@@ -103,11 +103,11 @@ class SearchServiceFulltextTest extends BaseTest
         return [
             [
                 'fox',
-                [3, [6, 8, 10], [11, 13, 14, 15]],
+                [3, [6, 8, 10], [11, 13, 14], 15],
             ],
             [
                 'quick fox',
-                $quickOrFox = [6, [11, 13, 15], [1, 3], [5, 7, 8, 10], [12, 14]],
+                $quickOrFox = [6, [11, 13], 15, [1, 3], [5, 7, 8, 10], [12, 14]],
             ],
             [
                 'quick OR fox',
@@ -119,7 +119,7 @@ class SearchServiceFulltextTest extends BaseTest
             ],
             [
                 '+quick +fox',
-                $quickAndFox = [6, [11, 13, 15]],
+                $quickAndFox = [6, [11, 13], 15],
             ],
             [
                 'quick AND fox',
@@ -143,11 +143,11 @@ class SearchServiceFulltextTest extends BaseTest
             ],
             [
                 '"quick brown"',
-                [5, [11, 12, 15]],
+                [5, [11, 12], 15],
             ],
             [
                 '"quick brown" AND fox',
-                [[11, 15]],
+                [11, 15],
             ],
             [
                 'quick OR brown AND fox AND NOT news',
@@ -167,7 +167,7 @@ class SearchServiceFulltextTest extends BaseTest
             ],
             [
                 '+qui* +fox',
-                [6, [11, 13, 15]],
+                [6, [11, 13], 15],
             ],
         ];
     }
@@ -205,8 +205,8 @@ class SearchServiceFulltextTest extends BaseTest
      */
     public function testFulltextLocationSearch($searchString, array $expectedKeys, array $idMap)
     {
-        if (($solrVersion = getenv('SOLR_VERSION')) && $solrVersion < 6) {
-            $this->markTestSkipped('Solr 4 detected, skipping as scoring won\'t match');
+        if (($solrVersion = getenv('SOLR_VERSION')) && $solrVersion < 7) {
+            $this->markTestSkipped("Solr $solrVersion detected, skipping as scoring won't match");
         }
 
         $repository = $this->getRepository(false);
