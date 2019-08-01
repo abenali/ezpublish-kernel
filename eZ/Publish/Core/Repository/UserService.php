@@ -8,6 +8,10 @@
  */
 namespace eZ\Publish\Core\Repository;
 
+use DateInterval;
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Exception;
 use eZ\Publish\API\Repository\Repository as RepositoryInterface;
 use eZ\Publish\API\Repository\UserService as UserServiceInterface;
@@ -18,6 +22,8 @@ use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ContentTypeId as Cr
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LocationId as CriterionLocationId;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalAnd as CriterionLogicalAnd;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ParentLocationId as CriterionParentLocationId;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
+use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\API\Repository\Values\User\User as APIUser;
 use eZ\Publish\API\Repository\Values\User\UserCreateStruct as APIUserCreateStruct;
@@ -39,9 +45,9 @@ use eZ\Publish\Core\Repository\Values\User\User;
 use eZ\Publish\Core\Repository\Values\User\UserCreateStruct;
 use eZ\Publish\Core\Repository\Values\User\UserGroup;
 use eZ\Publish\Core\Repository\Values\User\UserGroupCreateStruct;
+use eZ\Publish\SPI\Persistence\Content\Location\Handler as LocationHandler;
 use eZ\Publish\SPI\Persistence\User as SPIUser;
 use eZ\Publish\SPI\Persistence\User\Handler;
-use eZ\Publish\SPI\Persistence\Content\Location\Handler as LocationHandler;
 use eZ\Publish\SPI\Persistence\User\UserTokenUpdateStruct as SPIUserTokenUpdateStruct;
 use Psr\Log\LoggerInterface;
 
@@ -57,23 +63,14 @@ class UserService implements UserServiceInterface
 
     /** @var \eZ\Publish\SPI\Persistence\User\Handler */
     protected $userHandler;
-
-    /** @var \eZ\Publish\SPI\Persistence\Content\Location\Handler */
-    private $locationHandler;
-
     /** @var array */
     protected $settings;
-
     /** @var \Psr\Log\LoggerInterface|null */
     protected $logger;
-
+    /** @var \eZ\Publish\SPI\Persistence\Content\Location\Handler */
+    private $locationHandler;
     /** @var \eZ\Publish\API\Repository\PermissionResolver */
     private $permissionResolver;
-
-    public function setLogger(LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
-    }
 
     /**
      * Setups service with reference to repository object that created it & corresponding handler.
@@ -101,6 +98,11 @@ class UserService implements UserServiceInterface
             'hashType' => APIUser::DEFAULT_PASSWORD_HASH,
             'siteName' => 'ez.no',
         ];
+    }
+
+    public function setLogger(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -217,32 +219,6 @@ class UserService implements UserServiceInterface
         }
 
         return $subUserGroups;
-    }
-
-    /**
-     * Returns (searches) subgroups of a user group described by its main location.
-     *
-     * @param \eZ\Publish\API\Repository\Values\Content\Location $location
-     * @param int $offset
-     * @param int $limit
-     *
-     * @return \eZ\Publish\API\Repository\Values\Content\Search\SearchResult
-     */
-    protected function searchSubGroups(Location $location, $offset = 0, $limit = 25)
-    {
-        $searchQuery = new LocationQuery();
-
-        $searchQuery->offset = $offset;
-        $searchQuery->limit = $limit;
-
-        $searchQuery->filter = new CriterionLogicalAnd([
-            new CriterionContentTypeId($this->settings['userGroupClassID']),
-            new CriterionParentLocationId($location->id),
-        ]);
-
-        $searchQuery->sortClauses = $location->getSortClauses();
-
-        return $this->repository->getSearchService()->findLocations($searchQuery, [], false);
     }
 
     /**
@@ -497,6 +473,7 @@ class UserService implements UserServiceInterface
                             $this->settings['hashType']
                         ),
                         'hashAlgorithm' => $this->settings['hashType'],
+                        'passwordUpdatedAt' => time(),
                         'isEnabled' => $userCreateStruct->enabled,
                         'maxLogin' => 0,
                     ]
@@ -541,6 +518,7 @@ class UserService implements UserServiceInterface
             $spiUser->email = $value->email;
             $spiUser->hashAlgorithm = $value->passwordHashType;
             $spiUser->passwordHash = $value->passwordHash;
+            $spiUser->passwordUpdatedAt = $value->passwordUpdatedAt;
             $spiUser->isEnabled = $value->enabled;
             $spiUser->maxLogin = $value->maxLogin;
             break;
@@ -557,11 +535,10 @@ class UserService implements UserServiceInterface
     /**
      * Loads anonymous user.
      *
-     * @deprecated since 5.3, use loadUser( $anonymousUserId ) instead
-     *
+     * @return \eZ\Publish\API\Repository\Values\User\User
      * @uses ::loadUser()
      *
-     * @return \eZ\Publish\API\Repository\Values\User\User
+     * @deprecated since 5.3, use loadUser( $anonymousUserId ) instead
      */
     public function loadAnonymousUser()
     {
@@ -603,44 +580,6 @@ class UserService implements UserServiceInterface
         $this->updatePasswordHash($login, $password, $spiUser);
 
         return $this->buildDomainUserObject($spiUser, null, $prioritizedLanguages);
-    }
-
-    /**
-     * Update password hash to the type configured for the service, if they differ.
-     *
-     * @param string $login User login
-     * @param string $password User password
-     * @param \eZ\Publish\SPI\Persistence\User $spiUser
-     *
-     * @throws \eZ\Publish\Core\Base\Exceptions\BadStateException if the password is not correctly saved, in which case the update is reverted
-     */
-    private function updatePasswordHash($login, $password, SPIUser $spiUser)
-    {
-        if ($spiUser->hashAlgorithm === $this->settings['hashType']) {
-            return;
-        }
-
-        $spiUser->passwordHash = $this->createPasswordHash($login, $password, null, $this->settings['hashType']);
-        $spiUser->hashAlgorithm = $this->settings['hashType'];
-
-        $this->repository->beginTransaction();
-        $this->userHandler->update($spiUser);
-        $reloadedSpiUser = $this->userHandler->load($spiUser->id);
-
-        if ($reloadedSpiUser->passwordHash === $spiUser->passwordHash) {
-            $this->repository->commit();
-        } else {
-            // Password hash was not correctly saved, possible cause: EZP-28692
-            $this->repository->rollback();
-            if (isset($this->logger)) {
-                $this->logger->critical('Password hash could not be updated. Please verify that your database schema is up to date.');
-            }
-
-            throw new BadStateException(
-                'user',
-                'Could not save updated password hash, reverting to previous hash. Please verify that your database schema is up to date.'
-            );
-        }
     }
 
     /**
@@ -747,11 +686,11 @@ class UserService implements UserServiceInterface
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param \eZ\Publish\API\Repository\Values\User\UserUpdateStruct $userUpdateStruct
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed to update the user
+     * @return \eZ\Publish\API\Repository\Values\User\User
+     *
      * @throws \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException if a field in the $userUpdateStruct is not valid
      * @throws \eZ\Publish\API\Repository\Exceptions\ContentValidationException if a required field is set empty
-     *
-     * @return \eZ\Publish\API\Repository\Values\User\User
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed to update the user
      */
     public function updateUser(APIUser $user, UserUpdateStruct $userUpdateStruct)
     {
@@ -845,28 +784,30 @@ class UserService implements UserServiceInterface
                 );
             }
 
-            $this->userHandler->update(
-                new SPIUser(
-                    [
-                        'id' => $loadedUser->id,
-                        'login' => $loadedUser->login,
-                        'email' => $userUpdateStruct->email ?: $loadedUser->email,
-                        'passwordHash' => $userUpdateStruct->password ?
-                            $this->createPasswordHash(
-                                $loadedUser->login,
-                                $userUpdateStruct->password,
-                                $this->settings['siteName'],
-                                $this->settings['hashType']
-                            ) :
-                            $loadedUser->passwordHash,
-                        'hashAlgorithm' => $userUpdateStruct->password ?
-                            $this->settings['hashType'] :
-                            $loadedUser->hashAlgorithm,
-                        'isEnabled' => $userUpdateStruct->enabled !== null ? $userUpdateStruct->enabled : $loadedUser->enabled,
-                        'maxLogin' => $userUpdateStruct->maxLogin !== null ? (int)$userUpdateStruct->maxLogin : $loadedUser->maxLogin,
-                    ]
-                )
-            );
+            $spiUser = new SPIUser([
+                'id' => $loadedUser->id,
+                'login' => $loadedUser->login,
+                'email' => $userUpdateStruct->email ?: $loadedUser->email,
+                'isEnabled' => $userUpdateStruct->enabled !== null ? $userUpdateStruct->enabled : $loadedUser->enabled,
+                'maxLogin' => $userUpdateStruct->maxLogin !== null ? (int)$userUpdateStruct->maxLogin : $loadedUser->maxLogin,
+            ]);
+
+            if ($userUpdateStruct->password) {
+                $spiUser->passwordHash = $this->createPasswordHash(
+                    $loadedUser->login,
+                    $userUpdateStruct->password,
+                    $this->settings['siteName'],
+                    $this->settings['hashType']
+                );
+                $spiUser->hashAlgorithm = $this->settings['hashType'];
+                $spiUser->passwordUpdatedAt = time();
+            } else {
+                $spiUser->passwordHash = $loadedUser->passwordHash;
+                $spiUser->hashAlgorithm = $loadedUser->hashAlgorithm;
+                $spiUser->passwordUpdatedAt = $loadedUser->passwordUpdatedAt ? $loadedUser->passwordUpdatedAt->getTimestamp() : null;
+            }
+
+            $this->userHandler->update($spiUser);
 
             $this->repository->commit();
         } catch (Exception $e) {
@@ -883,12 +824,12 @@ class UserService implements UserServiceInterface
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param \eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct $userTokenUpdateStruct
      *
-     * @throws \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
+     * @return \eZ\Publish\API\Repository\Values\User\User
      * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @throws \RuntimeException
      * @throws \Exception
      *
-     * @return \eZ\Publish\API\Repository\Values\User\User
+     * @throws \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
      */
     public function updateUserToken(APIUser $user, UserTokenUpdateStruct $userTokenUpdateStruct)
     {
@@ -1037,14 +978,13 @@ class UserService implements UserServiceInterface
     /**
      * Loads the user groups the user belongs to.
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed read the user or user group
-     *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      * @param int $offset the start offset for paging
      * @param int $limit the number of user groups returned
      * @param string[] $prioritizedLanguages Used as prioritized language code on translated properties of returned object.
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserGroup[]
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed read the user or user group
      */
     public function loadUserGroupsOfUser(APIUser $user, $offset = 0, $limit = 25, array $prioritizedLanguages = [])
     {
@@ -1096,14 +1036,13 @@ class UserService implements UserServiceInterface
     /**
      * Loads the users of a user group.
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed to read the users or user group
-     *
      * @param \eZ\Publish\API\Repository\Values\User\UserGroup $userGroup
      * @param int $offset the start offset for paging
      * @param int $limit the number of users returned
      * @param string[] $prioritizedLanguages Used as prioritized language code on translated properties of returned object.
      *
      * @return \eZ\Publish\API\Repository\Values\User\User[]
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed to read the users or user group
      */
     public function loadUsersOfUserGroup(
         APIUserGroup $userGroup,
@@ -1294,6 +1233,32 @@ class UserService implements UserServiceInterface
     }
 
     /**
+     * Returns (searches) subgroups of a user group described by its main location.
+     *
+     * @param \eZ\Publish\API\Repository\Values\Content\Location $location
+     * @param int $offset
+     * @param int $limit
+     *
+     * @return \eZ\Publish\API\Repository\Values\Content\Search\SearchResult
+     */
+    protected function searchSubGroups(Location $location, $offset = 0, $limit = 25)
+    {
+        $searchQuery = new LocationQuery();
+
+        $searchQuery->offset = $offset;
+        $searchQuery->limit = $limit;
+
+        $searchQuery->filter = new CriterionLogicalAnd([
+            new CriterionContentTypeId($this->settings['userGroupClassID']),
+            new CriterionParentLocationId($location->id),
+        ]);
+
+        $searchQuery->sortClauses = $location->getSortClauses();
+
+        return $this->repository->getSearchService()->findLocations($searchQuery, [], false);
+    }
+
+    /**
      * Builds the domain UserGroup object from provided Content object.
      *
      * @param \eZ\Publish\API\Repository\Values\Content\Content $content
@@ -1346,11 +1311,81 @@ class UserService implements UserServiceInterface
                 'login' => $spiUser->login,
                 'email' => $spiUser->email,
                 'passwordHash' => $spiUser->passwordHash,
+                'passwordUpdatedAt' => $this->getDateTime($spiUser->passwordUpdatedAt),
                 'hashAlgorithm' => (int)$spiUser->hashAlgorithm,
                 'enabled' => $spiUser->isEnabled,
                 'maxLogin' => (int)$spiUser->maxLogin,
             ]
         );
+    }
+
+    public function isPasswordExpired(APIUser $user): bool
+    {
+        $passwordExpireAt = $this->getPasswordExpirationDate($user);
+        if ($passwordExpireAt === null) {
+            return false;
+        }
+
+        return $passwordExpireAt < new DateTime();
+    }
+
+    public function getPasswordExpirationDate(APIUser $user): ?DateTimeInterface
+    {
+        $passwordUpdatedAt = $user->passwordUpdatedAt;
+        if ($passwordUpdatedAt === null) {
+            return null;
+        }
+
+        $definition = $this->getUserFieldDefinition($user->getContentType());
+        if ($definition === null) {
+            return null;
+        }
+
+        $passwordExpireAfter = $definition->fieldSettings['PasswordExpireAfter'] ?? -1;
+        if ($passwordExpireAfter <= 0) {
+            return null;
+        }
+
+        if ($passwordUpdatedAt instanceof DateTime) {
+            $passwordUpdatedAt = DateTimeImmutable::createFromMutable($passwordUpdatedAt);
+        }
+
+        return $passwordUpdatedAt->add(new DateInterval(sprintf('P%dD', $passwordExpireAfter)));
+    }
+
+    public function getPasswordExpirationWarningDate(APIUser $user): ?DateTimeInterface
+    {
+        $passwordExpiresAt = $this->getPasswordExpirationDate($user);
+        if ($passwordExpiresAt === null) {
+            return null;
+        }
+
+        $definition = $this->getUserFieldDefinition($user->getContentType());
+        if ($definition === null) {
+            return null;
+        }
+
+        $passwordWarnBefore = $definition->fieldSettings['PasswordWarnBefore'] ?? -1;
+        if ($passwordWarnBefore <= 0) {
+            return null;
+        }
+
+        if ($passwordExpiresAt instanceof DateTime) {
+            $passwordExpiresAt = DateTimeImmutable::createFromMutable($passwordExpiresAt);
+        }
+
+        return $passwordExpiresAt->sub(new DateInterval(sprintf('P%dD', $passwordWarnBefore)));
+    }
+
+    private function getUserFieldDefinition(ContentType $contentType): ?FieldDefinition
+    {
+        foreach ($contentType->getFieldDefinitions() as $fieldDefinition) {
+            if ($fieldDefinition->fieldTypeIdentifier == 'ezuser') {
+                return $fieldDefinition;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -1433,6 +1468,44 @@ class UserService implements UserServiceInterface
     }
 
     /**
+     * Update password hash to the type configured for the service, if they differ.
+     *
+     * @param string $login User login
+     * @param string $password User password
+     * @param \eZ\Publish\SPI\Persistence\User $spiUser
+     *
+     * @throws \eZ\Publish\Core\Base\Exceptions\BadStateException if the password is not correctly saved, in which case the update is reverted
+     */
+    private function updatePasswordHash($login, $password, SPIUser $spiUser)
+    {
+        if ($spiUser->hashAlgorithm === $this->settings['hashType']) {
+            return;
+        }
+
+        $spiUser->passwordHash = $this->createPasswordHash($login, $password, null, $this->settings['hashType']);
+        $spiUser->hashAlgorithm = $this->settings['hashType'];
+
+        $this->repository->beginTransaction();
+        $this->userHandler->update($spiUser);
+        $reloadedSpiUser = $this->userHandler->load($spiUser->id);
+
+        if ($reloadedSpiUser->passwordHash === $spiUser->passwordHash) {
+            $this->repository->commit();
+        } else {
+            // Password hash was not correctly saved, possible cause: EZP-28692
+            $this->repository->rollback();
+            if (isset($this->logger)) {
+                $this->logger->critical('Password hash could not be updated. Please verify that your database schema is up to date.');
+            }
+
+            throw new BadStateException(
+                'user',
+                'Could not save updated password hash, reverting to previous hash. Please verify that your database schema is up to date.'
+            );
+        }
+    }
+
+    /**
      * Return true if any of the UserUpdateStruct properties refers to User Profile (Content) update.
      *
      * @param UserUpdateStruct $userUpdateStruct
@@ -1447,5 +1520,18 @@ class UserService implements UserServiceInterface
             !empty($userUpdateStruct->email) ||
             !empty($userUpdateStruct->enabled) ||
             !empty($userUpdateStruct->maxLogin);
+    }
+
+    private function getDateTime(?int $timestamp): ?DateTimeInterface
+    {
+        if ($timestamp !== null) {
+            // Instead of using DateTime(ts) we use setTimeStamp() so timezone does not get set to UTC
+            $dateTime = new DateTime();
+            $dateTime->setTimestamp($timestamp);
+
+            return DateTimeImmutable::createFromMutable($dateTime);
+        }
+
+        return null;
     }
 }

@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\API\Repository;
 
+use DateTimeInterface;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct;
@@ -376,4 +377,31 @@ interface UserService
      * @return \eZ\Publish\SPI\FieldType\ValidationError[]
      */
     public function validatePassword(string $password, PasswordValidationContext $context = null): array;
+
+    /**
+     * Returns true if password expired.
+     *
+     * @param \eZ\Publish\API\Repository\Values\User\User $user
+     *
+     * @return bool
+     */
+    public function isPasswordExpired(User $user): bool;
+
+    /**
+     * Returns datetime when user password will expire.
+     *
+     * @param \eZ\Publish\API\Repository\Values\User\User $user
+     *
+     * @return \DateTimeInterface|null
+     */
+    public function getPasswordExpirationDate(User $user): ?DateTimeInterface;
+
+    /**
+     * Returns datetime when user should be warned about password expiration.
+     *
+     * @param \eZ\Publish\API\Repository\Values\User\User $user
+     *
+     * @return \DateTimeInterface|null
+     */
+    public function getPasswordExpirationWarningDate(User $user): ?DateTimeInterface;
 }

@@ -8,7 +8,9 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
+use DateInterval;
 use DateTime;
+use DateTimeImmutable;
 use eZ\Publish\API\Repository\Exceptions\InvalidArgumentException;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
@@ -36,6 +38,9 @@ use ReflectionClass;
  */
 class UserServiceTest extends BaseTest
 {
+    // Example password matching default rules
+    private const EXAMPLE_PASSWORD = 'P@ssword123!';
+
     /**
      * Test for the loadUserGroup() method.
      *
@@ -101,7 +106,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      */
@@ -121,7 +126,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadSubUserGroups() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadSubUserGroups()
+     * @see     \eZ\Publish\API\Repository\UserService::loadSubUserGroups()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      */
     public function testLoadSubUserGroups()
@@ -162,8 +167,8 @@ class UserServiceTest extends BaseTest
                         'versionInfo' => new VersionInfo(
                             [
                                 'contentInfo' => new ContentInfo(
-                                ['id' => 123456]
-                            ),
+                                    ['id' => 123456]
+                                ),
                             ]
                         ),
                         'internalFields' => [],
@@ -179,7 +184,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserGroupCreateStruct
      *
-     * @see \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct()
+     * @see     \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct()
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testLoadContentTypeByIdentifier
      */
     public function testNewUserGroupCreateStruct()
@@ -205,7 +210,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\UserGroupCreateStruct $groupCreate
      *
-     * @see \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct()
+     * @see     \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserGroupCreateStruct
      */
     public function testNewUserGroupCreateStructSetsMainLanguageCode($groupCreate)
@@ -218,7 +223,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\UserGroupCreateStruct $groupCreate
      *
-     * @see \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct()
+     * @see     \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserGroupCreateStruct
      */
     public function testNewUserGroupCreateStructSetsContentType($groupCreate)
@@ -232,7 +237,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the newUserGroupCreateStruct() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct($mainLanguageCode, $contentType)
+     * @see     \eZ\Publish\API\Repository\UserService::newUserGroupCreateStruct($mainLanguageCode, $contentType)
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserGroupCreateStruct
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testLoadContentTypeByIdentifier
      */
@@ -266,7 +271,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserGroup
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::createUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserGroupCreateStruct
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testCreateContent
@@ -295,7 +300,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\UserGroup $userGroup
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::createUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
     public function testCreateUserGroupSetsExpectedProperties($userGroup)
@@ -313,7 +318,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the createUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::createUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
@@ -347,7 +352,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the createUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::createUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
@@ -380,7 +385,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the createUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::createUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
@@ -411,7 +416,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\UserGroup
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::createUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserGroupCreateStruct
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testCreateContent
@@ -463,7 +468,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the deleteUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::deleteUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::deleteUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
@@ -512,7 +517,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the moveUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::moveUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::moveUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadSubUserGroups
      */
@@ -621,7 +626,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserGroupUpdateStruct
      */
@@ -654,7 +659,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUserGroup
      */
     public function testUpdateUserGroupWithSubContentUpdateStruct()
@@ -694,7 +699,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUserGroup
      */
     public function testUpdateUserGroupWithSubContentMetadataUpdateStruct()
@@ -737,7 +742,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUserGroup
      */
@@ -820,7 +825,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\UserCreateStruct $userCreate
      *
-     * @see \eZ\Publish\API\Repository\UserService::newUserCreateStruct()
+     * @see     \eZ\Publish\API\Repository\UserService::newUserCreateStruct()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserCreateStruct
      */
     public function testNewUserCreateStructSetsExpectedProperties($userCreate)
@@ -844,7 +849,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the newUserCreateStruct() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::newUserCreateStruct($login, $email, $password, $mainLanguageCode, $contentType)
+     * @see     \eZ\Publish\API\Repository\UserService::newUserCreateStruct($login, $email, $password, $mainLanguageCode, $contentType)
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserCreateStruct
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testLoadContentTypeByIdentifier
      */
@@ -892,7 +897,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @see     \eZ\Publish\API\Repository\UserService::createUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserCreateStruct
      * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testCreateContent
@@ -916,7 +921,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @see     \eZ\Publish\API\Repository\UserService::createUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testCreateUserSetsExpectedProperties(User $user)
@@ -938,7 +943,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the createUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @see     \eZ\Publish\API\Repository\UserService::createUser()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
@@ -977,7 +982,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the createUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @see     \eZ\Publish\API\Repository\UserService::createUser()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
@@ -1016,7 +1021,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the createUser() method.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::createUser
+     * @covers  \eZ\Publish\API\Repository\UserService::createUser
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @expectedExceptionMessage Argument 'userCreateStruct' is invalid: User with provided login already exists
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
@@ -1034,7 +1039,7 @@ class UserServiceTest extends BaseTest
 
         // Instantiate a create struct with mandatory properties
         $userCreate = $userService->newUserCreateStruct(
-            // admin is an existing login
+        // admin is an existing login
             'admin',
             'user@example.com',
             'secret',
@@ -1058,7 +1063,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      *
-     * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @see     \eZ\Publish\API\Repository\UserService::createUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserCreateStruct
      * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testCreateContent
@@ -1133,12 +1138,12 @@ class UserServiceTest extends BaseTest
      */
     public function testCreateUserWithWeakPasswordThrowsUserPasswordValidationException()
     {
-        $userContentType = $this->createUserWithStrongPasswordContentType();
+        $userContentType = $this->createUserContentTypeWithStrongPassword();
 
         /* BEGIN: Use Case */
         // This call will fail with a "UserPasswordValidationException" because the
         // the password does not follow specified rules.
-        $this->createUserWithPassword('pass', $userContentType);
+        $this->createTestUserWithPassword('pass', $userContentType);
         /* END: Use Case */
     }
 
@@ -1149,10 +1154,10 @@ class UserServiceTest extends BaseTest
      */
     public function testCreateUserWithStrongPassword()
     {
-        $userContentType = $this->createUserWithStrongPasswordContentType();
+        $userContentType = $this->createUserContentTypeWithStrongPassword();
 
         /* BEGIN: Use Case */
-        $user = $this->createUserWithPassword('H@xxi0r!', $userContentType);
+        $user = $this->createTestUserWithPassword('H@xxi0r!', $userContentType);
         /* END: Use Case */
 
         $this->assertInstanceOf(User::class, $user);
@@ -1161,7 +1166,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUser()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testLoadUser()
@@ -1187,7 +1192,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUser()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUser()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUser
      */
@@ -1235,7 +1240,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByCredentials() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testLoadUserByCredentials()
@@ -1257,7 +1262,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByCredentials() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
@@ -1279,7 +1284,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByCredentials() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
@@ -1301,7 +1306,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByCredentials() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
@@ -1323,7 +1328,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByCredentials() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
      * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
@@ -1345,7 +1350,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByLogin() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByLogin()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByLogin()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testLoadUserByLogin()
@@ -1381,7 +1386,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByLogin() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByLogin()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByLogin()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByLogin
      */
@@ -1403,7 +1408,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserByLogin() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByLogin()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByLogin()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByLogin
      */
     public function testLoadUserByLoginWorksForLoginWithWrongCase()
@@ -1441,7 +1446,7 @@ class UserServiceTest extends BaseTest
      *
      * In some cases people use email as login name, make sure system works as exepcted when asking for user by email.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserByLogin()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUserByLogin()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByLogin
      */
@@ -1462,7 +1467,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUsersByEmail() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUsersByEmail()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUsersByEmail()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testLoadUserByEmail()
@@ -1484,7 +1489,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUsersByEmail() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::loadUsersByEmail()
+     * @see     \eZ\Publish\API\Repository\UserService::loadUsersByEmail()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByEmail
      */
     public function testLoadUserByEmailReturnsEmptyInUnknownEmail()
@@ -1507,7 +1512,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the deleteUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::deleteUser()
+     * @see     \eZ\Publish\API\Repository\UserService::deleteUser()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUser
@@ -1604,7 +1609,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserUpdateStruct
      * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testUpdateContent
@@ -1668,7 +1673,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserUpdateStruct
      * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testUpdateContent
@@ -1742,7 +1747,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
     public function testUpdateUserUpdatesExpectedProperties(User $user)
@@ -1768,7 +1773,7 @@ class UserServiceTest extends BaseTest
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
     public function testUpdateUserReturnsPublishedVersion(User $user)
@@ -1782,7 +1787,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
     public function testUpdateUserWithContentMetadataUpdateStruct()
@@ -1820,7 +1825,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
     public function testUpdateUserWithContentUpdateStruct()
@@ -1862,7 +1867,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
@@ -1898,7 +1903,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the updateUser() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @see     \eZ\Publish\API\Repository\UserService::updateUser()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
@@ -1942,7 +1947,7 @@ class UserServiceTest extends BaseTest
     {
         $userService = $this->getRepository()->getUserService();
 
-        $user = $this->createUserWithPassword('H@xxxiR!_1', $this->createUserWithStrongPasswordContentType());
+        $user = $this->createTestUserWithPassword('H@xxxiR!_1', $this->createUserContentTypeWithStrongPassword());
 
         /* BEGIN: Use Case */
         // Create a new update struct instance
@@ -1964,7 +1969,7 @@ class UserServiceTest extends BaseTest
     {
         $userService = $this->getRepository()->getUserService();
 
-        $user = $this->createUserWithPassword('H@xxxiR!_1', $this->createUserWithStrongPasswordContentType());
+        $user = $this->createTestUserWithPassword('H@xxxiR!_1', $this->createUserContentTypeWithStrongPassword());
 
         /* BEGIN: Use Case */
         // Create a new update struct instance
@@ -1980,7 +1985,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUserGroupsOfUser() method.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserGroupsOfUser
+     * @covers  \eZ\Publish\API\Repository\UserService::loadUserGroupsOfUser
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testLoadUserGroupsOfUser()
@@ -2006,7 +2011,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the loadUsersOfUserGroup() method.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUsersOfUserGroup
+     * @covers  \eZ\Publish\API\Repository\UserService::loadUsersOfUserGroup
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testLoadUsersOfUserGroup()
@@ -2034,7 +2039,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the assignUserToUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::assignUserToUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::assignUserToUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroupsOfUser
      */
     public function testAssignUserToUserGroup()
@@ -2076,7 +2081,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the assignUserToUserGroup() method.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::assignUserToUserGroup
+     * @covers  \eZ\Publish\API\Repository\UserService::assignUserToUserGroup
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @expectedExceptionMessage Argument 'user' is invalid: user is already in the given user group
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testAssignUserToUserGroup
@@ -2104,7 +2109,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the unAssignUssrFromUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::unAssignUssrFromUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::unAssignUssrFromUserGroup()
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroupsOfUser
      */
     public function testUnAssignUserFromUserGroup()
@@ -2146,7 +2151,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the unAssignUserFromUserGroup() method.
      *
-     * @see \eZ\Publish\API\Repository\UserService::unAssignUserFromUserGroup()
+     * @see     \eZ\Publish\API\Repository\UserService::unAssignUserFromUserGroup()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUnAssignUserFromUserGroup
      */
@@ -2173,7 +2178,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test for the unAssignUserFromUserGroup() method removing user from the last group.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::unAssignUserFromUserGroup
+     * @covers  \eZ\Publish\API\Repository\UserService::unAssignUserFromUserGroup
      * @expectedException \eZ\Publish\API\Repository\Exceptions\BadStateException
      * @expectedExceptionMessage Argument 'user' has a bad state: user only has one user group, cannot unassign from last group
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUnAssignUserFromUserGroup
@@ -2199,7 +2204,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test that multi-language logic for the loadUserGroup method respects prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserGroup
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUserGroup
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2231,7 +2236,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test that multi-language logic works correctly after updating user group main language.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserGroup
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUserGroup
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2270,7 +2275,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test that multi-language logic for the loadSubUserGroups method respects prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadSubUserGroups
+     * @covers       \eZ\Publish\API\Repository\UserService::loadSubUserGroups
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2310,7 +2315,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test that multi-language logic for the loadUser method respects prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUser
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUser
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2346,7 +2351,7 @@ class UserServiceTest extends BaseTest
      * Test that multi-language logic for the loadUser method works correctly after updating
      * user content main language.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserGroup
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUserGroup
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2389,7 +2394,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test that multi-language logic for the loadUserByLogin method respects prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserByLogin
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUserByLogin
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2425,7 +2430,7 @@ class UserServiceTest extends BaseTest
      * Test that multi-language logic for the loadUserByCredentials method respects
      * prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserByCredentials
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUserByCredentials
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2465,7 +2470,7 @@ class UserServiceTest extends BaseTest
      * Test that multi-language logic for the loadUsersByEmail method respects
      * prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUsersByEmail
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUsersByEmail
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2503,7 +2508,7 @@ class UserServiceTest extends BaseTest
      * Test that multi-language logic for the loadUserGroupsOfUser method respects
      * prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUserGroupsOfUser
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUserGroupsOfUser
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2534,7 +2539,7 @@ class UserServiceTest extends BaseTest
      * Test that multi-language logic for the loadUsersOfUserGroup method respects
      * prioritized language list.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::loadUsersOfUserGroup
+     * @covers       \eZ\Publish\API\Repository\UserService::loadUsersOfUserGroup
      * @dataProvider getPrioritizedLanguageList
      * @param string[] $prioritizedLanguages
      * @param string|null $expectedLanguageCode language code of expected translation
@@ -2811,7 +2816,7 @@ class UserServiceTest extends BaseTest
     /**
      * Test invalidating (expiring) User Token.
      *
-     * @covers \eZ\Publish\API\Repository\UserService::expireUserToken()
+     * @covers  \eZ\Publish\API\Repository\UserService::expireUserToken()
      *
      * @depends testLoadUserByToken
      *
@@ -2848,13 +2853,13 @@ class UserServiceTest extends BaseTest
     }
 
     /**
-     * @covers \eZ\Publish\API\Repository\UserService::validatePassword()
+     * @covers       \eZ\Publish\API\Repository\UserService::validatePassword()
      * @dataProvider dataProviderForValidatePassword
      */
     public function testValidatePassword(string $password, array $expectedErrorr)
     {
         $userService = $this->getRepository()->getUserService();
-        $contentType = $this->createUserWithStrongPasswordContentType();
+        $contentType = $this->createUserContentTypeWithStrongPassword();
 
         /* BEGIN: Use Case */
         $context = new PasswordValidationContext([
@@ -2893,6 +2898,137 @@ class UserServiceTest extends BaseTest
         ];
     }
 
+    public function testIsPasswordExpired(): void
+    {
+        $passwordExpireAfter = 30;
+
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate($passwordExpireAfter);
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $isPasswordExpired = $userService->isPasswordExpired($user);
+        /* END: Use Case */
+
+        $this->assertFalse($isPasswordExpired);
+    }
+
+    public function testIsPasswordExpiredIfExpirationIsDisabled(): void
+    {
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate(null, null);
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $isPasswordExpired = $userService->isPasswordExpired($user);
+        /* END: Use Case */
+
+        $this->assertFalse($isPasswordExpired);
+    }
+
+    public function testGetPasswordExpirationDate(): void
+    {
+        $passwordExpireAfter = 30;
+
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate($passwordExpireAfter);
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $passwordExpirationDate = $userService->getPasswordExpirationDate($user);
+        /* END: Use Case */
+
+        $passwordUpdatedAt = $user->passwordUpdatedAt;
+        if ($passwordUpdatedAt instanceof DateTimeImmutable) {
+            $passwordUpdatedAt = DateTime::createFromFormat(DateTime::ATOM, $passwordUpdatedAt->format(DateTime::ATOM));
+        }
+
+        $expectedPasswordExpirationDate = $passwordUpdatedAt->add(
+            new DateInterval(sprintf('P%dD', $passwordExpireAfter))
+        );
+
+        $this->assertEquals($expectedPasswordExpirationDate, $passwordExpirationDate);
+    }
+
+    public function testGetPasswordExpirationDateIfExpirationIsDisabled(): void
+    {
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate(null, null);
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $passwordExpirationDate = $userService->getPasswordExpirationDate($user);
+        /* END: Use Case */
+
+        $this->assertNull($passwordExpirationDate);
+    }
+
+    public function testGetPasswordExpirationWarningDate(): void
+    {
+        $passwordExpireAfter = 30;
+        $passwordExpirationWarningBefore = 14;
+
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate(
+            $passwordExpireAfter,
+            $passwordExpirationWarningBefore
+        );
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $passwordExpirationWarningDate = $userService->getPasswordExpirationWarningDate($user);
+        /* END: Use Case */
+
+        $passwordUpdatedAt = $user->passwordUpdatedAt;
+        if ($passwordUpdatedAt instanceof DateTimeImmutable) {
+            $passwordUpdatedAt = DateTime::createFromFormat(DateTime::ATOM, $passwordUpdatedAt->format(DateTime::ATOM));
+        }
+
+        $expectedPasswordExpirationWarningDate = $passwordUpdatedAt->add(
+            new DateInterval(sprintf('P%dD', $passwordExpireAfter - $passwordExpirationWarningBefore))
+        );
+
+        $this->assertEquals($expectedPasswordExpirationWarningDate, $passwordExpirationWarningDate);
+    }
+
+    public function testGetPasswordExpirationWarningDateIfExpirationIsDisabled(): void
+    {
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate(null, null);
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $passwordExpirationWarningDate = $userService->getPasswordExpirationWarningDate($user);
+        /* END: Use Case */
+
+        $this->assertNull($passwordExpirationWarningDate);
+    }
+
+    public function testGetPasswordExpirationWarningDateIfExpirationWarningIsDisabled(): void
+    {
+        $userService = $this->getRepository()->getUserService();
+        $contentType = $this->createUserContentTypeWithPasswordExpirationDate(30, null);
+
+        $user = $this->createTestUser($contentType);
+
+        /* BEGIN: Use Case */
+        $passwordExpirationWarningDate = $userService->getPasswordExpirationWarningDate($user);
+        /* END: Use Case */
+
+        $this->assertNull($passwordExpirationWarningDate);
+    }
+
+    public function createTestUser(ContentType $contentType): User
+    {
+        return $this->createTestUserWithPassword(self::EXAMPLE_PASSWORD, $contentType);
+    }
+
     /**
      * Creates a user with given password.
      *
@@ -2901,7 +3037,7 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      */
-    private function createUserWithPassword(string $password, ContentType $contentType): User
+    private function createTestUserWithPassword(string $password, ContentType $contentType): User
     {
         $userService = $this->getRepository()->getUserService();
         // ID of the "Editors" user group in an eZ Publish demo installation
@@ -2929,24 +3065,49 @@ class UserServiceTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\ContentType\ContentType
      */
-    private function createUserWithStrongPasswordContentType(): ContentType
+    private function createUserContentTypeWithStrongPassword(): ContentType
     {
+        return $this->createUserContentTypeWithAccountSettings('user-with-strong-password', null, [
+            'PasswordValueValidator' => [
+                'requireAtLeastOneUpperCaseCharacter' => 1,
+                'requireAtLeastOneLowerCaseCharacter' => 1,
+                'requireAtLeastOneNumericCharacter' => 1,
+                'requireAtLeastOneNonAlphanumericCharacter' => 1,
+                'minLength' => 8,
+            ],
+        ]);
+    }
+
+    private function createUserContentTypeWithPasswordExpirationDate(
+        ?int $passwordExpireAfter = 30,
+        ?int $passwordExpirationWarningBefore = 14
+    ): ContentType {
+        return $this->createUserContentTypeWithAccountSettings('password-expiration', [
+            'PasswordExpireAfter' => $passwordExpireAfter,
+            'PasswordWarnBefore' => $passwordExpirationWarningBefore,
+        ]);
+    }
+
+    private function createUserContentTypeWithAccountSettings(
+        string $identifier,
+        ?array $fieldSetting = null,
+        ?array $validatorConfiguration = null
+    ): ContentType {
         $repository = $this->getRepository();
 
         $contentTypeService = $repository->getContentTypeService();
 
-        $typeCreate = $contentTypeService->newContentTypeCreateStruct('user-with-strong-password');
+        $typeCreate = $contentTypeService->newContentTypeCreateStruct($identifier);
         $typeCreate->mainLanguageCode = 'eng-GB';
-        $typeCreate->remoteId = '384b94a1bd6bc06826410e284dd9684887bf56fc';
         $typeCreate->urlAliasSchema = 'url|scheme';
         $typeCreate->nameSchema = 'name|scheme';
         $typeCreate->names = [
-            'eng-GB' => 'User with strong password',
+            'eng-GB' => 'User: ' . $identifier,
         ];
         $typeCreate->descriptions = [
             'eng-GB' => '',
         ];
-        $typeCreate->creatorId = $this->generateId('user', $repository->getCurrentUser()->id);
+        $typeCreate->creatorId = $this->generateId('user', $repository->getPermissionResolver()->getCurrentUserReference()->getUserId());
         $typeCreate->creationDate = $this->createDateTime();
 
         $firstNameFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('first_name', 'ezstring');
@@ -2997,38 +3158,30 @@ class UserServiceTest extends BaseTest
 
         $typeCreate->addFieldDefinition($lastNameFieldCreate);
 
-        $accountFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('account', 'ezuser');
-        $accountFieldCreate->names = [
+        $accountFieldCreateStruct = $contentTypeService->newFieldDefinitionCreateStruct('account', 'ezuser');
+        $accountFieldCreateStruct->names = [
             'eng-GB' => 'User account',
         ];
-        $accountFieldCreate->descriptions = [
+        $accountFieldCreateStruct->descriptions = [
             'eng-GB' => '',
         ];
-        $accountFieldCreate->fieldGroup = 'default';
-        $accountFieldCreate->position = 3;
-        $accountFieldCreate->isTranslatable = false;
-        $accountFieldCreate->isRequired = true;
-        $accountFieldCreate->isInfoCollector = false;
-        $accountFieldCreate->validatorConfiguration = [
-            'PasswordValueValidator' => [
-                'requireAtLeastOneUpperCaseCharacter' => 1,
-                'requireAtLeastOneLowerCaseCharacter' => 1,
-                'requireAtLeastOneNumericCharacter' => 1,
-                'requireAtLeastOneNonAlphanumericCharacter' => 1,
-                'minLength' => 8,
-            ],
-        ];
-        $accountFieldCreate->fieldSettings = [];
-        $accountFieldCreate->isSearchable = false;
-        $accountFieldCreate->defaultValue = null;
+        $accountFieldCreateStruct->fieldGroup = 'default';
+        $accountFieldCreateStruct->position = 3;
+        $accountFieldCreateStruct->isTranslatable = false;
+        $accountFieldCreateStruct->isRequired = true;
+        $accountFieldCreateStruct->isInfoCollector = false;
+        $accountFieldCreateStruct->validatorConfiguration = $validatorConfiguration;
+        $accountFieldCreateStruct->fieldSettings = $fieldSetting;
+        $accountFieldCreateStruct->isSearchable = false;
+        $accountFieldCreateStruct->defaultValue = null;
 
-        $typeCreate->addFieldDefinition($accountFieldCreate);
+        $typeCreate->addFieldDefinition($accountFieldCreateStruct);
 
         $contentTypeDraft = $contentTypeService->createContentType($typeCreate, [
             $contentTypeService->loadContentTypeGroupByIdentifier('Users'),
         ]);
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
 
-        return $contentTypeService->loadContentTypeByIdentifier('user-with-strong-password');
+        return $contentTypeService->loadContentTypeByIdentifier($identifier);
     }
 }

@@ -37,7 +37,16 @@ class UserIntegrationTest extends BaseIntegrationTest
      */
     public function getSettingsSchema()
     {
-        return [];
+        return [
+            'PasswordExpireAfter' => [
+                'type' => 'int',
+                'default' => -1,
+            ],
+            'PasswordWarnBefore' => [
+                'type' => 'int',
+                'default' => -1,
+            ],
+        ];
     }
 
     /**
@@ -47,7 +56,10 @@ class UserIntegrationTest extends BaseIntegrationTest
      */
     public function getValidFieldSettings()
     {
-        return [];
+        return [
+            'PasswordExpireAfter' => -1,
+            'PasswordWarnBefore' => -1,
+        ];
     }
 
     /**
@@ -336,6 +348,7 @@ class UserIntegrationTest extends BaseIntegrationTest
                     'passwordHashType' => null,
                     'enabled' => null,
                     'maxLogin' => null,
+                    'passwordUpdatedAt' => null,
                 ],
             ],
         ];

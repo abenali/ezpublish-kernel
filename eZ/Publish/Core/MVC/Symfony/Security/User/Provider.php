@@ -52,7 +52,13 @@ class Provider implements APIUserProviderInterface
                 return $user;
             }
 
-            return new User($this->repository->getUserService()->loadUserByLogin($user), ['ROLE_USER']);
+            $apiUser = $this->repository->getUserService()->loadUserByLogin($user);
+
+            return new User(
+                $apiUser,
+                ['ROLE_USER'],
+                !$this->repository->getUserService()->isPasswordExpired($apiUser)
+            );
         } catch (NotFoundException $e) {
             throw new UsernameNotFoundException($e->getMessage(), 0, $e);
         }
@@ -116,6 +122,6 @@ class Provider implements APIUserProviderInterface
      */
     public function loadUserByAPIUser(APIUser $apiUser)
     {
-        return new User($apiUser, ['ROLE_USER']);
+        return new User($apiUser, ['ROLE_USER'], !$this->repository->getUserService()->isPasswordExpired($apiUser));
     }
 }

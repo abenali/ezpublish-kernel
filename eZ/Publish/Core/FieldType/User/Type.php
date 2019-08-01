@@ -28,6 +28,18 @@ class Type extends FieldType
     protected $userHandler;
 
     /** @var array */
+    protected $settingsSchema = [
+        'PasswordExpireAfter' => [
+            'type' => 'int',
+            'default' => -1,
+        ],
+        'PasswordWarnBefore' => [
+            'type' => 'int',
+            'default' => -1,
+        ],
+    ];
+
+    /** @var array */
     protected $validatorConfigurationSchema = [
         'PasswordValueValidator' => [
             'requireAtLeastOneUpperCaseCharacter' => [
@@ -293,5 +305,90 @@ class Type extends FieldType
         }
 
         return $validationErrors;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validateFieldSettings($fieldSettings)
+    {
+        $validationErrors = [];
+
+        foreach ($fieldSettings as $name => $value) {
+            if (!isset($this->settingsSchema[$name])) {
+                $validationErrors[] = new ValidationError(
+                    "Setting '%setting%' is unknown",
+                    null,
+                    [
+                        '%setting%' => $name,
+                    ],
+                    "[$name]"
+                );
+
+                continue;
+            }
+
+            $error = null;
+            switch ($name) {
+                case 'PasswordExpireAfter':
+                    $error = $this->validatePasswordExpireAfterSetting($name, $value);
+                    break;
+                case 'PasswordWarnBefore':
+                    $error = $this->validatePasswordWarnBeforeSetting($name, $value, $fieldSettings);
+                    break;
+            }
+
+            if ($error !== null) {
+                $validationErrors[] = $error;
+            }
+        }
+
+        return $validationErrors;
+    }
+
+    private function validatePasswordExpireAfterSetting(string $name, $value): ?ValidationError
+    {
+        if ($value !== null && !is_int($value)) {
+            return new ValidationError(
+                "Setting '%setting%' value must be of integer type",
+                null,
+                [
+                    '%setting%' => $name,
+                ],
+                "[$name]"
+            );
+        }
+
+        return null;
+    }
+
+    private function validatePasswordWarnBeforeSetting(string $name, $value, $fieldSettings): ?ValidationError
+    {
+        if ($value !== null) {
+            if (!is_int($value)) {
+                return new ValidationError(
+                    "Setting '%setting%' value must be of integer type",
+                    null,
+                    [
+                        '%setting%' => $name,
+                    ],
+                    "[$name]"
+                );
+            }
+
+            if ($value > 0) {
+                $passwordExpireAfter = (int)$fieldSettings['PasswordExpireAfter'];
+                if ($value >= $passwordExpireAfter) {
+                    return new ValidationError(
+                        'Password expiration warning value should be lower then password expiration value',
+                        null,
+                        [],
+                        "[$name]"
+                    );
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter;
 
+use eZ\Publish\Core\FieldType\FieldSettings;
 use eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter;
 use eZ\Publish\Core\Persistence\Legacy\Content\StorageFieldDefinition;
 use eZ\Publish\Core\Persistence\Legacy\Content\StorageFieldValue;
@@ -67,6 +68,11 @@ class UserConverter implements Converter
         if (isset($validatorParameters['minLength'])) {
             $storageDef->dataInt2 = $validatorParameters['minLength'];
         }
+
+        $fieldSettings = $fieldDef->fieldTypeConstraints->fieldSettings;
+
+        $storageDef->dataInt3 = $fieldSettings['PasswordExpireAfter'] ?? -1;
+        $storageDef->dataInt4 = $fieldSettings['PasswordWarnBefore'] ?? -1;
     }
 
     /**
@@ -90,6 +96,10 @@ class UserConverter implements Converter
         $validatorParameters['minLength'] = $storageDef->dataInt2;
 
         $fieldDef->fieldTypeConstraints->validators[self::PASSWORD_VALIDATOR_IDENTIFIER] = $validatorParameters;
+        $fieldDef->fieldTypeConstraints->fieldSettings = new FieldSettings([
+            'PasswordExpireAfter' => $storageDef->dataInt3 ?? -1,
+            'PasswordWarnBefore' => $storageDef->dataInt4 ?? -1,
+        ]);
     }
 
     /**

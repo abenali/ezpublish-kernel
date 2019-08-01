@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\Core\Repository\SiteAccessAware;
 
+use DateTimeInterface;
 use eZ\Publish\API\Repository\UserService as UserServiceInterface;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
@@ -204,5 +205,20 @@ class UserService implements UserServiceInterface
     public function validatePassword(string $password, PasswordValidationContext $context = null): array
     {
         return $this->service->validatePassword($password, $context);
+    }
+
+    public function isPasswordExpired(User $user): bool
+    {
+        return $this->service->isPasswordExpired($user);
+    }
+
+    public function getPasswordExpirationDate(User $user): ?DateTimeInterface
+    {
+        return $this->service->getPasswordExpirationDate($user);
+    }
+
+    public function getPasswordExpirationWarningDate(User $user): ?DateTimeInterface
+    {
+        return $this->service->getPasswordExpirationWarningDate($user);
     }
 }
