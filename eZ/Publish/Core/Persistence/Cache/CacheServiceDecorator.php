@@ -115,10 +115,10 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
         // If in transaction we set callback for save()/clear(), & for isMiss() detect if key is a deferred miss
         foreach ($items as $item) {
             /* @var TransactionItem $item */
-            $item->setClearCallback(function($key){
+            $item->setClearCallback(function ($key) {
                 $this->rawClear([$key]);
             });
-            $item->setIsClearedCallback(function($key){
+            $item->setIsClearedCallback(function ($key) {
                 // Due to keys in Stash being hierarchical we need to check if key or prefix of key has been cleared
                 foreach ($this->deferredClear as $clearedKey) {
                     if ($key === $clearedKey || stripos($key, $clearedKey) === 0) {
@@ -157,7 +157,7 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
         // Make washed string key out of the arguments
         if (empty($key)) {
             $key = self::SPI_CACHE_KEY_PREFIX;
-        } else if (!isset($key[1]) && is_array($key[0])) {
+        } elseif (!isset($key[1]) && is_array($key[0])) {
             $key = self::SPI_CACHE_KEY_PREFIX . '/' . implode('/', array_map([$this, 'washKey'], $key[0]));
         } else {
             $key = self::SPI_CACHE_KEY_PREFIX . '/' . implode('/', array_map([$this, 'washKey'], $key));
@@ -191,7 +191,7 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
     }
 
     /**
-     * {@inheritDoc}.
+     * {@inheritdoc}.
      */
     public function beginTransaction()
     {
@@ -199,11 +199,11 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
             // Wrap Item(s) in order to also handle calls to $item->save() and $item->clear()
             $this->cachePool->setItemClass(TransactionItem::class);
         }
-        $this->transactionDepth++;
+        ++$this->transactionDepth;
     }
 
     /**
-     * {@inheritDoc}.
+     * {@inheritdoc}.
      */
     public function commitTransaction()
     {
@@ -212,7 +212,7 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
             return;
         }
 
-        $this->transactionDepth--;
+        --$this->transactionDepth;
 
         // Cache commit time, it's now time to share the changes with the pool
         if ($this->transactionDepth === 0) {
@@ -225,7 +225,7 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
     }
 
     /**
-     * {@inheritDoc}.
+     * {@inheritdoc}.
      */
     public function rollbackTransaction()
     {
