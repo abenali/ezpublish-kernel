@@ -7,7 +7,7 @@
 
 namespace eZ\Publish\Core\Persistence\Cache\Adapter;
 
-use Stash\Item;
+use Tedivm\StashBundle\Service\CacheItem;
 
 /**
  * Class TransactionItem.
@@ -16,7 +16,7 @@ use Stash\Item;
  *
  * @internal
  */
-class TransactionItem extends Item
+class TransactionItem extends CacheItem
 {
     private $clearFn;
     private $isItemDeferedClearedFn;

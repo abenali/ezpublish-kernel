@@ -11,7 +11,7 @@ namespace eZ\Publish\Core\Persistence\Cache;
 use eZ\Publish\Core\Persistence\Cache\Adapter\TransactionAwareAdapterInterface;
 use eZ\Publish\Core\Persistence\Cache\Adapter\TransactionItem;
 use Stash\Interfaces\PoolInterface;
-use Stash\Item;
+use Tedivm\StashBundle\Service\CacheItem;
 
 /**
  * Class CacheServiceDecorator.
@@ -216,7 +216,7 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
 
         // Cache commit time, it's now time to share the changes with the pool
         if ($this->transactionDepth === 0) {
-            $this->cachePool->setItemClass(Item::class);
+            $this->cachePool->setItemClass(CacheItem::class);
             if (!empty($this->deferredClear)) {
                 $this->executeClear($this->deferredClear);
                 $this->deferredClear = [];
@@ -230,7 +230,7 @@ class CacheServiceDecorator implements TransactionAwareAdapterInterface
     public function rollbackTransaction()
     {
         // A rollback in SQL will by default set transaction level to 0 & wipe transaction changes, so we do the same.
-        $this->cachePool->setItemClass(Item::class);
+        $this->cachePool->setItemClass(CacheItem::class);
         $this->transactionDepth = 0;
         $this->deferredClear = [];
     }
