@@ -11,6 +11,7 @@ namespace eZ\Publish\Core\REST\Client;
 use DateTimeInterface;
 use eZ\Publish\API\Repository\UserService as APIUserService;
 use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\User\PasswordInfo;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\API\Repository\Values\User\User;
 use eZ\Publish\API\Repository\Values\User\UserCreateStruct;
@@ -419,26 +420,7 @@ class UserService implements APIUserService, Sessionable
         throw new \Exception('@todo: Implement.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isPasswordExpired(User $user): bool
-    {
-        throw new \Exception('@todo: Implement.');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPasswordExpirationDate(User $user): ?DateTimeInterface
-    {
-        throw new \Exception('@todo: Implement.');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPasswordExpirationWarningDate(User $user): ?DateTimeInterface
+    public function getPasswordInfo(User $user): PasswordInfo
     {
         throw new \Exception('@todo: Implement.');
     }

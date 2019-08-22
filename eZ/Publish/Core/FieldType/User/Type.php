@@ -8,6 +8,8 @@
  */
 namespace eZ\Publish\Core\FieldType\User;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
@@ -24,18 +26,21 @@ use eZ\Publish\API\Repository\Exceptions\NotFoundException;
  */
 class Type extends FieldType
 {
+    public const PASSWORD_TTL_SETTING = 'PasswordTTL';
+    public const PASSWORD_TTL_WARNING_SETTING = 'PasswordTTLWarning';
+
     /** @var \eZ\Publish\Core\Persistence\Cache\UserHandler */
     protected $userHandler;
 
     /** @var array */
     protected $settingsSchema = [
-        'PasswordExpireAfter' => [
+        self::PASSWORD_TTL_SETTING => [
             'type' => 'int',
-            'default' => -1,
+            'default' => null,
         ],
-        'PasswordWarnBefore' => [
+        self::PASSWORD_TTL_WARNING_SETTING => [
             'type' => 'int',
-            'default' => -1,
+            'default' => null,
         ],
     ];
 
@@ -139,7 +144,7 @@ class Type extends FieldType
     protected function createValueFromInput($inputValue)
     {
         if (is_array($inputValue)) {
-            $inputValue = new Value($inputValue);
+            $inputValue = $this->fromHash($inputValue);
         }
 
         return $inputValue;
@@ -178,6 +183,10 @@ class Type extends FieldType
             return $this->getEmptyValue();
         }
 
+        if (isset($hash['passwordUpdatedAt']) && $hash['passwordUpdatedAt'] !== null) {
+            $hash['passwordUpdatedAt'] = new DateTimeImmutable('@' . $hash['passwordUpdatedAt']);
+        }
+
         return new Value($hash);
     }
 
@@ -194,7 +203,12 @@ class Type extends FieldType
             return null;
         }
 
-        return (array)$value;
+        $hash = (array)$value;
+        if ($hash['passwordUpdatedAt'] instanceof DateTimeInterface) {
+            $hash['passwordUpdatedAt'] = $hash['passwordUpdatedAt']->getTimestamp();
+        }
+
+        return $hash;
     }
 
     /**
@@ -330,11 +344,11 @@ class Type extends FieldType
 
             $error = null;
             switch ($name) {
-                case 'PasswordExpireAfter':
-                    $error = $this->validatePasswordExpireAfterSetting($name, $value);
+                case self::PASSWORD_TTL_SETTING:
+                    $error = $this->validatePasswordTTLSetting($name, $value);
                     break;
-                case 'PasswordWarnBefore':
-                    $error = $this->validatePasswordWarnBeforeSetting($name, $value, $fieldSettings);
+                case self::PASSWORD_TTL_WARNING_SETTING:
+                    $error = $this->validatePasswordTTLWarningSetting($name, $value, $fieldSettings);
                     break;
             }
 
@@ -346,7 +360,7 @@ class Type extends FieldType
         return $validationErrors;
     }
 
-    private function validatePasswordExpireAfterSetting(string $name, $value): ?ValidationError
+    private function validatePasswordTTLSetting(string $name, $value): ?ValidationError
     {
         if ($value !== null && !is_int($value)) {
             return new ValidationError(
@@ -362,7 +376,7 @@ class Type extends FieldType
         return null;
     }
 
-    private function validatePasswordWarnBeforeSetting(string $name, $value, $fieldSettings): ?ValidationError
+    private function validatePasswordTTLWarningSetting(string $name, $value, $fieldSettings): ?ValidationError
     {
         if ($value !== null) {
             if (!is_int($value)) {
@@ -377,8 +391,8 @@ class Type extends FieldType
             }
 
             if ($value > 0) {
-                $passwordExpireAfter = (int)$fieldSettings['PasswordExpireAfter'];
-                if ($value >= $passwordExpireAfter) {
+                $passwordTTL = (int)$fieldSettings[self::PASSWORD_TTL_SETTING];
+                if ($value >= $passwordTTL) {
                     return new ValidationError(
                         'Password expiration warning value should be lower then password expiration value',
                         null,

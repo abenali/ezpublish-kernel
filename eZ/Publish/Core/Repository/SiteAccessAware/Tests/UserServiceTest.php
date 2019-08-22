@@ -5,6 +5,7 @@ namespace eZ\Publish\Core\Repository\SiteAccessAware\Tests;
 use DateInterval;
 use DateTime;
 use eZ\Publish\API\Repository\UserService as APIService;
+use eZ\Publish\API\Repository\Values\User\PasswordInfo;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\API\Repository\Values\User\UserGroupUpdateStruct;
 use eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct;
@@ -69,9 +70,7 @@ class UserServiceTest extends AbstractServiceTest
             ['isUserGroup', [$userGroup]],
 
             ['validatePassword', ['H@xi0r!', $passwordValidationContext], []],
-            ['isPasswordExpired', [$user], false],
-            ['getPasswordExpirationDate', [$user], $passwordExpirationDate],
-            ['getPasswordExpirationWarningDate', [$user], $passwordExpirationWarningDate],
+            ['getPasswordInfo', [$user], new PasswordInfo()],
         ];
     }
 

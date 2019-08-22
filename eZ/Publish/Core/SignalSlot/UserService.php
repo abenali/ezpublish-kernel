@@ -8,9 +8,9 @@
  */
 namespace eZ\Publish\Core\SignalSlot;
 
-use DateTimeInterface;
 use eZ\Publish\API\Repository\UserService as UserServiceInterface;
 use eZ\Publish\API\Repository\Values\Content\Content;
+use eZ\Publish\API\Repository\Values\User\PasswordInfo;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct;
 use eZ\Publish\API\Repository\Values\User\UserGroupCreateStruct;
@@ -576,18 +576,8 @@ class UserService implements UserServiceInterface
         return $this->service->validatePassword($password, $context);
     }
 
-    public function isPasswordExpired(User $user): bool
+    public function getPasswordInfo(User $user): PasswordInfo
     {
-        return $this->service->isPasswordExpired($user);
-    }
-
-    public function getPasswordExpirationDate(User $user): ?DateTimeInterface
-    {
-        return $this->service->getPasswordExpirationDate($user);
-    }
-
-    public function getPasswordExpirationWarningDate(User $user): ?DateTimeInterface
-    {
-        return $this->service->getPasswordExpirationWarningDate($user);
+        return $this->service->getPasswordInfo($user);
     }
 }

@@ -52,12 +52,8 @@ class Provider implements APIUserProviderInterface
                 return $user;
             }
 
-            $apiUser = $this->repository->getUserService()->loadUserByLogin($user);
-
-            return new User(
-                $apiUser,
-                ['ROLE_USER'],
-                !$this->repository->getUserService()->isPasswordExpired($apiUser)
+            return $this->createSecurityUser(
+                $this->repository->getUserService()->loadUserByLogin($user)
             );
         } catch (NotFoundException $e) {
             throw new UsernameNotFoundException($e->getMessage(), 0, $e);
@@ -122,6 +118,24 @@ class Provider implements APIUserProviderInterface
      */
     public function loadUserByAPIUser(APIUser $apiUser)
     {
-        return new User($apiUser, ['ROLE_USER'], !$this->repository->getUserService()->isPasswordExpired($apiUser));
+        return $this->createSecurityUser($apiUser);
+    }
+
+    /**
+     * Creates user object, usable by Symfony Security component, from a user object returned by Public API.
+     *
+     * @param \eZ\Publish\API\Repository\Values\User\User $apiUser
+     *
+     * @return \eZ\Publish\Core\MVC\Symfony\Security\User
+     */
+    private function createSecurityUser(APIUser $apiUser): User
+    {
+        $isPasswordExpired = $this->repository->getUserService()->getPasswordInfo($apiUser)->isPasswordExpired();
+
+        return new User(
+            $apiUser,
+            ['ROLE_USER'],
+            !$isPasswordExpired
+        );
     }
 }

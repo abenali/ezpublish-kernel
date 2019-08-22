@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\Core\FieldType\Tests;
 
+use DateTimeImmutable;
 use eZ\Publish\Core\Persistence\Cache\UserHandler;
 use eZ\Publish\Core\FieldType\User\Type as UserType;
 use eZ\Publish\Core\FieldType\User\Value as UserValue;
@@ -81,13 +82,13 @@ class UserTest extends FieldTypeTest
     protected function getSettingsSchemaExpectation()
     {
         return [
-            'PasswordExpireAfter' => [
+            UserType::PASSWORD_TTL_SETTING => [
                 'type' => 'int',
-                'default' => -1,
+                'default' => null,
             ],
-            'PasswordWarnBefore' => [
+            UserType::PASSWORD_TTL_WARNING_SETTING => [
                 'type' => 'int',
-                'default' => -1,
+                'default' => null,
             ],
         ];
     }
@@ -247,6 +248,8 @@ class UserTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
+        $passwordUpdatedAt = new DateTimeImmutable();
+
         return [
             [
                 new UserValue(),
@@ -261,12 +264,14 @@ class UserTest extends FieldTypeTest
                         'email' => 'sindelfingen@example.com',
                         'passwordHash' => '1234567890abcdef',
                         'passwordHashType' => 'md5',
-                        'passwordUpdatedAt' => time(),
+                        'passwordUpdatedAt' => $passwordUpdatedAt,
                         'enabled' => true,
                         'maxLogin' => 1000,
                     ]
                 ),
-                $userData,
+                [
+                    'passwordUpdatedAt' => $passwordUpdatedAt->getTimestamp(),
+                ] + $userData,
             ],
         ];
     }
@@ -323,10 +328,13 @@ class UserTest extends FieldTypeTest
                     'email' => 'sindelfingen@example.com',
                     'passwordHash' => '1234567890abcdef',
                     'passwordHashType' => 'md5',
+                    'passwordUpdatedAt' => 1567071092,
                     'enabled' => true,
                     'maxLogin' => 1000,
                 ],
-                new UserValue($userData),
+                new UserValue([
+                    'passwordUpdatedAt' => new DateTimeImmutable('@1567071092'),
+                ] + $userData),
             ],
         ];
     }
@@ -422,14 +430,14 @@ class UserTest extends FieldTypeTest
             ],
             [
                 [
-                    'PasswordExpireAfter' => 30,
-                    'PasswordWarnBefore' => -1,
+                    UserType::PASSWORD_TTL_SETTING => 30,
+                    UserType::PASSWORD_TTL_WARNING_SETTING => null,
                 ],
             ],
             [
                 [
-                    'PasswordExpireAfter' => 30,
-                    'PasswordWarnBefore' => 14,
+                    UserType::PASSWORD_TTL_SETTING => 30,
+                    UserType::PASSWORD_TTL_WARNING_SETTING => 14,
                 ],
             ],
         ];
@@ -463,14 +471,14 @@ class UserTest extends FieldTypeTest
         return [
             [
                 [
-                    'PasswordExpireAfter' => null,
-                    'PasswordWarnBefore' => 60,
+                    UserType::PASSWORD_TTL_SETTING => null,
+                    UserType::PASSWORD_TTL_WARNING_SETTING => 60,
                 ],
             ],
             [
                 [
-                    'PasswordExpireAfter' => 30,
-                    'PasswordWarnBefore' => 60,
+                    UserType::PASSWORD_TTL_SETTING => 30,
+                    UserType::PASSWORD_TTL_WARNING_SETTING => 60,
                 ],
             ],
         ];

@@ -11,6 +11,7 @@ namespace eZ\Publish\Core\SignalSlot\Tests;
 use DateInterval;
 use DateTime;
 use eZ\Publish\API\Repository\UserService as APIUserService;
+use eZ\Publish\API\Repository\Values\User\PasswordInfo;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\Core\Repository\Values\User\UserGroupCreateStruct;
 use eZ\Publish\API\Repository\Values\User\UserGroupUpdateStruct;
@@ -316,21 +317,9 @@ class UserServiceTest extends ServiceTest
                 0,
             ],
             [
-                'isPasswordExpired',
+                'getPasswordInfo',
                 [$user],
-                false,
-                0,
-            ],
-            [
-                'getPasswordExpirationDate',
-                [$user],
-                $passwordExpirationDate,
-                0,
-            ],
-            [
-                'getPasswordExpirationWarningDate',
-                [$user],
-                $passwordExpirationWarningDate,
+                new PasswordInfo(),
                 0,
             ],
         ];

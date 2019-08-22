@@ -9,7 +9,6 @@
 namespace eZ\Publish\API\Repository\Values\User;
 
 use DateTime;
-use DateTimeInterface;
 use eZ\Publish\API\Repository\Values\Content\Content;
 
 /**
@@ -19,7 +18,7 @@ use eZ\Publish\API\Repository\Values\Content\Content;
  * @property-read string $email
  * @property-read string $passwordHash
  * @property-read string $hashAlgorithm Hash algorithm used to hash the password
- * @property-read DateTimeInterface|null $passwordUpdatedAt
+ * @property-read \DateTimeInterface|null $passwordUpdatedAt
  * @property-read bool $enabled User can not login if false
  * @property-read int $maxLogin Max number of time user is allowed to login
  */
@@ -82,7 +81,7 @@ abstract class User extends Content implements UserReference
     /**
      * Datetime of last password update.
      *
-     * @var DateTimeInterface|null
+     * @var \DateTimeInterface|null
      */
     protected $passwordUpdatedAt;
 

@@ -58,7 +58,7 @@ class Value extends BaseValue
     public $passwordHashType;
 
     /**
-     * @var int|null
+     * @var \DateTimeImmutable|null
      */
     public $passwordUpdatedAt;
 

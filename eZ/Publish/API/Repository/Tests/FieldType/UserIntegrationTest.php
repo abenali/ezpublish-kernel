@@ -38,13 +38,13 @@ class UserIntegrationTest extends BaseIntegrationTest
     public function getSettingsSchema()
     {
         return [
-            'PasswordExpireAfter' => [
+            'PasswordTTL' => [
                 'type' => 'int',
-                'default' => -1,
+                'default' => null,
             ],
-            'PasswordWarnBefore' => [
+            'PasswordTTLWarning' => [
                 'type' => 'int',
-                'default' => -1,
+                'default' => null,
             ],
         ];
     }
@@ -57,8 +57,8 @@ class UserIntegrationTest extends BaseIntegrationTest
     public function getValidFieldSettings()
     {
         return [
-            'PasswordExpireAfter' => -1,
-            'PasswordWarnBefore' => -1,
+            'PasswordTTL' => null,
+            'PasswordTTLWarning' => null,
         ];
     }
 

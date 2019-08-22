@@ -25,19 +25,18 @@ class ParameterProvider implements ParameterProviderInterface
 
     public function getViewParameters(Field $field): array
     {
-        $user = $this->userService->loadUser($field->value->contentId);
+        $passwordInfo = $this->userService->getPasswordInfo(
+            $this->userService->loadUser($field->value->contentId)
+        );
 
-        $isPasswordExpired = false;
         $passwordExpiresIn = null;
-        $passwordExpiresAt = $this->userService->getPasswordExpirationDate($user);
-        if ($passwordExpiresAt !== null) {
-            $passwordExpiresIn = (new DateTime())->diff($passwordExpiresAt);
-            $isPasswordExpired = $this->userService->isPasswordExpired($user);
+        if (!$passwordInfo->isPasswordExpired() && $passwordInfo->hasExpirationDate()) {
+            $passwordExpiresIn = $passwordInfo->getExpirationDate()->diff(new DateTime());
         }
 
         return [
-            'is_password_expired' => $isPasswordExpired,
-            'password_expires_at' => $passwordExpiresAt,
+            'is_password_expired' => $passwordInfo->isPasswordExpired(),
+            'password_expires_at' => $passwordInfo->getExpirationDate(),
             'password_expires_in' => $passwordExpiresIn,
         ];
     }

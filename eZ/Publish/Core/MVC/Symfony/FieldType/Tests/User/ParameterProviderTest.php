@@ -9,9 +9,10 @@ declare(strict_types=1);
 namespace eZ\Publish\Core\MVC\Symfony\FieldType\Tests\User;
 
 use DateInterval;
-use DateTime;
+use DateTimeImmutable;
 use eZ\Publish\API\Repository\UserService;
 use eZ\Publish\API\Repository\Values\Content\Field;
+use eZ\Publish\API\Repository\Values\User\PasswordInfo;
 use eZ\Publish\API\Repository\Values\User\User;
 use eZ\Publish\Core\FieldType\User\Value;
 use eZ\Publish\Core\MVC\Symfony\FieldType\User\ParameterProvider;
@@ -32,32 +33,30 @@ class ParameterProviderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->userService = $this->createMock(UserService::class);
         $this->user = $this->createMock(User::class);
+
+        $this->userService = $this->createMock(UserService::class);
+        $this->userService
+            ->method('loadUser')
+            ->with(self::EXAMPLE_USER_ID, [])
+            ->willReturn($this->user);
+
         $this->parameterProvider = new ParameterProvider($this->userService);
     }
 
     public function testGetViewParameters(): void
     {
         $passwordExpiresIn = 14;
-        $passwordExpiresAt = (new DateTime())->add(new DateInterval('P14D'));
+        $passwordExpiresAt = (new DateTimeImmutable())->add(new DateInterval('P14D'));
 
         $this->userService
-            ->method('loadUser')
-            ->with(self::EXAMPLE_USER_ID, [])
-            ->willReturn($this->user);
-
-        $this->userService
-            ->method('getPasswordExpirationDate')
+            ->method('getPasswordInfo')
             ->with($this->user)
-            ->willReturn($passwordExpiresAt);
+            ->willReturn(new PasswordInfo($passwordExpiresAt));
 
-        $this->userService
-            ->method('isPasswordExpired')
-            ->with($this->user)
-            ->willReturn(false);
-
-        $parameters = $this->parameterProvider->getViewParameters($this->createFieldMock(self::EXAMPLE_USER_ID));
+        $parameters = $this->parameterProvider->getViewParameters(
+            $this->createFieldMock(self::EXAMPLE_USER_ID)
+        );
 
         $this->assertFalse($parameters['is_password_expired']);
         $this->assertEquals($passwordExpiresAt, $parameters['password_expires_at']);
@@ -69,14 +68,9 @@ class ParameterProviderTest extends TestCase
         $field = $this->createFieldMock(self::EXAMPLE_USER_ID);
 
         $this->userService
-            ->method('loadUser')
-            ->with(self::EXAMPLE_USER_ID, [])
-            ->willReturn($this->user);
-
-        $this->userService
-            ->method('getPasswordExpirationDate')
+            ->method('getPasswordInfo')
             ->with($this->user)
-            ->willReturn(null);
+            ->willReturn(new PasswordInfo());
 
         $this->assertEquals([
             'is_password_expired' => false,
