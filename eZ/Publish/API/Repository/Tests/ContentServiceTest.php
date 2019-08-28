@@ -34,6 +34,25 @@ use eZ\Publish\Core\Repository\Values\Content\ContentUpdateStruct;
  */
 class ContentServiceTest extends BaseContentServiceTest
 {
+    /** @var \eZ\Publish\API\Repository\PermissionResolver */
+    private $permissionResolver;
+
+    /** @var \eZ\Publish\API\Repository\ContentService */
+    private $contentService;
+
+    /** @var \eZ\Publish\API\Repository\LocationService */
+    private $locationService;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $repository = $this->getRepository();
+        $this->permissionResolver = $repository->getPermissionResolver();
+        $this->contentService = $repository->getContentService();
+        $this->locationService = $repository->getLocationService();
+    }
+
     /**
      * Test for the newContentCreateStruct() method.
      *
@@ -2325,6 +2344,56 @@ XML
         }
     }
 
+    public function testCountContentDraftsReturnsZeroByDefault(): void
+    {
+        $this->assertSame(0, $this->contentService->countContentDrafts());
+        $this->assertSame(0, $this->contentService->countContentDrafts());
+    }
+
+    public function testCountContentDrafts(): void
+    {
+        /* BEGIN: Use Case */
+        // Create 5 drafts
+        $this->createContentDrafts(5);
+        /* END: Use Case */
+
+        $this->assertSame(5, $this->contentService->countContentDrafts());
+    }
+
+    public function testCountContentDraftsForUsers(): void
+    {
+        /* BEGIN: Use Case */
+        $newUser = $this->createUserWithPolicies(
+            'new_user',
+            [
+                ['module' => 'content', 'function' => 'create'],
+                ['module' => 'content', 'function' => 'read'],
+                ['module' => 'content', 'function' => 'publish'],
+                ['module' => 'content', 'function' => 'edit'],
+            ]
+        );
+
+        $previousUser = $this->permissionResolver->getCurrentUserReference();
+
+        // Set new editor as user
+        $this->permissionResolver->setCurrentUserReference($newUser);
+
+        // Create a content draft as newUser
+        $publishedContent = $this->createContentVersion1();
+        $this->contentService->createContentDraft($publishedContent->contentInfo);
+
+        // Reset to previous current user
+        $this->permissionResolver->setCurrentUserReference($previousUser);
+
+        // Now $contentDrafts for the previous current user and the new user
+        $newUserDrafts = $this->contentService->countContentDrafts($newUser);
+        $previousUserDrafts = $this->contentService->countContentDrafts();
+        /* END: Use Case */
+
+        $this->assertSame(1, $newUserDrafts);
+        $this->assertSame(0, $previousUserDrafts);
+    }
+
     /**
      * Test for the loadContentDrafts() method.
      *
@@ -2332,12 +2401,8 @@ XML
      */
     public function testLoadContentDraftsReturnsEmptyArrayByDefault()
     {
-        $repository = $this->getRepository();
-
         /* BEGIN: Use Case */
-        $contentService = $repository->getContentService();
-
-        $contentDrafts = $contentService->loadContentDrafts();
+        $contentDrafts = $this->contentService->loadContentDrafts();
         /* END: Use Case */
 
         $this->assertSame([], $contentDrafts);
@@ -2351,28 +2416,24 @@ XML
      */
     public function testLoadContentDrafts()
     {
-        $repository = $this->getRepository();
-
         /* BEGIN: Use Case */
         // Remote ids of the "Media" and the "eZ Publish Demo Design ..." page
         // of a eZ Publish demo installation.
         $mediaRemoteId = 'a6e35cbcb7cd6ae4b691f3eee30cd262';
         $demoDesignRemoteId = '8b8b22fe3c6061ed500fbd2b377b885f';
 
-        $contentService = $repository->getContentService();
-
         // "Media" content object
-        $mediaContentInfo = $contentService->loadContentInfoByRemoteId($mediaRemoteId);
+        $mediaContentInfo = $this->contentService->loadContentInfoByRemoteId($mediaRemoteId);
 
         // "eZ Publish Demo Design ..." content object
-        $demoDesignContentInfo = $contentService->loadContentInfoByRemoteId($demoDesignRemoteId);
+        $demoDesignContentInfo = $this->contentService->loadContentInfoByRemoteId($demoDesignRemoteId);
 
         // Create some drafts
-        $contentService->createContentDraft($mediaContentInfo);
-        $contentService->createContentDraft($demoDesignContentInfo);
+        $this->contentService->createContentDraft($mediaContentInfo);
+        $this->contentService->createContentDraft($demoDesignContentInfo);
 
         // Now $contentDrafts should contain two drafted versions
-        $draftedVersions = $contentService->loadContentDrafts();
+        $draftedVersions = $this->contentService->loadContentDrafts();
         /* END: Use Case */
 
         $actual = [
@@ -2401,34 +2462,30 @@ XML
      */
     public function testLoadContentDraftsWithFirstParameter()
     {
-        $repository = $this->getRepository();
-
         /* BEGIN: Use Case */
         $user = $this->createUserVersion1();
 
         // Get current user
-        $oldCurrentUser = $repository->getCurrentUser();
+        $oldCurrentUser = $this->permissionResolver->getCurrentUserReference();
 
         // Set new editor as user
-        $repository->setCurrentUser($user);
+        $this->permissionResolver->setCurrentUserReference($user);
 
         // Remote id of the "Media" content object in an eZ Publish demo installation.
         $mediaRemoteId = 'a6e35cbcb7cd6ae4b691f3eee30cd262';
 
-        $contentService = $repository->getContentService();
-
         // "Media" content object
-        $mediaContentInfo = $contentService->loadContentInfoByRemoteId($mediaRemoteId);
+        $mediaContentInfo = $this->contentService->loadContentInfoByRemoteId($mediaRemoteId);
 
         // Create a content draft
-        $contentService->createContentDraft($mediaContentInfo);
+        $this->contentService->createContentDraft($mediaContentInfo);
 
         // Reset to previous current user
-        $repository->setCurrentUser($oldCurrentUser);
+        $this->permissionResolver->setCurrentUserReference($oldCurrentUser);
 
         // Now $contentDrafts for the previous current user and the new user
-        $newCurrentUserDrafts = $contentService->loadContentDrafts($user);
-        $oldCurrentUserDrafts = $contentService->loadContentDrafts($oldCurrentUser);
+        $newCurrentUserDrafts = $this->contentService->loadContentDrafts($user);
+        $oldCurrentUserDrafts = $this->contentService->loadContentDrafts();
         /* END: Use Case */
 
         $this->assertSame([], $oldCurrentUserDrafts);
@@ -2446,6 +2503,55 @@ XML
         $this->assertTrue($newCurrentUserDrafts[0]->isDraft());
         $this->assertFalse($newCurrentUserDrafts[0]->isArchived());
         $this->assertFalse($newCurrentUserDrafts[0]->isPublished());
+    }
+
+    /**
+     * Test for the loadContentDrafts() method.
+     *
+     * @see \eZ\Publish\API\Repository\ContentService::loadContentDrafts()
+     */
+    public function testLoadContentDraftsWithPaginationParameters()
+    {
+        // Create some drafts
+        $publishedContent = $this->createContentVersion1();
+        $draftContentA = $this->contentService->createContentDraft($publishedContent->contentInfo);
+        $draftContentB = $this->contentService->createContentDraft($publishedContent->contentInfo);
+        $draftContentC = $this->contentService->createContentDraft($publishedContent->contentInfo);
+        $draftContentD = $this->contentService->createContentDraft($publishedContent->contentInfo);
+        $draftContentE = $this->contentService->createContentDraft($publishedContent->contentInfo);
+
+        $draftsOnPage1 = $this->contentService->loadContentDrafts(null, 1, 2);
+        $draftsOnPage2 = $this->contentService->loadContentDrafts(null, 2, 2);
+        /* END: Use Case */
+
+        $this->assertEquals(
+            [
+                $draftContentA->contentInfo->remoteId,
+                $draftContentB->contentInfo->remoteId,
+                $draftContentC->contentInfo->remoteId,
+                $draftContentD->contentInfo->remoteId,
+            ],
+            [
+                $draftsOnPage1[0]->getContentInfo()->remoteId,
+                $draftsOnPage1[1]->getContentInfo()->remoteId,
+                $draftsOnPage2[0]->getContentInfo()->remoteId,
+                $draftsOnPage2[1]->getContentInfo()->remoteId,
+            ]
+        );
+    }
+
+    /**
+     * Test for the loadContentDrafts() method.
+     *
+     * @see \eZ\Publish\API\Repository\ContentService::loadContentDrafts()
+     */
+    public function testLoadAllContentDrafts()
+    {
+        // Create more drafts then default pagination limit
+        $this->createContentDrafts(12);
+        /* END: Use Case */
+
+        $this->assertCount(12, $this->contentService->loadContentDrafts());
     }
 
     /**
@@ -6740,5 +6846,25 @@ XML
         $urlAliasService = $repository->getURLAliasService();
         $urlAlias = $urlAliasService->lookup($expectedPath);
         $this->assertSame($expectedPath, $urlAlias->path);
+    }
+
+    /**
+     * @param int $amountOfDrafts
+     *
+     * @throws UnauthorizedException
+     */
+    private function createContentDrafts(int $amountOfDrafts): void
+    {
+        if (0 >= $amountOfDrafts) {
+            throw new InvalidArgumentException('$amountOfDrafts', 'Must be greater then 0');
+        }
+
+        $publishedContent = $this->createContentVersion1();
+
+        $i = 1;
+        while ($i <= $amountOfDrafts) {
+            $this->contentService->createContentDraft($publishedContent->contentInfo);
+            ++$i;
+        }
     }
 }
