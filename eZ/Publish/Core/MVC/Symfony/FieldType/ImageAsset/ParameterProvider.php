@@ -16,14 +16,15 @@ use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 
 class ParameterProvider implements ParameterProviderInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
-    /** @var \eZ\Publish\API\Repository\PermissionResolver */
+    /**
+     * @var \eZ\Publish\API\Repository\PermissionResolver
+     */
     private $permissionsResolver;
-
-    /** @var \eZ\Publish\Core\Repository\FieldTypeService */
-    private $fieldTypeService;
 
     /**
      * @param \eZ\Publish\API\Repository\Repository $repository
@@ -32,7 +33,6 @@ class ParameterProvider implements ParameterProviderInterface
     {
         $this->repository = $repository;
         $this->permissionsResolver = $repository->getPermissionResolver();
-        $this->fieldTypeService = $repository->getFieldTypeService();
     }
 
     /**
@@ -40,21 +40,19 @@ class ParameterProvider implements ParameterProviderInterface
      */
     public function getViewParameters(Field $field): array
     {
-        $fieldType = $this->fieldTypeService->getFieldType($field->fieldTypeIdentifier);
-
-        if ($fieldType->isEmptyValue($field->value)) {
-            return [
-                'available' => null,
-            ];
-        }
-
         try {
             $contentInfo = $this->loadContentInfo(
                 $field->value->destinationContentId
             );
 
+            if (!$this->userHasPermissions($contentInfo)) {
+                return [
+                    'available' => false,
+                ];
+            }
+
             return [
-                'available' => !$contentInfo->isTrashed() && $this->userHasPermissions($contentInfo),
+                'available' => !$contentInfo->isTrashed(),
             ];
         } catch (NotFoundException $exception) {
             return [

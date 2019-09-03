@@ -18,13 +18,17 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class AnonymousAuthenticationProviderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $configResolver;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->repository = $this->createMock(Repository::class);
@@ -51,7 +55,7 @@ class AnonymousAuthenticationProviderTest extends TestCase
         $authProvider->setConfigResolver($this->configResolver);
         $anonymousToken = $this
             ->getMockBuilder(AnonymousToken::class)
-            ->setConstructorArgs([$key, $this->createMock(UserInterface::class)])
+            ->setConstructorArgs(array($key, $this->createMock(UserInterface::class)))
             ->getMockForAbstractClass();
         $this->assertSame($anonymousToken, $authProvider->authenticate($anonymousToken));
     }

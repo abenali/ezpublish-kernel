@@ -6,7 +6,7 @@
  */
 namespace eZ\Bundle\EzPublishIOBundle\Migration\FileLister;
 
-use eZ\Bundle\EzPublishIOBundle\ApiLoader\HandlerRegistry;
+use eZ\Bundle\EzPublishIOBundle\ApiLoader\HandlerFactory;
 use eZ\Bundle\EzPublishIOBundle\Migration\FileListerInterface;
 use eZ\Bundle\EzPublishIOBundle\Migration\MigrationHandler;
 use eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException;
@@ -23,15 +23,15 @@ class BinaryFileLister extends MigrationHandler implements FileListerInterface
     private $filesDir;
 
     /**
-     * @param \eZ\Bundle\EzPublishIOBundle\ApiLoader\HandlerRegistry $metadataHandlerRegistry
-     * @param \eZ\Bundle\EzPublishIOBundle\ApiLoader\HandlerRegistry $binarydataHandlerRegistry
+     * @param \eZ\Bundle\EzPublishIOBundle\ApiLoader\HandlerFactory $metadataHandlerFactory
+     * @param \eZ\Bundle\EzPublishIOBundle\ApiLoader\HandlerFactory $binarydataHandlerFactory
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Iterator $fileList
      * @param string $filesDir Directory where files are stored, within the storage dir. Example: 'original'
      */
     public function __construct(
-        HandlerRegistry $metadataHandlerRegistry,
-        HandlerRegistry $binarydataHandlerRegistry,
+        HandlerFactory $metadataHandlerFactory,
+        HandlerFactory $binarydataHandlerFactory,
         LoggerInterface $logger = null,
         Iterator $fileList,
         $filesDir
@@ -41,7 +41,7 @@ class BinaryFileLister extends MigrationHandler implements FileListerInterface
 
         $this->fileList->rewind();
 
-        parent::__construct($metadataHandlerRegistry, $binarydataHandlerRegistry, $logger);
+        parent::__construct($metadataHandlerFactory, $binarydataHandlerFactory, $logger);
     }
 
     public function countFiles()

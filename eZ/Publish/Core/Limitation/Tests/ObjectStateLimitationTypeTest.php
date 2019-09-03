@@ -24,19 +24,25 @@ use eZ\Publish\SPI\Persistence\Content\ObjectState\Handler as SPIHandler;
  */
 class ObjectStateLimitationTypeTest extends Base
 {
-    /** @var \eZ\Publish\SPI\Persistence\Content\ObjectState\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\ObjectState\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $objectStateHandlerMock;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\ObjectState\Group[] */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\ObjectState\Group[]
+     */
     private $allObjectStateGroups;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $loadObjectStatesMap;
 
     /**
      * Setup Handler mock.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
@@ -68,7 +74,7 @@ class ObjectStateLimitationTypeTest extends Base
     /**
      * Tear down Handler mock.
      */
-    protected function tearDown(): void
+    public function tearDown()
     {
         unset($this->objectStateHandlerMock);
 
@@ -203,19 +209,18 @@ class ObjectStateLimitationTypeTest extends Base
             $object
         );
 
-        self::assertIsBool($value);
+        self::assertInternalType('boolean', $value);
         self::assertEquals($expected, $value);
     }
 
     /**
      * @depends testConstruct
+     * @expectedException \RuntimeException
      *
      * @param \eZ\Publish\Core\Limitation\ObjectStateLimitationType $limitationType
      */
     public function testGetCriterionInvalidValue(ObjectStateLimitationType $limitationType)
     {
-        $this->expectException(\RuntimeException::class);
-
         $limitationType->getCriterion(
             new ObjectStateLimitation([]),
             $this->getUserMock()
@@ -235,8 +240,8 @@ class ObjectStateLimitationTypeTest extends Base
         );
 
         self::assertInstanceOf(ObjectStateId::class, $criterion);
-        self::assertIsArray($criterion->value);
-        self::assertIsString($criterion->operator);
+        self::assertInternalType('array', $criterion->value);
+        self::assertInternalType('string', $criterion->operator);
         self::assertEquals(Operator::EQ, $criterion->operator);
         self::assertEquals([2], $criterion->value);
     }
@@ -264,8 +269,8 @@ class ObjectStateLimitationTypeTest extends Base
         );
 
         self::assertInstanceOf(ObjectStateId::class, $criterion);
-        self::assertIsArray($criterion->value);
-        self::assertIsString($criterion->operator);
+        self::assertInternalType('array', $criterion->value);
+        self::assertInternalType('string', $criterion->operator);
         self::assertEquals(Operator::IN, $criterion->operator);
         self::assertEquals([1, 2], $criterion->value);
     }
@@ -293,15 +298,15 @@ class ObjectStateLimitationTypeTest extends Base
         );
 
         self::assertInstanceOf(LogicalAnd::class, $criterion);
-        self::assertIsArray($criterion->criteria);
+        self::assertInternalType('array', $criterion->criteria);
 
-        self::assertIsArray($criterion->criteria[0]->value);
-        self::assertIsString($criterion->criteria[0]->operator);
+        self::assertInternalType('array', $criterion->criteria[0]->value);
+        self::assertInternalType('string', $criterion->criteria[0]->operator);
         self::assertEquals(Operator::IN, $criterion->criteria[0]->operator);
         self::assertEquals([1, 2], $criterion->criteria[0]->value);
 
-        self::assertIsArray($criterion->criteria[1]->value);
-        self::assertIsString($criterion->criteria[1]->operator);
+        self::assertInternalType('array', $criterion->criteria[1]->value);
+        self::assertInternalType('string', $criterion->criteria[1]->operator);
         self::assertEquals(Operator::IN, $criterion->criteria[1]->operator);
         self::assertEquals([3], $criterion->criteria[1]->value);
     }

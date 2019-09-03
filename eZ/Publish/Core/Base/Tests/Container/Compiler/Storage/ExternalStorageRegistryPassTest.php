@@ -17,197 +17,162 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class ExternalStorageRegistryPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
-        $this->setDefinition('ezpublish.persistence.external_storage_registry', new Definition());
+        $this->setDefinition('ezpublish.persistence.external_storage_registry.factory', new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new ExternalStorageRegistryPass());
     }
 
-    /**
-     * @dataProvider externalStorageHandlerTagsProvider
-     */
-    public function testRegisterExternalStorageHandler(string $tag)
+    public function testRegisterExternalStorageHandler()
     {
         $def = new Definition();
         $fieldTypeIdentifier = 'field_type_identifier';
-        $def->addTag($tag, ['alias' => $fieldTypeIdentifier]);
+        $def->addTag('ezpublish.fieldType.externalStorageHandler', array('alias' => $fieldTypeIdentifier));
         $serviceId = 'some_service_id';
         $this->setDefinition($serviceId, $def);
 
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.persistence.external_storage_registry',
-            'register',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            'ezpublish.persistence.external_storage_registry.factory',
+            'registerExternalStorageHandler',
+            array($serviceId, $fieldTypeIdentifier)
         );
     }
 
     /**
-     * @dataProvider externalStorageHandlerTagsProvider
+     * @expectedException \LogicException
      */
-    public function testRegisterExternalStorageHandlerNoAlias(string $tag)
+    public function testRegisterExternalStorageHandlerNoAlias()
     {
-        $this->expectException(\LogicException::class);
-
         $def = new Definition();
         $fieldTypeIdentifier = 'field_type_identifier';
-        $def->addTag($tag);
+        $def->addTag('ezpublish.fieldType.externalStorageHandler');
         $serviceId = 'some_service_id';
         $this->setDefinition($serviceId, $def);
 
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.persistence.external_storage_registry',
-            'register',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            'ezpublish.persistence.external_storage_registry.factory',
+            'registerExternalStorageHandler',
+            array($serviceId, $fieldTypeIdentifier)
         );
     }
 
-    /**
-     * @dataProvider externalStorageHandlerGatewayTagsProvider
-     */
-    public function testRegisterExternalStorageHandlerWithGateway(string $tag)
+    public function testRegisterExternalStorageHandlerWithGateway()
     {
         $handlerDef = new Definition();
         $handlerDef->setClass(GatewayBasedStorageHandler::class);
         $fieldTypeIdentifier = 'field_type_identifier';
-        $handlerDef->addTag(ExternalStorageRegistryPass::EXTERNAL_STORAGE_HANDLER_SERVICE_TAG, [
-            'alias' => $fieldTypeIdentifier,
-        ]);
+        $handlerDef->addTag('ezpublish.fieldType.externalStorageHandler', array('alias' => $fieldTypeIdentifier));
         $storageHandlerServiceId = 'external_storage_handler_id';
         $this->setDefinition($storageHandlerServiceId, $handlerDef);
 
         $gatewayDef = new Definition();
         $gatewayIdentifier = 'LegacyStorage';
-        $gatewayDef->addTag($tag, [
-            'alias' => $fieldTypeIdentifier,
-            'identifier' => $gatewayIdentifier,
-        ]);
+        $gatewayDef->addTag(
+            'ezpublish.fieldType.externalStorageHandler.gateway',
+            array('alias' => $fieldTypeIdentifier, 'identifier' => $gatewayIdentifier)
+        );
         $gatewayServiceId = 'gateway_service';
         $this->setDefinition($gatewayServiceId, $gatewayDef);
 
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.persistence.external_storage_registry',
-            'register',
-            [$fieldTypeIdentifier, new Reference($storageHandlerServiceId)]
+            'ezpublish.persistence.external_storage_registry.factory',
+            'registerExternalStorageHandler',
+            array($storageHandlerServiceId, $fieldTypeIdentifier)
         );
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             $storageHandlerServiceId,
             'addGateway',
-            [$gatewayIdentifier, new Reference($gatewayServiceId)]
+            array($gatewayIdentifier, new Reference($gatewayServiceId))
         );
     }
 
     /**
-     * @dataProvider externalStorageHandlerGatewayTagsProvider
+     * @expectedException \LogicException
      */
-    public function testRegisterExternalStorageHandlerWithoutRegisteredGateway(string $tag)
+    public function testRegisterExternalStorageHandlerWithoutRegisteredGateway()
     {
-        $this->expectException(\LogicException::class);
-
         $handlerDef = new Definition();
         $handlerDef->setClass(GatewayBasedStorageHandler::class);
         $fieldTypeIdentifier = 'field_type_identifier';
-        $handlerDef->addTag($tag, [
-            'alias' => $fieldTypeIdentifier,
-        ]);
+        $handlerDef->addTag('ezpublish.fieldType.externalStorageHandler', array('alias' => $fieldTypeIdentifier));
         $storageHandlerServiceId = 'external_storage_handler_id';
         $this->setDefinition($storageHandlerServiceId, $handlerDef);
 
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.persistence.external_storage_registry',
-            'register',
-            [$fieldTypeIdentifier, new Reference($storageHandlerServiceId)]
+            'ezpublish.persistence.external_storage_registry.factory',
+            'registerExternalStorageHandler',
+            array($storageHandlerServiceId, $fieldTypeIdentifier)
         );
     }
 
     /**
-     * @dataProvider externalStorageHandlerGatewayTagsProvider
+     * @expectedException \LogicException
      */
-    public function testRegisterExternalStorageHandlerWithGatewayNoAlias(string $tag)
+    public function testRegisterExternalStorageHandlerWithGatewayNoAlias()
     {
-        $this->expectException(\LogicException::class);
-
         $handlerDef = new Definition();
         $handlerDef->setClass(GatewayBasedStorageHandler::class);
         $fieldTypeIdentifier = 'field_type_identifier';
-        $handlerDef->addTag(ExternalStorageRegistryPass::EXTERNAL_STORAGE_HANDLER_SERVICE_TAG, [
-            'alias' => $fieldTypeIdentifier,
-        ]);
+        $handlerDef->addTag('ezpublish.fieldType.externalStorageHandler', array('alias' => $fieldTypeIdentifier));
         $storageHandlerServiceId = 'external_storage_handler_id';
         $this->setDefinition($storageHandlerServiceId, $handlerDef);
 
         $gatewayDef = new Definition();
         $gatewayIdentifier = 'LegacyStorage';
-        $gatewayDef->addTag($tag);
+        $gatewayDef->addTag('ezpublish.fieldType.externalStorageHandler.gateway');
         $gatewayServiceId = 'gateway_service';
         $this->setDefinition($gatewayServiceId, $gatewayDef);
 
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.persistence.external_storage_registry',
-            'register',
-            [$fieldTypeIdentifier, new Reference($storageHandlerServiceId)]
+            'ezpublish.persistence.external_storage_registry.factory',
+            'registerExternalStorageHandler',
+            array($storageHandlerServiceId, $fieldTypeIdentifier)
         );
     }
 
     /**
-     * @dataProvider externalStorageHandlerGatewayTagsProvider
+     * @expectedException \LogicException
      */
-    public function testRegisterExternalStorageHandlerWithGatewayNoIdentifier(string $tag)
+    public function testRegisterExternalStorageHandlerWithGatewayNoIdentifier()
     {
-        $this->expectException(\LogicException::class);
-
         $handlerDef = new Definition();
         $handlerDef->setClass(GatewayBasedStorageHandler::class);
         $fieldTypeIdentifier = 'field_type_identifier';
-        $handlerDef->addTag(ExternalStorageRegistryPass::EXTERNAL_STORAGE_HANDLER_SERVICE_TAG, [
-            'alias' => $fieldTypeIdentifier,
-        ]);
+        $handlerDef->addTag('ezpublish.fieldType.externalStorageHandler', array('alias' => $fieldTypeIdentifier));
         $storageHandlerServiceId = 'external_storage_handler_id';
         $this->setDefinition($storageHandlerServiceId, $handlerDef);
 
         $gatewayDef = new Definition();
         $gatewayIdentifier = 'LegacyStorage';
-        $gatewayDef->addTag($tag, ['alias' => $fieldTypeIdentifier]);
+        $gatewayDef->addTag(
+            'ezpublish.fieldType.externalStorageHandler.gateway',
+            array('alias' => $fieldTypeIdentifier)
+        );
         $gatewayServiceId = 'gateway_service';
         $this->setDefinition($gatewayServiceId, $gatewayDef);
 
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.persistence.external_storage_registry',
-            'register',
-            [$fieldTypeIdentifier, new Reference($storageHandlerServiceId)]
+            'ezpublish.persistence.external_storage_registry.factory',
+            'registerExternalStorageHandler',
+            array($storageHandlerServiceId, $fieldTypeIdentifier)
         );
-    }
-
-    public function externalStorageHandlerTagsProvider(): array
-    {
-        return [
-            [ExternalStorageRegistryPass::DEPRECATED_EXTERNAL_STORAGE_HANDLER_SERVICE_TAG],
-            [ExternalStorageRegistryPass::EXTERNAL_STORAGE_HANDLER_SERVICE_TAG],
-        ];
-    }
-
-    public function externalStorageHandlerGatewayTagsProvider(): array
-    {
-        return [
-            [ExternalStorageRegistryPass::DEPRECATED_EXTERNAL_STORAGE_HANDLER_GATEWAY_SERVICE_TAG],
-            [ExternalStorageRegistryPass::EXTERNAL_STORAGE_HANDLER_GATEWAY_SERVICE_TAG],
-        ];
     }
 }

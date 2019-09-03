@@ -16,7 +16,6 @@ use eZ\Publish\SPI\Persistence\Handler;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\Core\Repository\Values\Content\TrashItem;
 use eZ\Publish\API\Repository\Values\Content\TrashItem as APITrashItem;
-use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Query;
 use eZ\Publish\SPI\Persistence\Content\Location\Trashed;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue;
@@ -24,10 +23,6 @@ use eZ\Publish\Core\Base\Exceptions\UnauthorizedException;
 use eZ\Publish\API\Repository\Values\Content\Trash\SearchResult;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\Content\Query\SortClause;
-use eZ\Publish\API\Repository\PermissionCriterionResolver;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalAnd as CriterionLogicalAnd;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalNot as CriterionLogicalNot;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\Subtree as CriterionSubtree;
 use DateTime;
 use Exception;
 
@@ -36,16 +31,24 @@ use Exception;
  */
 class TrashService implements TrashServiceInterface
 {
-    /** @var \eZ\Publish\Core\Repository\Repository */
+    /**
+     * @var \eZ\Publish\Core\Repository\Repository
+     */
     protected $repository;
 
-    /** @var \eZ\Publish\SPI\Persistence\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Handler
+     */
     protected $persistenceHandler;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $settings;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\NameSchemaService */
+    /**
+     * @var \eZ\Publish\Core\Repository\Helper\NameSchemaService
+     */
     protected $nameSchemaService;
 
     /**
@@ -54,24 +57,21 @@ class TrashService implements TrashServiceInterface
      * @param \eZ\Publish\API\Repository\Repository $repository
      * @param \eZ\Publish\SPI\Persistence\Handler $handler
      * @param \eZ\Publish\Core\Repository\Helper\NameSchemaService $nameSchemaService
-     * @param \eZ\Publish\API\Repository\PermissionCriterionResolver $permissionCriterionResolver
      * @param array $settings
      */
     public function __construct(
         RepositoryInterface $repository,
         Handler $handler,
         Helper\NameSchemaService $nameSchemaService,
-        PermissionCriterionResolver $permissionCriterionResolver,
-        array $settings = []
+        array $settings = array()
     ) {
-        $this->permissionCriterionResolver = $permissionCriterionResolver;
         $this->repository = $repository;
         $this->persistenceHandler = $handler;
         $this->nameSchemaService = $nameSchemaService;
         // Union makes sure default settings are ignored if provided in argument
-        $this->settings = $settings + [
+        $this->settings = $settings + array(
             //'defaultSetting' => array(),
-        ];
+        );
     }
 
     /**
@@ -118,11 +118,11 @@ class TrashService implements TrashServiceInterface
      */
     public function trash(Location $location)
     {
-        if (empty($location->id)) {
+        if (!is_numeric($location->id)) {
             throw new InvalidArgumentValue('id', $location->id, 'Location');
         }
 
-        if (!$this->userHasPermissionsToRemove($location->getContentInfo(), $location)) {
+        if (!$this->repository->canUser('content', 'remove', $location->getContentInfo(), [$location])) {
             throw new UnauthorizedException('content', 'remove');
         }
 
@@ -225,7 +225,10 @@ class TrashService implements TrashServiceInterface
      */
     public function emptyTrash()
     {
-        if ($this->repository->hasAccess('content', 'cleantrash') === false) {
+        // Will throw if you have Role assignment limitation where you have content/cleantrash permission.
+        // This is by design and means you can only delete one and one trash item, or you'll need to change how
+        // permissions is assigned to be on separate role with no Role assignment limitation.
+        if ($this->repository->hasAccess('content', 'cleantrash') !== true) {
             throw new UnauthorizedException('content', 'cleantrash');
         }
 
@@ -327,7 +330,7 @@ class TrashService implements TrashServiceInterface
 
     protected function buildDomainTrashItems(array $spiTrashItems): array
     {
-        $trashItems = [];
+        $trashItems = array();
         // TODO: load content in bulk once API allows for it
         foreach ($spiTrashItems as $spiTrashItem) {
             try {
@@ -346,7 +349,7 @@ class TrashService implements TrashServiceInterface
     protected function buildDomainTrashItemObject(Trashed $spiTrashItem, Content $content): APITrashItem
     {
         return new TrashItem(
-            [
+            array(
                 'content' => $content,
                 'contentInfo' => $content->contentInfo,
                 'id' => $spiTrashItem->id,
@@ -360,7 +363,7 @@ class TrashService implements TrashServiceInterface
                 'sortField' => $spiTrashItem->sortField,
                 'sortOrder' => $spiTrashItem->sortOrder,
                 'trashed' => isset($spiTrashItem->trashed) ? new DateTime('@' . $spiTrashItem->trashed) : new DateTime('@0'),
-            ]
+            )
         );
     }
 
@@ -375,39 +378,5 @@ class TrashService implements TrashServiceInterface
         $dateTime->setTimestamp($timestamp);
 
         return $dateTime;
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\Content\ContentInfo $contentInfo
-     * @param \eZ\Publish\API\Repository\Values\Content\Location $location
-     *
-     * @return bool
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     */
-    private function userHasPermissionsToRemove(ContentInfo $contentInfo, Location $location)
-    {
-        if (!$this->repository->canUser('content', 'remove', $contentInfo, [$location])) {
-            return false;
-        }
-        $contentRemoveCriterion = $this->permissionCriterionResolver->getPermissionsCriterion('content', 'remove');
-        if (!$contentRemoveCriterion instanceof Criterion) {
-            return (bool)$contentRemoveCriterion;
-        }
-        $query = new Query(
-            [
-                'limit' => 0,
-                'filter' => new CriterionLogicalAnd(
-                    [
-                        new CriterionSubtree($location->pathString),
-                        new CriterionLogicalNot($contentRemoveCriterion),
-                    ]
-                ),
-            ]
-        );
-        $result = $this->repository->getSearchService()->findContent($query, [], false);
-
-        return $result->totalCount == 0;
     }
 }

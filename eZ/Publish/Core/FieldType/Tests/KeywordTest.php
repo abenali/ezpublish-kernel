@@ -44,7 +44,7 @@ class KeywordTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -54,7 +54,7 @@ class KeywordTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -62,7 +62,7 @@ class KeywordTest extends FieldTypeTest
      */
     protected function getEmptyValueExpectation()
     {
-        return new KeywordValue([]);
+        return new KeywordValue(array());
     }
 
     /**
@@ -90,12 +90,12 @@ class KeywordTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 23,
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -129,28 +129,28 @@ class KeywordTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
-                new KeywordValue([]),
-            ],
-            [
-                [],
-                new KeywordValue([]),
-            ],
-            [
+                new KeywordValue(array()),
+            ),
+            array(
+                array(),
+                new KeywordValue(array()),
+            ),
+            array(
                 'foo',
-                new KeywordValue(['foo']),
-            ],
-            [
-                ['foo'],
-                new KeywordValue(['foo']),
-            ],
-            [
-                new KeywordValue(['foo']),
-                new KeywordValue(['foo']),
-            ],
-        ];
+                new KeywordValue(array('foo')),
+            ),
+            array(
+                array('foo'),
+                new KeywordValue(array('foo')),
+            ),
+            array(
+                new KeywordValue(array('foo')),
+                new KeywordValue(array('foo')),
+            ),
+        );
     }
 
     /**
@@ -190,16 +190,16 @@ class KeywordTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
-                new KeywordValue([]),
-                [],
-            ],
-            [
-                new KeywordValue(['foo', 'bar']),
-                ['foo', 'bar'],
-            ],
-        ];
+        return array(
+            array(
+                new KeywordValue(array()),
+                array(),
+            ),
+            array(
+                new KeywordValue(array('foo', 'bar')),
+                array('foo', 'bar'),
+            ),
+        );
     }
 
     /**
@@ -239,16 +239,16 @@ class KeywordTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
-                [],
-                new KeywordValue([]),
-            ],
-            [
-                ['foo', 'bar'],
-                new KeywordValue(['foo', 'bar']),
-            ],
-        ];
+        return array(
+            array(
+                array(),
+                new KeywordValue(array()),
+            ),
+            array(
+                array('foo', 'bar'),
+                new KeywordValue(array('foo', 'bar')),
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -256,11 +256,11 @@ class KeywordTest extends FieldTypeTest
         return 'ezkeyword';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new KeywordValue(['foo', 'bar']), [], 'en_GB', 'foo, bar'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new KeywordValue(array('foo', 'bar')), 'foo, bar'),
+        );
     }
 }

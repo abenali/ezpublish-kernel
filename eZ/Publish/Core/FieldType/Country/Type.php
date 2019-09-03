@@ -23,14 +23,16 @@ use eZ\Publish\Core\FieldType\Value as BaseValue;
  */
 class Type extends FieldType
 {
-    protected $settingsSchema = [
-        'isMultiple' => [
+    protected $settingsSchema = array(
+        'isMultiple' => array(
             'type' => 'boolean',
             'default' => false,
-        ],
-    ];
+        ),
+    );
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $countriesInfo;
 
     /**
@@ -52,9 +54,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\Country\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\Country\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value;
     }
@@ -118,7 +127,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $validationErrors;
@@ -131,7 +140,7 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'Field definition does not allow multiple countries to be selected.',
                 null,
-                [],
+                array(),
                 'countries'
             );
         }
@@ -141,9 +150,9 @@ class Type extends FieldType
                 $validationErrors[] = new ValidationError(
                     "Country with Alpha2 code '%alpha2%' is not defined in FieldType settings.",
                     null,
-                    [
+                    array(
                         '%alpha2%' => $alpha2,
-                    ],
+                    ),
                     'countries'
                 );
             }
@@ -157,7 +166,7 @@ class Type extends FieldType
      */
     protected function getSortInfo(BaseValue $value)
     {
-        $countries = [];
+        $countries = array();
         foreach ($value->countries as $countryInfo) {
             $countries[] = $this->transformationProcessor->transformByGroup($countryInfo['Name'], 'lowercase');
         }
@@ -180,7 +189,7 @@ class Type extends FieldType
             return $this->getEmptyValue();
         }
 
-        $countries = [];
+        $countries = array();
         foreach ($hash as $country) {
             foreach ($this->countriesInfo as $countryInfo) {
                 switch ($country) {
@@ -233,16 +242,16 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (!isset($this->settingsSchema[$name])) {
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
                 continue;
@@ -254,9 +263,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of boolean type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }

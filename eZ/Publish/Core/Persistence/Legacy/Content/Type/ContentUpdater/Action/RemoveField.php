@@ -33,7 +33,9 @@ class RemoveField extends Action
      */
     protected $storageHandler;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper
+     */
     protected $contentMapper;
 
     /**
@@ -64,12 +66,12 @@ class RemoveField extends Action
     public function apply($contentId)
     {
         $versionNumbers = $this->contentGateway->listVersionNumbers($contentId);
-        $fieldIdSet = [];
+        $fieldIdSet = array();
 
         $nameRows = $this->contentGateway->loadVersionedNameData(
             array_map(
                 function ($versionNo) use ($contentId) {
-                    return ['id' => $contentId, 'version' => $versionNo];
+                    return array('id' => $contentId, 'version' => $versionNo);
                 },
                 $versionNumbers
             )
@@ -79,7 +81,7 @@ class RemoveField extends Action
             $contentRows = $this->contentGateway->load($contentId, $versionNo);
             $contentList = $this->contentMapper->extractContentFromRows($contentRows, $nameRows);
             $content = $contentList[0];
-            $versionFieldIdSet = [];
+            $versionFieldIdSet = array();
 
             foreach ($content->fields as $field) {
                 if ($field->fieldDefinitionId == $this->fieldDefinition->id) {

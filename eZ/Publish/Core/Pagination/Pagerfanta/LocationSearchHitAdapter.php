@@ -18,19 +18,27 @@ use Pagerfanta\Adapter\AdapterInterface;
  */
 class LocationSearchHitAdapter implements AdapterInterface
 {
-    /** @var \eZ\Publish\API\Repository\Values\Content\LocationQuery */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\LocationQuery
+     */
     private $query;
 
-    /** @var \eZ\Publish\API\Repository\SearchService */
+    /**
+     * @var \eZ\Publish\API\Repository\SearchService
+     */
     private $searchService;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $languageFilter;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $nbResults;
 
-    public function __construct(LocationQuery $query, SearchService $searchService, array $languageFilter = [])
+    public function __construct(LocationQuery $query, SearchService $searchService, array $languageFilter = array())
     {
         $this->query = $query;
         $this->searchService = $searchService;

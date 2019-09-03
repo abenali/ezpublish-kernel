@@ -17,7 +17,7 @@ class LegacyStorageImageFileListTest extends TestCase
     /** @var \eZ\Bundle\EzPublishCoreBundle\Imagine\VariationPurger\LegacyStorageImageFileList */
     protected $fileList;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->rowReaderMock = $this->createMock(ImageFileRowReader::class);
         $this->fileList = new LegacyStorageImageFileList(
@@ -29,10 +29,10 @@ class LegacyStorageImageFileListTest extends TestCase
 
     public function testIterator()
     {
-        $expected = [
+        $expected = array(
             'path/to/1st/image.jpg',
             'path/to/2nd/image.jpg',
-        ];
+        );
         $this->configureRowReaderMock($expected);
 
         foreach ($this->fileList as $index => $file) {
@@ -45,7 +45,7 @@ class LegacyStorageImageFileListTest extends TestCase
      */
     public function testImageIdTransformation()
     {
-        $this->configureRowReaderMock(['var/ezdemo_site/storage/images/path/to/1st/image.jpg']);
+        $this->configureRowReaderMock(array('var/ezdemo_site/storage/images/path/to/1st/image.jpg'));
         foreach ($this->fileList as $file) {
             self::assertEquals('path/to/1st/image.jpg', $file);
         }
@@ -54,7 +54,7 @@ class LegacyStorageImageFileListTest extends TestCase
     private function configureRowReaderMock(array $fileList)
     {
         $mockInvocator = $this->rowReaderMock->expects($this->any())->method('getRow');
-        call_user_func_array([$mockInvocator, 'willReturnOnConsecutiveCalls'], $fileList);
+        call_user_func_array(array($mockInvocator, 'willReturnOnConsecutiveCalls'), $fileList);
 
         $this->rowReaderMock->expects($this->any())->method('getCount')->willReturn(count($fileList));
     }

@@ -20,34 +20,3 @@ services:
             $contentTypeService: '@ezpublish.api.service.content_type'
             # Siteaccess aware configuration is not available in the integration tests
             $mappings: '%ezsettings.default.fieldtypes.ezimageasset.mappings%'
-
-    # repeat part of DIC setup to avoid loading DoctrineSchemaBundle
-    _instanceof:
-        EzSystems\DoctrineSchema\Database\DbPlatform\DbPlatform:
-            tags: ['doctrine.dbplatform']
-
-    Symfony\Component\EventDispatcher\EventDispatcher:
-        calls:
-            - ['addSubscriber', ['@eZ\Publish\Core\Search\Common\EventSubscriber\ContentEventSubscriber']]
-            - ['addSubscriber', ['@eZ\Publish\Core\Search\Common\EventSubscriber\LocationEventSubscriber']]
-            - ['addSubscriber', ['@eZ\Publish\Core\Search\Common\EventSubscriber\ObjectStateEventSubscriber']]
-            - ['addSubscriber', ['@eZ\Publish\Core\Search\Common\EventSubscriber\SectionEventSubscriber']]
-            - ['addSubscriber', ['@eZ\Publish\Core\Search\Common\EventSubscriber\TrashEventSubscriber']]
-            - ['addSubscriber', ['@eZ\Publish\Core\Search\Common\EventSubscriber\UserEventSubscriber']]
-
-    Doctrine\Common\EventManager: ~
-
-    EzSystems\DoctrineSchema\Database\DbPlatform\SqliteDbPlatform:
-        autowire: true
-
-    eZ\Publish\Core\Persistence\Tests\DatabaseConnectionFactory:
-        autowire: true
-        arguments:
-            $databasePlatforms: !tagged 'doctrine.dbplatform'
-
-    # build ezpublish.api.storage_engine.legacy.connection for test purposes
-    ezpublish.api.storage_engine.legacy.connection:
-        class: Doctrine\DBAL\Connection
-        factory: 'eZ\Publish\Core\Persistence\Tests\DatabaseConnectionFactory:createConnection'
-        arguments:
-            $databaseURL: '%legacy_dsn%'

@@ -29,7 +29,7 @@ class LegacyDFSClusterTest extends TestCase
     /** @var \eZ\Publish\Core\IO\UrlDecorator|\PHPUnit\Framework\MockObject\MockObject */
     private $urlDecoratorMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->dbalMock = $this->createMock(Connection::class);
         $this->urlDecoratorMock = $this->createMock(UrlDecorator::class);
@@ -74,10 +74,11 @@ class LegacyDFSClusterTest extends TestCase
         $this->assertEquals($mtimeExpected, $spiBinary->mtime);
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testCreateInvalidArgument()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $this->dbalMock
             ->expects($this->never())
             ->method('prepare');
@@ -108,10 +109,11 @@ class LegacyDFSClusterTest extends TestCase
         $this->handler->delete('prefix/my/file.png');
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException
+     */
     public function testDeleteNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException::class);
-
         $statement = $this->createDbalStatementMock();
         $statement
             ->expects($this->once())
@@ -138,7 +140,7 @@ class LegacyDFSClusterTest extends TestCase
         $statement
             ->expects($this->once())
             ->method('fetch')
-            ->will($this->returnValue(['size' => 123, 'datatype' => 'image/png', 'mtime' => 1307155200]));
+            ->will($this->returnValue(array('size' => 123, 'datatype' => 'image/png', 'mtime' => 1307155200)));
 
         $this->dbalMock
             ->expects($this->once())
@@ -158,10 +160,11 @@ class LegacyDFSClusterTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException
+     */
     public function testLoadNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException::class);
-
         $statement = $this->createDbalStatementMock();
         $statement
             ->expects($this->once())

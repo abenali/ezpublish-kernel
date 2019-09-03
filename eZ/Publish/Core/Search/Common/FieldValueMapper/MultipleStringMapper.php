@@ -40,7 +40,7 @@ class MultipleStringMapper extends StringMapper
      */
     public function map(Field $field)
     {
-        $values = [];
+        $values = array();
 
         foreach ((array)$field->value as $value) {
             $values[] = $this->convert($value);

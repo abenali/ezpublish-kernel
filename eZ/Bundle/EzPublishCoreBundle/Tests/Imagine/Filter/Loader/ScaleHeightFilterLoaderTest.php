@@ -15,13 +15,17 @@ use PHPUnit\Framework\TestCase;
 
 class ScaleHeightFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $innerLoader;
 
-    /** @var ScaleHeightFilterLoader */
+    /**
+     * @var ScaleHeightFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerLoader = $this->createMock(LoaderInterface::class);
@@ -29,11 +33,12 @@ class ScaleHeightFilterLoaderTest extends TestCase
         $this->loader->setInnerLoader($this->innerLoader);
     }
 
+    /**
+     * @expectedException \Imagine\Exception\InvalidArgumentException
+     */
     public function testLoadFail()
     {
-        $this->expectException(\Imagine\Exception\InvalidArgumentException::class);
-
-        $this->loader->load($this->createMock(ImageInterface::class, []));
+        $this->loader->load($this->createMock(ImageInterface::class, array()));
     }
 
     public function testLoad()
@@ -43,9 +48,9 @@ class ScaleHeightFilterLoaderTest extends TestCase
         $this->innerLoader
             ->expects($this->once())
             ->method('load')
-            ->with($image, $this->equalTo(['heighten' => $height]))
+            ->with($image, $this->equalTo(array('heighten' => $height)))
             ->will($this->returnValue($image));
 
-        $this->assertSame($image, $this->loader->load($image, [$height]));
+        $this->assertSame($image, $this->loader->load($image, array($height)));
     }
 }

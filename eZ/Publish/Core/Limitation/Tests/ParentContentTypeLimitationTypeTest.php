@@ -30,19 +30,25 @@ use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
  */
 class ParentContentTypeLimitationTypeTest extends Base
 {
-    /** @var \eZ\Publish\SPI\Persistence\Content\Location\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Location\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $locationHandlerMock;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Type\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Type\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $contentTypeHandlerMock;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $contentHandlerMock;
 
     /**
      * Setup Location Handler mock.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
         $this->locationHandlerMock = $this->createMock(SPILocation\Handler::class);
@@ -53,7 +59,7 @@ class ParentContentTypeLimitationTypeTest extends Base
     /**
      * Tear down Location Handler mock.
      */
-    protected function tearDown(): void
+    public function tearDown()
     {
         unset($this->locationHandlerMock);
         unset($this->contentTypeHandlerMock);
@@ -74,11 +80,11 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValue()
     {
-        return [
-            [new ParentContentTypeLimitation()],
-            [new ParentContentTypeLimitation([])],
-            [new ParentContentTypeLimitation(['limitationValues' => ['', 'true', '2', 's3fd4af32r']])],
-        ];
+        return array(
+            array(new ParentContentTypeLimitation()),
+            array(new ParentContentTypeLimitation(array())),
+            array(new ParentContentTypeLimitation(array('limitationValues' => array('', 'true', '2', 's3fd4af32r')))),
+        );
     }
 
     /**
@@ -98,24 +104,23 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValueException()
     {
-        return [
-            [new ObjectStateLimitation()],
-            [new ParentContentTypeLimitation(['limitationValues' => [true]])],
-            [new ParentContentTypeLimitation(['limitationValues' => [new \DateTime()]])],
-        ];
+        return array(
+            array(new ObjectStateLimitation()),
+            array(new ParentContentTypeLimitation(array('limitationValues' => array(true)))),
+            array(new ParentContentTypeLimitation(array('limitationValues' => array(new \DateTime())))),
+        );
     }
 
     /**
      * @dataProvider providerForTestAcceptValueException
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\ParentContentTypeLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, ParentContentTypeLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -124,11 +129,11 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestValidatePass()
     {
-        return [
-            [new ParentContentTypeLimitation()],
-            [new ParentContentTypeLimitation([])],
-            [new ParentContentTypeLimitation(['limitationValues' => ['1']])],
-        ];
+        return array(
+            array(new ParentContentTypeLimitation()),
+            array(new ParentContentTypeLimitation(array())),
+            array(new ParentContentTypeLimitation(array('limitationValues' => array('1')))),
+        );
     }
 
     /**
@@ -165,11 +170,11 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestValidateError()
     {
-        return [
-            [new ParentContentTypeLimitation(), 0],
-            [new ParentContentTypeLimitation(['limitationValues' => ['/1/777/']]), 1],
-            [new ParentContentTypeLimitation(['limitationValues' => ['/1/888/', '/1/999/']]), 2],
-        ];
+        return array(
+            array(new ParentContentTypeLimitation(), 0),
+            array(new ParentContentTypeLimitation(array('limitationValues' => array('/1/777/'))), 1),
+            array(new ParentContentTypeLimitation(array('limitationValues' => array('/1/888/', '/1/999/'))), 2),
+        );
     }
 
     /**
@@ -213,11 +218,11 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function testBuildValue(ParentContentTypeLimitationType $limitationType)
     {
-        $expected = ['test', 'test' => '1'];
+        $expected = array('test', 'test' => '1');
         $value = $limitationType->buildValue($expected);
 
         self::assertInstanceOf(ParentContentTypeLimitation::class, $value);
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -240,7 +245,7 @@ class ParentContentTypeLimitationTypeTest extends Base
         $versionInfoMock
             ->expects($this->once())
             ->method('getContentInfo')
-            ->will($this->returnValue(new ContentInfo(['published' => true])));
+            ->will($this->returnValue(new ContentInfo(array('published' => true))));
 
         return $versionInfoMock;
     }
@@ -250,198 +255,194 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestEvaluate()
     {
-        return [
+        return array(
             // ContentInfo, with API targets, no access
-            [
+            array(
                 'limitation' => new ParentContentTypeLimitation(),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new Location(['contentInfo' => new ContentInfo(['contentTypeId' => 24])])],
-                'persistence' => [],
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new Location(array('contentInfo' => new ContentInfo(array('contentTypeId' => 24))))),
+                'persistence' => array(),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, with SPI targets, no access
-            [
+            array(
                 'limitation' => new ParentContentTypeLimitation(),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new SPILocation(['contentId' => 42])],
-                'persistence' => [
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '24'])],
-                ],
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new SPILocation(array('contentId' => 42))),
+                'persistence' => array(
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '24'))),
+                ),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, with API targets, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new Location(['contentInfo' => new ContentInfo(['contentTypeId' => 24])])],
-                'persistence' => [],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new Location(array('contentInfo' => new ContentInfo(array('contentTypeId' => 24))))),
+                'persistence' => array(),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, with SPI targets, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new SPILocation(['contentId' => 42])],
-                'persistence' => [
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '24'])],
-                ],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new SPILocation(array('contentId' => 42))),
+                'persistence' => array(
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '24'))),
+                ),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, with API targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new Location(['contentInfo' => new ContentInfo(['contentTypeId' => 42])])],
-                'persistence' => [],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new Location(array('contentInfo' => new ContentInfo(array('contentTypeId' => 42))))),
+                'persistence' => array(),
                 'expected' => true,
-            ],
+            ),
             // ContentInfo, with SPI targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new SPILocation(['contentId' => 24])],
-                'persistence' => [
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new SPILocation(array('contentId' => 24))),
+                'persistence' => array(
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '42'))),
+                ),
                 'expected' => true,
-            ],
+            ),
             // ContentInfo, no targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [43]]),
-                'object' => new ContentInfo(['published' => true, 'id' => 40]),
-                'targets' => [],
-                'persistence' => [
-                    'locations' => [new SPILocation(['id' => 40, 'contentId' => '24', 'parentId' => 43, 'depth' => 1])],
-                    'parentLocations' => [43 => new SPILocation(['id' => 43, 'contentId' => 24])],
-                    'parentContents' => [24 => new SPIContentInfo(['id' => 24, 'contentTypeId' => 43])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => '24'))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '42'))),
+                ),
                 'expected' => true,
-            ],
+            ),
             // ContentInfo, no targets, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [40]]),
-                'object' => new ContentInfo(['published' => true, 'id' => 40]),
-                'targets' => [],
-                'persistence' => [
-                    'locations' => [new SPILocation(['id' => 40, 'contentId' => '24', 'parentId' => 43, 'depth' => 1])],
-                    'parentLocations' => [43 => new SPILocation(['id' => 43, 'contentId' => 24])],
-                    'parentContents' => [24 => new SPIContentInfo(['id' => 24, 'contentTypeId' => 39])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => '24'))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '4200'))),
+                ),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, no targets, un-published, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
-                'object' => new ContentInfo(['published' => false]),
-                'targets' => [],
-                'persistence' => [
-                    'locations' => [new SPILocation(['contentId' => '24'])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => false)),
+                'targets' => array(),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => '24'))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '42'))),
+                ),
                 'expected' => true,
-            ],
+            ),
             // ContentInfo, no targets, un-published, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
-                'object' => new ContentInfo(['published' => false]),
-                'targets' => [],
-                'persistence' => [
-                    'locations' => [new SPILocation(['contentId' => '24'])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '4200'])],
-                ],
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
+                'object' => new ContentInfo(array('published' => false)),
+                'targets' => array(),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => '24'))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '4200'))),
+                ),
                 'expected' => false,
-            ],
+            ),
             // Content, with API targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getTestEvaluateContentMock(),
-                'targets' => [new Location(['contentInfo' => new ContentInfo(['contentTypeId' => 42])])],
-                'persistence' => [],
+                'targets' => array(new Location(array('contentInfo' => new ContentInfo(array('contentTypeId' => 42))))),
+                'persistence' => array(),
                 'expected' => true,
-            ],
+            ),
             // Content, with SPI targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getTestEvaluateContentMock(),
-                'targets' => [new SPILocation(['contentId' => '24'])],
-                'persistence' => [
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+                'targets' => array(new SPILocation(array('contentId' => '24'))),
+                'persistence' => array(
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '42'))),
+                ),
                 'expected' => true,
-            ],
+            ),
             // VersionInfo, with API targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getTestEvaluateVersionInfoMock(),
-                'targets' => [new Location(['contentInfo' => new ContentInfo(['contentTypeId' => 42])])],
-                'persistence' => [],
+                'targets' => array(new Location(array('contentInfo' => new ContentInfo(array('contentTypeId' => 42))))),
+                'persistence' => array(),
                 'expected' => true,
-            ],
+            ),
             // VersionInfo, with SPI targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getTestEvaluateVersionInfoMock(),
-                'targets' => [new SPILocation(['contentId' => '24'])],
-                'persistence' => [
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+                'targets' => array(new SPILocation(array('contentId' => '24'))),
+                'persistence' => array(
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '42'))),
+                ),
                 'expected' => true,
-            ],
+            ),
             // VersionInfo, with LocationCreateStruct targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getTestEvaluateVersionInfoMock(),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 24])],
-                'persistence' => [
-                    'locations' => [new SPILocation(['contentId' => 100])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '42'])],
-                ],
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 24))),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => 100))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '42'))),
+                ),
                 'expected' => true,
-            ],
+            ),
             // Content, with LocationCreateStruct targets, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getTestEvaluateContentMock(),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 24])],
-                'persistence' => [
-                    'locations' => [new SPILocation(['contentId' => 100])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => '24'])],
-                ],
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 24))),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => 100))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => '24'))),
+                ),
                 'expected' => false,
-            ],
+            ),
             // ContentCreateStruct, no targets, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(42))),
                 'object' => new ContentCreateStruct(),
-                'targets' => [],
-                'persistence' => [],
+                'targets' => array(),
+                'persistence' => array(),
                 'expected' => false,
-            ],
+            ),
             // ContentCreateStruct, with LocationCreateStruct targets, no access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [12, 23]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(12, 23))),
                 'object' => new ContentCreateStruct(),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 24])],
-                'persistence' => [
-                    'locations' => [new SPILocation(['contentId' => 100])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => 34])],
-                ],
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 24))),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => 100))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => 34))),
+                ),
                 'expected' => false,
-            ],
+            ),
             // ContentCreateStruct, with LocationCreateStruct targets, with access
-            [
-                'limitation' => new ParentContentTypeLimitation(['limitationValues' => [12, 23]]),
+            array(
+                'limitation' => new ParentContentTypeLimitation(array('limitationValues' => array(12, 23))),
                 'object' => new ContentCreateStruct(),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 43])],
-                'persistence' => [
-                    'locations' => [new SPILocation(['contentId' => 100])],
-                    'contentInfos' => [new SPIContentInfo(['contentTypeId' => 12])],
-                ],
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 43))),
+                'persistence' => array(
+                    'locations' => array(new SPILocation(array('contentId' => 100))),
+                    'contentInfos' => array(new SPIContentInfo(array('contentTypeId' => 12))),
+                ),
                 'expected' => true,
-            ],
-        ];
+            ),
+        );
     }
 
     protected function assertContentHandlerExpectations($callNo, $persistenceCalled, $contentId, $contentInfo)
@@ -515,35 +516,17 @@ class ParentContentTypeLimitationTypeTest extends Base
             }
         } else {
             $this->getPersistenceMock()
+                ->expects($this->at(0))
                 ->method('locationHandler')
                 ->will($this->returnValue($this->locationHandlerMock));
 
-            $this->getPersistenceMock()
-                ->method('contentHandler')
-                ->will($this->returnValue($this->contentHandlerMock));
-
             $this->locationHandlerMock
+                ->expects($this->once())
                 ->method(
                     $object instanceof ContentInfo && $object->published ? 'loadLocationsByContent' : 'loadParentLocationsForDraftContent'
                 )
                 ->with($object->id)
                 ->will($this->returnValue($persistence['locations']));
-
-            foreach ($persistence['locations'] as $location) {
-                if (!empty($persistence['parentLocations'][$location->parentId])) {
-                    $this->locationHandlerMock
-                            ->method('load')
-                            ->with($location->parentId)
-                            ->will($this->returnValue($persistence['parentLocations'][$location->parentId]));
-                }
-
-                if (!empty($persistence['parentLocations'][$location->parentId])) {
-                    $this->contentHandlerMock
-                            ->method('loadContentInfo')
-                            ->with($location->contentId)
-                            ->willReturn($persistence['parentContents'][$location->contentId]);
-                }
-            }
 
             foreach ($persistence['locations'] as $index => $location) {
                 $this->assertContentHandlerExpectations(
@@ -562,7 +545,7 @@ class ParentContentTypeLimitationTypeTest extends Base
             $targets
         );
 
-        self::assertIsBool($value);
+        self::assertInternalType('boolean', $value);
         self::assertEquals($expected, $value);
     }
 
@@ -571,45 +554,44 @@ class ParentContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestEvaluateInvalidArgument()
     {
-        return [
+        return array(
             // invalid limitation
-            [
+            array(
                 'limitation' => new ObjectStateLimitation(),
                 'object' => new ContentInfo(),
-                'targets' => [new Location()],
-                'persistence' => [],
-            ],
+                'targets' => array(new Location()),
+                'persistence' => array(),
+            ),
             // invalid object
-            [
+            array(
                 'limitation' => new ParentContentTypeLimitation(),
                 'object' => new ObjectStateLimitation(),
-                'targets' => [],
-                'persistence' => [],
-            ],
+                'targets' => array(),
+                'persistence' => array(),
+            ),
             // invalid target when using ContentCreateStruct
-            [
+            array(
                 'limitation' => new ParentContentTypeLimitation(),
                 'object' => new ContentCreateStruct(),
-                'targets' => [new Location()],
-                'persistence' => [],
-            ],
+                'targets' => array(new Location()),
+                'persistence' => array(),
+            ),
             // invalid target when not using ContentCreateStruct
-            [
+            array(
                 'limitation' => new ParentContentTypeLimitation(),
                 'object' => new ContentInfo(),
-                'targets' => [new ObjectStateLimitation()],
-                'persistence' => [],
-            ],
-        ];
+                'targets' => array(new ObjectStateLimitation()),
+                'persistence' => array(),
+            ),
+        );
     }
 
     /**
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(Limitation $limitation, ValueObject $object, $targets)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         // Need to create inline instead of depending on testConstruct() to get correct mock instance
         $limitationType = $this->testConstruct();
 
@@ -633,15 +615,14 @@ class ParentContentTypeLimitationTypeTest extends Base
 
     /**
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotImplementedException
      *
      * @param \eZ\Publish\Core\Limitation\ParentContentTypeLimitationType $limitationType
      */
     public function testGetCriterionInvalidValue(ParentContentTypeLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotImplementedException::class);
-
         $limitationType->getCriterion(
-            new ParentContentTypeLimitation([]),
+            new ParentContentTypeLimitation(array()),
             $this->getUserMock()
         );
     }

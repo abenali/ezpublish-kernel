@@ -22,12 +22,11 @@ class LanguageServiceAuthorizationTest extends BaseTest
      * Test for the createLanguage() method.
      *
      * @see \eZ\Publish\API\Repository\LanguageService::createLanguage()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testCreateLanguage
      */
     public function testCreateLanguageThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -54,12 +53,11 @@ class LanguageServiceAuthorizationTest extends BaseTest
      * Test for the updateLanguageName() method.
      *
      * @see \eZ\Publish\API\Repository\LanguageService::updateLanguageName()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testUpdateLanguageName
      */
     public function testUpdateLanguageNameThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -90,12 +88,11 @@ class LanguageServiceAuthorizationTest extends BaseTest
      * Test for the enableLanguage() method.
      *
      * @see \eZ\Publish\API\Repository\LanguageService::enableLanguage()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testEnableLanguage
      */
     public function testEnableLanguageThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -124,12 +121,11 @@ class LanguageServiceAuthorizationTest extends BaseTest
      * Test for the disableLanguage() method.
      *
      * @see \eZ\Publish\API\Repository\LanguageService::disableLanguage()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testDisableLanguage
      */
     public function testDisableLanguageThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -158,12 +154,11 @@ class LanguageServiceAuthorizationTest extends BaseTest
      * Test for the deleteLanguage() method.
      *
      * @see \eZ\Publish\API\Repository\LanguageService::deleteLanguage()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testDeleteLanguage
      */
     public function testDeleteLanguageThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);

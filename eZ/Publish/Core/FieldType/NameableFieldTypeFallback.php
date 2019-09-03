@@ -21,7 +21,9 @@ use eZ\Publish\SPI\FieldType\Value as SPIValue;
  */
 class NameableFieldTypeFallback implements Nameable
 {
-    /** @var \eZ\Publish\SPI\FieldType\FieldType */
+    /**
+     * @var \eZ\Publish\SPI\FieldType\FieldType
+     */
     private $fieldType;
 
     /**

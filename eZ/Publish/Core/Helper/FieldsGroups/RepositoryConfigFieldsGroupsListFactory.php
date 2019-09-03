@@ -6,14 +6,16 @@
 namespace eZ\Publish\Core\Helper\FieldsGroups;
 
 use eZ\Bundle\EzPublishCoreBundle\ApiLoader\RepositoryConfigurationProvider;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Builds a SettingsFieldGroupsList.
  */
 final class RepositoryConfigFieldsGroupsListFactory
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\ApiLoader\RepositoryConfigurationProvider */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\ApiLoader\RepositoryConfigurationProvider
+     */
     private $configProvider;
 
     public function __construct(RepositoryConfigurationProvider $configProvider)

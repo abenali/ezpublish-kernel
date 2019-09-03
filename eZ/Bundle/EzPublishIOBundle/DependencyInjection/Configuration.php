@@ -15,11 +15,15 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    /** @var ConfigurationFactory[]|ArrayObject */
-    private $metadataHandlerFactories = [];
+    /**
+     * @var ConfigurationFactory[]|ArrayObject
+     */
+    private $metadataHandlerFactories = array();
 
-    /** @var ConfigurationFactory[]|ArrayObject */
-    private $binarydataHandlerFactories = [];
+    /**
+     * @var ConfigurationFactory[]|ArrayObject
+     */
+    private $binarydataHandlerFactories = array();
 
     public function setMetadataHandlerFactories(ArrayObject $factories)
     {
@@ -33,9 +37,8 @@ class Configuration implements ConfigurationInterface
 
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('ez_io');
-
-        $rootNode = $treeBuilder->getRootNode();
+        $treeBuilder = new TreeBuilder();
+        $rootNode = $treeBuilder->root('ez_io');
 
         $this->addHandlersSection(
             $rootNode,

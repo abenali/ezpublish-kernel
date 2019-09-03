@@ -26,13 +26,15 @@ use eZ\Publish\SPI\Persistence\Content\Location\Handler as SPILocationHandler;
  */
 class ParentDepthLimitationTypeTest extends Base
 {
-    /** @var \eZ\Publish\SPI\Persistence\Content\Location\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Location\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $locationHandlerMock;
 
     /**
      * Setup Location Handler mock.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
         $this->locationHandlerMock = $this->createMock(SPILocationHandler::class);
@@ -41,7 +43,7 @@ class ParentDepthLimitationTypeTest extends Base
     /**
      * Tear down Location Handler mock.
      */
-    protected function tearDown(): void
+    public function tearDown()
     {
         unset($this->locationHandlerMock);
         parent::tearDown();
@@ -93,14 +95,13 @@ class ParentDepthLimitationTypeTest extends Base
     /**
      * @dataProvider providerForTestAcceptValueException
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\ParentDepthLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, ParentDepthLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -142,7 +143,7 @@ class ParentDepthLimitationTypeTest extends Base
            ParentDepthLimitation::class,
             $value
         );
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -336,7 +337,7 @@ class ParentDepthLimitationTypeTest extends Base
             $targets
         );
 
-        self::assertIsBool($value);
+        self::assertInternalType('boolean', $value);
         self::assertEquals($expected, $value);
     }
 
@@ -379,6 +380,7 @@ class ParentDepthLimitationTypeTest extends Base
 
     /**
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(
         Limitation $limitation,
@@ -386,8 +388,6 @@ class ParentDepthLimitationTypeTest extends Base
         $targets,
         array $persistenceLocations
     ) {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         // Need to create inline instead of depending on testConstruct() to get correct mock instance
         $limitationType = $this->testConstruct();
 

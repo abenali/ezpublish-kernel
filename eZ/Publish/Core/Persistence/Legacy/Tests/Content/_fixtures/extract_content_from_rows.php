@@ -1,7 +1,8 @@
 <?php
 
-return [
-  0 => [
+return array(
+  0 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -33,9 +34,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  1 => [
+  ),
+  1 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -67,9 +68,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => 'new test article (2)',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  2 => [
+  ),
+  2 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -101,9 +102,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => 'something',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  3 => [
+  ),
+  3 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -137,9 +138,81 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  4 => [
+  ),
+  4 =>
+  array(
+    'ezcontentobject_id' => '226',
+    'ezcontentobject_contentclass_id' => '16',
+    'ezcontentobject_section_id' => '1',
+    'ezcontentobject_owner_id' => '14',
+    'ezcontentobject_remote_id' => '95a226fb62c1533f60c16c3769bc7c6c',
+    'ezcontentobject_current_version' => '2',
+    'ezcontentobject_initial_language_id' => '2',
+    'ezcontentobject_modified' => '1313061404',
+    'ezcontentobject_published' => '1313047907',
+    'ezcontentobject_status' => '1',
+    'ezcontentobject_name' => 'Something',
+    'ezcontentobject_language_mask' => '2',
+    'ezcontentobject_version_id' => '676',
+    'ezcontentobject_version_version' => '2',
+    'ezcontentobject_version_modified' => '1313061404',
+    'ezcontentobject_version_creator_id' => '14',
+    'ezcontentobject_version_created' => '1313061317',
+    'ezcontentobject_version_status' => '1',
+    'ezcontentobject_version_language_mask' => '3',
+    'ezcontentobject_version_initial_language_id' => '2',
+    'ezcontentobject_attribute_id' => '1335',
+    'ezcontentobject_attribute_contentclassattribute_id' => '186',
+    'ezcontentobject_attribute_data_type_string' => 'ezrichtext',
+    'ezcontentobject_attribute_language_code' => 'eng-US',
+    'ezcontentobject_attribute_language_id' => '2',
+    'ezcontentobject_attribute_data_float' => '0.0',
+    'ezcontentobject_attribute_data_int' => '1045487555',
+    'ezcontentobject_attribute_data_text' => '<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ezxhtml="http://ez.no/xmlns/ezpublish/docbook/xhtml" xmlns:ezcustom="http://ez.no/xmlns/ezpublish/docbook/custom" version="5.0-variant ezpublish-1.0"><para>Something is in here!</para></section>
+',
+    'ezcontentobject_attribute_sort_key_int' => '0',
+    'ezcontentobject_attribute_sort_key_string' => '',
+    'ezcontentobject_tree_main_node_id' => '228',
+  ),
+  5 =>
+  array(
+    'ezcontentobject_id' => '226',
+    'ezcontentobject_contentclass_id' => '16',
+    'ezcontentobject_section_id' => '1',
+    'ezcontentobject_owner_id' => '14',
+    'ezcontentobject_remote_id' => '95a226fb62c1533f60c16c3769bc7c6c',
+    'ezcontentobject_current_version' => '2',
+    'ezcontentobject_initial_language_id' => '2',
+    'ezcontentobject_modified' => '1313061404',
+    'ezcontentobject_published' => '1313047907',
+    'ezcontentobject_status' => '1',
+    'ezcontentobject_name' => 'Something',
+    'ezcontentobject_language_mask' => '2',
+    'ezcontentobject_version_id' => '676',
+    'ezcontentobject_version_version' => '2',
+    'ezcontentobject_version_modified' => '1313061404',
+    'ezcontentobject_version_creator_id' => '14',
+    'ezcontentobject_version_created' => '1313061317',
+    'ezcontentobject_version_status' => '1',
+    'ezcontentobject_version_language_mask' => '3',
+    'ezcontentobject_version_initial_language_id' => '2',
+    'ezcontentobject_attribute_id' => '1336',
+    'ezcontentobject_attribute_contentclassattribute_id' => '187',
+    'ezcontentobject_attribute_data_type_string' => 'ezrichtext',
+    'ezcontentobject_attribute_language_code' => 'eng-US',
+    'ezcontentobject_attribute_language_id' => '2',
+    'ezcontentobject_attribute_data_float' => '0.0',
+    'ezcontentobject_attribute_data_int' => '1045487555',
+    'ezcontentobject_attribute_data_text' => '<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ezxhtml="http://ez.no/xmlns/ezpublish/docbook/xhtml" xmlns:ezcustom="http://ez.no/xmlns/ezpublish/docbook/custom" version="5.0-variant ezpublish-1.0"><para>Something is in here!</para></section>
+',
+    'ezcontentobject_attribute_sort_key_int' => '0',
+    'ezcontentobject_attribute_sort_key_string' => '',
+    'ezcontentobject_tree_main_node_id' => '228',
+  ),
+  6 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -171,9 +244,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '1',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  5 => [
+  ),
+  7 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -207,9 +280,45 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  6 => [
+  ),
+  8 =>
+  array(
+    'ezcontentobject_id' => '226',
+    'ezcontentobject_contentclass_id' => '16',
+    'ezcontentobject_section_id' => '1',
+    'ezcontentobject_owner_id' => '14',
+    'ezcontentobject_remote_id' => '95a226fb62c1533f60c16c3769bc7c6c',
+    'ezcontentobject_current_version' => '2',
+    'ezcontentobject_initial_language_id' => '2',
+    'ezcontentobject_modified' => '1313061404',
+    'ezcontentobject_published' => '1313047907',
+    'ezcontentobject_status' => '1',
+    'ezcontentobject_name' => 'Something',
+    'ezcontentobject_language_mask' => '2',
+    'ezcontentobject_version_id' => '676',
+    'ezcontentobject_version_version' => '2',
+    'ezcontentobject_version_modified' => '1313061404',
+    'ezcontentobject_version_creator_id' => '14',
+    'ezcontentobject_version_created' => '1313061317',
+    'ezcontentobject_version_status' => '1',
+    'ezcontentobject_version_language_mask' => '3',
+    'ezcontentobject_version_initial_language_id' => '2',
+    'ezcontentobject_attribute_id' => '1339',
+    'ezcontentobject_attribute_contentclassattribute_id' => '190',
+    'ezcontentobject_attribute_data_type_string' => 'ezrichtext',
+    'ezcontentobject_attribute_language_code' => 'eng-US',
+    'ezcontentobject_attribute_language_id' => '2',
+    'ezcontentobject_attribute_data_float' => '0.0',
+    'ezcontentobject_attribute_data_int' => '1045487555',
+    'ezcontentobject_attribute_data_text' => '<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ezxhtml="http://ez.no/xmlns/ezpublish/docbook/xhtml" xmlns:ezcustom="http://ez.no/xmlns/ezpublish/docbook/custom" version="5.0-variant ezpublish-1.0"/>
+',
+    'ezcontentobject_attribute_sort_key_int' => '0',
+    'ezcontentobject_attribute_sort_key_string' => '',
+    'ezcontentobject_tree_main_node_id' => '228',
+  ),
+  9 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -241,9 +350,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  7 => [
+  ),
+  10 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -275,9 +384,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  8 => [
+  ),
+  11 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -309,9 +418,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  9 => [
+  ),
+  12 =>
+  array(
     'ezcontentobject_id' => '226',
     'ezcontentobject_contentclass_id' => '16',
     'ezcontentobject_section_id' => '1',
@@ -343,6 +452,5 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '228',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-];
+  ),
+);

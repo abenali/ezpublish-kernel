@@ -82,24 +82,24 @@ class TimeIntegrationTest extends BaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        return [
+        return array(
             // The eztime field type does not have any special field definition
             // properties
-            ['fieldType', 'eztime'],
-            [
+            array('fieldType', 'eztime'),
+            array(
                 'fieldTypeConstraints',
                 new Content\FieldTypeConstraints(
-                    [
+                    array(
                         'fieldSettings' => new FieldType\FieldSettings(
-                            [
+                            array(
                                 'defaultType' => 0,
                                 'useSeconds' => false,
-                            ]
+                            )
                         ),
-                    ]
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -110,11 +110,11 @@ class TimeIntegrationTest extends BaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => 3661,
                 'externalData' => null,
                 'sortKey' => 42,
-            ]
+            )
         );
     }
 
@@ -128,11 +128,11 @@ class TimeIntegrationTest extends BaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => 7322,
                 'externalData' => null,
                 'sortKey' => 23,
-            ]
+            )
         );
     }
 }

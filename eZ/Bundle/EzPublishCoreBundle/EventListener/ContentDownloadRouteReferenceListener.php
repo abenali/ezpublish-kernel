@@ -36,9 +36,9 @@ class ContentDownloadRouteReferenceListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
+        return array(
             MVCEvents::ROUTE_REFERENCE_GENERATION => 'onRouteReferenceGeneration',
-        ];
+        );
     }
 
     /**

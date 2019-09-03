@@ -1,7 +1,15 @@
 parameters:
     # Parameter provider
     ezpublish.fieldType.parameterProviderRegistry.class: eZ\Publish\Core\MVC\Symfony\FieldType\View\ParameterProviderRegistry
+    ezpublish.fieldType.ezpage.parameterProvider.class: eZ\Publish\Core\MVC\Symfony\FieldType\Page\ParameterProvider
     ezpublish.fieldType.locale.parameterProvider.class: eZ\Publish\Core\MVC\Symfony\FieldType\View\ParameterProvider\LocaleParameterProvider
+
+    # Page
+    ezpublish.fieldType.ezpage.pageService.class: eZ\Bundle\EzPublishCoreBundle\FieldType\Page\PageService
+    ezpublish.fieldType.ezpage.pageService.factory.class: eZ\Publish\Core\MVC\Symfony\FieldType\Page\PageServiceFactory
+    ezpublish.fieldType.ezpage.block.class: eZ\Publish\Core\FieldType\Page\Parts\Block
+    ezpublish.fieldType.ezpage.zone.class: eZ\Publish\Core\FieldType\Page\Parts\Zone
+    ezpublish.fieldType.ezpage.hashConverter.class: eZ\Publish\Core\FieldType\Page\HashConverter
 
     # Image
     ezpublish.fieldType.ezimage.pathGenerator.class: eZ\Publish\Core\FieldType\Image\PathGenerator\LegacyPathGenerator
@@ -11,6 +19,11 @@ parameters:
     # BinaryFile
     ezpublish.fieldType.ezbinaryfile.pathGenerator.class: eZ\Publish\Core\FieldType\BinaryBase\PathGenerator\LegacyPathGenerator
     ezpublish.fieldType.ezbinarybase.downloadUrlGenerator.class: eZ\Publish\Core\MVC\Symfony\FieldType\BinaryBase\ContentDownloadUrlGenerator
+
+    # Nameable services (for fieldtypes that need advance name handling)
+    ezpublish.fieldType.ezobjectrelation.nameable_field.class: eZ\Publish\Core\FieldType\Relation\NameableField
+    ezpublish.fieldType.ezobjectrelationlist.nameable_field.class: eZ\Publish\Core\FieldType\RelationList\NameableField
+    ezpublish.fieldType.ezselection.nameable_field.class: eZ\Publish\Core\FieldType\Selection\NameableField
 
 services:
     # Parameter providers
@@ -23,31 +36,53 @@ services:
         calls:
             - [setRequestStack, ["@request_stack"]]
         tags:
-            - {name: ezplatform.field_type.parameter_provider, alias: ezdatetime}
-            - {name: ezplatform.field_type.parameter_provider, alias: ezdate}
-            - {name: ezplatform.field_type.parameter_provider, alias: eztime}
+            - {name: ezpublish.fieldType.parameterProvider, alias: ezdatetime}
+            - {name: ezpublish.fieldType.parameterProvider, alias: ezdate}
+            - {name: ezpublish.fieldType.parameterProvider, alias: eztime}
+
+    ezpublish.fieldType.ezpage.parameterProvider:
+        class: "%ezpublish.fieldType.ezpage.parameterProvider.class%"
+        arguments: ["@ezpublish.fieldType.ezpage.pageService"]
+        tags:
+            - {name: ezpublish.fieldType.parameterProvider, alias: ezpage}
 
     ezpublish.fieldType.ezobjectrelation.parameterProvider:
         class: \eZ\Publish\Core\MVC\Symfony\FieldType\Relation\ParameterProvider
         arguments:
             - "@ezpublish.api.service.content"
         tags:
-            - {name: ezplatform.field_type.parameter_provider, alias: ezobjectrelation}
+            - {name: ezpublish.fieldType.parameterProvider, alias: ezobjectrelation}
 
     ezpublish.fieldType.ezobjectrelationlist.parameterProvider:
         class: \eZ\Publish\Core\MVC\Symfony\FieldType\RelationList\ParameterProvider
         arguments:
             - "@ezpublish.api.service.content"
         tags:
-            - {name: ezplatform.field_type.parameter_provider, alias: ezobjectrelationlist}
+            - {name: ezpublish.fieldType.parameterProvider, alias: ezobjectrelationlist}
 
     ezpublish.fieldType.ezimageasset.parameterProvider:
         class: \eZ\Publish\Core\MVC\Symfony\FieldType\ImageAsset\ParameterProvider
-        lazy: true
         arguments:
             - "@ezpublish.siteaccessaware.repository"
         tags:
-            - {name: ezplatform.field_type.parameter_provider, alias: ezimageasset}
+            - {name: ezpublish.fieldType.parameterProvider, alias: ezimageasset}
+
+    # Page
+    ezpublish.fieldType.ezpage.pageService.factory:
+        class: "%ezpublish.fieldType.ezpage.pageService.factory.class%"
+
+    ezpublish.fieldType.ezpage.pageService:
+        class: "%ezpublish.fieldType.ezpage.pageService.class%"
+        factory: ["@ezpublish.fieldType.ezpage.pageService.factory", buildService]
+        arguments:
+            - "%ezpublish.fieldType.ezpage.pageService.class%"
+            - "@ezpublish.config.resolver"
+            - "@ezpublish.fieldType.ezpage.storage_gateway"
+            - "@ezpublish.api.service.content"
+        lazy: true
+
+    ezpublish.fieldType.ezpage.hashConverter:
+        class: "%ezpublish.fieldType.ezpage.hashConverter.class%"
 
     # Image
     ezpublish.fieldType.ezimage.io_service:
@@ -95,13 +130,37 @@ services:
 
     # Will be added to binaryfile & mediafile external storage handlers by a compiler pass
     ezpublish.fieldType.ezbinarybase.download_url_generator:
-        public: true # @todo should be private
         class: "%ezpublish.fieldType.ezbinarybase.downloadUrlGenerator.class%"
         arguments: ["@router"]
 
+    # Nameable services (for fieldtypes that need advance name handling)
+    ezpublish.fieldType.ezobjectrelation.nameable_field:
+        class: "%ezpublish.fieldType.ezobjectrelation.nameable_field.class%"
+        arguments:
+          - "@ezpublish.spi.persistence.cache.contentHandler"
+        tags:
+            - {name: ezpublish.fieldType.nameable, alias: ezobjectrelation}
+
+    ezpublish.fieldType.ezobjectrelationlist.nameable_field:
+        class: "%ezpublish.fieldType.ezobjectrelationlist.nameable_field.class%"
+        arguments:
+          - "@ezpublish.spi.persistence.cache.contentHandler"
+        tags:
+            - {name: ezpublish.fieldType.nameable, alias: ezobjectrelationlist}
+
+    ezpublish.fieldType.ezselection.nameable_field:
+        class: "%ezpublish.fieldType.ezselection.nameable_field.class%"
+        tags:
+            - {name: ezpublish.fieldType.nameable, alias: ezselection}
+
     # Symfony 3.4+ service definitions:
+    eZ\Publish\Core\FieldType\ImageAsset\NameableField:
+        arguments:
+            $handler: '@ezpublish.spi.persistence.cache.contentHandler'
+        tags:
+            - {name: ezpublish.fieldType.nameable, alias: ezimageasset}
+
     eZ\Publish\Core\FieldType\ImageAsset\AssetMapper:
-        lazy: true
         arguments:
             $contentService: '@ezpublish.api.service.content'
             $locationService: '@ezpublish.api.service.location'

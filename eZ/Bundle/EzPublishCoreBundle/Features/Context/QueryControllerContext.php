@@ -12,13 +12,18 @@ use Behat\Mink\Element\NodeElement;
 use Behat\MinkExtension\Context\RawMinkContext;
 use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\API\Repository\Values\Content\Content;
+use EzSystems\PlatformBehatBundle\Context\RepositoryContext;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
 class QueryControllerContext extends RawMinkContext implements Context
 {
-    /** @var YamlConfigurationContext */
+    use RepositoryContext;
+
+    /**
+     * @var YamlConfigurationContext
+     */
     private $configurationContext;
 
     /**
@@ -54,7 +59,7 @@ class QueryControllerContext extends RawMinkContext implements Context
         $configurationBlock = array_merge(
             Yaml::parse($string),
             [
-                'template' => 'eZBehatBundle:tests:dump.html.twig',
+                'template' => 'EzPlatformBehatBundle::dump.html.twig',
                 'match' => [
                     'Id\Content' => $this->matchedContent->id,
                 ],
@@ -85,16 +90,15 @@ class QueryControllerContext extends RawMinkContext implements Context
      */
     public function aContentItemThatMatchesTheViewConfigurationBlockBelow()
     {
-        $this->matchedContent = $this->repository->sudo(function (Repository $repository) {
-            return $this->createFolder($repository);
-        });
+        $this->matchedContent = $this->createFolder();
     }
 
     /**
      * @return Content
      */
-    private function createFolder(Repository $repository)
+    private function createFolder()
     {
+        $repository = $this->getRepository();
         $contentService = $repository->getContentService();
         $contentTypeService = $repository->getContentTypeService();
         $locationService = $repository->getLocationService();
@@ -131,9 +135,9 @@ class QueryControllerContext extends RawMinkContext implements Context
      */
     public function visitMatchedContent()
     {
-        $urlAliasService = $this->repository->getURLAliasService();
+        $urlAliasService = $this->getRepository()->getURLAliasService();
         $urlAlias = $urlAliasService->reverseLookup(
-            $this->repository->getLocationService()->loadLocation(
+            $this->getRepository()->getLocationService()->loadLocation(
                 $this->matchedContent->contentInfo->mainLocationId
             )
         );

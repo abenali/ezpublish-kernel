@@ -18,7 +18,9 @@ use eZ\Publish\SPI\Persistence\Content\Type;
  */
 class DoctrineDatabase extends Handler
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway
+     */
     protected $contentTypeGateway;
 
     /**
@@ -61,7 +63,7 @@ class DoctrineDatabase extends Handler
      */
     public function deleteOldType(Type $fromType)
     {
-        $this->contentTypeGateway->delete($fromType->id, $fromType->status, $fromType->fieldDefinitions);
+        $this->contentTypeGateway->delete($fromType->id, $fromType->status);
     }
 
     /**

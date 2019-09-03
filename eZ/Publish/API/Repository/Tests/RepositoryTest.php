@@ -297,11 +297,10 @@ class RepositoryTest extends BaseTest
      * Test for the commit() method.
      *
      * @see \eZ\Publish\API\Repository\Repository::commit()
+     * @expectedException \RuntimeException
      */
     public function testCommitThrowsRuntimeException()
     {
-        $this->expectException(\RuntimeException::class);
-
         $repository = $this->getRepository();
         $repository->commit();
     }
@@ -322,11 +321,10 @@ class RepositoryTest extends BaseTest
      * Test for the rollback() method.
      *
      * @see \eZ\Publish\API\Repository\Repository::rollback()
+     * @expectedException \RuntimeException
      */
     public function testRollbackThrowsRuntimeException()
     {
-        $this->expectException(\RuntimeException::class);
-
         $repository = $this->getRepository();
         $repository->rollback();
     }
@@ -545,7 +543,9 @@ class RepositoryTest extends BaseTest
         $permissionSets = $repository->hasAccess('content', 'read');
         /* END: Use Case */
 
-        $this->assertIsArray($permissionSets
+        $this->assertInternalType(
+            'array',
+            $permissionSets
         );
         $this->assertNotEmpty($permissionSets);
     }
@@ -557,11 +557,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetUserService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessForCurrentUserNo
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testCanUserForAnonymousUserNo()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $homeId = $this->generateId('object', 57);
@@ -602,11 +601,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetUserService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessForCurrentUserYes
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testCanUserForAdministratorUser()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $administratorUserId = $this->generateId('user', 14);
@@ -680,11 +678,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetUserService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessLimited
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testCanUserWithLimitationNo()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $administratorUserId = $this->generateId('user', 14);
@@ -723,11 +720,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentTypeService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testSetCurrentUser
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessLimited
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCanUserThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $userGroupContentTypeId = $this->generateId('type', 3);
@@ -800,7 +796,7 @@ class RepositoryTest extends BaseTest
         // Performing an action having necessary permissions will succeed
         $contentDraft = $contentService->createContent(
             $contentCreateStruct,
-            [$locationCreateStruct]
+            array($locationCreateStruct)
         );
         /* END: Use Case */
 
@@ -819,11 +815,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentTypeService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessLimited
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testCanUserWithTargetNo()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $homeLocationId = $this->generateId('location', 2);
@@ -863,7 +858,7 @@ class RepositoryTest extends BaseTest
         if (!$canUser) {
             $contentDraft = $contentService->createContent(
                 $contentCreateStruct,
-                [$locationCreateStruct]
+                array($locationCreateStruct)
             );
         }
         /* END: Use Case */
@@ -908,7 +903,7 @@ class RepositoryTest extends BaseTest
         $locationService = $repository->getLocationService();
         $locationCreateStruct1 = $locationService->newLocationCreateStruct($imagesLocationId);
         $locationCreateStruct2 = $locationService->newLocationCreateStruct($filesLocationId);
-        $locationCreateStructs = [$locationCreateStruct1, $locationCreateStruct2];
+        $locationCreateStructs = array($locationCreateStruct1, $locationCreateStruct2);
 
         // This call will return true
         $canUser = $repository->canUser(
@@ -937,11 +932,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentTypeService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessLimited
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testCanUserWithMultipleTargetsNo()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $homeLocationId = $this->generateId('location', 2);
@@ -970,7 +964,7 @@ class RepositoryTest extends BaseTest
         $locationService = $repository->getLocationService();
         $locationCreateStruct1 = $locationService->newLocationCreateStruct($homeLocationId);
         $locationCreateStruct2 = $locationService->newLocationCreateStruct($administratorUsersLocationId);
-        $locationCreateStructs = [$locationCreateStruct1, $locationCreateStruct2];
+        $locationCreateStructs = array($locationCreateStruct1, $locationCreateStruct2);
 
         // This call will return false because user with Editor role does not have permission to
         // create content in the "Administrator users" location subtree
@@ -996,11 +990,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetContentService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testSetCurrentUser
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessLimited
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCanUserWithTargetThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $homeId = $this->generateId('object', 57);
@@ -1039,11 +1032,10 @@ class RepositoryTest extends BaseTest
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testGetURLAliasService
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testSetCurrentUser
      * @depends eZ\Publish\API\Repository\Tests\RepositoryTest::testHasAccessLimited
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCanUserWithTargetThrowsInvalidArgumentExceptionVariant()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -1080,11 +1072,10 @@ class RepositoryTest extends BaseTest
      * Test for the canUser() method.
      *
      * @see \eZ\Publish\API\Repository\Repository::canUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\BadStateException
      */
     public function testCanUserThrowsBadStateException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\BadStateException::class);
-
         $this->markTestIncomplete(
             'Cannot be tested on current fixture since policy with unsupported limitation value is not available.'
         );

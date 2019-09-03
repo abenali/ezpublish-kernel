@@ -48,8 +48,8 @@ class VersionInfoTest extends TestCase
 
     private function createVersionInfoWithStatus($status)
     {
-        return new VersionInfo([
+        return new VersionInfo(array(
             'status' => $status,
-        ]);
+        ));
     }
 }

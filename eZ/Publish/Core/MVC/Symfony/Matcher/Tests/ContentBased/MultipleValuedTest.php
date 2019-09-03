@@ -23,9 +23,9 @@ class MultipleValuedTest extends BaseTest
         $matcher = $this->getMultipleValuedMatcherMock();
         $matcher->setMatchingConfig($matchingConfig);
         $values = $matcher->getValues();
-        $this->assertIsArray($values);
+        $this->assertInternalType('array', $values);
 
-        $matchingConfig = is_array($matchingConfig) ? $matchingConfig : [$matchingConfig];
+        $matchingConfig = is_array($matchingConfig) ? $matchingConfig : array($matchingConfig);
         foreach ($matchingConfig as $val) {
             $this->assertContains($val, $values);
         }
@@ -38,14 +38,14 @@ class MultipleValuedTest extends BaseTest
      */
     public function matchingConfigProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 'singleValue',
-                ['one', 'two', 'three'],
-                [123, 'nous irons au bois'],
+                array('one', 'two', 'three'),
+                array(123, 'nous irons au bois'),
                 456,
-            ],
-        ];
+            ),
+        );
     }
 
     /**

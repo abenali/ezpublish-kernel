@@ -284,25 +284,4 @@ abstract class Gateway
      * @return array
      */
     abstract public function getSearchableFieldMapData();
-
-    /**
-     * Removes fieldDefinition data from multilingual table.
-     *
-     * @param int $fieldDefinitionId
-     * @param string $languageCode
-     * @param int $status
-     */
-    abstract public function removeFieldDefinitionTranslation(
-        int $fieldDefinitionId,
-        string $languageCode,
-        int $status
-    ): void;
-
-    /**
-     * Removes items created or modified by the user.
-     *
-     * @param int $userId
-     * @param int $version
-     */
-    abstract public function removeByUserAndVersion(int $userId, int $version): void;
 }

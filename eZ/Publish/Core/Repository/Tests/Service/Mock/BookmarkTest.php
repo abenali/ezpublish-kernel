@@ -29,7 +29,7 @@ class BookmarkTest extends BaseServiceMockTest
     /** @var \eZ\Publish\SPI\Persistence\Bookmark\Handler|\PHPUnit\Framework\MockObject\MockObject */
     private $bookmarkHandler;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -80,11 +80,10 @@ class BookmarkTest extends BaseServiceMockTest
 
     /**
      * @covers \eZ\Publish\Core\Repository\BookmarkService::createBookmark
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateBookmarkThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $location = $this->createLocation(self::LOCATION_ID);
 
         $this->assertLocationIsLoaded($location);
@@ -104,11 +103,10 @@ class BookmarkTest extends BaseServiceMockTest
 
     /**
      * @covers \eZ\Publish\Core\Repository\BookmarkService::createBookmark
+     * @expectedException \Exception
      */
     public function testCreateBookmarkWithRollback()
     {
-        $this->expectException(\Exception::class);
-
         $location = $this->createLocation(self::LOCATION_ID);
 
         $this->assertLocationIsLoaded($location);
@@ -158,11 +156,10 @@ class BookmarkTest extends BaseServiceMockTest
 
     /**
      * @covers \eZ\Publish\Core\Repository\BookmarkService::deleteBookmark
+     * @expectedException \Exception
      */
     public function testDeleteBookmarkWithRollback()
     {
-        $this->expectException(\Exception::class);
-
         $location = $this->createLocation(self::LOCATION_ID);
 
         $this->assertLocationIsLoaded($location);
@@ -185,11 +182,10 @@ class BookmarkTest extends BaseServiceMockTest
 
     /**
      * @covers \eZ\Publish\Core\Repository\BookmarkService::deleteBookmark
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testDeleteBookmarkNonExisting()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $location = $this->createLocation(self::LOCATION_ID);
 
         $this->assertLocationIsLoaded($location);

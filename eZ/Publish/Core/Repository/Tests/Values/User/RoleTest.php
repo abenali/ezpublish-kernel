@@ -37,11 +37,10 @@ class RoleTest extends TestCase
      * Test retrieving missing property.
      *
      * @covers \eZ\Publish\API\Repository\Values\User\Role::__get
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testMissingProperty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $role = new Role();
         $value = $role->notDefined;
         self::fail('Succeeded getting non existing property');
@@ -51,11 +50,10 @@ class RoleTest extends TestCase
      * Test setting read only property.
      *
      * @covers \eZ\Publish\API\Repository\Values\User\Role::__set
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException
      */
     public function testReadOnlyProperty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException::class);
-
         $role = new Role();
         $role->id = 42;
         self::fail('Succeeded setting read only property');
@@ -80,11 +78,10 @@ class RoleTest extends TestCase
      * Test unsetting a property.
      *
      * @covers \eZ\Publish\API\Repository\Values\User\Role::__unset
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException
      */
     public function testUnsetProperty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException::class);
-
         $role = new Role(['id' => 1]);
         unset($role->id);
         self::fail('Unsetting read-only property succeeded');

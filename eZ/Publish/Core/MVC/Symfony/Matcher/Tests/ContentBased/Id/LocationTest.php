@@ -15,10 +15,12 @@ use eZ\Publish\Core\MVC\Symfony\Matcher\Tests\ContentBased\BaseTest;
 
 class LocationTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\Location */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\Location
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new LocationIdMatcher();
@@ -41,28 +43,28 @@ class LocationTest extends BaseTest
 
     public function matchLocationProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
-                $this->getLocationMock(['id' => 123]),
+                $this->getLocationMock(array('id' => 123)),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
-                $this->getLocationMock(['id' => 456]),
+                $this->getLocationMock(array('id' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getLocationMock(['id' => 456]),
+            ),
+            array(
+                array(123, 789),
+                $this->getLocationMock(array('id' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getLocationMock(['id' => 789]),
+            ),
+            array(
+                array(123, 789),
+                $this->getLocationMock(array('id' => 789)),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -82,27 +84,27 @@ class LocationTest extends BaseTest
 
     public function matchContentInfoProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
-                $this->getContentInfoMock(['mainLocationId' => 123]),
+                $this->getContentInfoMock(array('mainLocationId' => 123)),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
-                $this->getContentInfoMock(['mainLocationId' => 456]),
+                $this->getContentInfoMock(array('mainLocationId' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getContentInfoMock(['mainLocationId' => 456]),
+            ),
+            array(
+                array(123, 789),
+                $this->getContentInfoMock(array('mainLocationId' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getContentInfoMock(['mainLocationId' => 789]),
+            ),
+            array(
+                array(123, 789),
+                $this->getContentInfoMock(array('mainLocationId' => 789)),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 }

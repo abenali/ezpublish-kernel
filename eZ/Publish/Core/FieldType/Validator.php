@@ -20,7 +20,7 @@ abstract class Validator
      *
      * @var \eZ\Publish\SPI\FieldType\ValidationError[]
      */
-    protected $errors = [];
+    protected $errors = array();
 
     /**
      * Hash of constraints handled by the validator.
@@ -43,14 +43,14 @@ abstract class Validator
      *
      * @var array
      */
-    protected $constraints = [];
+    protected $constraints = array();
 
     /**
      * A one dimensional map with validator parameters.
      *
      * @var mixed
      */
-    protected $constraintsSchema = [];
+    protected $constraintsSchema = array();
 
     /**
      * Returns a schema for supported validator configurations.
@@ -126,7 +126,7 @@ abstract class Validator
     public function initializeWithConstraints(array $constraints)
     {
         // Reset errors
-        $this->errors = [];
+        $this->errors = array();
         // Set existing constraint values to false
         foreach ($this->constraints as $constraint => $value) {
             $this->constraints[$constraint] = false;

@@ -19,16 +19,20 @@ use eZ\Publish\API\Repository\Tests\SetupFactory\Legacy as LegacySetupFactory;
  */
 class LanguageServiceMaximumSupportedLanguagesTest extends BaseTest
 {
-    /** @var \eZ\Publish\API\Repository\LanguageService */
+    /**
+     * @var \eZ\Publish\API\Repository\LanguageService
+     */
     private $languageService;
 
-    /** @var array */
-    private $createdLanguages = [];
+    /**
+     * @var array
+     */
+    private $createdLanguages = array();
 
     /**
      * Creates as much languages as possible.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
@@ -62,7 +66,7 @@ class LanguageServiceMaximumSupportedLanguagesTest extends BaseTest
         }
     }
 
-    protected function tearDown(): void
+    public function tearDown()
     {
         while (($language = array_pop($this->createdLanguages)) !== null) {
             $this->languageService->deleteLanguage($language);
@@ -77,12 +81,12 @@ class LanguageServiceMaximumSupportedLanguagesTest extends BaseTest
      * @see \eZ\Publish\API\Repository\LanguageService::createLanguage()
      *
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testNewLanguageCreateStruct
+     *
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Maximum number of languages reached!
      */
     public function testCreateMaximumLanguageLimit()
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Maximum number of languages reached!');
-
         $languageCreate = $this->languageService->newLanguageCreateStruct();
         $languageCreate->enabled = true;
 

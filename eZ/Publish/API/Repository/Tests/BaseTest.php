@@ -10,12 +10,7 @@ namespace eZ\Publish\API\Repository\Tests;
 
 use Doctrine\DBAL\Connection;
 use eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException;
-use eZ\Publish\API\Repository\Exceptions\ForbiddenException;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
-use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use eZ\Publish\API\Repository\Tests\PHPUnitConstraint\ValidationErrorOccurs as PHPUnitConstraintValidationErrorOccurs;
-use eZ\Publish\API\Repository\Tests\SetupFactory\Legacy;
-use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Language;
 use EzSystems\EzPlatformSolrSearchEngine\Tests\SetupFactory\LegacySetupFactory as LegacySolrSetupFactory;
 use PHPUnit\Framework\TestCase;
@@ -24,6 +19,7 @@ use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\API\Repository\Values\User\Limitation\RoleLimitation;
 use eZ\Publish\API\Repository\Values\User\Limitation\SubtreeLimitation;
 use eZ\Publish\API\Repository\Values\User\UserGroup;
+use eZ\Publish\Core\REST\Client\Sessionable;
 use DateTime;
 use ArrayObject;
 use Exception;
@@ -39,19 +35,30 @@ abstract class BaseTest extends TestCase
      */
     const DB_INT_MAX = 2147483647;
 
-    /** @var \eZ\Publish\API\Repository\Tests\SetupFactory */
+    /**
+     * @var \eZ\Publish\API\Repository\Tests\SetupFactory
+     */
     private $setupFactory;
 
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
         try {
             // Use setup factory instance here w/o clearing data in case test don't need to
-            $this->getSetupFactory()->getRepository(false);
+            $repository = $this->getSetupFactory()->getRepository(false);
+
+            // Set session if we are testing the REST backend to make it
+            // possible to persist data in the memory backend during multiple
+            // requests.
+            if ($repository instanceof Sessionable) {
+                $repository->setSession($id = md5(microtime()));
+            }
         } catch (PDOException $e) {
             $this->fail(
                 'The communication with the database cannot be established. ' .
@@ -71,7 +78,7 @@ abstract class BaseTest extends TestCase
     /**
      * Resets the temporary used repository between each test run.
      */
-    protected function tearDown(): void
+    protected function tearDown()
     {
         $this->repository = null;
         parent::tearDown();
@@ -155,13 +162,12 @@ abstract class BaseTest extends TestCase
     protected function getSetupFactory()
     {
         if (null === $this->setupFactory) {
-            if (false === ($setupClass = getenv('setupFactory'))) {
-                $setupClass = Legacy::class;
-                putenv("setupFactory=${setupClass}");
-            }
+            $setupClass = getenv('setupFactory');
 
-            if (false === ($fixtureDir = getenv('fixtureDir'))) {
-                putenv('fixtureDir=Legacy');
+            if (false === $setupClass) {
+                throw new \ErrorException(
+                    'Missing mandatory environment variable "setupFactory", this should normally be set in the relevant phpunit-integration-*.xml file and refer to a setupFactory for the given StorageEngine/SearchEngine in use'
+                );
             }
 
             if (false === class_exists($setupClass)) {
@@ -236,7 +242,7 @@ abstract class BaseTest extends TestCase
      * @param \eZ\Publish\API\Repository\Values\ValueObject $actualObject
      * @param array $propertyNames
      */
-    protected function assertStructPropertiesCorrect(ValueObject $expectedValues, ValueObject $actualObject, array $additionalProperties = [])
+    protected function assertStructPropertiesCorrect(ValueObject $expectedValues, ValueObject $actualObject, array $additionalProperties = array())
     {
         foreach ($expectedValues as $propertyName => $propertyValue) {
             if ($propertyValue instanceof ValueObject) {
@@ -327,7 +333,7 @@ abstract class BaseTest extends TestCase
         $group = $userService->loadUserGroup($editorsGroupId);
 
         // Create a new user instance.
-        $user = $userService->createUser($userCreate, [$group]);
+        $user = $userService->createUser($userCreate, array($group));
         /* END: Inline */
 
         return $user;
@@ -345,7 +351,7 @@ abstract class BaseTest extends TestCase
         return $this->createCustomUserVersion1(
             'Media Editor',
             'Editor',
-            new SubtreeLimitation(['limitationValues' => ['/1/43/']])
+            new SubtreeLimitation(array('limitationValues' => array('/1/43/')))
         );
     }
 
@@ -424,7 +430,7 @@ abstract class BaseTest extends TestCase
         $userCreate->setField('last_name', ucfirst($login));
 
         // Create a new user instance.
-        $user = $userService->createUser($userCreate, [$userGroup]);
+        $user = $userService->createUser($userCreate, array($userGroup));
         /* END: Inline */
 
         return $user;
@@ -463,7 +469,7 @@ abstract class BaseTest extends TestCase
         $userCreate->setField('last_name', $lastName);
 
         // Create a new user instance.
-        $user = $userService->createUser($userCreate, [$userGroup]);
+        $user = $userService->createUser($userCreate, array($userGroup));
 
         return $user;
     }
@@ -569,15 +575,12 @@ abstract class BaseTest extends TestCase
      *
      * @param string $login
      * @param array $policiesData list of policies in the form of <code>[ [ 'module' => 'name', 'function' => 'name'] ]</code>
-     * @param \eZ\Publish\API\Repository\Values\User\Limitation\RoleLimitation|null $roleLimitation
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\ForbiddenException
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
+     * @throws \Exception
      */
-    public function createUserWithPolicies($login, array $policiesData, RoleLimitation $roleLimitation = null)
+    public function createUserWithPolicies($login, array $policiesData)
     {
         $repository = $this->getRepository(false);
         $roleService = $repository->getRoleService();
@@ -596,12 +599,12 @@ abstract class BaseTest extends TestCase
             $user = $userService->createUser($userCreateStruct, [$userService->loadUserGroup(4)]);
 
             $role = $this->createRoleWithPolicies(uniqid('role_for_' . $login . '_', true), $policiesData);
-            $roleService->assignRoleToUser($role, $user, $roleLimitation);
+            $roleService->assignRoleToUser($role, $user);
 
             $repository->commit();
 
             return $user;
-        } catch (ForbiddenException | NotFoundException | UnauthorizedException $ex) {
+        } catch (\Exception $ex) {
             $repository->rollback();
             throw $ex;
         }
@@ -713,36 +716,6 @@ abstract class BaseTest extends TestCase
         );
 
         return $contentService->publishVersion($contentDraft->versionInfo);
-    }
-
-    /**
-     * Update 'folder' Content.
-     *
-     * @param \eZ\Publish\API\Repository\Values\Content\Content $content
-     * @param array $names Folder names in the form of <code>['&lt;language_code&gt;' => '&lt;name&gt;']</code>
-     *
-     * @return \eZ\Publish\API\Repository\Values\Content\Content
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException
-     * @throws \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
-     * @throws \eZ\Publish\API\Repository\Exceptions\ContentValidationException
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
-     */
-    protected function updateFolder(Content $content, array $names)
-    {
-        $repository = $this->getRepository(false);
-        $contentService = $repository->getContentService();
-
-        $draft = $contentService->createContentDraft($content->contentInfo);
-        $struct = $contentService->newContentUpdateStruct();
-        $struct->initialLanguageCode = array_keys($names)[0];
-
-        foreach ($names as $languageCode => $translatedName) {
-            $struct->setField('name', $translatedName, $languageCode);
-        }
-
-        return $contentService->updateContent($draft->versionInfo, $struct);
     }
 
     /**

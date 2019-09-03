@@ -18,7 +18,9 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  */
 class ValueObjectVoter implements VoterInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
     public function __construct(Repository $repository)

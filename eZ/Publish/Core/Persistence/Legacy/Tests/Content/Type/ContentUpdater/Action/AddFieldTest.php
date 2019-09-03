@@ -45,7 +45,9 @@ class AddFieldTest extends TestCase
      */
     protected $fieldValueConverterMock;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper
+     */
     protected $contentMapperMock;
 
     /**
@@ -58,7 +60,7 @@ class AddFieldTest extends TestCase
     /**
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Type\ContentUpdater::__construct
      */
-    public function testConstructor()
+    public function testCtor()
     {
         $action = new AddField(
             $this->getContentGatewayMock(),
@@ -68,15 +70,29 @@ class AddFieldTest extends TestCase
             $this->getContentMapperMock()
         );
 
-        $this->assertInstanceOf(AddField::class, $action);
+        $this->assertAttributeSame(
+            $this->getContentGatewayMock(),
+            'contentGateway',
+            $action
+        );
+        $this->assertAttributeEquals(
+            $this->getFieldDefinitionFixture(),
+            'fieldDefinition',
+            $action
+        );
+        $this->assertAttributeSame(
+            $this->getFieldValueConverterMock(),
+            'fieldValueConverter',
+            $action
+        );
     }
 
     public function testApplySingleVersionSingleTranslation()
     {
         $contentId = 42;
-        $versionNumbers = [1];
-        $content = $this->getContentFixture(1, ['cro-HR']);
-        $action = $this->getMockedAction(['insertField']);
+        $versionNumbers = array(1);
+        $content = $this->getContentFixture(1, array('cro-HR'));
+        $action = $this->getMockedAction(array('insertField'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -87,20 +103,20 @@ class AddFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->once())
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content)));
 
         $action
             ->expects($this->once())
@@ -114,9 +130,9 @@ class AddFieldTest extends TestCase
     public function testApplySingleVersionMultipleTranslations()
     {
         $contentId = 42;
-        $versionNumbers = [1];
-        $content = $this->getContentFixture(1, ['eng-GB', 'ger-DE']);
-        $action = $this->getMockedAction(['insertField']);
+        $versionNumbers = array(1);
+        $content = $this->getContentFixture(1, array('eng-GB', 'ger-DE'));
+        $action = $this->getMockedAction(array('insertField'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -127,20 +143,20 @@ class AddFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->once())
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content)));
 
         $action
             ->expects($this->at(0))
@@ -160,10 +176,10 @@ class AddFieldTest extends TestCase
     public function testApplyMultipleVersionsSingleTranslation()
     {
         $contentId = 42;
-        $versionNumbers = [1, 2];
-        $content1 = $this->getContentFixture(1, ['eng-GB']);
-        $content2 = $this->getContentFixture(2, ['eng-GB']);
-        $action = $this->getMockedAction(['insertField']);
+        $versionNumbers = array(1, 2);
+        $content1 = $this->getContentFixture(1, array('eng-GB'));
+        $content2 = $this->getContentFixture(2, array('eng-GB'));
+        $action = $this->getMockedAction(array('insertField'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -174,32 +190,32 @@ class AddFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1], ['id' => $contentId, 'version' => 2]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1), array('id' => $contentId, 'version' => 2))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(0))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content1]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content1)));
 
         $this->getContentGatewayMock()
             ->expects($this->at(3))
             ->method('load')
             ->with($contentId, 2)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(1))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content2]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content2)));
 
         $action
             ->expects($this->at(0))
@@ -219,10 +235,10 @@ class AddFieldTest extends TestCase
     public function testApplyMultipleVersionsMultipleTranslations()
     {
         $contentId = 42;
-        $versionNumbers = [1, 2];
-        $content1 = $this->getContentFixture(1, ['eng-GB', 'ger-DE']);
-        $content2 = $this->getContentFixture(2, ['eng-GB', 'ger-DE']);
-        $action = $this->getMockedAction(['insertField']);
+        $versionNumbers = array(1, 2);
+        $content1 = $this->getContentFixture(1, array('eng-GB', 'ger-DE'));
+        $content2 = $this->getContentFixture(2, array('eng-GB', 'ger-DE'));
+        $action = $this->getMockedAction(array('insertField'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -233,32 +249,32 @@ class AddFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1], ['id' => $contentId, 'version' => 2]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1), array('id' => $contentId, 'version' => 2))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(0))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content1]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content1)));
 
         $this->getContentGatewayMock()
             ->expects($this->at(3))
             ->method('load')
             ->with($contentId, 2)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(1))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content2]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content2)));
 
         $action
             ->expects($this->at(0))
@@ -512,9 +528,9 @@ class AddFieldTest extends TestCase
         $content->versionInfo = $versionInfo;
         $content->versionInfo->versionNo = $versionNo;
 
-        $fields = [];
+        $fields = array();
         foreach ($languageCodes as $languageCode) {
-            $fields[] = new Field(['languageCode' => $languageCode]);
+            $fields[] = new Field(array('languageCode' => $languageCode));
         }
 
         $content->fields = $fields;
@@ -622,19 +638,19 @@ class AddFieldTest extends TestCase
      *
      * @return \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Persistence\Legacy\Content\Type\ContentUpdater\Action\AddField
      */
-    protected function getMockedAction($methods = [])
+    protected function getMockedAction($methods = array())
     {
         return $this
             ->getMockBuilder(AddField::class)
             ->setMethods((array)$methods)
             ->setConstructorArgs(
-                [
+                array(
                     $this->getContentGatewayMock(),
                     $this->getFieldDefinitionFixture(),
                     $this->getFieldValueConverterMock(),
                     $this->getContentStorageHandlerMock(),
                     $this->getContentMapperMock(),
-                ]
+                )
             )
             ->getMock();
     }

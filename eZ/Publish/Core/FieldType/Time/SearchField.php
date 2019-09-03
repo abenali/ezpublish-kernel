@@ -28,13 +28,13 @@ class SearchField implements Indexable
      */
     public function getIndexData(Field $field, FieldDefinition $fieldDefinition)
     {
-        return [
+        return array(
             new Search\Field(
                 'value',
                 $field->value->data,
                 new Search\FieldType\IntegerField()
             ),
-        ];
+        );
     }
 
     /**
@@ -44,9 +44,9 @@ class SearchField implements Indexable
      */
     public function getIndexDefinition()
     {
-        return [
+        return array(
             'value' => new Search\FieldType\IntegerField(),
-        ];
+        );
     }
 
     /**

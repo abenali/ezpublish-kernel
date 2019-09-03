@@ -15,13 +15,17 @@ use PHPUnit\Framework\TestCase;
 
 class ScaleDownOnlyFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $innerLoader;
 
-    /** @var ScaleDownOnlyFilterLoader */
+    /**
+     * @var ScaleDownOnlyFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerLoader = $this->createMock(LoaderInterface::class);
@@ -30,32 +34,31 @@ class ScaleDownOnlyFilterLoaderTest extends TestCase
     }
 
     /**
+     * @expectedException \Imagine\Exception\InvalidArgumentException
      * @dataProvider loadInvalidProvider
      */
     public function testLoadInvalidOptions(array $options)
     {
-        $this->expectException(\Imagine\Exception\InvalidArgumentException::class);
-
         $this->loader->load($this->createMock(ImageInterface::class), $options);
     }
 
     public function loadInvalidProvider()
     {
-        return [
-            [[]],
-            [[123]],
-            [['foo' => 'bar']],
-        ];
+        return array(
+            array(array()),
+            array(array(123)),
+            array(array('foo' => 'bar')),
+        );
     }
 
     public function testLoad()
     {
-        $options = [123, 456];
+        $options = array(123, 456);
         $image = $this->createMock(ImageInterface::class);
         $this->innerLoader
             ->expects($this->once())
             ->method('load')
-            ->with($image, $this->equalTo(['size' => $options, 'mode' => ImageInterface::THUMBNAIL_INSET]))
+            ->with($image, $this->equalTo(array('size' => $options, 'mode' => ImageInterface::THUMBNAIL_INSET)))
             ->will($this->returnValue($image));
 
         $this->assertSame($image, $this->loader->load($image, $options));

@@ -21,7 +21,6 @@ parameters:
     ezpublish.route_reference.generator.class: eZ\Publish\Core\MVC\Symfony\Routing\Generator\RouteReferenceGenerator
     ezpublish.route_reference.listener.language_switch.class: eZ\Publish\Core\MVC\Symfony\EventListener\LanguageSwitchListener
     ezpublish.original_request_listener.class: eZ\Bundle\EzPublishCoreBundle\EventListener\OriginalRequestListener
-    ezpublish.preview_request_listener.class: eZ\Bundle\EzPublishCoreBundle\EventListener\PreviewRequestListener
     ezpublish.route_reference.listener.content_download.class: eZ\Bundle\EzPublishCoreBundle\EventListener\ContentDownloadRouteReferenceListener
 
 services:
@@ -33,7 +32,7 @@ services:
 
     ezpublish.siteaccess_match_listener:
         class: "%ezpublish.siteaccess_match_listener.class%"
-        arguments: ["@ezpublish.siteaccess_router", "@event_dispatcher"]
+        arguments: ["@ezpublish.siteaccess_router", "@event_dispatcher", "@fos_http_cache.user_context.request_matcher"]
         tags:
             - { name: kernel.event_subscriber }
 
@@ -69,12 +68,9 @@ services:
             - "%ezpublish.urlalias_generator.charmap%"
         parent: ezpublish.url_generator.base
 
-    eZ\Bundle\EzPublishCoreBundle\SiteAccess\SiteAccessMatcherRegistry: ~
-
     ezpublish.siteaccess.matcher_builder:
         class: "%ezpublish.siteaccess.matcher_builder.class%"
-        arguments:
-            - '@eZ\Bundle\EzPublishCoreBundle\SiteAccess\SiteAccessMatcherRegistry'
+        arguments: ["@service_container"]
 
     ezpublish.siteaccess_router:
         class: "%ezpublish.siteaccess_router.class%"
@@ -89,8 +85,9 @@ services:
 
     ezpublish.siteaccess_listener:
         class: "%ezpublish.siteaccess_listener.class%"
-        arguments:
-            - "@ezpublish.siteaccess"
+        arguments: ["@router.default", "@ezpublish.urlalias_generator", "@security.http_utils"]
+        calls:
+            - [setContainer, ["@service_container"]]
         tags:
             - { name: kernel.event_subscriber }
 
@@ -131,12 +128,6 @@ services:
 
     ezpublish.original_request_listener:
         class: "%ezpublish.original_request_listener.class%"
-        tags:
-            - { name: kernel.event_subscriber }
-
-    ezpublish.preview_request_listener:
-        class: "%ezpublish.preview_request_listener.class%"
-        arguments: ["@request_stack"]
         tags:
             - { name: kernel.event_subscriber }
 

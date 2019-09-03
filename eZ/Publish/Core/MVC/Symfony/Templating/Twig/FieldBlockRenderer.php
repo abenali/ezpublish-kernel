@@ -12,8 +12,8 @@ use eZ\Publish\API\Repository\Values\Content\Field;
 use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\MVC\Symfony\Templating\Exception\MissingFieldBlockException;
 use eZ\Publish\Core\MVC\Symfony\Templating\FieldBlockRendererInterface;
-use Twig\Environment;
-use Twig\Template;
+use Twig_Environment;
+use Twig_Template;
 
 class FieldBlockRenderer implements FieldBlockRendererInterface
 {
@@ -25,49 +25,51 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
     const FIELD_DEFINITION_VIEW_SUFFIX = '_settings';
     const FIELD_DEFINITION_EDIT_SUFFIX = '_field_definition_edit';
 
-    /** @var \Twig\Environment */
+    /**
+     * @var Twig_Environment
+     */
     private $twig;
 
     /**
      * Array of Twig template resources for field view.
      * Either the path to each template and its priority in a hash or its
-     * \Twig\Template (compiled) counterpart.
+     * \Twig_Template (compiled) counterpart.
      *
-     * @var \Twig\Template[]|array
+     * @var Twig_Template[]|array
      */
     private $fieldViewResources = [];
 
     /**
      * Array of Twig template resources for field edit.
      * Either the path to each template and its priority in a hash or its
-     * \Twig\Template (compiled) counterpart.
+     * \Twig_Template (compiled) counterpart.
      *
-     * @var \Twig\Template[]|array
+     * @var Twig_Template[]|array
      */
     private $fieldEditResources = [];
 
     /**
      * Array of Twig template resources for field definition view.
      * Either the path to each template and its priority in a hash or its
-     * \Twig\Template (compiled) counterpart.
+     * \Twig_Template (compiled) counterpart.
      *
-     * @var \Twig\Template[]|array
+     * @var Twig_Template[]|array
      */
     private $fieldDefinitionViewResources = [];
 
     /**
      * Array of Twig template resources for field definition edit.
      * Either the path to each template and its priority in a hash or its
-     * \Twig\Template (compiled) counterpart.
+     * \Twig_Template (compiled) counterpart.
      *
-     * @var \Twig\Template[]|array
+     * @var Twig_Template[]|array
      */
     private $fieldDefinitionEditResources = [];
 
     /**
-     * A \Twig\Template instance used to render template blocks, or path to the template to use.
+     * A \Twig_Template instance used to render template blocks, or path to the template to use.
      *
-     * @var \Twig\Template|string
+     * @var Twig_Template|string
      */
     private $baseTemplate;
 
@@ -79,15 +81,15 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
     private $blocks = [];
 
     /**
-     * @param \Twig\Environment $twig
+     * @param Twig_Environment $twig
      */
-    public function setTwig(Environment $twig)
+    public function setTwig(Twig_Environment $twig)
     {
         $this->twig = $twig;
     }
 
     /**
-     * @param string|\Twig\Template $baseTemplate
+     * @param string|Twig_Template $baseTemplate
      */
     public function setBaseTemplate($baseTemplate)
     {
@@ -225,11 +227,11 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
      * found, returns null.
      *
      * @param string $blockName
-     * @param \Twig\Template $tpl
+     * @param Twig_Template $tpl
      *
      * @return array|null
      */
-    private function searchBlock(string $blockName, Template $tpl)
+    private function searchBlock($blockName, Twig_Template $tpl)
     {
         // Current template might have parents, so we need to loop against
         // them to find a matching block
@@ -239,7 +241,7 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
                     return $block;
                 }
             }
-        } while (($tpl = $tpl->getParent([])) instanceof Template);
+        } while (($tpl = $tpl->getParent([])) instanceof Twig_Template);
 
         return null;
     }
@@ -251,7 +253,7 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
      *
      * @param string $fieldTypeIdentifier
      * @param int $type Either self::VIEW or self::EDIT
-     * @param null|string|\Twig\Template $localTemplate a file where to look for the block first
+     * @param null|string|Twig_Template $localTemplate a file where to look for the block first
      *
      * @return array
      */
@@ -259,8 +261,8 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
     {
         $fieldBlockName = $this->getRenderFieldBlockName($fieldTypeIdentifier, $type);
         if ($localTemplate !== null) {
-            // $localTemplate might be a \Twig\Template instance already (e.g. using _self Twig keyword)
-            if (!$localTemplate instanceof Template) {
+            // $localTemplate might be a Twig_Template instance already (e.g. using _self Twig keyword)
+            if (!$localTemplate instanceof Twig_Template) {
                 $localTemplate = $this->twig->loadTemplate($localTemplate);
             }
 
@@ -305,7 +307,7 @@ class FieldBlockRenderer implements FieldBlockRendererInterface
         }
 
         foreach ($this->{$resourcesName} as &$template) {
-            if (!$template instanceof Template) {
+            if (!$template instanceof Twig_Template) {
                 $template = $this->twig->loadTemplate($template['template']);
             }
 

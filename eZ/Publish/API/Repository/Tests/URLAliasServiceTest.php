@@ -32,7 +32,7 @@ class URLAliasServiceTest extends BaseTest
      * at least returns an object, because this method is utilized in several
      * tests.
      */
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -87,11 +87,11 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
-        return [$createdUrlAlias, $location->id];
+        return array($createdUrlAlias, $location->id);
     }
 
     /**
@@ -106,16 +106,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::LOCATION,
                 'destination' => $locationId,
                 'path' => '/Home/My-New-Site',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => false,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => false,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -144,11 +144,11 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
-        return [$createdUrlAlias, $location->id];
+        return array($createdUrlAlias, $location->id);
     }
 
     /**
@@ -163,16 +163,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::LOCATION,
                 'destination' => $locationId,
                 'path' => '/Home/My-New-Site',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => false,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => true,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -200,11 +200,11 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
-        return [$createdUrlAlias, $location->id];
+        return array($createdUrlAlias, $location->id);
     }
 
     /**
@@ -219,16 +219,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::LOCATION,
                 'destination' => $locationId,
                 'path' => '/Home/My-New-Site',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => true,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => false,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -237,11 +237,10 @@ class URLAliasServiceTest extends BaseTest
      * Test for the createUrlAlias() method.
      *
      * @see \eZ\Publish\API\Repository\URLAliasService::createUrlAlias()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateUrlAliasThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $locationId = $this->generateId('location', 5);
@@ -280,7 +279,7 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
@@ -297,16 +296,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::RESOURCE,
                 'destination' => 'content/search?SearchText=eZ',
                 'path' => '/Home/My-New-Site',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => false,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => false,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -332,7 +331,7 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
@@ -349,16 +348,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::RESOURCE,
                 'destination' => 'content/search?SearchText=eZ',
                 'path' => '/Home/My-New-Site',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => false,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => true,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -385,7 +384,7 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
@@ -402,16 +401,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::RESOURCE,
                 'destination' => 'content/search?SearchText=eZ',
                 'path' => '/Home/My-New-Site',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => true,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => false,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -444,11 +443,11 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
-        return [$createdUrlAlias, $location->id];
+        return array($createdUrlAlias, $location->id);
     }
 
     /**
@@ -479,11 +478,11 @@ class URLAliasServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $createdUrlAlias
         );
 
-        return [$createdUrlAlias, $location->id];
+        return array($createdUrlAlias, $location->id);
     }
 
     /**
@@ -498,16 +497,16 @@ class URLAliasServiceTest extends BaseTest
         $this->assertNotNull($createdUrlAlias->id);
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'type' => URLAlias::LOCATION,
                 'destination' => $locationId,
                 'path' => '/Home/My-New-Site-global',
-                'languageCodes' => ['eng-US'],
+                'languageCodes' => array('eng-US'),
                 'alwaysAvailable' => true,
                 'isHistory' => false,
                 'isCustom' => true,
                 'forward' => false,
-            ],
+            ),
             $createdUrlAlias
         );
     }
@@ -526,11 +525,10 @@ class URLAliasServiceTest extends BaseTest
      * Test for the createGlobalUrlAlias() method.
      *
      * @see \eZ\Publish\API\Repository\URLAliasService::createGlobalUrlAlias()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateGlobalUrlAliasThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -571,12 +569,15 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listLocationAliases($location);
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
 
         // Only 1 non-history alias
-        $this->assertCount(1, $loadedAliases);
+        $this->assertEquals(1, count($loadedAliases));
 
-        return [$loadedAliases, $location];
+        return array($loadedAliases, $location);
     }
 
     /**
@@ -590,7 +591,7 @@ class URLAliasServiceTest extends BaseTest
 
         foreach ($loadedAliases as $loadedAlias) {
             $this->assertInstanceOf(
-                URLAlias::class,
+                'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
                 $loadedAlias
             );
             $this->assertEquals(
@@ -625,8 +626,11 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listLocationAliases($location, false, 'eng-US');
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
-        $this->assertCount(1, $loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
+        $this->assertEquals(1, count($loadedAliases));
     }
 
     /**
@@ -653,8 +657,11 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listLocationAliases($location, true, 'eng-US');
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
-        $this->assertCount(1, $loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
+        $this->assertEquals(1, count($loadedAliases));
     }
 
     /**
@@ -676,8 +683,11 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listGlobalAliases();
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
-        $this->assertCount(3, $loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
+        $this->assertEquals(3, count($loadedAliases));
     }
 
     /**
@@ -726,8 +736,11 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listGlobalAliases('eng-US');
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
-        $this->assertCount(2, $loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
+        $this->assertEquals(2, count($loadedAliases));
     }
 
     /**
@@ -749,8 +762,11 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listGlobalAliases(null, 1);
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
-        $this->assertCount(2, $loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
+        $this->assertEquals(2, count($loadedAliases));
     }
 
     /**
@@ -772,8 +788,11 @@ class URLAliasServiceTest extends BaseTest
         $loadedAliases = $urlAliasService->listGlobalAliases(null, 0, 1);
         /* END: Use Case */
 
-        $this->assertIsArray($loadedAliases);
-        $this->assertCount(1, $loadedAliases);
+        $this->assertInternalType(
+            'array',
+            $loadedAliases
+        );
+        $this->assertEquals(1, count($loadedAliases));
     }
 
     /**
@@ -821,11 +840,10 @@ class URLAliasServiceTest extends BaseTest
      * Test for the removeAliases() method.
      *
      * @see \eZ\Publish\API\Repository\URLAliasService::removeAliases()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testRemoveAliasesThrowsInvalidArgumentExceptionIfAutogeneratedAliasesAreToBeRemoved()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $locationService = $repository->getLocationService();
@@ -858,11 +876,11 @@ class URLAliasServiceTest extends BaseTest
         /* BEGIN: Use Case */
         $urlAliasService = $repository->getURLAliasService();
 
-        $loadedAlias = $urlAliasService->lookup('/Setup2');
+        $loadedAlias = $urlAliasService->lookUp('/Setup2');
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $loadedAlias
         );
 
@@ -884,11 +902,11 @@ class URLAliasServiceTest extends BaseTest
         // Create aliases in multiple languages
         $this->createGlobalAliases();
 
-        $loadedAlias = $urlAliasService->lookup('/My/Special-Support', 'eng-US');
+        $loadedAlias = $urlAliasService->lookUp('/My/Special-Support', 'eng-US');
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            URLAlias::class,
+            'eZ\\Publish\\API\\Repository\\Values\\Content\\URLAlias',
             $loadedAlias
         );
         $this->assertEquals(
@@ -901,18 +919,17 @@ class URLAliasServiceTest extends BaseTest
      * Test for the lookUp() method.
      *
      * @see \eZ\Publish\API\Repository\URLAliasService::lookUp()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLookUpThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
         $urlAliasService = $repository->getURLAliasService();
 
         // Throws NotFoundException
-        $urlAliasService->lookup('/non-existent-url');
+        $loadedAlias = $urlAliasService->lookUp('/non-existent-url');
         /* END: Use Case */
     }
 
@@ -920,18 +937,17 @@ class URLAliasServiceTest extends BaseTest
      * Test for the lookUp() method.
      *
      * @see \eZ\Publish\API\Repository\URLAliasService::lookUp($url, $languageCode)
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLookUpThrowsNotFoundExceptionWithLanguageFilter()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
         $urlAliasService = $repository->getURLAliasService();
 
         // Throws NotFoundException
-        $urlAliasService->lookup('/Contact-Us', 'ger-DE');
+        $loadedAlias = $urlAliasService->lookUp('/Contact-Us', 'ger-DE');
         /* END: Use Case */
     }
 
@@ -939,18 +955,17 @@ class URLAliasServiceTest extends BaseTest
      * Test for the lookUp() method.
      *
      * @see \eZ\Publish\API\Repository\URLAliasService::lookUp($url, $languageCode)
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testLookUpThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
         $urlAliasService = $repository->getURLAliasService();
 
         // Throws InvalidArgumentException
-        $loadedAlias = $urlAliasService->lookup(str_repeat('/1', 99), 'ger-DE');
+        $loadedAlias = $urlAliasService->lookUp(str_repeat('/1', 99), 'ger-DE');
         /* END: Use Case */
     }
 
@@ -985,6 +1000,15 @@ class URLAliasServiceTest extends BaseTest
         $articleContentType = $contentTypeService->loadContentTypeByIdentifier('article');
         $articleCreateStruct = $contentService->newContentCreateStruct($articleContentType, 'eng-GB');
         $articleCreateStruct->setField('title', 'My Article');
+        $articleCreateStruct->setField(
+            'intro',
+            <<< DOCBOOK
+<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0-variant ezpublish-1.0">
+    <para>Cache invalidation in eZ</para>
+</section>
+DOCBOOK
+        );
         $article = $contentService->publishVersion(
             $contentService->createContent($articleCreateStruct, [
                 $locationService->newLocationCreateStruct($folderLocation->id),

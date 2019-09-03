@@ -31,13 +31,15 @@ use eZ\Publish\SPI\Persistence\Content\Section\Handler as SPISectionHandler;
  */
 class SectionLimitationTypeTest extends Base
 {
-    /** @var \eZ\Publish\SPI\Persistence\Content\Section\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Section\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $sectionHandlerMock;
 
     /**
      * Setup Location Handler mock.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
         $this->sectionHandlerMock = $this->createMock(SPISectionHandler::class);
@@ -46,7 +48,7 @@ class SectionLimitationTypeTest extends Base
     /**
      * Tear down Location Handler mock.
      */
-    protected function tearDown(): void
+    public function tearDown()
     {
         unset($this->sectionHandlerMock);
         parent::tearDown();
@@ -65,11 +67,11 @@ class SectionLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValue()
     {
-        return [
-            [new SectionLimitation()],
-            [new SectionLimitation([])],
-            [new SectionLimitation(['limitationValues' => ['', 'true', '2', 's3fdaf32r']])],
-        ];
+        return array(
+            array(new SectionLimitation()),
+            array(new SectionLimitation(array())),
+            array(new SectionLimitation(array('limitationValues' => array('', 'true', '2', 's3fdaf32r')))),
+        );
     }
 
     /**
@@ -89,26 +91,25 @@ class SectionLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValueException()
     {
-        return [
-            [new ObjectStateLimitation()],
-            [new SectionLimitation(['limitationValues' => [true]])],
-            [new SectionLimitation(['limitationValues' => [new \stdClass()]])],
-            [new SectionLimitation(['limitationValues' => [null]])],
-            [new SectionLimitation(['limitationValues' => '/1/2/'])],
-        ];
+        return array(
+            array(new ObjectStateLimitation()),
+            array(new SectionLimitation(array('limitationValues' => array(true)))),
+            array(new SectionLimitation(array('limitationValues' => array(new \stdClass())))),
+            array(new SectionLimitation(array('limitationValues' => array(null)))),
+            array(new SectionLimitation(array('limitationValues' => '/1/2/'))),
+        );
     }
 
     /**
      * @dataProvider providerForTestAcceptValueException
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\SectionLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, SectionLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -117,11 +118,11 @@ class SectionLimitationTypeTest extends Base
      */
     public function providerForTestValidatePass()
     {
-        return [
-            [new SectionLimitation()],
-            [new SectionLimitation([])],
-            [new SectionLimitation(['limitationValues' => ['1']])],
-        ];
+        return array(
+            array(new SectionLimitation()),
+            array(new SectionLimitation(array())),
+            array(new SectionLimitation(array('limitationValues' => array('1')))),
+        );
     }
 
     /**
@@ -144,7 +145,7 @@ class SectionLimitationTypeTest extends Base
                     ->with($value)
                     ->will(
                         $this->returnValue(
-                            new SPISection(['id' => $value])
+                            new SPISection(array('id' => $value))
                         )
                     );
             }
@@ -162,11 +163,11 @@ class SectionLimitationTypeTest extends Base
      */
     public function providerForTestValidateError()
     {
-        return [
-            [new SectionLimitation(), 0],
-            [new SectionLimitation(['limitationValues' => ['777']]), 1],
-            [new SectionLimitation(['limitationValues' => ['888', '999']]), 2],
-        ];
+        return array(
+            array(new SectionLimitation(), 0),
+            array(new SectionLimitation(array('limitationValues' => array('777'))), 1),
+            array(new SectionLimitation(array('limitationValues' => array('888', '999'))), 2),
+        );
     }
 
     /**
@@ -210,11 +211,11 @@ class SectionLimitationTypeTest extends Base
      */
     public function testBuildValue(SectionLimitationType $limitationType)
     {
-        $expected = ['test', 'test' => '33'];
+        $expected = array('test', 'test' => '33');
         $value = $limitationType->buildValue($expected);
 
         self::assertInstanceOf(SectionLimitation::class, $value);
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -235,115 +236,115 @@ class SectionLimitationTypeTest extends Base
         $versionInfoMock
             ->expects($this->once())
             ->method('getContentInfo')
-            ->will($this->returnValue(new ContentInfo(['sectionId' => 2])));
+            ->will($this->returnValue(new ContentInfo(array('sectionId' => 2))));
 
         $versionInfoMock2 = $this->createMock(APIVersionInfo::class);
 
         $versionInfoMock2
             ->expects($this->once())
             ->method('getContentInfo')
-            ->will($this->returnValue(new ContentInfo(['sectionId' => 2])));
+            ->will($this->returnValue(new ContentInfo(array('sectionId' => 2))));
 
-        return [
+        return array(
             // ContentInfo, with targets, no access
-            [
+            array(
                 'limitation' => new SectionLimitation(),
-                'object' => new ContentInfo(['sectionId' => 55]),
-                'targets' => [new Location()],
+                'object' => new ContentInfo(array('sectionId' => 55)),
+                'targets' => array(new Location()),
                 'expected' => LimitationType::ACCESS_DENIED,
-            ],
+            ),
             // ContentInfo, with targets, no access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
-                'object' => new ContentInfo(['sectionId' => 55]),
-                'targets' => [new Location(['pathString' => '/1/55'])],
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
+                'object' => new ContentInfo(array('sectionId' => 55)),
+                'targets' => array(new Location(array('pathString' => '/1/55'))),
                 'expected' => LimitationType::ACCESS_DENIED,
-            ],
+            ),
             // ContentInfo, with targets, with access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
-                'object' => new ContentInfo(['sectionId' => 2]),
-                'targets' => [new Location(['pathString' => '/1/2/'])],
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
+                'object' => new ContentInfo(array('sectionId' => 2)),
+                'targets' => array(new Location(array('pathString' => '/1/2/'))),
                 'expected' => LimitationType::ACCESS_GRANTED,
-            ],
+            ),
             // ContentInfo, no targets, with access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
-                'object' => new ContentInfo(['sectionId' => 2]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
+                'object' => new ContentInfo(array('sectionId' => 2)),
                 'targets' => null,
                 'expected' => LimitationType::ACCESS_GRANTED,
-            ],
+            ),
             // ContentInfo, no targets, no access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2', '43']]),
-                'object' => new ContentInfo(['sectionId' => 55]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2', '43'))),
+                'object' => new ContentInfo(array('sectionId' => 55)),
                 'targets' => null,
                 'expected' => LimitationType::ACCESS_DENIED,
-            ],
+            ),
             // ContentInfo, no targets, un-published, with access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
-                'object' => new ContentInfo(['published' => false, 'sectionId' => 2]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
+                'object' => new ContentInfo(array('published' => false, 'sectionId' => 2)),
                 'targets' => null,
                 'expected' => LimitationType::ACCESS_GRANTED,
-            ],
+            ),
             // ContentInfo, no targets, un-published, no access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2', '43']]),
-                'object' => new ContentInfo(['published' => false, 'sectionId' => 55]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2', '43'))),
+                'object' => new ContentInfo(array('published' => false, 'sectionId' => 55)),
                 'targets' => null,
                 'expected' => LimitationType::ACCESS_DENIED,
-            ],
+            ),
             // Content, with targets, with access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
                 'object' => $contentMock,
-                'targets' => [new Location(['pathString' => '/1/2/'])],
+                'targets' => array(new Location(array('pathString' => '/1/2/'))),
                 'expected' => LimitationType::ACCESS_GRANTED,
-            ],
+            ),
             // VersionInfo, with targets, with access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
                 'object' => $versionInfoMock2,
-                'targets' => [new Location(['pathString' => '/1/2/'])],
+                'targets' => array(new Location(array('pathString' => '/1/2/'))),
                 'expected' => LimitationType::ACCESS_GRANTED,
-            ],
+            ),
             // ContentCreateStruct, no targets, no access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2']]),
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2'))),
                 'object' => new ContentCreateStruct(),
-                'targets' => [],
+                'targets' => array(),
                 'expected' => LimitationType::ACCESS_DENIED,
-            ],
+            ),
             // ContentCreateStruct, with targets, no access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2', '43']]),
-                'object' => new ContentCreateStruct(['sectionId' => 55]),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 55])],
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2', '43'))),
+                'object' => new ContentCreateStruct(array('sectionId' => 55)),
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 55))),
                 'expected' => LimitationType::ACCESS_DENIED,
-            ],
+            ),
             // ContentCreateStruct, with targets, with access
-            [
-                'limitation' => new SectionLimitation(['limitationValues' => ['2', '43']]),
-                'object' => new ContentCreateStruct(['sectionId' => 43]),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 55])],
+            array(
+                'limitation' => new SectionLimitation(array('limitationValues' => array('2', '43'))),
+                'object' => new ContentCreateStruct(array('sectionId' => 43)),
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 55))),
                 'expected' => LimitationType::ACCESS_GRANTED,
-            ],
+            ),
             // invalid object
-            [
+            array(
                 'limitation' => new SectionLimitation(),
                 'object' => new ObjectStateLimitation(),
-                'targets' => [new LocationCreateStruct(['parentLocationId' => 43])],
+                'targets' => array(new LocationCreateStruct(array('parentLocationId' => 43))),
                 'expected' => LimitationType::ACCESS_ABSTAIN,
-            ],
+            ),
             // invalid target
-            [
+            array(
                 'limitation' => new SectionLimitation(),
-                'object' => new ContentInfo(['published' => true]),
-                'targets' => [new ObjectStateLimitation()],
+                'object' => new ContentInfo(array('published' => true)),
+                'targets' => array(new ObjectStateLimitation()),
                 'expected' => LimitationType::ACCESS_ABSTAIN,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -382,26 +383,25 @@ class SectionLimitationTypeTest extends Base
      */
     public function providerForTestEvaluateInvalidArgument()
     {
-        return [
+        return array(
             // invalid limitation
-            [
+            array(
                 'limitation' => new ObjectStateLimitation(),
                 'object' => new ContentInfo(),
-                'targets' => [new Location()],
-            ],
-        ];
+                'targets' => array(new Location()),
+            ),
+        );
     }
 
     /**
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(
         Limitation $limitation,
         ValueObject $object,
         $targets
     ) {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         // Need to create inline instead of depending on testConstruct() to get correct mock instance
         $limitationType = $this->testConstruct();
 
@@ -425,15 +425,14 @@ class SectionLimitationTypeTest extends Base
 
     /**
      * @depends testConstruct
+     * @expectedException \RuntimeException
      *
      * @param \eZ\Publish\Core\Limitation\SectionLimitationType $limitationType
      */
     public function testGetCriterionInvalidValue(SectionLimitationType $limitationType)
     {
-        $this->expectException(\RuntimeException::class);
-
         $limitationType->getCriterion(
-            new SectionLimitation([]),
+            new SectionLimitation(array()),
             $this->getUserMock()
         );
     }
@@ -446,15 +445,15 @@ class SectionLimitationTypeTest extends Base
     public function testGetCriterionSingleValue(SectionLimitationType $limitationType)
     {
         $criterion = $limitationType->getCriterion(
-            new SectionLimitation(['limitationValues' => ['9']]),
+            new SectionLimitation(array('limitationValues' => array('9'))),
             $this->getUserMock()
         );
 
         self::assertInstanceOf(SectionId::class, $criterion);
-        self::assertIsArray($criterion->value);
-        self::assertIsString($criterion->operator);
+        self::assertInternalType('array', $criterion->value);
+        self::assertInternalType('string', $criterion->operator);
         self::assertEquals(Operator::EQ, $criterion->operator);
-        self::assertEquals(['9'], $criterion->value);
+        self::assertEquals(array('9'), $criterion->value);
     }
 
     /**
@@ -465,27 +464,26 @@ class SectionLimitationTypeTest extends Base
     public function testGetCriterionMultipleValues(SectionLimitationType $limitationType)
     {
         $criterion = $limitationType->getCriterion(
-            new SectionLimitation(['limitationValues' => ['9', '55']]),
+            new SectionLimitation(array('limitationValues' => array('9', '55'))),
             $this->getUserMock()
         );
 
         self::assertInstanceOf(SectionId::class, $criterion);
-        self::assertIsArray($criterion->value);
-        self::assertIsString($criterion->operator);
+        self::assertInternalType('array', $criterion->value);
+        self::assertInternalType('string', $criterion->operator);
         self::assertEquals(Operator::IN, $criterion->operator);
-        self::assertEquals(['9', '55'], $criterion->value);
+        self::assertEquals(array('9', '55'), $criterion->value);
     }
 
     /**
      * @depends testConstruct
      *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotImplementedException
      *
      * @param \eZ\Publish\Core\Limitation\SectionLimitationType $limitationType
      */
     public function testValueSchema(SectionLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotImplementedException::class);
-
         $limitationType->valueSchema();
     }
 }

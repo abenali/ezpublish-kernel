@@ -49,7 +49,7 @@ class Mapper
      */
     public function mapUsers(array $data)
     {
-        $users = [];
+        $users = array();
         foreach ($data as $row) {
             $users[] = $this->mapUser($row);
         }
@@ -66,8 +66,10 @@ class Mapper
      */
     public function mapPolicies(array $data)
     {
-        /** @var \eZ\Publish\SPI\Persistence\User\Policy[] */
-        $policies = [];
+        /**
+         * @var \eZ\Publish\SPI\Persistence\User\Policy[]
+         */
+        $policies = array();
         foreach ($data as $row) {
             $policyId = $row['ezpolicy_id'];
             if (!isset($policies[$policyId]) && ($policyId !== null)) {
@@ -79,25 +81,25 @@ class Mapper
                 }
 
                 $policies[$policyId] = new Policy(
-                    [
+                    array(
                         'id' => (int)$policyId,
                         'roleId' => (int)$row['ezrole_id'],
                         'originalId' => $originalId,
                         'module' => $row['ezpolicy_module_name'],
                         'function' => $row['ezpolicy_function_name'],
                         'limitations' => '*', // limitations must be '*' if not a non empty array of limitations
-                    ]
+                    )
                 );
             }
 
             if (!$row['ezpolicy_limitation_identifier']) {
                 continue;
             } elseif ($policies[$policyId]->limitations === '*') {
-                $policies[$policyId]->limitations = [];
+                $policies[$policyId]->limitations = array();
             }
 
             if (!isset($policies[$policyId]->limitations[$row['ezpolicy_limitation_identifier']])) {
-                $policies[$policyId]->limitations[$row['ezpolicy_limitation_identifier']] = [$row['ezpolicy_limitation_value_value']];
+                $policies[$policyId]->limitations[$row['ezpolicy_limitation_identifier']] = array($row['ezpolicy_limitation_value_value']);
             } elseif (!in_array($row['ezpolicy_limitation_value_value'], $policies[$policyId]->limitations[$row['ezpolicy_limitation_identifier']])) {
                 $policies[$policyId]->limitations[$row['ezpolicy_limitation_identifier']][] = $row['ezpolicy_limitation_value_value'];
             }
@@ -141,12 +143,12 @@ class Mapper
      */
     public function mapRoles(array $data)
     {
-        $roleData = [];
+        $roleData = array();
         foreach ($data as $row) {
             $roleData[$row['ezrole_id']][] = $row;
         }
 
-        $roles = [];
+        $roles = array();
         foreach ($roleData as $data) {
             $roles[] = $this->mapRole($data);
         }
@@ -163,7 +165,7 @@ class Mapper
      */
     public function mapRoleAssignments(array $data)
     {
-        $roleAssignmentData = [];
+        $roleAssignmentData = array();
         foreach ($data as $row) {
             $id = (int)$row['id'];
             $roleId = (int)$row['role_id'];
@@ -177,26 +179,26 @@ class Mapper
             $limitIdentifier = $row['limit_identifier'];
             if (!empty($limitIdentifier)) {
                 $roleAssignmentData[$roleId][$contentId][$limitIdentifier][$id] = new RoleAssignment(
-                    [
+                    array(
                         'id' => $id,
                         'roleId' => $roleId,
                         'contentId' => $contentId,
                         'limitationIdentifier' => $limitIdentifier,
-                        'values' => [$row['limit_value']],
-                    ]
+                        'values' => array($row['limit_value']),
+                    )
                 );
             } else {
                 $roleAssignmentData[$roleId][$contentId] = new RoleAssignment(
-                    [
+                    array(
                         'id' => $id,
                         'roleId' => $roleId,
                         'contentId' => $contentId,
-                    ]
+                    )
                 );
             }
         }
 
-        $roleAssignments = [];
+        $roleAssignments = array();
         array_walk_recursive(
             $roleAssignmentData,
             function ($roleAssignment) use (&$roleAssignments) {

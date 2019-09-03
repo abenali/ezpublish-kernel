@@ -17,7 +17,9 @@ use eZ\Publish\SPI\Persistence\Content\Type;
  */
 class DeferredLegacy extends Handler
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway
+     */
     protected $contentTypeGateway;
 
     /**

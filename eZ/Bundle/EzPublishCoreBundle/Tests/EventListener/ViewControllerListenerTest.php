@@ -23,19 +23,29 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class ViewControllerListenerTest extends TestCase
 {
-    /** @var \Symfony\Component\HttpKernel\Controller\ControllerResolver|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \Symfony\Component\HttpKernel\Controller\ControllerResolver|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $controllerResolver;
 
-    /** @var \Psr\Log\LoggerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \Psr\Log\LoggerInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $logger;
 
-    /** @var ViewControllerListener */
+    /**
+     * @var ViewControllerListener
+     */
     private $controllerListener;
 
-    /** @var \Symfony\Component\HttpKernel\Event\FilterControllerEvent|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \Symfony\Component\HttpKernel\Event\FilterControllerEvent|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $event;
 
-    /** @var Request */
+    /**
+     * @var Request
+     */
     private $request;
 
     /** @var \eZ\Publish\Core\MVC\Symfony\View\Builder\ViewBuilderRegistry|\PHPUnit\Framework\MockObject\MockObject */
@@ -50,7 +60,7 @@ class ViewControllerListenerTest extends TestCase
     /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\PHPUnit\Framework\MockObject\MockObject */
     private $eventDispatcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->controllerResolver = $this->createMock(ControllerResolverInterface::class);
@@ -77,7 +87,7 @@ class ViewControllerListenerTest extends TestCase
     public function testGetSubscribedEvents()
     {
         $this->assertSame(
-            [KernelEvents::CONTROLLER => ['getController', 10]],
+            array(KernelEvents::CONTROLLER => array('getController', 10)),
             $this->controllerListener->getSubscribedEvents()
         );
     }
@@ -127,11 +137,11 @@ class ViewControllerListenerTest extends TestCase
         $customController = 'FooBundle::bar';
 
         $this->request->attributes->add(
-            [
+            array(
                 '_controller' => 'ez_content:viewLocation',
                 'locationId' => $id,
                 'viewType' => $viewType,
-            ]
+            )
         );
 
         $this->viewBuilderRegistry

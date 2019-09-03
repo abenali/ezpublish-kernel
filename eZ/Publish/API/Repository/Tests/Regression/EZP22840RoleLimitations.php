@@ -36,11 +36,11 @@ class EZP22840RoleLimitations extends BaseTest
         $policyCreate = $roleService->newPolicyCreateStruct('state', 'assign');
         $policyCreate->addLimitation(
             new NewObjectStateLimitation(
-                [
-                    'limitationValues' => [
+                array(
+                    'limitationValues' => array(
                         $notLockedState,
-                    ],
-                ]
+                    ),
+                )
             )
         );
 
@@ -69,7 +69,7 @@ class EZP22840RoleLimitations extends BaseTest
         $user = $this->createCustomUserVersion1(
             'Section Editor',
             'Editor',
-            new SectionLimitation(['limitationValues' => ['2']])
+            new SectionLimitation(array('limitationValues' => array('2')))
         );
 
         // set as current user

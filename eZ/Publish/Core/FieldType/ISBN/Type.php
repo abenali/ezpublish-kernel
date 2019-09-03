@@ -30,12 +30,12 @@ class Type extends FieldType
     const ISBN13_PREFIX_978 = '978';
     const ISBN13_PREFIX_979 = '979';
 
-    protected $settingsSchema = [
-        'isISBN13' => [
+    protected $settingsSchema = array(
+        'isISBN13' => array(
             'type' => 'boolean',
             'default' => true,
-        ],
-    ];
+        ),
+    );
 
     /**
      * Returns the field type identifier for this field type.
@@ -48,11 +48,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\ISBN\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\ISBN\Value $value
      *
      * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value->isbn;
     }
@@ -128,7 +133,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         if ($this->isEmptyValue($fieldValue)) {
             return $validationErrors;
         }
@@ -142,7 +147,7 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'ISBN-10 must be 10 character length',
                 null,
-                [],
+                array(),
                 'isbn'
             );
         } elseif (strlen($isbnTestNumber) === 10) {
@@ -151,7 +156,7 @@ class Type extends FieldType
                 $validationErrors[] = new ValidationError(
                     'ISBN value must be in a valid ISBN-10 format',
                     null,
-                    [],
+                    array(),
                     'isbn'
                 );
             }
@@ -161,7 +166,7 @@ class Type extends FieldType
                 $validationErrors[] = new ValidationError(
                     $error,
                     null,
-                    [],
+                    array(),
                     'isbn'
                 );
             }
@@ -233,16 +238,16 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (!isset($this->settingsSchema[$name])) {
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
                 continue;
@@ -254,9 +259,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of boolean type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }

@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\FieldType\TextBlock;
 
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\Core\FieldType\ValidationError;
@@ -22,14 +21,14 @@ use eZ\Publish\Core\FieldType\Value as BaseValue;
  */
 class Type extends FieldType
 {
-    protected $settingsSchema = [
-        'textRows' => [
+    protected $settingsSchema = array(
+        'textRows' => array(
             'type' => 'int',
             'default' => 10,
-        ],
-    ];
+        ),
+    );
 
-    protected $validatorConfigurationSchema = [];
+    protected $validatorConfigurationSchema = array();
 
     /**
      * Returns the field type identifier for this field type.
@@ -42,9 +41,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\TextBlock\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\TextBlock\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value->text;
     }
@@ -172,7 +178,7 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (isset($this->settingsSchema[$name])) {
@@ -182,9 +188,9 @@ class Type extends FieldType
                             $validationErrors[] = new ValidationError(
                                 "Setting '%setting%' value must be of integer type",
                                 null,
-                                [
+                                array(
                                     '%setting%' => $name,
-                                ],
+                                ),
                                 "[$name]"
                             );
                         }
@@ -194,9 +200,9 @@ class Type extends FieldType
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
             }

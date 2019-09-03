@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\Persistence\Legacy\Content\ObjectState\Gateway;
 
-use Doctrine\DBAL\ParameterType;
 use eZ\Publish\Core\Persistence\Legacy\Content\ObjectState\Gateway;
 use eZ\Publish\Core\Persistence\Legacy\Content\Language\MaskGenerator;
 use eZ\Publish\Core\Persistence\Database\DatabaseHandler;
@@ -120,7 +119,7 @@ class DoctrineDatabase extends Gateway
         $statement = $query->prepare();
         $statement->execute();
 
-        $rows = [];
+        $rows = array();
         while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
             $rows[$row['ezcobj_state_id']][] = $row;
         }
@@ -190,7 +189,7 @@ class DoctrineDatabase extends Gateway
         $statement = $query->prepare();
         $statement->execute();
 
-        $rows = [];
+        $rows = array();
         while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
             $rows[$row['ezcobj_state_group_id']][] = $row;
         }
@@ -247,11 +246,7 @@ class DoctrineDatabase extends Gateway
             $query->bindValue($objectState->identifier)
         )->set(
             $this->dbHandler->quoteColumn('language_mask'),
-            $query->bindValue(
-                $this->maskGenerator->generateLanguageMaskFromLanguageCodes($objectState->languageCodes, true),
-                null,
-                ParameterType::INTEGER
-            )
+            $query->bindValue($this->generateLanguageMask($objectState->languageCodes), null, \PDO::PARAM_INT)
         )->set(
             $this->dbHandler->quoteColumn('priority'),
             $query->bindValue($objectState->priority, null, \PDO::PARAM_INT)
@@ -298,11 +293,7 @@ class DoctrineDatabase extends Gateway
             $query->bindValue($objectState->identifier)
         )->set(
             $this->dbHandler->quoteColumn('language_mask'),
-            $query->bindValue(
-                $this->maskGenerator->generateLanguageMaskFromLanguageCodes($objectState->languageCodes, true),
-                null,
-                ParameterType::INTEGER
-            )
+            $query->bindValue($this->generateLanguageMask($objectState->languageCodes), null, \PDO::PARAM_INT)
         )->where(
             $query->expr->eq(
                 $this->dbHandler->quoteColumn('id'),
@@ -409,11 +400,7 @@ class DoctrineDatabase extends Gateway
             $query->bindValue($objectStateGroup->identifier)
         )->set(
             $this->dbHandler->quoteColumn('language_mask'),
-            $query->bindValue(
-                $this->maskGenerator->generateLanguageMaskFromLanguageCodes($objectStateGroup->languageCodes, true),
-                null,
-                ParameterType::INTEGER
-            )
+            $query->bindValue($this->generateLanguageMask($objectStateGroup->languageCodes), null, \PDO::PARAM_INT)
         );
 
         $query->prepare()->execute();
@@ -448,11 +435,7 @@ class DoctrineDatabase extends Gateway
             $query->bindValue($objectStateGroup->identifier)
         )->set(
             $this->dbHandler->quoteColumn('language_mask'),
-            $query->bindValue(
-                $this->maskGenerator->generateLanguageMaskFromLanguageCodes($objectStateGroup->languageCodes, true),
-                null,
-                ParameterType::INTEGER
-            )
+            $query->bindValue($this->generateLanguageMask($objectStateGroup->languageCodes), null, \PDO::PARAM_INT)
         )->where(
             $query->expr->eq(
                 $this->dbHandler->quoteColumn('id'),
@@ -833,5 +816,24 @@ class DoctrineDatabase extends Gateway
         );
 
         $query->prepare()->execute();
+    }
+
+    /**
+     * Generates language mask from provided language codes
+     * Also sets always available bit.
+     *
+     * @param array $languageCodes
+     *
+     * @return int
+     */
+    protected function generateLanguageMask(array $languageCodes)
+    {
+        $maskLanguageCodes = array();
+        foreach ($languageCodes as $languageCode) {
+            $maskLanguageCodes[$languageCode] = 1;
+        }
+        $maskLanguageCodes['always-available'] = 1;
+
+        return $this->maskGenerator->generateLanguageMask($maskLanguageCodes);
     }
 }

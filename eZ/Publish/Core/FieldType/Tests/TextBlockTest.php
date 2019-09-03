@@ -44,7 +44,7 @@ class TextBlockTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -54,12 +54,12 @@ class TextBlockTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [
-            'textRows' => [
+        return array(
+            'textRows' => array(
                 'type' => 'int',
                 'default' => 10,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -97,16 +97,16 @@ class TextBlockTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 23,
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new TextBlockValue(23),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -140,32 +140,32 @@ class TextBlockTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new TextBlockValue(),
-            ],
-            [
+            ),
+            array(
                 '',
                 new TextBlockValue(),
-            ],
-            [
+            ),
+            array(
                 'sindelfingen',
                 new TextBlockValue('sindelfingen'),
-            ],
-            [
+            ),
+            array(
                 new TextBlockValue('sindelfingen'),
                 new TextBlockValue('sindelfingen'),
-            ],
-            [
+            ),
+            array(
                 new TextBlockValue(''),
                 new TextBlockValue(),
-            ],
-            [
+            ),
+            array(
                 new TextBlockValue(null),
                 new TextBlockValue(),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -205,16 +205,16 @@ class TextBlockTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new TextBlockValue(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new TextBlockValue('sindelfingen'),
                 'sindelfingen',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -254,16 +254,16 @@ class TextBlockTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 '',
                 new TextBlockValue(),
-            ],
-            [
+            ),
+            array(
                 'sindelfingen',
                 new TextBlockValue('sindelfingen'),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -290,16 +290,16 @@ class TextBlockTest extends FieldTypeTest
      */
     public function provideValidFieldSettings()
     {
-        return [
-            [
-                [],
-            ],
-            [
-                [
+        return array(
+            array(
+                array(),
+            ),
+            array(
+                array(
                     'textRows' => 23,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -327,19 +327,19 @@ class TextBlockTest extends FieldTypeTest
      */
     public function provideInValidFieldSettings()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'non-existent' => 'foo',
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     // textRows must be integer
                     'textRows' => 'foo',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -347,11 +347,11 @@ class TextBlockTest extends FieldTypeTest
         return 'eztext';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new TextBlockValue('This is a piece of text'), [], 'en_GB', 'This is a piece of text'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new TextBlockValue('This is a piece of text'), 'This is a piece of text'),
+        );
     }
 }

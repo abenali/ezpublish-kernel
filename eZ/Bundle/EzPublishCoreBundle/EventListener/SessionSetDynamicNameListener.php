@@ -32,13 +32,19 @@ class SessionSetDynamicNameListener implements EventSubscriberInterface
      */
     const SESSION_NAME_PREFIX = 'eZSESSID';
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     private $configResolver;
 
-    /** @var \Symfony\Component\HttpFoundation\Session\SessionInterface|null */
+    /**
+     * @var \Symfony\Component\HttpFoundation\Session\SessionInterface|null
+     */
     private $session;
 
-    /** @var \Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface|NativeSessionStorage */
+    /**
+     * @var \Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface|NativeSessionStorage
+     */
     private $sessionStorage;
 
     /**
@@ -55,9 +61,9 @@ class SessionSetDynamicNameListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
-            MVCEvents::SITEACCESS => ['onSiteAccessMatch', 250],
-        ];
+        return array(
+            MVCEvents::SITEACCESS => array('onSiteAccessMatch', 250),
+        );
     }
 
     public function onSiteAccessMatch(PostSiteAccessMatchEvent $event)

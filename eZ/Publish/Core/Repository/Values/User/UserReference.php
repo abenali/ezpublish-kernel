@@ -17,7 +17,9 @@ use eZ\Publish\API\Repository\Values\User\UserReference as APIUserReference;
  */
 class UserReference implements APIUserReference
 {
-    /** @var mixed */
+    /**
+     * @var mixed
+     */
     private $userId;
 
     /**

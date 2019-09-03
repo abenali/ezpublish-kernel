@@ -16,10 +16,12 @@ use eZ\Publish\API\Repository\Repository;
 
 class SectionTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Identifier\Section */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Identifier\Section
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new SectionIdentifierMatcher();
@@ -42,9 +44,9 @@ class SectionTest extends BaseTest
                     $this
                         ->getMockBuilder(Section::class)
                         ->setConstructorArgs(
-                            [
-                                ['identifier' => $sectionIdentifier],
-                            ]
+                            array(
+                                array('identifier' => $sectionIdentifier),
+                            )
                         )
                         ->getMockForAbstractClass()
                 )
@@ -94,28 +96,28 @@ class SectionTest extends BaseTest
 
     public function matchSectionProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 'foo',
                 $this->generateRepositoryMockForSectionIdentifier('foo'),
                 true,
-            ],
-            [
+            ),
+            array(
                 'foo',
                 $this->generateRepositoryMockForSectionIdentifier('bar'),
                 false,
-            ],
-            [
-                ['foo', 'baz'],
+            ),
+            array(
+                array('foo', 'baz'),
                 $this->generateRepositoryMockForSectionIdentifier('bar'),
                 false,
-            ],
-            [
-                ['foo', 'baz'],
+            ),
+            array(
+                array('foo', 'baz'),
                 $this->generateRepositoryMockForSectionIdentifier('baz'),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**

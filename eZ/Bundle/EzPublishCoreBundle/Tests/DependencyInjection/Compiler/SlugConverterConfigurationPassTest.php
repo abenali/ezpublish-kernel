@@ -19,7 +19,7 @@ class SlugConverterConfigurationPassTest extends AbstractCompilerPassTestCase
     /**
      * {@inheritdoc}
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new SlugConverterConfigurationPass());
     }
@@ -41,7 +41,6 @@ class SlugConverterConfigurationPassTest extends AbstractCompilerPassTestCase
         $definition = new Definition(SlugConverter::class);
         $definition->setArgument(0, $this->createMock(TransformationProcessor::class));
         $definition->setArgument(1, $existingOldParameters);
-        $definition->setPublic(true);
 
         $this->setDefinition('ezpublish.persistence.slug_converter', $definition);
 

@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\API\Repository;
 
-use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\SectionCreateStruct;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Section;
@@ -57,7 +56,9 @@ interface SectionService
     public function loadSection($sectionId);
 
     /**
-     * Loads all sections, excluding the ones the current user is not allowed to read.
+     * Loads all sections.
+     *
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException If the current user user is not allowed to read a section
      *
      * @return array of {@link \eZ\Publish\API\Repository\Values\Content\Section}
      */
@@ -109,15 +110,6 @@ interface SectionService
      * @param \eZ\Publish\API\Repository\Values\Content\Section $section
      */
     public function assignSection(ContentInfo $contentInfo, Section $section);
-
-    /**
-     * Assigns the subtree to the given section
-     * this method overrides the current assigned section.
-     *
-     * @param \eZ\Publish\API\Repository\Values\Content\Location $location
-     * @param \eZ\Publish\API\Repository\Values\Content\Section $section
-     */
-    public function assignSectionToSubtree(Location $location, Section $section): void;
 
     /**
      * Deletes $section from content repository.

@@ -17,12 +17,12 @@ use Imagine\Exception\InvalidArgumentException;
  */
 class ScaleWidthFilterLoader extends FilterLoaderWrapped
 {
-    public function load(ImageInterface $image, array $options = [])
+    public function load(ImageInterface $image, array $options = array())
     {
         if (empty($options)) {
             throw new InvalidArgumentException('Missing width option');
         }
 
-        return $this->innerLoader->load($image, ['widen' => $options[0]]);
+        return $this->innerLoader->load($image, array('widen' => $options[0]));
     }
 }

@@ -19,10 +19,14 @@ use Psr\Log\LoggerInterface;
  */
 class UrlStorage extends GatewayBasedStorage
 {
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     protected $logger;
 
-    /** @var \eZ\Publish\Core\FieldType\Url\UrlStorage\Gateway */
+    /**
+     * @var \eZ\Publish\Core\FieldType\Url\UrlStorage\Gateway
+     */
     protected $gateway;
 
     /**
@@ -52,7 +56,7 @@ class UrlStorage extends GatewayBasedStorage
             return false;
         }
 
-        $map = $this->gateway->getUrlIdMap([$url]);
+        $map = $this->gateway->getUrlIdMap(array($url));
 
         if (isset($map[$url])) {
             $urlId = $map[$url];
@@ -87,7 +91,7 @@ class UrlStorage extends GatewayBasedStorage
             return;
         }
 
-        $map = $this->gateway->getIdUrlMap([$id]);
+        $map = $this->gateway->getIdUrlMap(array($id));
 
         // URL id is not in the DB
         if (!isset($map[$id]) && isset($this->logger)) {

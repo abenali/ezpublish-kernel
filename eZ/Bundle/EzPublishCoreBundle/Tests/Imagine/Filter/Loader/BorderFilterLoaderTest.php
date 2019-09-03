@@ -19,29 +19,28 @@ use PHPUnit\Framework\TestCase;
 class BorderFilterLoaderTest extends TestCase
 {
     /**
+     * @expectedException \Imagine\Exception\InvalidArgumentException
      * @dataProvider loadInvalidProvider
      */
     public function testLoadInvalidOptions(array $options)
     {
-        $this->expectException(\Imagine\Exception\InvalidArgumentException::class);
-
         $loader = new BorderFilterLoader();
         $loader->load($this->createMock(ImageInterface::class), $options);
     }
 
     public function loadInvalidProvider()
     {
-        return [
-            [[]],
-            [[123]],
-            [['foo' => 'bar']],
-        ];
+        return array(
+            array(array()),
+            array(array(123)),
+            array(array('foo' => 'bar')),
+        );
     }
 
     public function testLoadDefaultColor()
     {
         $image = $this->createMock(ImageInterface::class);
-        $options = [10, 10];
+        $options = array(10, 10);
 
         $palette = $this->createMock(PaletteInterface::class);
         $image
@@ -88,7 +87,7 @@ class BorderFilterLoaderTest extends TestCase
     public function testLoad($thickX, $thickY, $color)
     {
         $image = $this->createMock(ImageInterface::class);
-        $options = [$thickX, $thickY, $color];
+        $options = array($thickX, $thickY, $color);
 
         $palette = $this->createMock(PaletteInterface::class);
         $image
@@ -131,10 +130,10 @@ class BorderFilterLoaderTest extends TestCase
 
     public function loadProvider()
     {
-        return [
-            [10, 10, '#fff'],
-            [5, 5, '#5dcb4f'],
-            [50, 50, '#fa1629'],
-        ];
+        return array(
+            array(10, 10, '#fff'),
+            array(5, 5, '#5dcb4f'),
+            array(50, 50, '#fa1629'),
+        );
     }
 }

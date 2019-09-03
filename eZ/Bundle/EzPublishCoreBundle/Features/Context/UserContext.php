@@ -8,6 +8,8 @@ namespace eZ\Bundle\EzPublishCoreBundle\Features\Context;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Behat\Context\Context;
 use PHPUnit\Framework\Assert as Assertion;
+use EzSystems\PlatformBehatBundle\Context\RepositoryContext;
+use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\API\Repository\UserService;
 use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Exceptions as ApiExceptions;
@@ -20,6 +22,8 @@ use eZ\Publish\API\Repository\Exceptions\NotFoundException;
  */
 class UserContext implements Context
 {
+    use RepositoryContext;
+
     const DEFAULT_LANGUAGE = 'eng-GB';
 
     /**
@@ -32,18 +36,24 @@ class UserContext implements Context
     const USERGROUP_ROOT_SUBTREE = '/1/5/';
     const USERGROUP_CONTENT_IDENTIFIER = 'user_group';
 
-    /** @var \eZ\Publish\API\Repository\UserService */
+    /**
+     * @var \eZ\Publish\API\Repository\UserService
+     */
     protected $userService;
 
-    /** @var \eZ\Publish\API\Repository\SearchService */
+    /**
+     * @var \eZ\Publish\API\Repository\SearchService
+     */
     protected $searchService;
 
     /**
+     * @injectService $repository @ezpublish.api.repository
      * @injectService $userService @ezpublish.api.service.user
      * @injectService $searchService @ezpublish.api.service.search
      */
-    public function __construct(UserService $userService, SearchService $searchService)
+    public function __construct(Repository $repository, UserService $userService, SearchService $searchService)
     {
+        $this->setRepository($repository);
         $this->userService = $userService;
         $this->searchService = $searchService;
     }
@@ -89,18 +99,18 @@ class UserContext implements Context
      */
     public function searchUserGroups($name, $parentLocationId = null)
     {
-        $criterionArray = [
+        $criterionArray = array(
             new Criterion\Subtree(self::USERGROUP_ROOT_SUBTREE),
             new Criterion\ContentTypeIdentifier(self::USERGROUP_CONTENT_IDENTIFIER),
             new Criterion\Field('name', Criterion\Operator::EQ, $name),
-        ];
+        );
         if ($parentLocationId) {
             $criterionArray[] = new Criterion\ParentLocationId($parentLocationId);
         }
         $query = new Query();
         $query->filter = new Criterion\LogicalAnd($criterionArray);
 
-        $result = $this->searchService->findContent($query, [], false);
+        $result = $this->searchService->findContent($query, array(), false);
 
         return $result->searchHits;
     }
@@ -115,7 +125,7 @@ class UserContext implements Context
      *
      * @return eZ\Publish\API\Repository\Values\User\User
      */
-    protected function createUser($username, $email, $password, $parentGroup = null, $fields = [])
+    protected function createUser($username, $email, $password, $parentGroup = null, $fields = array())
     {
         $userCreateStruct = $this->userService->newUserCreateStruct(
             $username,
@@ -141,7 +151,7 @@ class UserContext implements Context
             $parentGroup = $this->userService->loadUserGroup(self::USERGROUP_ROOT_CONTENT_ID);
         }
 
-        $user = $this->userService->createUser($userCreateStruct, [$parentGroup]);
+        $user = $this->userService->createUser($userCreateStruct, array($parentGroup));
 
         return $user;
     }
@@ -515,7 +525,7 @@ class UserContext implements Context
         $user = $this->userService->loadUserByLogin($username);
         $fieldsTable = $table->getTable();
         array_shift($fieldsTable);
-        $updateFields = [];
+        $updateFields = array();
         foreach ($fieldsTable as $fieldRow) {
             $fieldName = $fieldRow[0];
             $expectedValue = $fieldRow[1];

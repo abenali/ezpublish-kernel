@@ -7,9 +7,7 @@
 namespace eZ\Publish\Core\Repository;
 
 use DateTime;
-use Exception;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
-use eZ\Publish\API\Repository\PermissionResolver;
 use eZ\Publish\API\Repository\Repository as RepositoryInterface;
 use eZ\Publish\API\Repository\URLService as URLServiceInterface;
 use eZ\Publish\API\Repository\Values\Content\Query;
@@ -28,28 +26,26 @@ use eZ\Publish\SPI\Persistence\URL\URLUpdateStruct as SPIUrlUpdateStruct;
 
 class URLService implements URLServiceInterface
 {
-    /** @var \eZ\Publish\Core\Repository\Repository */
+    /**
+     * @var \eZ\Publish\Core\Repository\Repository
+     */
     protected $repository;
 
-    /** @var \eZ\Publish\SPI\Persistence\URL\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\URL\Handler
+     */
     protected $urlHandler;
 
-    /** \eZ\Publish\API\Repository\PermissionResolver */
-    private $permissionResolver;
-
     /**
+     * URLService constructor.
+     *
      * @param \eZ\Publish\API\Repository\Repository $repository
      * @param \eZ\Publish\SPI\Persistence\URL\Handler $urlHandler
-     * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
      */
-    public function __construct(
-        RepositoryInterface $repository,
-        URLHandler $urlHandler,
-        PermissionResolver $permissionResolver
-    ) {
+    public function __construct(RepositoryInterface $repository, URLHandler $urlHandler)
+    {
         $this->repository = $repository;
         $this->urlHandler = $urlHandler;
-        $this->permissionResolver = $permissionResolver;
     }
 
     /**
@@ -57,7 +53,7 @@ class URLService implements URLServiceInterface
      */
     public function findUrls(URLQuery $query)
     {
-        if ($this->repository->hasAccess('url', 'view') === false) {
+        if ($this->repository->hasAccess('url', 'view') !== true) {
             throw new UnauthorizedException('url', 'view');
         }
 
@@ -87,7 +83,7 @@ class URLService implements URLServiceInterface
      */
     public function updateUrl(URL $url, URLUpdateStruct $struct)
     {
-        if (!$this->permissionResolver->canUser('url', 'update', $url)) {
+        if ($this->repository->hasAccess('url', 'update') !== true) {
             throw new UnauthorizedException('url', 'update');
         }
 
@@ -101,7 +97,7 @@ class URLService implements URLServiceInterface
         try {
             $this->urlHandler->updateUrl($url->id, $updateStruct);
             $this->repository->commit();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->repository->rollback();
             throw $e;
         }
@@ -114,15 +110,13 @@ class URLService implements URLServiceInterface
      */
     public function loadById($id)
     {
-        $url = $this->buildDomainObject(
-            $this->urlHandler->loadById($id)
-        );
-
-        if (!$this->permissionResolver->canUser('url', 'view', $url)) {
+        if ($this->repository->hasAccess('url', 'view') !== true) {
             throw new UnauthorizedException('url', 'view');
         }
 
-        return $url;
+        return $this->buildDomainObject(
+            $this->urlHandler->loadById($id)
+        );
     }
 
     /**
@@ -130,15 +124,13 @@ class URLService implements URLServiceInterface
      */
     public function loadByUrl($url)
     {
-        $apiUrl = $this->buildDomainObject(
-            $this->urlHandler->loadByUrl($url)
-        );
-
-        if (!$this->permissionResolver->canUser('url', 'view', $apiUrl)) {
+        if ($this->repository->hasAccess('url', 'view') !== true) {
             throw new UnauthorizedException('url', 'view');
         }
 
-        return $apiUrl;
+        return $this->buildDomainObject(
+            $this->urlHandler->loadByUrl($url)
+        );
     }
 
     /**
@@ -185,7 +177,6 @@ class URLService implements URLServiceInterface
      * Builds domain object from ValueObject returned by Persistence API.
      *
      * @param \eZ\Publish\SPI\Persistence\URL\URL $data
-     *
      * @return \eZ\Publish\API\Repository\Values\URL\URL
      */
     protected function buildDomainObject(SPIUrl $data)
@@ -205,7 +196,6 @@ class URLService implements URLServiceInterface
      *
      * @param \eZ\Publish\API\Repository\Values\URL\URL $url
      * @param \eZ\Publish\API\Repository\Values\URL\URLUpdateStruct $data
-     *
      * @return \eZ\Publish\SPI\Persistence\URL\URLUpdateStruct
      */
     protected function buildUpdateStruct(URL $url, URLUpdateStruct $data)
@@ -243,9 +233,8 @@ class URLService implements URLServiceInterface
      *
      * @param int $id
      * @param string $url
-     *
      * @return bool
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
+     * @throws \eZ\Publish\Core\Base\Exceptions\UnauthorizedException
      */
     protected function isUnique($id, $url)
     {

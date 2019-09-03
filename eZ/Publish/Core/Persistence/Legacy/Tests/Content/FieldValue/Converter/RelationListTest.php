@@ -21,16 +21,18 @@ use PHPUnit\Framework\TestCase;
  */
 class RelationListTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\RelationListConverter */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\RelationListConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->converter = $this
             ->getMockBuilder('eZ\\Publish\\Core\\Persistence\\Legacy\\Content\\FieldValue\\Converter\\RelationListConverter')
             ->disableOriginalConstructor()
-            ->setMethods(['getRelationXmlHashFromDB'])
+            ->setMethods(array('getRelationXmlHashFromDB'))
             ->getMock();
     }
 
@@ -40,10 +42,10 @@ class RelationListTest extends TestCase
      */
     public function testToStorageValue()
     {
-        $destinationContentIds = [3, 2, 1];
+        $destinationContentIds = array(3, 2, 1);
         $fieldValue = new FieldValue();
         $fieldValue->sortKey = false;
-        $fieldValue->data = ['destinationContentIds' => $destinationContentIds];
+        $fieldValue->data = array('destinationContentIds' => $destinationContentIds);
 
         $expectedStorageFieldValue = new StorageFieldValue();
         $expectedStorageFieldValue->dataText = <<<EOT
@@ -60,38 +62,38 @@ EOT;
             ->with($destinationContentIds)
             ->will(
                 $this->returnValue(
-                    [
-                        '1' => [
-                            [
+                    array(
+                        '1' => array(
+                            array(
                                 'ezcontentobject_remote_id' => '12',
                                 'ezcontentobject_current_version' => '13',
                                 'ezcontentobject_contentclass_id' => '14',
                                 'ezcontentobject_tree_node_id' => '15',
                                 'ezcontentobject_tree_parent_node_id' => '16',
                                 'ezcontentclass_identifier' => '17',
-                            ],
-                        ],
-                        '3' => [
-                            [
+                            ),
+                        ),
+                        '3' => array(
+                            array(
                                 'ezcontentobject_remote_id' => '32',
                                 'ezcontentobject_current_version' => '33',
                                 'ezcontentobject_contentclass_id' => '34',
                                 'ezcontentobject_tree_node_id' => '35',
                                 'ezcontentobject_tree_parent_node_id' => '36',
                                 'ezcontentclass_identifier' => '37',
-                            ],
-                        ],
-                        '2' => [
-                            [
+                            ),
+                        ),
+                        '2' => array(
+                            array(
                                 'ezcontentobject_remote_id' => '22',
                                 'ezcontentobject_current_version' => '23',
                                 'ezcontentobject_contentclass_id' => '24',
                                 'ezcontentobject_tree_node_id' => '25',
                                 'ezcontentobject_tree_parent_node_id' => '26',
                                 'ezcontentclass_identifier' => '27',
-                            ],
-                        ],
-                    ]
+                            ),
+                        ),
+                    )
                 )
             );
 
@@ -109,10 +111,10 @@ EOT;
      */
     public function testToStorageValueEmpty()
     {
-        $destinationContentIds = [];
+        $destinationContentIds = array();
         $fieldValue = new FieldValue();
         $fieldValue->sortKey = false;
-        $fieldValue->data = ['destinationContentIds' => $destinationContentIds];
+        $fieldValue->data = array('destinationContentIds' => $destinationContentIds);
 
         $expectedStorageFieldValue = new StorageFieldValue();
         $expectedStorageFieldValue->dataText = <<<EOT
@@ -127,7 +129,7 @@ EOT;
             ->expects($this->once())
             ->method('getRelationXmlHashFromDB')
             ->with($destinationContentIds)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->converter->toStorageValue($fieldValue, $actualStorageFieldValue);
 
@@ -152,7 +154,7 @@ EOT;
 EOT;
 
         $expectedFieldValue = new FieldValue();
-        $expectedFieldValue->data = ['destinationContentIds' => [3, 2, 1]];
+        $expectedFieldValue->data = array('destinationContentIds' => array(3, 2, 1));
 
         $actualFieldValue = new FieldValue();
 
@@ -179,7 +181,7 @@ EOT;
 EOT;
 
         $expectedFieldValue = new FieldValue();
-        $expectedFieldValue->data = ['destinationContentIds' => []];
+        $expectedFieldValue->data = array('destinationContentIds' => array());
 
         $actualFieldValue = new FieldValue();
 
@@ -198,22 +200,22 @@ EOT;
     public function testToStorageFieldDefinition()
     {
         $fieldDefinition = new PersistenceFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => new FieldTypeConstraints(
-                    [
-                        'fieldSettings' => [
+                    array(
+                        'fieldSettings' => array(
                             'selectionMethod' => Type::SELECTION_BROWSE,
                             'selectionDefaultLocation' => 12345,
-                            'selectionContentTypes' => ['article', 'blog_post'],
-                        ],
-                        'validators' => [
-                            'RelationListValueValidator' => [
+                            'selectionContentTypes' => array('article', 'blog_post'),
+                        ),
+                        'validators' => array(
+                            'RelationListValueValidator' => array(
                                 'selectionLimit' => 5,
-                            ],
-                        ],
-                    ]
+                            ),
+                        ),
+                    )
                 ),
-            ]
+            )
         );
 
         $expectedStorageFieldDefinition = new StorageFieldDefinition();
@@ -256,27 +258,27 @@ EOT;
 EOT;
 
         $expectedFieldDefinition = new PersistenceFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => new FieldTypeConstraints(
-                    [
-                        'fieldSettings' => [
+                    array(
+                        'fieldSettings' => array(
                             'selectionMethod' => Type::SELECTION_DROPDOWN,
                             'selectionDefaultLocation' => 54321,
-                            'selectionContentTypes' => ['forum', 'folder'],
-                        ],
-                        'validators' => [
-                            'RelationListValueValidator' => [
+                            'selectionContentTypes' => array('forum', 'folder'),
+                        ),
+                        'validators' => array(
+                            'RelationListValueValidator' => array(
                                 'selectionLimit' => 1,
-                            ],
-                        ],
-                    ]
+                            ),
+                        ),
+                    )
                 ),
                 'defaultValue' => new FieldValue(
-                    [
-                        'data' => ['destinationContentIds' => []],
-                    ]
+                    array(
+                        'data' => array('destinationContentIds' => array()),
+                    )
                 ),
-            ]
+            )
         );
 
         $actualFieldDefinition = new PersistenceFieldDefinition();

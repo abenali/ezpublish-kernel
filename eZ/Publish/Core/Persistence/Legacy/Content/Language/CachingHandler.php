@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\Persistence\Legacy\Content\Language;
 
-use eZ\Publish\Core\Persistence\Cache\InMemory\InMemoryCache;
 use eZ\Publish\SPI\Persistence\Content\Language;
 use eZ\Publish\SPI\Persistence\Content\Language\Handler as BaseLanguageHandler;
 use eZ\Publish\SPI\Persistence\Content\Language\CreateStruct;
@@ -28,20 +27,40 @@ class CachingHandler implements BaseLanguageHandler
     /**
      * Language cache.
      *
-     * @var \eZ\Publish\Core\Persistence\Cache\InMemory\InMemoryCache
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Language\Cache
      */
-    protected $cache;
+    protected $languageCache;
+
+    /**
+     * If the cache has already been initialized.
+     *
+     * @var bool
+     */
+    protected $isCacheInitialized = false;
 
     /**
      * Creates a caching handler around $innerHandler.
      *
      * @param \eZ\Publish\SPI\Persistence\Content\Language\Handler $innerHandler
-     * @param \eZ\Publish\Core\Persistence\Cache\InMemory\InMemoryCache $cache
      */
-    public function __construct(BaseLanguageHandler $innerHandler, InMemoryCache $cache)
+    public function __construct(BaseLanguageHandler $innerHandler, Cache $languageCache)
     {
         $this->innerHandler = $innerHandler;
-        $this->cache = $cache;
+        $this->languageCache = $languageCache;
+    }
+
+    /**
+     * Initializes the cache if necessary.
+     */
+    protected function initializeCache()
+    {
+        if (false === $this->isCacheInitialized) {
+            $languages = $this->innerHandler->loadAll();
+            foreach ($languages as $language) {
+                $this->languageCache->store($language);
+            }
+            $this->isCacheInitialized = true;
+        }
     }
 
     /**
@@ -53,8 +72,9 @@ class CachingHandler implements BaseLanguageHandler
      */
     public function create(CreateStruct $struct)
     {
+        $this->initializeCache();
         $language = $this->innerHandler->create($struct);
-        $this->storeCache([$language]);
+        $this->languageCache->store($language);
 
         return $language;
     }
@@ -66,8 +86,9 @@ class CachingHandler implements BaseLanguageHandler
      */
     public function update(Language $language)
     {
+        $this->initializeCache();
         $this->innerHandler->update($language);
-        $this->storeCache([$language]);
+        $this->languageCache->store($language);
     }
 
     /**
@@ -81,38 +102,9 @@ class CachingHandler implements BaseLanguageHandler
      */
     public function load($id)
     {
-        $language = $this->cache->get('ez-language-' . $id);
-        if ($language === null) {
-            $language = $this->innerHandler->load($id);
-            $this->storeCache([$language]);
-        }
+        $this->initializeCache();
 
-        return $language;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadList(array $ids): iterable
-    {
-        $missing = [];
-        $languages = [];
-        foreach ($ids as $id) {
-            if ($language = $this->cache->get('ez-language-' . $id)) {
-                $languages[$id] = $language;
-            } else {
-                $missing[] = $id;
-            }
-        }
-
-        if (!empty($missing)) {
-            $loaded = $this->innerHandler->loadList($missing);
-            $this->storeCache($loaded);
-            /** @noinspection AdditionOperationOnArraysInspection */
-            $languages += $loaded;
-        }
-
-        return $languages;
+        return $this->languageCache->getById($id);
     }
 
     /**
@@ -126,38 +118,9 @@ class CachingHandler implements BaseLanguageHandler
      */
     public function loadByLanguageCode($languageCode)
     {
-        $language = $this->cache->get('ez-language-code-' . $languageCode);
-        if ($language === null) {
-            $language = $this->innerHandler->loadByLanguageCode($languageCode);
-            $this->storeCache([$language]);
-        }
+        $this->initializeCache();
 
-        return $language;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadListByLanguageCodes(array $languageCodes): iterable
-    {
-        $missing = [];
-        $languages = [];
-        foreach ($languageCodes as $languageCode) {
-            if ($language = $this->cache->get('ez-language-code-' . $languageCode)) {
-                $languages[$languageCode] = $language;
-            } else {
-                $missing[] = $languageCode;
-            }
-        }
-
-        if (!empty($missing)) {
-            $loaded = $this->innerHandler->loadListByLanguageCodes($missing);
-            $this->storeCache($loaded);
-            /** @noinspection AdditionOperationOnArraysInspection */
-            $languages += $loaded;
-        }
-
-        return $languages;
+        return $this->languageCache->getByLocale($languageCode);
     }
 
     /**
@@ -167,13 +130,9 @@ class CachingHandler implements BaseLanguageHandler
      */
     public function loadAll()
     {
-        $languages = $this->cache->get('ez-language-list');
-        if ($languages === null) {
-            $languages = $this->innerHandler->loadAll();
-            $this->storeCache($languages, 'ez-language-list');
-        }
+        $this->initializeCache();
 
-        return $languages;
+        return $this->languageCache->getAll();
     }
 
     /**
@@ -183,36 +142,17 @@ class CachingHandler implements BaseLanguageHandler
      */
     public function delete($id)
     {
+        $this->initializeCache();
         $this->innerHandler->delete($id);
-        // Delete by primary key will remove the object, so we don't need to clear `ez-language-code-` here.
-        $this->cache->deleteMulti(['ez-language-' . $id, 'ez-language-list']);
+        $this->languageCache->remove($id);
     }
 
     /**
-     * Clear internal in-memory cache.
+     * Clear internal cache.
      */
-    public function clearCache(): void
+    public function clearCache()
     {
-        $this->cache->clear();
-    }
-
-    /**
-     * Helper to store languages in internal in-memory cache with all needed keys.
-     *
-     * @param array $languages
-     * @param string|null $listIndex
-     */
-    protected function storeCache(array $languages, string $listIndex = null): void
-    {
-        $this->cache->setMulti(
-            $languages,
-            static function (Language $language) {
-                return [
-                        'ez-language-' . $language->id,
-                        'ez-language-code-' . $language->languageCode,
-                    ];
-            },
-            $listIndex
-        );
+        $this->isCacheInitialized = false;
+        $this->languageCache->clearCache();
     }
 }

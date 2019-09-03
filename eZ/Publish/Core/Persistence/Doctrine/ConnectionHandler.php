@@ -22,7 +22,9 @@ use Doctrine\DBAL\DBALException;
  */
 class ConnectionHandler implements DatabaseHandler
 {
-    /** @var \Doctrine\DBAL\Connection */
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
     protected $connection;
 
     /**
@@ -131,7 +133,7 @@ class ConnectionHandler implements DatabaseHandler
      */
     public static function parseDSN($dsn)
     {
-        $parsed = [
+        $parsed = array(
             'driver' => false,
             'user' => false,
             'password' => false,
@@ -141,7 +143,7 @@ class ConnectionHandler implements DatabaseHandler
             'dbname' => false,
             'memory' => false,
             'path' => false,
-        ];
+        );
 
         // Find driver and dbsyntax
         if (($pos = strpos($dsn, '://')) !== false) {
@@ -223,7 +225,7 @@ class ConnectionHandler implements DatabaseHandler
                 if (strpos($dsn, '&') !== false) {
                     $opts = explode('&', $dsn);
                 } else {
-                    $opts = [$dsn];
+                    $opts = array($dsn);
                 }
 
                 foreach ($opts as $opt) {
@@ -248,11 +250,11 @@ class ConnectionHandler implements DatabaseHandler
             }
         }
 
-        $driverMap = [
+        $driverMap = array(
             'mysql' => 'pdo_mysql',
             'pgsql' => 'pdo_pgsql',
             'sqlite' => 'pdo_sqlite',
-        ];
+        );
 
         if (isset($driverMap[$parsed['driver']])) {
             $parsed['driver'] = $driverMap[$parsed['driver']];

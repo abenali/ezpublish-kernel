@@ -17,17 +17,21 @@ use eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter;
  */
 class FieldValueConverterRegistryTest extends TestCase
 {
-    private const TYPE_NAME = 'some-type';
-
     /**
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\ConverterRegistry::register
      */
     public function testRegister()
     {
         $converter = $this->getFieldValueConverterMock();
-        $registry = new Registry([self::TYPE_NAME => $converter]);
+        $registry = new Registry(array('some-type' => $converter));
 
-        $this->assertSame($converter, $registry->getConverter(self::TYPE_NAME));
+        $this->assertAttributeSame(
+            array(
+                'some-type' => $converter,
+            ),
+            'converterMap',
+            $registry
+        );
     }
 
     /**
@@ -36,9 +40,9 @@ class FieldValueConverterRegistryTest extends TestCase
     public function testGetStorage()
     {
         $converter = $this->getFieldValueConverterMock();
-        $registry = new Registry([self::TYPE_NAME => $converter]);
+        $registry = new Registry(array('some-type' => $converter));
 
-        $res = $registry->getConverter(self::TYPE_NAME);
+        $res = $registry->getConverter('some-type');
 
         $this->assertSame(
             $converter,
@@ -49,12 +53,11 @@ class FieldValueConverterRegistryTest extends TestCase
     /**
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\ConverterRegistry::getConverter
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\Exception\NotFound
+     * @expectedException \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\Exception\NotFound
      */
     public function testGetNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\Exception\NotFound::class);
-
-        $registry = new Registry([]);
+        $registry = new Registry(array());
 
         $registry->getConverter('not-found');
     }

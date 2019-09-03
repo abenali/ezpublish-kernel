@@ -292,9 +292,9 @@ class MapperTest extends TestCase
         $mapper = $this->getNonConvertingMapper();
         $types = $mapper->extractTypesFromRows($rows);
 
-        $this->assertCount(
+        $this->assertEquals(
             1,
-            $types,
+            count($types),
             'Incorrect number of types extracted'
         );
 
@@ -324,9 +324,9 @@ class MapperTest extends TestCase
             $types[0]
         );
 
-        $this->assertCount(
-            4,
-            $types[0]->fieldDefinitions,
+        $this->assertEquals(
+            6,
+            count($types[0]->fieldDefinitions),
             'Incorrect number of field definitions'
         );
         $this->assertPropertiesCorrect(
@@ -345,7 +345,7 @@ class MapperTest extends TestCase
                 'isSearchable' => true,
                 'position' => 2,
             ],
-            $types[0]->fieldDefinitions[1]
+            $types[0]->fieldDefinitions[2]
         );
 
         $this->assertPropertiesCorrect(
@@ -362,7 +362,7 @@ class MapperTest extends TestCase
                 'isSearchable' => false,
                 'position' => 6,
             ],
-            $types[0]->fieldDefinitions[3]
+            $types[0]->fieldDefinitions[5]
         );
     }
 
@@ -390,9 +390,6 @@ class MapperTest extends TestCase
 
         $fieldDef = new FieldDefinition();
         $fieldDef->fieldType = 'some_type';
-        $fieldDef->name = [
-            'eng-GB' => 'some name',
-        ];
 
         $storageFieldDef = new StorageFieldDefinition();
 
@@ -437,8 +434,8 @@ class MapperTest extends TestCase
     protected function getNonConvertingMapper()
     {
         $mapper = $this->getMockBuilder(Mapper::class)
-            ->setMethods(['toFieldDefinition'])
-            ->setConstructorArgs([$this->getConverterRegistryMock(), $this->getMaskGeneratorMock()])
+            ->setMethods(array('toFieldDefinition'))
+            ->setConstructorArgs(array($this->getConverterRegistryMock(), $this->getMaskGeneratorMock()))
             ->getMock();
 
         // Dedicatedly tested test

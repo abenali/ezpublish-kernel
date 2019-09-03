@@ -14,10 +14,12 @@ use PHPUnit\Framework\TestCase;
 
 class MapperTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Mapper
+     */
     private $mapper;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->mapper = new Mapper();
     }

@@ -19,11 +19,15 @@ use eZ\Publish\Core\Persistence\Database\DeleteQuery;
  */
 class DeleteDoctrineQuery extends AbstractDoctrineQuery implements DeleteQuery
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $table;
 
-    /** @var array */
-    private $where = [];
+    /**
+     * @var array
+     */
+    private $where = array();
 
     /**
      * Opens the query and sets the target table to $table.

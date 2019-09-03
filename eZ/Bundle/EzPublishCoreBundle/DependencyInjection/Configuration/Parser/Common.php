@@ -20,7 +20,9 @@ use Symfony\Component\Config\Definition\Builder\NodeBuilder;
  */
 class Common extends AbstractParser implements SuggestionCollectorAwareInterface
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\Suggestion\Collector\SuggestionCollectorInterface */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\Suggestion\Collector\SuggestionCollectorInterface
+     */
     private $suggestionCollector;
 
     /**
@@ -37,7 +39,7 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
             ->arrayNode('database')
                 ->info('DEPRECATED. Use ezpublish.repositories / repository settings instead.')
                 ->children()
-                    ->enumNode('type')->values(['mysql', 'pgsql', 'sqlite'])->info('The database driver. Can be mysql, pgsql or sqlite.')->end()
+                    ->enumNode('type')->values(array('mysql', 'pgsql', 'sqlite'))->info('The database driver. Can be mysql, pgsql or sqlite.')->end()
                     ->scalarNode('server')->end()
                     ->scalarNode('port')->end()
                     ->scalarNode('user')->cannotBeEmpty()->end()
@@ -47,7 +49,7 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
                     ->scalarNode('socket')->end()
                     ->arrayNode('options')
                         ->info('Arbitrary options, supported by your DB driver ("driver-opts" in PDO)')
-                        ->example(['foo' => 'bar', 'someOptionName' => ['one', 'two', 'three']])
+                        ->example(array('foo' => 'bar', 'someOptionName' => array('one', 'two', 'three')))
                         ->useAttributeAsKey('key')
                         ->prototype('variable')->end()
                     ->end()
@@ -90,7 +92,7 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
                 ->children()
                     ->scalarNode('name')
                         ->info('The session name. If you want a session name per siteaccess, use "{siteaccess_hash}" token. Will override default session name from framework.session.name')
-                        ->example(['session' => ['name' => 'eZSESSID{siteaccess_hash}']])
+                        ->example(array('session' => array('name' => 'eZSESSID{siteaccess_hash}')))
                     ->end()
                     ->scalarNode('cookie_lifetime')->end()
                     ->scalarNode('cookie_path')->end()
@@ -102,11 +104,6 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
             ->scalarNode('pagelayout')
                 ->info('The default layout to use')
                 ->example('AppBundle::pagelayout.html.twig')
-                ->setDeprecated('The "pagelayout" option is deprecated. Use "page_layout" instead.')
-            ->end()
-            ->scalarNode('page_layout')
-                ->info('The default layout to use')
-                ->example('AppBundle::page_layout.html.twig')
             ->end()
             ->scalarNode('index_page')
                 ->info('The page that the index page will show. Default value is null.')
@@ -121,7 +118,7 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
                 ->children()
                     ->arrayNode('purge_servers')
                         ->info('Servers to use for Http PURGE (will NOT be used if ezpublish.http_cache.purge_type is "local").')
-                        ->example(['http://localhost/', 'http://another.server/'])
+                        ->example(array('http://localhost/', 'http://another.server/'))
                         ->requiresAtLeastOneElement()
                         ->prototype('scalar')->end()
                     ->end()
@@ -136,11 +133,11 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
                 ->children()
                     ->scalarNode('layout')
                         ->info('Layout template to use for user related actions. This is most likely the base pagelayout template of your site.')
-                        ->example(['layout' => 'eZDemoBundle::pagelayout.html.twig'])
+                        ->example(array('layout' => 'eZDemoBundle::pagelayout.html.twig'))
                     ->end()
                     ->scalarNode('login_template')
                         ->info('Template to use for login form. Defaults to EzPublishCoreBundle:security:login.html.twig')
-                        ->example(['login_template' => 'AcmeTestBundle:User:login.html.twig'])
+                        ->example(array('login_template' => 'AcmeTestBundle:User:login.html.twig'))
                     ->end()
                 ->end()
             ->end();
@@ -179,7 +176,7 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
 
         // session_name setting is deprecated in favor of session.name
         $container = $contextualizer->getContainer();
-        $sessionOptions = $container->hasParameter("ezsettings.$currentScope.session") ? $container->getParameter("ezsettings.$currentScope.session") : [];
+        $sessionOptions = $container->hasParameter("ezsettings.$currentScope.session") ? $container->getParameter("ezsettings.$currentScope.session") : array();
         if (isset($sessionOptions['name'])) {
             $contextualizer->setContextualParameter('session_name', $currentScope, $sessionOptions['name']);
         }
@@ -209,14 +206,7 @@ class Common extends AbstractParser implements SuggestionCollectorAwareInterface
             $contextualizer->setContextualParameter('default_page', $currentScope, '/' . ltrim($scopeSettings['default_page'], '/'));
         }
         if (isset($scopeSettings['pagelayout'])) {
-            // note: "pagelayout" is deprecated, deprecation message is set via Semantic Config Node Builder
             $contextualizer->setContextualParameter('pagelayout', $currentScope, $scopeSettings['pagelayout']);
-            $contextualizer->setContextualParameter('page_layout', $currentScope, $scopeSettings['pagelayout']);
-        }
-        if (isset($scopeSettings['page_layout'])) {
-            // note: "page_layout" as the new setting always takes precedence
-            $contextualizer->setContextualParameter('pagelayout', $currentScope, $scopeSettings['page_layout']);
-            $contextualizer->setContextualParameter('page_layout', $currentScope, $scopeSettings['page_layout']);
         }
     }
 
@@ -242,23 +232,23 @@ Please define:
 EOT
         );
         $suggestion->setMandatory(true);
-        $suggestionArray = [
+        $suggestionArray = array(
             'driver' => 'pdo_mysql',
             'host' => 'localhost',
             'dbname' => 'my_database',
             'user' => 'my_user',
             'password' => 'some_password',
             'charset' => 'UTF8',
-        ];
+        );
 
         if (!empty($databaseConfig)) {
             $suggestionArray['dbname'] = $databaseConfig['database_name'];
             $suggestionArray['host'] = $databaseConfig['server'];
-            $driverMap = [
+            $driverMap = array(
                 'mysql' => 'pdo_mysql',
                 'pgsql' => 'pdo_pgsql',
                 'sqlite' => 'pdo_sqlite',
-            ];
+            );
             if (isset($driverMap[$databaseConfig['type']])) {
                 $suggestionArray['driver'] = $driverMap[$databaseConfig['type']];
             } else {
@@ -272,34 +262,34 @@ EOT
             $suggestionArray['password'] = $databaseConfig['password'];
         }
         $suggestion->setSuggestion(
-            [
-                'doctrine' => [
-                    'dbal' => [
-                        'connections' => [
+            array(
+                'doctrine' => array(
+                    'dbal' => array(
+                        'connections' => array(
                             'default' => $suggestionArray,
-                        ],
-                    ],
-                ],
-                'ezpublish' => [
-                    'repositories' => [
-                        'my_repository' => [
-                            'storage' => [
+                        ),
+                    ),
+                ),
+                'ezpublish' => array(
+                    'repositories' => array(
+                        'my_repository' => array(
+                            'storage' => array(
                                 'engine' => 'legacy',
                                 'connection' => 'default',
-                            ],
-                            'search' => [
+                            ),
+                            'search' => array(
                                 'engine' => 'legacy',
                                 'connection' => 'default',
-                            ],
-                        ],
-                    ],
-                    'system' => [
-                        $sa => [
+                            ),
+                        ),
+                    ),
+                    'system' => array(
+                        $sa => array(
                             'repository' => 'my_repository',
-                        ],
-                    ],
-                ],
-            ]
+                        ),
+                    ),
+                ),
+            )
         );
 
         $this->suggestionCollector->addSuggestion($suggestion);

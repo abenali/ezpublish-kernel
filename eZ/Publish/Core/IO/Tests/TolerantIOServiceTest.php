@@ -16,7 +16,7 @@ use eZ\Publish\Core\IO\Values\MissingBinaryFile;
  */
 class TolerantIOServiceTest extends IOServiceTest
 {
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
@@ -24,7 +24,7 @@ class TolerantIOServiceTest extends IOServiceTest
             $this->metadataHandlerMock,
             $this->binarydataHandlerMock,
             $this->mimeTypeDetectorMock,
-            ['prefix' => self::PREFIX]
+            array('prefix' => self::PREFIX)
         );
     }
 
@@ -33,10 +33,9 @@ class TolerantIOServiceTest extends IOServiceTest
      */
     public function testLoadBinaryFileNotFound()
     {
-        $binaryFile = parent::loadBinaryFileNotFound();
-
+        $binaryFile = parent::testLoadBinaryFileNotFound();
         self::assertEquals(
-            new MissingBinaryFile(['id' => 'id.ext']),
+            new MissingBinaryFile(array('id' => 'id.ext')),
             $binaryFile
         );
     }
@@ -55,9 +54,9 @@ class TolerantIOServiceTest extends IOServiceTest
             ->with($prefixedUri)
             ->will($this->returnValue("/$prefixedUri"));
 
-        $binaryFile = parent::loadBinaryFileNotFound();
+        $binaryFile = parent::testLoadBinaryFileNotFound();
         self::assertEquals(
-            new MissingBinaryFile(['id' => 'id.ext', 'uri' => "/$prefixedUri"]),
+            new MissingBinaryFile(array('id' => 'id.ext', 'uri' => "/$prefixedUri")),
             $binaryFile
         );
     }
@@ -69,14 +68,14 @@ class TolerantIOServiceTest extends IOServiceTest
      */
     public function testDeleteBinaryFileNotFound()
     {
-        parent::deleteBinaryFileNotFound();
+        parent::testDeleteBinaryFileNotFound();
     }
 
     public function testLoadBinaryFileByUriNotFound()
     {
         self::assertEquals(
-            new MissingBinaryFile(['id' => 'my/path.png']),
-            parent::loadBinaryFileByUriNotFound()
+            new MissingBinaryFile(array('id' => 'my/path.png')),
+            parent::testLoadBinaryFileByUriNotFound()
         );
     }
 }

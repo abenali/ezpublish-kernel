@@ -39,7 +39,7 @@ class MapLocationTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -49,7 +49,7 @@ class MapLocationTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -85,39 +85,39 @@ class MapLocationTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 'some string',
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 'foo',
-                    ]
+                    )
                 ),
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 'bar',
-                    ]
+                    )
                 ),
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 42.23,
-                        'address' => [],
-                    ]
+                        'address' => array(),
+                    )
                 ),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -151,64 +151,64 @@ class MapLocationTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new MapLocation\Value(),
-            ],
-            [
-                [],
+            ),
+            array(
+                array(),
                 new MapLocation\Value(),
-            ],
-            [
+            ),
+            array(
                 new MapLocation\Value(),
                 new MapLocation\Value(),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'latitude' => 23.42,
                     'longitude' => 42.23,
                     'address' => 'Nowhere',
-                ],
+                ),
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 42.23,
                         'address' => 'Nowhere',
-                    ]
+                    )
                 ),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'latitude' => 23,
                     'longitude' => 42,
                     'address' => 'Somewhere',
-                ],
+                ),
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23,
                         'longitude' => 42,
                         'address' => 'Somewhere',
-                    ]
+                    )
                 ),
-            ],
-            [
+            ),
+            array(
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 42.23,
                         'address' => 'Nowhere',
-                    ]
+                    )
                 ),
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 42.23,
                         'address' => 'Nowhere',
-                    ]
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -248,26 +248,26 @@ class MapLocationTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new MapLocation\Value(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 42.23,
                         'address' => 'Nowhere',
-                    ]
+                    )
                 ),
-                [
+                array(
                     'latitude' => 23.42,
                     'longitude' => 42.23,
                     'address' => 'Nowhere',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -309,26 +309,26 @@ class MapLocationTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new MapLocation\Value(),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'latitude' => 23.42,
                     'longitude' => 42.23,
                     'address' => 'Nowhere',
-                ],
+                ),
                 new MapLocation\Value(
-                    [
+                    array(
                         'latitude' => 23.42,
                         'longitude' => 42.23,
                         'address' => 'Nowhere',
-                    ]
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -336,11 +336,11 @@ class MapLocationTest extends FieldTypeTest
         return 'ezgmaplocation';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new MapLocation\Value(['address' => 'Bag End, The Shire']), [], 'en_GB', 'Bag End, The Shire'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new MapLocation\Value(array('address' => 'Bag End, The Shire')), 'Bag End, The Shire'),
+        );
     }
 }

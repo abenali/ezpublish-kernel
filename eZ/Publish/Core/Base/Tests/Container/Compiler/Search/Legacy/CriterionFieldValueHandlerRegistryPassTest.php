@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class CriterionFieldValueHandlerRegistryPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition(
@@ -31,7 +31,7 @@ class CriterionFieldValueHandlerRegistryPassTest extends AbstractCompilerPassTes
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new CriterionFieldValueHandlerRegistryPass());
     }
@@ -43,7 +43,7 @@ class CriterionFieldValueHandlerRegistryPassTest extends AbstractCompilerPassTes
         $def = new Definition();
         $def->addTag(
             'ezpublish.search.legacy.gateway.criterion_field_value_handler',
-            ['alias' => $fieldTypeIdentifier]
+            array('alias' => $fieldTypeIdentifier)
         );
         $this->setDefinition($serviceId, $def);
 
@@ -52,14 +52,15 @@ class CriterionFieldValueHandlerRegistryPassTest extends AbstractCompilerPassTes
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.legacy.gateway.criterion_field_value_handler.registry',
             'register',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRegisterValueHandlerNoAlias()
     {
-        $this->expectException(\LogicException::class);
-
         $fieldTypeIdentifier = 'field_type_identifier';
         $serviceId = 'service_id';
         $def = new Definition();
@@ -71,7 +72,7 @@ class CriterionFieldValueHandlerRegistryPassTest extends AbstractCompilerPassTes
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.legacy.gateway.criterion_field_value_handler.registry',
             'register',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 }

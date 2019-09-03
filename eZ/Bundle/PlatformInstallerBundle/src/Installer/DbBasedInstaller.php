@@ -14,7 +14,7 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 
 class DbBasedInstaller
 {
-    /** @var \Doctrine\DBAL\Connection */
+    /** @var Connection */
     protected $db;
 
     /** @var \Symfony\Component\Console\Output\OutputInterface */
@@ -61,7 +61,7 @@ class DbBasedInstaller
         if (!$this->output->isQuiet()) {
             $this->output->writeln(
                 sprintf(
-                    '<info>Executing %d queries from <comment>%s</comment> on database <comment>%s</comment></info>',
+                    'Executing %d queries from %s on database %s',
                     count($queries),
                     $file,
                     $this->db->getDatabase()
@@ -81,9 +81,7 @@ class DbBasedInstaller
      *
      * @return string absolute existing file path
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     *
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws \eZ\Publish\Core\Base\Exceptions\InvalidArgumentException
      *
      * @since 6.13
      */

@@ -18,7 +18,7 @@ class MapperTest extends TestCase
     /** @var \eZ\Publish\Core\Persistence\Legacy\Bookmark\Mapper */
     private $mapper;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->mapper = new Mapper();
     }

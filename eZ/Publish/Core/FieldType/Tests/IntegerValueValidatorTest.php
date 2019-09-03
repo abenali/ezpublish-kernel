@@ -56,10 +56,10 @@ class IntegerValueValidatorTest extends TestCase
      */
     public function testConstraintsInitializeGet()
     {
-        $constraints = [
+        $constraints = array(
             'minIntegerValue' => 0,
             'maxIntegerValue' => 100,
-        ];
+        );
         $validator = new IntegerValueValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -75,16 +75,16 @@ class IntegerValueValidatorTest extends TestCase
      */
     public function testGetConstraintsSchema()
     {
-        $constraintsSchema = [
-            'minIntegerValue' => [
+        $constraintsSchema = array(
+            'minIntegerValue' => array(
                 'type' => 'int',
                 'default' => 0,
-            ],
-            'maxIntegerValue' => [
+            ),
+            'maxIntegerValue' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-        ];
+            ),
+        );
         $validator = new IntegerValueValidator();
         $this->assertSame($constraintsSchema, $validator->getConstraintsSchema());
     }
@@ -97,10 +97,10 @@ class IntegerValueValidatorTest extends TestCase
      */
     public function testConstraintsSetGet()
     {
-        $constraints = [
+        $constraints = array(
             'minIntegerValue' => 0,
             'maxIntegerValue' => 100,
-        ];
+        );
         $validator = new IntegerValueValidator();
         $validator->minIntegerValue = $constraints['minIntegerValue'];
         $validator->maxIntegerValue = $constraints['maxIntegerValue'];
@@ -112,14 +112,13 @@ class IntegerValueValidatorTest extends TestCase
      * Tests initializing with a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::initializeWithConstraints
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testInitializeBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
-        $constraints = [
+        $constraints = array(
             'unexisting' => 0,
-        ];
+        );
         $validator = new IntegerValueValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -130,11 +129,10 @@ class IntegerValueValidatorTest extends TestCase
      * Tests setting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__set
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testSetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new IntegerValueValidator();
         $validator->unexisting = 0;
     }
@@ -143,11 +141,10 @@ class IntegerValueValidatorTest extends TestCase
      * Tests getting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__get
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testGetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new IntegerValueValidator();
         $null = $validator->unexisting;
     }
@@ -165,20 +162,20 @@ class IntegerValueValidatorTest extends TestCase
         $validator->minIntegerValue = 10;
         $validator->maxIntegerValue = 15;
         $this->assertTrue($validator->validate(new IntegerValue($value)));
-        $this->assertSame([], $validator->getMessage());
+        $this->assertSame(array(), $validator->getMessage());
     }
 
     public function providerForValidateOK()
     {
-        return [
-            [10],
-            [11],
-            [12],
-            [12.5],
-            [13],
-            [14],
-            [15],
-        ];
+        return array(
+            array(10),
+            array(11),
+            array(12),
+            array(12.5),
+            array(13),
+            array(14),
+            array(15),
+        );
     }
 
     /**
@@ -215,12 +212,12 @@ class IntegerValueValidatorTest extends TestCase
 
     public function providerForValidateKO()
     {
-        return [
-            [-12, 'The value can not be lower than %size%.', ['%size%' => $this->getMinIntegerValue()]],
-            [0, 'The value can not be lower than %size%.', ['%size%' => $this->getMinIntegerValue()]],
-            [9, 'The value can not be lower than %size%.', ['%size%' => $this->getMinIntegerValue()]],
-            [16, 'The value can not be higher than %size%.', ['%size%' => $this->getMaxIntegerValue()]],
-        ];
+        return array(
+            array(-12, 'The value can not be lower than %size%.', array('%size%' => $this->getMinIntegerValue())),
+            array(0, 'The value can not be lower than %size%.', array('%size%' => $this->getMinIntegerValue())),
+            array(9, 'The value can not be lower than %size%.', array('%size%' => $this->getMinIntegerValue())),
+            array(16, 'The value can not be higher than %size%.', array('%size%' => $this->getMaxIntegerValue())),
+        );
     }
 
     /**
@@ -240,33 +237,33 @@ class IntegerValueValidatorTest extends TestCase
 
     public function providerForValidateConstraintsOK()
     {
-        return [
-            [
-                [],
-                [
+        return array(
+            array(
+                array(),
+                array(
                     'minIntegerValue' => 5,
-                ],
-                [
+                ),
+                array(
                     'maxIntegerValue' => 2,
-                ],
-                [
+                ),
+                array(
                     'minIntegerValue' => null,
                     'maxIntegerValue' => null,
-                ],
-                [
+                ),
+                array(
                     'minIntegerValue' => -5,
                     'maxIntegerValue' => null,
-                ],
-                [
+                ),
+                array(
                     'minIntegerValue' => null,
                     'maxIntegerValue' => 12,
-                ],
-                [
+                ),
+                array(
                     'minIntegerValue' => 6,
                     'maxIntegerValue' => 8,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -298,88 +295,88 @@ class IntegerValueValidatorTest extends TestCase
 
     public function providerForValidateConstraintsKO()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'minIntegerValue' => true,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minIntegerValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minIntegerValue'),
+                ),
+            ),
+            array(
+                array(
                     'minIntegerValue' => 'five thousand bytes',
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minIntegerValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minIntegerValue'),
+                ),
+            ),
+            array(
+                array(
                     'minIntegerValue' => 'five thousand bytes',
                     'maxIntegerValue' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minIntegerValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minIntegerValue'),
+                ),
+            ),
+            array(
+                array(
                     'maxIntegerValue' => new \DateTime(),
                     'minIntegerValue' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'maxIntegerValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'maxIntegerValue'),
+                ),
+            ),
+            array(
+                array(
                     'minIntegerValue' => true,
                     'maxIntegerValue' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minIntegerValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minIntegerValue'),
+                ),
+            ),
+            array(
+                array(
                     'minIntegerValue' => 'five thousand bytes',
                     'maxIntegerValue' => 'ten billion bytes',
-                ],
-                [
+                ),
+                array(
                     "Validator parameter '%parameter%' value must be of integer type",
                     "Validator parameter '%parameter%' value must be of integer type",
-                ],
-                [
-                    ['%parameter%' => 'minIntegerValue'],
-                    ['%parameter%' => 'maxIntegerValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array(
+                    array('%parameter%' => 'minIntegerValue'),
+                    array('%parameter%' => 'maxIntegerValue'),
+                ),
+            ),
+            array(
+                array(
                     'brljix' => 12345,
-                ],
-                ["Validator parameter '%parameter%' is unknown"],
-                [
-                    ['%parameter%' => 'brljix'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' is unknown"),
+                array(
+                    array('%parameter%' => 'brljix'),
+                ),
+            ),
+            array(
+                array(
                     'minIntegerValue' => 12345,
                     'brljix' => 12345,
-                ],
-                ["Validator parameter '%parameter%' is unknown"],
-                [
-                    ['%parameter%' => 'brljix'],
-                ],
-            ],
-        ];
+                ),
+                array("Validator parameter '%parameter%' is unknown"),
+                array(
+                    array('%parameter%' => 'brljix'),
+                ),
+            ),
+        );
     }
 }

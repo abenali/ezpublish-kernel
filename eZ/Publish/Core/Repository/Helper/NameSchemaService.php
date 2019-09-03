@@ -9,7 +9,6 @@
 namespace eZ\Publish\Core\Repository\Helper;
 
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
-use eZ\Publish\Core\FieldType\FieldTypeRegistry;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler as ContentTypeHandler;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
@@ -48,40 +47,48 @@ class NameSchemaService
      */
     const META_STRING = 'EZMETAGROUP_';
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Type\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Type\Handler
+     */
     protected $contentTypeHandler;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper */
+    /**
+     * @var ContentTypeDomainMapper
+     */
     protected $contentTypeDomainMapper;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\FieldTypeRegistry */
-    protected $fieldTypeRegistry;
+    /**
+     * @var NameableFieldTypeRegistry
+     */
+    protected $nameableFieldTypeRegistry;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $settings;
 
     /**
      * Constructs a object to resolve $nameSchema with $contentVersion fields values.
      *
      * @param \eZ\Publish\SPI\Persistence\Content\Type\Handler $contentTypeHandler
-     * @param \eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper $contentTypeDomainMapper
-     * @param \eZ\Publish\Core\FieldType\FieldTypeRegistry $fieldTypeRegistry
+     * @param ContentTypeDomainMapper $contentTypeDomainMapper
+     * @param NameableFieldTypeRegistry $nameableFieldTypeRegistry
      * @param array $settings
      */
     public function __construct(
         ContentTypeHandler $contentTypeHandler,
         ContentTypeDomainMapper $contentTypeDomainMapper,
-        FieldTypeRegistry $fieldTypeRegistry,
-        array $settings = [])
+        NameableFieldTypeRegistry $nameableFieldTypeRegistry,
+        array $settings = array())
     {
         $this->contentTypeHandler = $contentTypeHandler;
         $this->contentTypeDomainMapper = $contentTypeDomainMapper;
-        $this->fieldTypeRegistry = $fieldTypeRegistry;
+        $this->nameableFieldTypeRegistry = $nameableFieldTypeRegistry;
         // Union makes sure default settings are ignored if provided in argument
-        $this->settings = $settings + [
+        $this->settings = $settings + array(
             'limit' => 150,
             'sequence' => '...',
-        ];
+        );
     }
 
     /**
@@ -116,7 +123,7 @@ class NameSchemaService
      *
      * @return array
      */
-    public function resolveNameSchema(Content $content, array $fieldMap = [], array $languageCodes = [], ContentType $contentType = null)
+    public function resolveNameSchema(Content $content, array $fieldMap = array(), array $languageCodes = array(), ContentType $contentType = null)
     {
         if ($contentType === null) {
             $contentType = $this->contentTypeHandler->load($content->contentInfo->contentTypeId);
@@ -151,7 +158,7 @@ class NameSchemaService
             return $content->fields;
         }
 
-        $mergedFieldMap = [];
+        $mergedFieldMap = array();
 
         foreach ($content->fields as $fieldIdentifier => $fieldLanguageMap) {
             foreach ($languageCodes as $languageCode) {
@@ -180,7 +187,7 @@ class NameSchemaService
         $tokens = $this->extractTokens($filteredNameSchema);
         $schemaIdentifiers = $this->getIdentifiers($nameSchema);
 
-        $names = [];
+        $names = array();
 
         foreach ($languageCodes as $languageCode) {
             // Fetch titles for language code
@@ -221,7 +228,7 @@ class NameSchemaService
      */
     protected function getFieldTitles(array $schemaIdentifiers, $contentType, array $fieldMap, $languageCode)
     {
-        $fieldTitles = [];
+        $fieldTitles = array();
 
         foreach ($schemaIdentifiers as $fieldDefinitionIdentifier) {
             if (isset($fieldMap[$fieldDefinitionIdentifier][$languageCode])) {
@@ -248,11 +255,11 @@ class NameSchemaService
                     throw new InvalidArgumentType('$contentType', 'API or SPI variant of ContentType');
                 }
 
-                $fieldTypeService = $this->fieldTypeRegistry->getFieldType(
+                $nameableFieldTypeService = $this->nameableFieldTypeRegistry->getFieldType(
                     $fieldDefinition->fieldTypeIdentifier
                 );
 
-                $fieldTitles[$fieldDefinitionIdentifier] = $fieldTypeService->getName(
+                $fieldTitles[$fieldDefinitionIdentifier] = $nameableFieldTypeService->getFieldName(
                     $fieldMap[$fieldDefinitionIdentifier][$languageCode],
                     $fieldDefinition,
                     $languageCode
@@ -387,7 +394,7 @@ class NameSchemaService
     {
         $retNamePattern = '';
         $foundGroups = preg_match_all('/[<|\\|](\\(.+\\))[\\||>]/U', $nameSchema, $groupArray);
-        $groupLookupTable = [];
+        $groupLookupTable = array();
 
         if ($foundGroups) {
             $i = 0;
@@ -399,7 +406,7 @@ class NameSchemaService
                 $retNamePattern = str_replace($group, $metaToken, $nameSchema);
 
                 // Remove the pattern "(" ")" from the tokens
-                $group = str_replace(['(', ')'], '', $group);
+                $group = str_replace(array('(', ')'), '', $group);
 
                 $groupLookupTable[$metaToken] = $group;
                 ++$i;
@@ -407,7 +414,7 @@ class NameSchemaService
             $nameSchema = $retNamePattern;
         }
 
-        return [$nameSchema, $groupLookupTable];
+        return array($nameSchema, $groupLookupTable);
     }
 
     /**
@@ -422,14 +429,14 @@ class NameSchemaService
         $allTokens = '#<(.*)>#U';
         $identifiers = '#\\W#';
 
-        $tmpArray = [];
+        $tmpArray = array();
         preg_match_all($allTokens, $schemaString, $matches);
 
         foreach ($matches[1] as $match) {
             $tmpArray[] = preg_split($identifiers, $match, -1, PREG_SPLIT_NO_EMPTY);
         }
 
-        $retArray = [];
+        $retArray = array();
         foreach ($tmpArray as $matchGroup) {
             if (is_array($matchGroup)) {
                 foreach ($matchGroup as $item) {

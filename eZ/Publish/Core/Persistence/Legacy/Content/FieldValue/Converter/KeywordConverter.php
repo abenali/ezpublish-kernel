@@ -49,7 +49,7 @@ class KeywordConverter implements Converter
      */
     public function toFieldValue(StorageFieldValue $value, FieldValue $fieldValue)
     {
-        $fieldValue->data = [];
+        $fieldValue->data = array();
         $fieldValue->sortKey = $value->sortKeyString;
     }
 

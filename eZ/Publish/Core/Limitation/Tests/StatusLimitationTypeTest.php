@@ -37,21 +37,21 @@ class StatusLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValue()
     {
-        return [
-            [new StatusLimitation()],
-            [new StatusLimitation([])],
-            [
+        return array(
+            array(new StatusLimitation()),
+            array(new StatusLimitation(array())),
+            array(
                 new StatusLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             VersionInfo::STATUS_DRAFT,
                             VersionInfo::STATUS_PUBLISHED,
                             VersionInfo::STATUS_ARCHIVED,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -71,23 +71,22 @@ class StatusLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValueException()
     {
-        return [
-            [new ObjectStateLimitation()],
-            [new StatusLimitation(['limitationValues' => [true]])],
-        ];
+        return array(
+            array(new ObjectStateLimitation()),
+            array(new StatusLimitation(array('limitationValues' => array(true)))),
+        );
     }
 
     /**
      * @depends testConstruct
      * @dataProvider providerForTestAcceptValueException
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\StatusLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, StatusLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -96,53 +95,53 @@ class StatusLimitationTypeTest extends Base
      */
     public function providerForTestValidateError()
     {
-        return [
-            [new StatusLimitation(), 0],
-            [new StatusLimitation([]), 0],
-            [
+        return array(
+            array(new StatusLimitation(), 0),
+            array(new StatusLimitation(array()), 0),
+            array(
                 new StatusLimitation(
-                    [
-                        'limitationValues' => [SPIVersionInfo::STATUS_PUBLISHED],
-                    ]
+                    array(
+                        'limitationValues' => array(SPIVersionInfo::STATUS_PUBLISHED),
+                    )
                 ),
                 0,
-            ],
-            [new StatusLimitation(['limitationValues' => [100]]), 1],
-            [
+            ),
+            array(new StatusLimitation(array('limitationValues' => array(100))), 1),
+            array(
                 new StatusLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             SPIVersionInfo::STATUS_PUBLISHED,
                             PHP_INT_MAX,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
                 1,
-            ],
-            [
+            ),
+            array(
                 new StatusLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             SPIVersionInfo::STATUS_PENDING,
                             SPIVersionInfo::STATUS_REJECTED,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
                 2,
-            ],
-            [
+            ),
+            array(
                 new StatusLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             SPIVersionInfo::STATUS_DRAFT,
                             SPIVersionInfo::STATUS_PUBLISHED,
                             SPIVersionInfo::STATUS_ARCHIVED,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
                 0,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -166,11 +165,11 @@ class StatusLimitationTypeTest extends Base
      */
     public function testBuildValue(StatusLimitationType $limitationType)
     {
-        $expected = ['test', 'test' => 9];
+        $expected = array('test', 'test' => 9);
         $value = $limitationType->buildValue($expected);
 
         self::assertInstanceOf(StatusLimitation::class, $value);
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -178,7 +177,7 @@ class StatusLimitationTypeTest extends Base
     {
         $versionInfoMock = $this->getMockBuilder(APIVersionInfo::class)
             ->disableOriginalConstructor()
-            ->setMethods(['__get'])
+            ->setMethods(array('__get'))
             ->getMockForAbstractClass();
 
         if ($shouldBeCalled) {
@@ -200,8 +199,8 @@ class StatusLimitationTypeTest extends Base
     protected function getContentMock()
     {
         $contentMock = $this->getMockBuilder(APIContent::class)
-            ->setConstructorArgs([])
-            ->setMethods([])
+            ->setConstructorArgs(array())
+            ->setMethods(array())
             ->getMock();
 
         $contentMock
@@ -217,44 +216,44 @@ class StatusLimitationTypeTest extends Base
      */
     public function providerForTestEvaluate()
     {
-        return [
+        return array(
             // VersionInfo, no access
-            [
+            array(
                 'limitation' => new StatusLimitation(),
                 'object' => $this->getVersionInfoMock(false),
                 'expected' => false,
-            ],
+            ),
             // VersionInfo, no access
-            [
-                'limitation' => new StatusLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new StatusLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getVersionInfoMock(),
                 'expected' => false,
-            ],
+            ),
             // VersionInfo, with access
-            [
-                'limitation' => new StatusLimitation(['limitationValues' => [24]]),
+            array(
+                'limitation' => new StatusLimitation(array('limitationValues' => array(24))),
                 'object' => $this->getVersionInfoMock(),
                 'expected' => true,
-            ],
+            ),
             // Content, no access
-            [
+            array(
                 'limitation' => new StatusLimitation(),
                 'object' => $this->getContentMock(),
                 'expected' => false,
-            ],
+            ),
             // Content, no access
-            [
-                'limitation' => new StatusLimitation(['limitationValues' => [42]]),
+            array(
+                'limitation' => new StatusLimitation(array('limitationValues' => array(42))),
                 'object' => $this->getContentMock(),
                 'expected' => false,
-            ],
+            ),
             // Content, with access
-            [
-                'limitation' => new StatusLimitation(['limitationValues' => [24]]),
+            array(
+                'limitation' => new StatusLimitation(array('limitationValues' => array(24))),
                 'object' => $this->getContentMock(),
                 'expected' => true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -278,7 +277,7 @@ class StatusLimitationTypeTest extends Base
             $object
         );
 
-        self::assertIsBool($value);
+        self::assertInternalType('boolean', $value);
         self::assertEquals($expected, $value);
     }
 
@@ -288,35 +287,34 @@ class StatusLimitationTypeTest extends Base
     public function providerForTestEvaluateInvalidArgument()
     {
         $versionInfoMock = $this->getMockBuilder(APIVersionInfo::class)
-            ->setConstructorArgs([])
-            ->setMethods([])
+            ->setConstructorArgs(array())
+            ->setMethods(array())
             ->getMock();
 
-        return [
+        return array(
             // invalid limitation
-            [
+            array(
                 'limitation' => new ObjectStateLimitation(),
                 'object' => $versionInfoMock,
-            ],
+            ),
             // invalid object
-            [
+            array(
                 'limitation' => new StatusLimitation(),
                 'object' => new ObjectStateLimitation(),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
      * @depends testConstruct
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(
         Limitation $limitation,
         ValueObject $object,
         StatusLimitationType $limitationType
     ) {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $userMock = $this->getUserMock();
         $userMock->expects($this->never())->method($this->anything());
 
@@ -330,13 +328,12 @@ class StatusLimitationTypeTest extends Base
 
     /**
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotImplementedException
      *
      * @param \eZ\Publish\Core\Limitation\StatusLimitationType $limitationType
      */
     public function testGetCriterion(StatusLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotImplementedException::class);
-
         $limitationType->getCriterion(new StatusLimitation(), $this->getUserMock());
     }
 

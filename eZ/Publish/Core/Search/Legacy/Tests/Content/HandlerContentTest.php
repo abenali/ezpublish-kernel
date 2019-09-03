@@ -34,7 +34,7 @@ class HandlerContentTest extends AbstractTestCase
      *
      * @return \eZ\Publish\Core\Search\Legacy\Content\Handler
      */
-    protected function getContentSearchHandler(array $fullTextSearchConfiguration = [])
+    protected function getContentSearchHandler(array $fullTextSearchConfiguration = array())
     {
         $transformationProcessor = new Persistence\TransformationProcessor\DefinitionBased(
             new Persistence\TransformationProcessor\DefinitionBased\Parser(),
@@ -66,7 +66,7 @@ class HandlerContentTest extends AbstractTestCase
             new Content\Gateway\DoctrineDatabase(
                 $this->getDatabaseHandler(),
                 new Content\Common\Gateway\CriteriaConverter(
-                    [
+                    array(
                         new Content\Common\Gateway\CriterionHandler\ContentId(
                             $this->getDatabaseHandler()
                         ),
@@ -122,7 +122,7 @@ class HandlerContentTest extends AbstractTestCase
                             $this->getConverterRegistry(),
                             new Content\Common\Gateway\CriterionHandler\FieldValue\Converter(
                                 new Content\Common\Gateway\CriterionHandler\FieldValue\HandlerRegistry(
-                                    [
+                                    array(
                                         'ezboolean' => $simpleValueHandler,
                                         'ezcountry' => $commaSeparatedCollectionValueHandler,
                                         'ezdate' => $simpleValueHandler,
@@ -133,7 +133,7 @@ class HandlerContentTest extends AbstractTestCase
                                         'ezobjectrelationlist' => $commaSeparatedCollectionValueHandler,
                                         'ezselection' => $hyphenSeparatedCollectionValueHandler,
                                         'eztime' => $simpleValueHandler,
-                                    ]
+                                    )
                                 ),
                                 $compositeValueHandler
                             ),
@@ -160,12 +160,12 @@ class HandlerContentTest extends AbstractTestCase
                             $this->getContentTypeHandler(),
                             $this->getLanguageHandler()
                         ),
-                    ]
+                    )
                 ),
                 new Content\Common\Gateway\SortClauseConverter(
-                    [
+                    array(
                         new Content\Common\Gateway\SortClauseHandler\ContentId($this->getDatabaseHandler()),
-                    ]
+                    )
                 ),
                 $this->getLanguageHandler()
             ),
@@ -193,12 +193,12 @@ class HandlerContentTest extends AbstractTestCase
     {
         $mapperMock = $this->getMockBuilder(ContentMapper::class)
             ->setConstructorArgs(
-                [
+                array(
                     $this->getConverterRegistry(),
                     $this->getLanguageHandler(),
-                ]
+                )
             )
-            ->setMethods(['extractContentInfoFromRows'])
+            ->setMethods(array('extractContentInfoFromRows'))
             ->getMock();
         $mapperMock->expects($this->any())
             ->method('extractContentInfoFromRows')
@@ -206,7 +206,7 @@ class HandlerContentTest extends AbstractTestCase
             ->will(
                 $this->returnCallback(
                     function ($rows) {
-                        $contentInfoObjs = [];
+                        $contentInfoObjs = array();
                         foreach ($rows as $row) {
                             $contentId = (int)$row['id'];
                             if (!isset($contentInfoObjs[$contentId])) {
@@ -232,7 +232,7 @@ class HandlerContentTest extends AbstractTestCase
     {
         return $this->getMockBuilder(FieldHandler::class)
             ->disableOriginalConstructor()
-            ->setMethods(['loadExternalFieldData'])
+            ->setMethods(array('loadExternalFieldData'))
             ->getMock();
     }
 
@@ -245,9 +245,9 @@ class HandlerContentTest extends AbstractTestCase
 
         $result = $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\ContentId(10),
-                ]
+                )
             )
         );
 
@@ -266,11 +266,11 @@ class HandlerContentTest extends AbstractTestCase
 
         $result = $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\ContentId(10),
                     'offset' => 0,
                     'limit' => 0,
-                ]
+                )
             )
         );
 
@@ -279,7 +279,7 @@ class HandlerContentTest extends AbstractTestCase
             $result->totalCount
         );
         $this->assertEquals(
-            [],
+            array(),
             $result->searchHits
         );
     }
@@ -293,11 +293,11 @@ class HandlerContentTest extends AbstractTestCase
 
         $result = $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\ContentId(10),
                     'offset' => 0,
                     'limit' => null,
-                ]
+                )
             )
         );
 
@@ -305,9 +305,9 @@ class HandlerContentTest extends AbstractTestCase
             1,
             $result->totalCount
         );
-        $this->assertCount(
+        $this->assertEquals(
             1,
-            $result->searchHits
+            count($result->searchHits)
         );
     }
 
@@ -320,11 +320,11 @@ class HandlerContentTest extends AbstractTestCase
 
         $result = $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\ContentId(10),
                     'offset' => 1000,
                     'limit' => null,
-                ]
+                )
             )
         );
 
@@ -332,9 +332,9 @@ class HandlerContentTest extends AbstractTestCase
             1,
             $result->totalCount
         );
-        $this->assertCount(
+        $this->assertEquals(
             0,
-            $result->searchHits
+            count($result->searchHits)
         );
     }
 
@@ -347,10 +347,11 @@ class HandlerContentTest extends AbstractTestCase
         $this->assertEquals(10, $contentInfo->id);
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFindSingleWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $locator = $this->getContentSearchHandler();
         $locator->findSingle(
             new Criterion\Field(
@@ -361,37 +362,40 @@ class HandlerContentTest extends AbstractTestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFindContentWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $locator = $this->getContentSearchHandler();
         $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'tag_cloud_url',
                         Criterion\Operator::EQ,
                         'http://nimbus.com'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFindSingleTooMany()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $locator = $this->getContentSearchHandler();
-        $locator->findSingle(new Criterion\ContentId([4, 10, 12, 23]));
+        $locator->findSingle(new Criterion\ContentId(array(4, 10, 12, 23)));
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     */
     public function testFindSingleZero()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $locator = $this->getContentSearchHandler();
         $locator->findSingle(new Criterion\ContentId(0));
     }
@@ -399,15 +403,15 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentIdFilter()
     {
         $this->assertSearchResults(
-            [4, 10],
+            array(4, 10),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\ContentId(
-                            [1, 4, 10]
+                            array(1, 4, 10)
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -419,12 +423,12 @@ class HandlerContentTest extends AbstractTestCase
 
         $result = $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\ContentId(
-                        [1, 4, 10]
+                        array(1, 4, 10)
                     ),
                     'limit' => 10,
-                ]
+                )
             )
         );
 
@@ -434,22 +438,22 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentAndCombinatorFilter()
     {
         $this->assertSearchResults(
-            [4],
+            array(4),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\LogicalAnd(
-                            [
+                            array(
                                 new Criterion\ContentId(
-                                    [1, 4, 10]
+                                    array(1, 4, 10)
                                 ),
                                 new Criterion\ContentId(
-                                    [4, 12]
+                                    array(4, 12)
                                 ),
-                            ]
+                            )
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -461,23 +465,23 @@ class HandlerContentTest extends AbstractTestCase
 
         $result = $locator->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\LogicalOr(
-                        [
+                        array(
                             new Criterion\ContentId(
-                                [1, 4, 10]
+                                array(1, 4, 10)
                             ),
                             new Criterion\ContentId(
-                                [4, 12]
+                                array(4, 12)
                             ),
-                        ]
+                        )
                     ),
                     'limit' => 10,
-                ]
+                )
             )
         );
 
-        $expectedContentIds = [4, 10, 12];
+        $expectedContentIds = array(4, 10, 12);
 
         $this->assertEquals(
             count($expectedContentIds),
@@ -494,24 +498,24 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentNotCombinatorFilter()
     {
         $this->assertSearchResults(
-            [4],
+            array(4),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\LogicalAnd(
-                            [
+                            array(
                                 new Criterion\ContentId(
-                                    [1, 4, 10]
+                                    array(1, 4, 10)
                                 ),
                                 new Criterion\LogicalNot(
                                     new Criterion\ContentId(
-                                        [10, 12]
+                                        array(10, 12)
                                     )
                                 ),
-                            ]
+                            )
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -520,15 +524,15 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentSubtreeFilterIn()
     {
         $this->assertSearchResults(
-            [67, 68, 69, 70, 71, 72, 73, 74],
+            array(67, 68, 69, 70, 71, 72, 73, 74),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Subtree(
-                            ['/1/2/69/']
+                            array('/1/2/69/')
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -537,13 +541,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentSubtreeFilterEq()
     {
         $this->assertSearchResults(
-            [67, 68, 69, 70, 71, 72, 73, 74],
+            array(67, 68, 69, 70, 71, 72, 73, 74),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Subtree('/1/2/69/'),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -552,13 +556,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentTypeIdFilter()
     {
         $this->assertSearchResults(
-            [10, 14, 226],
+            array(10, 14, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\ContentTypeId(4),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -567,14 +571,14 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentTypeIdentifierFilter()
     {
         $this->assertSearchResults(
-            [41, 45, 49, 50, 51],
+            array(41, 45, 49, 50, 51),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\ContentTypeIdentifier('folder'),
                         'limit' => 5,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -583,13 +587,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testContentTypeGroupFilter()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 42, 225, 226],
+            array(4, 10, 11, 12, 13, 14, 42, 225, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\ContentTypeGroupId(2),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -598,17 +602,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testDateMetadataFilterModifiedGreater()
     {
         $this->assertSearchResults(
-            [11, 225, 226],
+            array(11, 225, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\DateMetadata(
                             Criterion\DateMetadata::MODIFIED,
                             Criterion\Operator::GT,
                             1311154214
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -617,17 +621,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testDateMetadataFilterModifiedGreaterOrEqual()
     {
         $this->assertSearchResults(
-            [11, 14, 225, 226],
+            array(11, 14, 225, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\DateMetadata(
                             Criterion\DateMetadata::MODIFIED,
                             Criterion\Operator::GTE,
                             1311154214
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -636,17 +640,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testDateMetadataFilterModifiedIn()
     {
         $this->assertSearchResults(
-            [11, 14, 225, 226],
+            array(11, 14, 225, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\DateMetadata(
                             Criterion\DateMetadata::MODIFIED,
                             Criterion\Operator::IN,
-                            [1311154214, 1311154215]
+                            array(1311154214, 1311154215)
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -655,17 +659,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testDateMetadataFilterModifiedBetween()
     {
         $this->assertSearchResults(
-            [11, 14, 225, 226],
+            array(11, 14, 225, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\DateMetadata(
                             Criterion\DateMetadata::MODIFIED,
                             Criterion\Operator::BETWEEN,
-                            [1311154213, 1311154215]
+                            array(1311154213, 1311154215)
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -674,17 +678,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testDateMetadataFilterCreatedBetween()
     {
         $this->assertSearchResults(
-            [66, 131, 225],
+            array(66, 131, 225),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\DateMetadata(
                             Criterion\DateMetadata::CREATED,
                             Criterion\Operator::BETWEEN,
-                            [1299780749, 1311154215]
+                            array(1299780749, 1311154215)
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -693,13 +697,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testLocationIdFilter()
     {
         $this->assertSearchResults(
-            [4, 65],
+            array(4, 65),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
-                        'filter' => new Criterion\LocationId([1, 2, 5]),
+                    array(
+                        'filter' => new Criterion\LocationId(array(1, 2, 5)),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -708,13 +712,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testParentLocationIdFilter()
     {
         $this->assertSearchResults(
-            [4, 41, 45, 56, 65],
+            array(4, 41, 45, 56, 65),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
-                        'filter' => new Criterion\ParentLocationId([1]),
+                    array(
+                        'filter' => new Criterion\ParentLocationId(array(1)),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -723,15 +727,15 @@ class HandlerContentTest extends AbstractTestCase
     public function testRemoteIdFilter()
     {
         $this->assertSearchResults(
-            [4, 10],
+            array(4, 10),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\RemoteId(
-                            ['f5c88a2209584891056f987fd965b0ba', 'faaeb9be3bd98ed09f606fc16d144eca']
+                            array('f5c88a2209584891056f987fd965b0ba', 'faaeb9be3bd98ed09f606fc16d144eca')
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -740,15 +744,15 @@ class HandlerContentTest extends AbstractTestCase
     public function testLocationRemoteIdFilter()
     {
         $this->assertSearchResults(
-            [4, 65],
+            array(4, 65),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\LocationRemoteId(
-                            ['3f6d92f8044aed134f32153517850f5a', 'f3e90596361e31d496d4026eb624c983']
+                            array('3f6d92f8044aed134f32153517850f5a', 'f3e90596361e31d496d4026eb624c983')
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -757,13 +761,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testSectionFilter()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 42, 226],
+            array(4, 10, 11, 12, 13, 14, 42, 226),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
-                        'filter' => new Criterion\SectionId([2]),
+                    array(
+                        'filter' => new Criterion\SectionId(array(2)),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -772,19 +776,19 @@ class HandlerContentTest extends AbstractTestCase
     public function testStatusFilter()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $searchResult = $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         // Status criterion is gone, but this will also match all published
                         'filter' => new Criterion\LogicalNot(
                             new Criterion\ContentId(
-                                [0]
+                                array(0)
                             )
                         ),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -798,17 +802,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilter()
     {
         $this->assertSearchResults(
-            [11],
+            array(11),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Field(
                             'name',
                             Criterion\Operator::EQ,
                             'members'
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -817,17 +821,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilterIn()
     {
         $this->assertSearchResults(
-            [11, 42],
+            array(11, 42),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Field(
                             'name',
                             Criterion\Operator::IN,
-                            ['members', 'anonymous users']
+                            array('members', 'anonymous users')
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -836,17 +840,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilterContainsPartial()
     {
         $this->assertSearchResults(
-            [42],
+            array(42),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Field(
                             'name',
                             Criterion\Operator::CONTAINS,
                             'nonymous use'
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -855,17 +859,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilterContainsSimple()
     {
         $this->assertSearchResults(
-            [77],
+            array(77),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Field(
                             'publish_date',
                             Criterion\Operator::CONTAINS,
                             1174643880
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -874,17 +878,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilterContainsSimpleNoMatch()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Field(
                             'publish_date',
                             Criterion\Operator::CONTAINS,
                             1174643
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -893,17 +897,17 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilterBetween()
     {
         $this->assertSearchResults(
-            [186, 187],
+            array(69, 71, 72),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Field(
-                            'publication_date',
+                            'price',
                             Criterion\Operator::BETWEEN,
-                            [1190000000, 1200000000]
+                            array(10000, 1000000)
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -912,26 +916,26 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldFilterOr()
     {
         $this->assertSearchResults(
-            [11, 186, 187],
+            array(11, 69, 71, 72),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\LogicalOr(
-                            [
+                            array(
                                 new Criterion\Field(
                                     'name',
                                     Criterion\Operator::EQ,
                                     'members'
                                 ),
                                 new Criterion\Field(
-                                    'publication_date',
+                                    'price',
                                     Criterion\Operator::BETWEEN,
-                                    [1190000000, 1200000000]
+                                    array(10000, 1000000)
                                 ),
-                            ]
+                            )
                         ),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -940,13 +944,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testFullTextFilter()
     {
         $this->assertSearchResults(
-            [191],
+            array(191),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FullText('applied webpage'),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -955,13 +959,13 @@ class HandlerContentTest extends AbstractTestCase
     public function testFullTextWildcardFilter()
     {
         $this->assertSearchResults(
-            [191],
+            array(191),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FullText('applie*'),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -970,15 +974,15 @@ class HandlerContentTest extends AbstractTestCase
     public function testFullTextDisabledWildcardFilter()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler(
-                ['enableWildcards' => false]
+                array('enableWildcards' => false)
             )->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FullText('applie*'),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -987,19 +991,19 @@ class HandlerContentTest extends AbstractTestCase
     public function testFullTextFilterStopwordRemoval()
     {
         $handler = $this->getContentSearchHandler(
-            [
+            array(
                 'stopWordThresholdFactor' => 0.1,
-            ]
+            )
         );
 
         $this->assertSearchResults(
-            [],
+            array(),
             $handler->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FullText('the'),
                         'limit' => 10,
-                    ]
+                    )
                 )
             )
         );
@@ -1008,56 +1012,58 @@ class HandlerContentTest extends AbstractTestCase
     public function testFullTextFilterNoStopwordRemoval()
     {
         $handler = $this->getContentSearchHandler(
-            [
+            array(
                 'stopWordThresholdFactor' => 1,
-            ]
+            )
         );
 
         $result = $handler->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\FullText(
                         'the'
                     ),
                     'limit' => 10,
-                ]
+                )
             )
         );
 
-        $this->assertCount(
+        $this->assertEquals(
             10,
-
+            count(
                 array_map(
                     function ($hit) {
                         return $hit->valueObject->id;
                     },
                     $result->searchHits
                 )
+            )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFullTextFilterInvalidStopwordThreshold()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $this->getContentSearchHandler(
-            [
+            array(
                 'stopWordThresholdFactor' => 2,
-            ]
+            )
         );
     }
 
     public function testObjectStateIdFilter()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\ObjectStateId(1),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1066,14 +1072,14 @@ class HandlerContentTest extends AbstractTestCase
     public function testObjectStateIdFilterIn()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
-                        'filter' => new Criterion\ObjectStateId([1, 2]),
+                    array(
+                        'filter' => new Criterion\ObjectStateId(array(1, 2)),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1082,14 +1088,14 @@ class HandlerContentTest extends AbstractTestCase
     public function testLanguageCodeFilter()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\LanguageCode('eng-US'),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1098,14 +1104,14 @@ class HandlerContentTest extends AbstractTestCase
     public function testLanguageCodeFilterIn()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
-                        'filter' => new Criterion\LanguageCode(['eng-US', 'eng-GB']),
+                    array(
+                        'filter' => new Criterion\LanguageCode(array('eng-US', 'eng-GB')),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1114,14 +1120,14 @@ class HandlerContentTest extends AbstractTestCase
     public function testLanguageCodeFilterWithAlwaysAvailable()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49, 50, 51, 56, 57, 65, 68, 70, 74, 76, 80],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49, 50, 51, 56, 57, 65, 68, 70, 74, 76, 80),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\LanguageCode('eng-GB', true),
                         'limit' => 20,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1130,16 +1136,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testVisibilityFilter()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\Visibility(
                             Criterion\Visibility::VISIBLE
                         ),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1148,16 +1154,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterOwnerWrongUserId()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::OWNER,
                             Criterion\Operator::EQ,
                             2
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1166,18 +1172,18 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterOwnerAdministrator()
     {
         $this->assertSearchResults(
-            [4, 10, 11, 12, 13, 14, 41, 42, 45, 49],
+            array(4, 10, 11, 12, 13, 14, 41, 42, 45, 49),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::OWNER,
                             Criterion\Operator::EQ,
                             14
                         ),
                         'limit' => 10,
-                        'sortClauses' => [new SortClause\ContentId()],
-                    ]
+                        'sortClauses' => array(new SortClause\ContentId()),
+                    )
                 )
             )
         );
@@ -1186,16 +1192,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterOwnerEqAMember()
     {
         $this->assertSearchResults(
-            [223],
+            array(223),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::OWNER,
                             Criterion\Operator::EQ,
                             226
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1204,16 +1210,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterOwnerInAMember()
     {
         $this->assertSearchResults(
-            [223],
+            array(223),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::OWNER,
                             Criterion\Operator::IN,
-                            [226]
+                            array(226)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1222,16 +1228,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterCreatorEqAMember()
     {
         $this->assertSearchResults(
-            [223],
+            array(223),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::MODIFIER,
                             Criterion\Operator::EQ,
                             226
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1240,16 +1246,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterCreatorInAMember()
     {
         $this->assertSearchResults(
-            [223],
+            array(223),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::MODIFIER,
                             Criterion\Operator::IN,
-                            [226]
+                            array(226)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1258,16 +1264,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterEqGroupMember()
     {
         $this->assertSearchResults(
-            [223],
+            array(223),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::GROUP,
                             Criterion\Operator::EQ,
                             11
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1276,16 +1282,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterInGroupMember()
     {
         $this->assertSearchResults(
-            [223],
+            array(223),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::GROUP,
                             Criterion\Operator::IN,
-                            [11]
+                            array(11)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1294,16 +1300,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterEqGroupMemberNoMatch()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::GROUP,
                             Criterion\Operator::EQ,
                             13
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1312,16 +1318,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testUserMetadataFilterInGroupMemberNoMatch()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\UserMetadata(
                             Criterion\UserMetadata::GROUP,
                             Criterion\Operator::IN,
-                            [13]
+                            array(13)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1330,16 +1336,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldRelationFilterContainsSingle()
     {
         $this->assertSearchResults(
-            [67],
+            array(67),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FieldRelation(
                             'billboard',
                             Criterion\Operator::CONTAINS,
-                            [60]
+                            array(60)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1348,16 +1354,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldRelationFilterContainsSingleNoMatch()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FieldRelation(
                             'billboard',
                             Criterion\Operator::CONTAINS,
-                            [4]
+                            array(4)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1366,16 +1372,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldRelationFilterContainsArray()
     {
         $this->assertSearchResults(
-            [67],
+            array(67),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FieldRelation(
                             'billboard',
                             Criterion\Operator::CONTAINS,
-                            [60, 75]
+                            array(60, 75)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1384,16 +1390,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldRelationFilterContainsArrayNotMatch()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FieldRelation(
                             'billboard',
                             Criterion\Operator::CONTAINS,
-                            [60, 64]
+                            array(60, 64)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1402,16 +1408,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldRelationFilterInArray()
     {
         $this->assertSearchResults(
-            [67, 75],
+            array(67, 75),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FieldRelation(
                             'billboard',
                             Criterion\Operator::IN,
-                            [60, 64]
+                            array(60, 64)
                         ),
-                    ]
+                    )
                 )
             )
         );
@@ -1420,16 +1426,16 @@ class HandlerContentTest extends AbstractTestCase
     public function testFieldRelationFilterInArrayNotMatch()
     {
         $this->assertSearchResults(
-            [],
+            array(),
             $this->getContentSearchHandler()->findContent(
                 new Query(
-                    [
+                    array(
                         'filter' => new Criterion\FieldRelation(
                             'billboard',
                             Criterion\Operator::IN,
-                            [4, 10]
+                            array(4, 10)
                         ),
-                    ]
+                    )
                 )
             )
         );

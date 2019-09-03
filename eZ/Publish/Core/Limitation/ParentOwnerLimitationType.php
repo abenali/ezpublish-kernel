@@ -17,7 +17,6 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\API\Repository\Values\User\Limitation\ParentOwnerLimitation as APIParentOwnerLimitation;
 use eZ\Publish\API\Repository\Values\User\Limitation as APILimitationValue;
-use eZ\Publish\SPI\Limitation\Target;
 use eZ\Publish\SPI\Limitation\Type as SPILimitationTypeInterface;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\Persistence\Content\Location as SPILocation;
@@ -65,16 +64,16 @@ class ParentOwnerLimitationType extends AbstractPersistenceLimitationType implem
      */
     public function validate(APILimitationValue $limitationValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         foreach ($limitationValue->limitationValues as $key => $value) {
             if ($value !== 1 && $value !== 2) {
                 $validationErrors[] = new ValidationError(
                     "limitationValues[%key%] => '%value%' must be either 1 (owner) or 2 (session)",
                     null,
-                    [
+                    array(
                         'value' => $value,
                         'key' => $key,
-                    ]
+                    )
                 );
             }
         }
@@ -91,7 +90,7 @@ class ParentOwnerLimitationType extends AbstractPersistenceLimitationType implem
      */
     public function buildValue(array $limitationValues)
     {
-        return new APIParentOwnerLimitation(['limitationValues' => $limitationValues]);
+        return new APIParentOwnerLimitation(array('limitationValues' => $limitationValues));
     }
 
     /**
@@ -129,21 +128,20 @@ class ParentOwnerLimitationType extends AbstractPersistenceLimitationType implem
             return false;
         }
 
-        $hasMandatoryTarget = false;
         foreach ($targets as $target) {
             if ($target instanceof LocationCreateStruct) {
-                $hasMandatoryTarget = true;
                 $target = $this->persistence->locationHandler()->load($target->parentLocationId);
             }
 
             if ($target instanceof Location) {
-                $hasMandatoryTarget = true;
                 $targetContentInfo = $target->getContentInfo();
             } elseif ($target instanceof SPILocation) {
-                $hasMandatoryTarget = true;
                 $targetContentInfo = $this->persistence->contentHandler()->loadContentInfo($target->contentId);
             } else {
-                continue;
+                throw new InvalidArgumentException(
+                    '$targets',
+                    'Must contain objects of type: Location or LocationCreateStruct'
+                );
             }
 
             $userId = $currentUser->getUserId();
@@ -154,13 +152,6 @@ class ParentOwnerLimitationType extends AbstractPersistenceLimitationType implem
             if (!($isOwner || $isSelf)) {
                 return false;
             }
-        }
-
-        if (false === $hasMandatoryTarget) {
-            throw new InvalidArgumentException(
-                '$targets',
-                'Must contain objects of type: Location or LocationCreateStruct'
-            );
         }
 
         return true;

@@ -22,18 +22,18 @@ use eZ\Publish\Core\FieldType\Value as BaseValue;
  */
 class Type extends FieldType
 {
-    protected $validatorConfigurationSchema = [
-        'IntegerValueValidator' => [
-            'minIntegerValue' => [
+    protected $validatorConfigurationSchema = array(
+        'IntegerValueValidator' => array(
+            'minIntegerValue' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-            'maxIntegerValue' => [
+            ),
+            'maxIntegerValue' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-        ],
-    ];
+            ),
+        ),
+    );
 
     /**
      * Validates the validatorConfiguration of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct.
@@ -44,16 +44,16 @@ class Type extends FieldType
      */
     public function validateValidatorConfiguration($validatorConfiguration)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($validatorConfiguration as $validatorIdentifier => $constraints) {
             if ($validatorIdentifier !== 'IntegerValueValidator') {
                 $validationErrors[] = new ValidationError(
                     "Validator '%validator%' is unknown",
                     null,
-                    [
+                    array(
                         '%validator%' => $validatorIdentifier,
-                    ],
+                    ),
                     "[$validatorIdentifier]"
                 );
 
@@ -67,9 +67,9 @@ class Type extends FieldType
                             $validationErrors[] = new ValidationError(
                                 "Validator parameter '%parameter%' value must be of integer type",
                                 null,
-                                [
+                                array(
                                     '%parameter%' => $name,
-                                ],
+                                ),
                                 "[$validatorIdentifier][$name]"
                             );
                         }
@@ -78,9 +78,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Validator parameter '%parameter%' is unknown",
                             null,
-                            [
+                            array(
                                 '%parameter%' => $name,
-                            ],
+                            ),
                             "[$validatorIdentifier][$name]"
                         );
                 }
@@ -102,7 +102,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $validationErrors;
@@ -111,9 +111,9 @@ class Type extends FieldType
         $validatorConfiguration = $fieldDefinition->getValidatorConfiguration();
         $constraints = isset($validatorConfiguration['IntegerValueValidator']) ?
             $validatorConfiguration['IntegerValueValidator'] :
-            [];
+            array();
 
-        $validationErrors = [];
+        $validationErrors = array();
 
         // 0 and False are unlimited value for maxIntegerValue
         if (isset($constraints['maxIntegerValue']) &&
@@ -124,9 +124,9 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'The value can not be higher than %size%.',
                 null,
-                [
+                array(
                     '%size%' => $constraints['maxIntegerValue'],
-                ],
+                ),
                 'value'
             );
         }
@@ -136,9 +136,9 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'The value can not be lower than %size%.',
                 null,
-                [
+                array(
                     '%size%' => $constraints['minIntegerValue'],
-                ],
+                ),
                 'value'
             );
         }
@@ -157,11 +157,18 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\Integer\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\Integer\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
-        return (string)$value;
+        return (string)$value->value;
     }
 
     /**

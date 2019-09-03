@@ -97,9 +97,9 @@ class BinaryBaseStorage extends GatewayBasedStorage
         $referenced = $this->gateway->getReferencedFiles([$field->id], $versionInfo->versionNo);
         if ($referenced === null || !in_array($field->value->externalData['id'], $referenced)) {
             $this->removeOldFile($field->id, $versionInfo->versionNo, $context);
-        }
 
-        $this->gateway->storeFileReference($versionInfo, $field);
+            $this->gateway->storeFileReference($versionInfo, $field);
+        }
     }
 
     public function copyLegacyField(VersionInfo $versionInfo, Field $field, Field $originalField, array $context)
@@ -132,7 +132,7 @@ class BinaryBaseStorage extends GatewayBasedStorage
 
         $this->gateway->removeFileReference($fieldId, $versionNo);
 
-        $fileCounts = $this->gateway->countFileReferences([$fileReference['id']]);
+        $fileCounts = $this->gateway->countFileReferences(array($fileReference['id']));
 
         if ($fileCounts[$fileReference['id']] === 0) {
             $binaryFile = $this->IOService->loadBinaryFile($fileReference['id']);

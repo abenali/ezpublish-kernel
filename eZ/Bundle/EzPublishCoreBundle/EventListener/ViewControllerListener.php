@@ -47,7 +47,7 @@ class ViewControllerListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [KernelEvents::CONTROLLER => ['getController', 10]];
+        return array(KernelEvents::CONTROLLER => array('getController', 10));
     }
 
     /**
@@ -66,7 +66,7 @@ class ViewControllerListener implements EventSubscriberInterface
         }
 
         $parameterEvent = new FilterViewBuilderParametersEvent(clone $request);
-        $this->eventDispatcher->dispatch($parameterEvent, ViewEvents::FILTER_BUILDER_PARAMETERS);
+        $this->eventDispatcher->dispatch(ViewEvents::FILTER_BUILDER_PARAMETERS, $parameterEvent);
         $view = $viewBuilder->buildView($parameterEvent->getParameters()->all());
         $request->attributes->set('view', $view);
 

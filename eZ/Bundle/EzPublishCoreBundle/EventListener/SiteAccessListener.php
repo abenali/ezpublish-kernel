@@ -10,37 +10,56 @@ namespace eZ\Bundle\EzPublishCoreBundle\EventListener;
 
 use eZ\Publish\Core\MVC\Symfony\MVCEvents;
 use eZ\Publish\Core\MVC\Symfony\Event\PostSiteAccessMatchEvent;
-use eZ\Publish\Core\MVC\Symfony\SiteAccess;
+use eZ\Publish\Core\MVC\Symfony\Routing\Generator\UrlAliasGenerator;
 use eZ\Publish\Core\MVC\Symfony\SiteAccess\URILexer;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\HttpUtils;
 
 /**
  * SiteAccess match listener.
  */
-class SiteAccessListener implements EventSubscriberInterface
+class SiteAccessListener implements EventSubscriberInterface, ContainerAwareInterface
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\SiteAccess */
-    private $siteaccess;
+    use ContainerAwareTrait;
 
-    public function __construct(
-        SiteAccess $siteaccess
-    ) {
-        $this->siteaccess = $siteaccess;
-    }
+    /**
+     * @var \Symfony\Component\Routing\RouterInterface
+     */
+    private $defaultRouter;
 
-    public static function getSubscribedEvents(): array
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Routing\Generator\UrlAliasGenerator
+     */
+    private $urlAliasGenerator;
+
+    /**
+     * @var \Symfony\Component\Security\Http\HttpUtils
+     */
+    private $httpUtils;
+
+    public function __construct(RouterInterface $defaultRouter, UrlAliasGenerator $urlAliasGenerator, HttpUtils $httpUtils)
     {
-        return [
-            MVCEvents::SITEACCESS => ['onSiteAccessMatch', 255],
-        ];
+        $this->defaultRouter = $defaultRouter;
+        $this->urlAliasGenerator = $urlAliasGenerator;
+        $this->httpUtils = $httpUtils;
     }
 
-    public function onSiteAccessMatch(PostSiteAccessMatchEvent $event): void
+    public static function getSubscribedEvents()
+    {
+        return array(
+            MVCEvents::SITEACCESS => array('onSiteAccessMatch', 255),
+        );
+    }
+
+    public function onSiteAccessMatch(PostSiteAccessMatchEvent $event)
     {
         $request = $event->getRequest();
         $matchedSiteAccess = $event->getSiteAccess();
 
-        $siteAccess = $this->siteaccess;
+        $siteAccess = $this->container->get('ezpublish.siteaccess');
         $siteAccess->name = $matchedSiteAccess->name;
         $siteAccess->matchingType = $matchedSiteAccess->matchingType;
         $siteAccess->matcher = $matchedSiteAccess->matcher;
@@ -55,7 +74,7 @@ class SiteAccessListener implements EventSubscriberInterface
                 );
             } else {
                 $request->attributes->set('viewParametersString', '');
-                $request->attributes->set('viewParameters', []);
+                $request->attributes->set('viewParameters', array());
             }
 
             return;
@@ -89,11 +108,11 @@ class SiteAccessListener implements EventSubscriberInterface
      *               Second element is the view parameters hash.
      *               Third element is the view parameters string (e.g. /(foo)/bar)
      */
-    private function getViewParameters(string $pathinfo): array
+    private function getViewParameters($pathinfo)
     {
         // No view parameters, get out of here.
         if (($vpStart = strpos($pathinfo, '/(')) === false) {
-            return [$pathinfo, [], ''];
+            return array($pathinfo, array(), '');
         }
 
         $vpString = substr($pathinfo, $vpStart + 1);
@@ -102,7 +121,7 @@ class SiteAccessListener implements EventSubscriberInterface
         // Now remove the view parameters string from $semanticPathinfo
         $pathinfo = substr($pathinfo, 0, $vpStart);
 
-        return [$pathinfo, $viewParameters, "/$vpString"];
+        return array($pathinfo, $viewParameters, "/$vpString");
     }
 
     /**
@@ -112,10 +131,10 @@ class SiteAccessListener implements EventSubscriberInterface
      *
      * @return array
      */
-    private function generateViewParametersArray(string $vpString): array
+    private function generateViewParametersArray($vpString)
     {
         $vpString = trim($vpString, '/');
-        $viewParameters = [];
+        $viewParameters = array();
 
         $vpSegments = explode('/', $vpString);
         for ($i = 0, $iMax = count($vpSegments); $i < $iMax; ++$i) {
@@ -126,7 +145,7 @@ class SiteAccessListener implements EventSubscriberInterface
             // View parameter name.
             // We extract it + the value from the following segment (next element in $vpSegments array)
             if ($vpSegments[$i][0] === '(') {
-                $paramName = str_replace(['(', ')'], '', $vpSegments[$i]);
+                $paramName = str_replace(array('(', ')'), '', $vpSegments[$i]);
                 // A value is present (e.g. /(foo)/bar)
                 if (isset($vpSegments[$i + 1])) {
                     $viewParameters[$paramName] = $vpSegments[$i + 1];

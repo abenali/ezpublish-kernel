@@ -22,10 +22,14 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  */
 class EzPublishIOExtension extends Extension
 {
-    /** @var \eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory[]|\ArrayObject */
+    /**
+     * @var \eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory[]|\ArrayObject
+     */
     private $metadataHandlerFactories;
 
-    /** @var \eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory[]|\ArrayObject */
+    /**
+     * @var \eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory[]|\ArrayObject
+     */
     private $binarydataHandlerFactories;
 
     public function __construct()
@@ -103,7 +107,7 @@ class EzPublishIOExtension extends Extension
      */
     private function processHandlers(ContainerBuilder $container, $config, $key)
     {
-        $handlers = [];
+        $handlers = array();
         if (isset($config[$key])) {
             foreach ($config[$key] as $name => $value) {
                 if (isset($handlers[$name])) {

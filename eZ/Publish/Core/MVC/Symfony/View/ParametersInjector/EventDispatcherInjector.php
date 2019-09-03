@@ -15,7 +15,9 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class EventDispatcherInjector implements ParametersInjector
 {
-    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
     private $eventDispatcher;
 
     public function __construct(EventDispatcherInterface $eventDispatcher)
@@ -26,7 +28,7 @@ class EventDispatcherInjector implements ParametersInjector
     public function injectViewParameters(View $view, array $parameters)
     {
         $event = new FilterViewParametersEvent($view, $parameters);
-        $this->eventDispatcher->dispatch($event, ViewEvents::FILTER_VIEW_PARAMETERS);
+        $this->eventDispatcher->dispatch(ViewEvents::FILTER_VIEW_PARAMETERS, $event);
         $view->addParameters($event->getViewParameters());
     }
 }

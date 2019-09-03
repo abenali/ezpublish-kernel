@@ -44,5 +44,5 @@ class RoleUpdateStruct extends ValueObject
      *
      * @var string[]
      */
-    public $description = [];
+    public $description = array();
 }

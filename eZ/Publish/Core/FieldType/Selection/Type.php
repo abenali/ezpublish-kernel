@@ -30,20 +30,16 @@ class Type extends FieldType
      *
      * @var mixed
      */
-    protected $settingsSchema = [
-        'isMultiple' => [
+    protected $settingsSchema = array(
+        'isMultiple' => array(
             'type' => 'bool',
             'default' => false,
-        ],
-        'options' => [
+        ),
+        'options' => array(
             'type' => 'hash',
-            'default' => [],
-        ],
-        'multilingualOptions' => [
-            'type' => 'hash',
-            'default' => [],
-        ],
-    ];
+            'default' => array(),
+        ),
+    );
 
     /**
      * Validates the fieldSettings of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct.
@@ -54,7 +50,7 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $settingKey => $settingValue) {
             switch ($settingKey) {
@@ -63,11 +59,11 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "FieldType '%fieldType%' expects setting '%setting%' to be of type '%type%'",
                             null,
-                            [
+                            array(
                                 '%fieldType%' => $this->getFieldTypeIdentifier(),
                                 '%setting%' => $settingKey,
                                 '%type%' => 'bool',
-                            ],
+                            ),
                             "[$settingKey]"
                         );
                     }
@@ -77,25 +73,11 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "FieldType '%fieldType%' expects setting '%setting%' to be of type '%type%'",
                             null,
-                            [
+                            array(
                                 '%fieldType%' => $this->getFieldTypeIdentifier(),
                                 '%setting%' => $settingKey,
                                 '%type%' => 'hash',
-                            ],
-                            "[$settingKey]"
-                        );
-                    }
-                    break;
-                case 'multilingualOptions':
-                    if (!is_array($settingValue) && !is_array(reset($settingValue))) {
-                        $validationErrors[] = new ValidationError(
-                            "FieldType '%fieldType%' expects setting '%setting%' to be of type '%type%'",
-                            null,
-                            [
-                                '%fieldType%' => $this->getFieldTypeIdentifier(),
-                                '%setting%' => $settingKey,
-                                '%type%' => 'hash',
-                            ],
+                            ),
                             "[$settingKey]"
                         );
                     }
@@ -104,9 +86,9 @@ class Type extends FieldType
                     $validationErrors[] = new ValidationError(
                         "Setting '%setting%' is unknown",
                         null,
-                        [
+                        array(
                             '%setting%' => $settingKey,
-                        ],
+                        ),
                         "[$settingKey]"
                     );
             }
@@ -126,28 +108,18 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\Selection\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param mixed $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
-        if (empty($value->selection)) {
-            return '';
-        }
-
-        $names = [];
-        $fieldSettings = $fieldDefinition->getFieldSettings();
-
-        foreach ($value->selection as $optionIndex) {
-            if (isset($fieldSettings['multilingualOptions'][$languageCode][$optionIndex])) {
-                $names[] = $fieldSettings['multilingualOptions'][$languageCode][$optionIndex];
-            } elseif (isset($fieldSettings['multilingualOptions'][$fieldDefinition->mainLanguageCode][$optionIndex])) {
-                $names[] = $fieldSettings['multilingualOptions'][$fieldDefinition->mainLanguageCode][$optionIndex];
-            } elseif (isset($fieldSettings['options'][$optionIndex])) {
-                $names[] = $fieldSettings['options'][$optionIndex];
-            }
-        }
-
-        return implode(' ', $names);
+        throw new \RuntimeException('Name generation provided via NameableField set via "ezpublish.fieldType.nameable" service tag');
     }
 
     /**
@@ -209,7 +181,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $validationErrors;
@@ -222,43 +194,21 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'Field definition does not allow multiple options to be selected.',
                 null,
-                [],
+                array(),
                 'selection'
             );
         }
 
         foreach ($fieldValue->selection as $optionIndex) {
-            if (!isset($fieldSettings['options'][$optionIndex]) && empty($fieldSettings['multilingualOptions'])) {
+            if (!isset($fieldSettings['options'][$optionIndex])) {
                 $validationErrors[] = new ValidationError(
                     'Option with index %index% does not exist in the field definition.',
                     null,
-                    [
+                    array(
                         '%index%' => $optionIndex,
-                    ],
+                    ),
                     'selection'
                 );
-            }
-        }
-
-        //@todo: find a way to include selection language
-        if (isset($fieldSettings['multilingualOptions'])) {
-            $possibleOptionIndexesByLanguage = array_map(function ($languageOptionIndexes) {
-                return array_keys($languageOptionIndexes);
-            }, $fieldSettings['multilingualOptions']);
-
-            $possibleOptionIndexes = call_user_func_array('array_merge', $possibleOptionIndexesByLanguage);
-
-            foreach ($fieldValue->selection as $optionIndex) {
-                if (!in_array($optionIndex, $possibleOptionIndexes)) {
-                    $validationErrors[] = new ValidationError(
-                        'Option with index %index% does not exist in the field definition.',
-                        null,
-                        [
-                            '%index%' => $optionIndex,
-                        ],
-                        'selection'
-                    );
-                }
             }
         }
 

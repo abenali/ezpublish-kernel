@@ -14,10 +14,14 @@ use eZ\Publish\SPI\Persistence\Handler as SPIHandler;
 
 abstract class Base extends TestCase
 {
-    /** @var \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $persistenceHandlerMock;
 
-    /** @var \eZ\Publish\API\Repository\Values\User\User|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\User\User|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $userMock;
 
     /**
@@ -25,7 +29,7 @@ abstract class Base extends TestCase
      *
      * @return \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject
      */
-    public function getPersistenceMock(array $mockMethods = [])
+    public function getPersistenceMock(array $mockMethods = array())
     {
         if ($this->persistenceHandlerMock !== null) {
             return $this->persistenceHandlerMock;
@@ -39,14 +43,14 @@ abstract class Base extends TestCase
      *
      * @return \eZ\Publish\API\Repository\Values\User\User|\PHPUnit\Framework\MockObject\MockObject
      */
-    public function getUserMock(array $mockMethods = [])
+    public function getUserMock(array $mockMethods = array())
     {
         if ($this->userMock !== null) {
             return $this->userMock;
         }
 
         return $this->userMock = $this->getMockBuilder(APIUser::class)
-            ->setConstructorArgs([])
+            ->setConstructorArgs(array())
             ->setMethods($mockMethods)
             ->getMock();
     }
@@ -54,7 +58,7 @@ abstract class Base extends TestCase
     /**
      * unset properties.
      */
-    protected function tearDown(): void
+    public function tearDown()
     {
         if ($this->persistenceHandlerMock !== null) {
             unset($this->persistenceHandlerMock);

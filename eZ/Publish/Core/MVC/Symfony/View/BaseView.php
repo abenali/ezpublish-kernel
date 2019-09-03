@@ -10,16 +10,24 @@ use Symfony\Component\HttpKernel\Controller\ControllerReference;
 
 abstract class BaseView implements View
 {
-    /** @var string|\Closure */
+    /**
+     * @var string|\Closure
+     */
     protected $templateIdentifier;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $parameters = [];
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $configHash = [];
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $viewType = 'full';
 
     /** @var ControllerReference */

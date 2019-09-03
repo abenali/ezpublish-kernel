@@ -20,10 +20,14 @@ use eZ\Publish\Core\Persistence\Database\QueryException;
  */
 class DoctrineExpression implements Expression
 {
-    /** @var \Doctrine\DBAL\Connection */
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
     private $connection;
 
-    /** @var \Doctrine\DBAL\Platforms\AbstractPlatform */
+    /**
+     * @var \Doctrine\DBAL\Platforms\AbstractPlatform
+     */
     private $platform;
 
     public function __construct(Connection $connection)
@@ -628,7 +632,7 @@ class DoctrineExpression implements Expression
     {
         $args = func_get_args();
 
-        return call_user_func_array([$this->platform, 'getConcatExpression'], $args);
+        return call_user_func_array(array($this->platform, 'getConcatExpression'), $args);
     }
 
     /**
@@ -782,7 +786,7 @@ class DoctrineExpression implements Expression
      */
     private function arrayFlatten(array $array)
     {
-        $flat = [];
+        $flat = array();
         foreach ($array as $arg) {
             switch (gettype($arg)) {
                 case 'array':

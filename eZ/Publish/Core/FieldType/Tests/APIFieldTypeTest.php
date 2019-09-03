@@ -17,13 +17,17 @@ use PHPUnit\Framework\TestCase;
 
 class APIFieldTypeTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $innerFieldType;
 
-    /** @var FieldType */
+    /**
+     * @var FieldType
+     */
     private $fieldType;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerFieldType = $this->createMock(SPIFieldType::class);

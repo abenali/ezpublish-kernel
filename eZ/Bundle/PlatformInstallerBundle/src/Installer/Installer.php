@@ -19,7 +19,7 @@ namespace EzSystems\PlatformInstallerBundle\Installer;
 interface Installer
 {
     /**
-     * Handle inserting of schema.
+     * Handle inserting of schema, schema should ideally be in ISO SQL format.
      */
     public function importSchema();
 

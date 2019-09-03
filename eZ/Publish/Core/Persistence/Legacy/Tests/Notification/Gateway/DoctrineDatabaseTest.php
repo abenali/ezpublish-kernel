@@ -26,7 +26,7 @@ class DoctrineDatabaseTest extends TestCase
         'data' => null,
     ];
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 

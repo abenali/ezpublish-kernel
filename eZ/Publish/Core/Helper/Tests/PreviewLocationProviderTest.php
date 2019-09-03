@@ -13,9 +13,7 @@ use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo as APIContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Location as APILocation;
 use eZ\Publish\Core\Helper\PreviewLocationProvider;
-use eZ\Publish\Core\Repository\Values\Content\Content;
 use eZ\Publish\Core\Repository\Values\Content\Location;
-use eZ\Publish\Core\Repository\Values\Content\VersionInfo;
 use eZ\Publish\SPI\Persistence\Content\Location\Handler as SPILocationHandler;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +31,7 @@ class PreviewLocationProviderTest extends TestCase
     /** @var \eZ\Publish\Core\Helper\PreviewLocationProvider */
     private $provider;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -47,13 +45,17 @@ class PreviewLocationProviderTest extends TestCase
     {
         $contentId = 123;
         $parentLocationId = 456;
-        $content = $this->getContentMock($contentId);
+
+        $contentInfo = $this
+            ->getMockBuilder(APIContentInfo::class)
+            ->setConstructorArgs(array(array('id' => $contentId)))
+            ->getMockForAbstractClass();
 
         $this->contentService
             ->expects($this->once())
-            ->method('loadContent')
+            ->method('loadContentInfo')
             ->with($contentId)
-            ->willReturn($content);
+            ->will($this->returnValue($contentInfo));
 
         $this->locationService
             ->expects($this->never())
@@ -63,11 +65,11 @@ class PreviewLocationProviderTest extends TestCase
             ->expects($this->once())
             ->method('loadParentLocationsForDraftContent')
             ->with($contentId)
-            ->will($this->returnValue([new Location(['id' => $parentLocationId])]));
+            ->will($this->returnValue(array(new Location(array('id' => $parentLocationId)))));
 
         $location = $this->provider->loadMainLocation($contentId);
         $this->assertInstanceOf(APILocation::class, $location);
-        $this->assertSame($content, $location->getContent());
+        $this->assertSame($contentInfo, $location->contentInfo);
         $this->assertNull($location->id);
         $this->assertEquals($parentLocationId, $location->parentLocationId);
     }
@@ -76,72 +78,52 @@ class PreviewLocationProviderTest extends TestCase
     {
         $contentId = 123;
         $locationId = 456;
-        $content = $this->getContentMock($contentId, $locationId);
-
+        $contentInfo = $this
+            ->getMockBuilder(APIContentInfo::class)
+            ->setConstructorArgs(array(array('id' => $contentId, 'mainLocationId' => $locationId)))
+            ->getMockForAbstractClass();
         $location = $this
             ->getMockBuilder(Location::class)
-            ->setConstructorArgs([['id' => $locationId, 'content' => $content]])
+            ->setConstructorArgs(array(array('id' => $locationId, 'contentInfo' => $contentInfo)))
             ->getMockForAbstractClass();
-
         $this->contentService
             ->expects($this->once())
-            ->method('loadContent')
+            ->method('loadContentInfo')
             ->with($contentId)
-            ->willReturn($content);
-
+            ->will($this->returnValue($contentInfo));
         $this->locationService
             ->expects($this->once())
             ->method('loadLocation')
             ->with($locationId)
             ->will($this->returnValue($location));
-
         $this->locationHandler->expects($this->never())->method('loadParentLocationsForDraftContent');
 
         $returnedLocation = $this->provider->loadMainLocation($contentId);
         $this->assertSame($location, $returnedLocation);
-        $this->assertSame($content, $location->getContent());
+        $this->assertSame($contentInfo, $returnedLocation->contentInfo);
     }
 
     public function testGetPreviewLocationNoLocation()
     {
         $contentId = 123;
-        $content = $this->getContentMock($contentId);
 
+        $contentInfo = $this
+            ->getMockBuilder(APIContentInfo::class)
+            ->setConstructorArgs(array(array('id' => $contentId)))
+            ->getMockForAbstractClass();
         $this->contentService
             ->expects($this->once())
-            ->method('loadContent')
+            ->method('loadContentInfo')
             ->with($contentId)
-            ->willReturn($content);
-
+            ->will($this->returnValue($contentInfo));
         $this->locationHandler
             ->expects($this->once())
             ->method('loadParentLocationsForDraftContent')
             ->with($contentId)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->locationHandler->expects($this->never())->method('loadLocationsByContent');
 
         $this->assertNull($this->provider->loadMainLocation($contentId));
-    }
-
-    private function getContentMock(int $contentId, ?int $mainLocationId = null, bool $published = false): Content
-    {
-        $contentInfo = new APIContentInfo([
-            'id' => $contentId,
-            'mainLocationId' => $mainLocationId,
-            'published' => $published,
-        ]);
-
-        $versionInfo = $this->createMock(VersionInfo::class);
-        $versionInfo->expects($this->once())
-            ->method('getContentInfo')
-            ->willReturn($contentInfo);
-
-        $content = $this->createMock(Content::class);
-        $content->expects($this->once())
-            ->method('getVersionInfo')
-            ->willReturn($versionInfo);
-
-        return $content;
     }
 }

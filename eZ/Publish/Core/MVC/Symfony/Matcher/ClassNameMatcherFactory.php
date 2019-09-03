@@ -20,9 +20,11 @@ use InvalidArgumentException;
  * A relative namespace can be defined. If so, getMatcher() will search for the requested matcher
  * inside this namespace if a relative namespace (not starting with '\') is passed.
  */
-class ClassNameMatcherFactory implements ConfigurableMatcherFactoryInterface
+class ClassNameMatcherFactory implements MatcherFactoryInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
     /**
@@ -33,7 +35,9 @@ class ClassNameMatcherFactory implements ConfigurableMatcherFactoryInterface
      */
     protected $matchConfig;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\MatcherInterface[] */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\MatcherInterface[]
+     */
     protected $matchers = [];
 
     /**
@@ -132,7 +136,7 @@ class ClassNameMatcherFactory implements ConfigurableMatcherFactoryInterface
             }
 
             if ($hasMatched) {
-                return $this->alreadyMatched[$viewType][$view] = $configHash + ['matcher' => $matcher];
+                return $this->alreadyMatched[$viewType][$view] = $configHash + array('matcher' => $matcher);
             }
         }
 
@@ -141,9 +145,13 @@ class ClassNameMatcherFactory implements ConfigurableMatcherFactoryInterface
 
     /**
      * @param array $matchConfig
+     *
+     * @return AbstractMatcherFactory
      */
-    public function setMatchConfig(array $matchConfig): void
+    public function setMatchConfig($matchConfig)
     {
         $this->matchConfig = $matchConfig;
+
+        return $this;
     }
 }

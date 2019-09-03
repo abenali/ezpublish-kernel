@@ -18,16 +18,22 @@ use PHPUnit\Framework\TestCase;
 
 class HandlerTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\URL\Gateway|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\URL\Gateway|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $gateway;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\URL\Mapper|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\URL\Mapper|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $mapper;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\URL\Handler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\URL\Handler
+     */
     private $handler;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->gateway = $this->createMock(Gateway::class);
@@ -96,10 +102,11 @@ class HandlerTest extends TestCase
         $this->assertEquals($expected, $this->handler->find($query));
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFoundException
+     */
     public function testLoadByIdWithoutUrlData()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\NotFoundException::class);
-
         $id = 1;
 
         $this->gateway
@@ -136,10 +143,11 @@ class HandlerTest extends TestCase
         $this->assertEquals($url, $this->handler->loadById($url->id));
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFoundException
+     */
     public function testLoadByUrlWithoutUrlData()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\NotFoundException::class);
-
         $url = 'http://ez.no';
 
         $this->gateway

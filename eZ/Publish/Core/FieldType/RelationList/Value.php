@@ -27,7 +27,7 @@ class Value extends BaseValue
      *
      * @param mixed[] $destinationContentIds
      */
-    public function __construct(array $destinationContentIds = [])
+    public function __construct(array $destinationContentIds = array())
     {
         $this->destinationContentIds = $destinationContentIds;
     }

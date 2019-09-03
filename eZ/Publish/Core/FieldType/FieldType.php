@@ -8,7 +8,7 @@
  */
 namespace eZ\Publish\Core\FieldType;
 
-use eZ\Publish\SPI\FieldType\FieldType as SPIFieldType;
+use eZ\Publish\SPI\FieldType\FieldType as FieldTypeInterface;
 use eZ\Publish\Core\Persistence\TransformationProcessor;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
 use eZ\Publish\SPI\Persistence\Content\FieldValue as PersistenceValue;
@@ -32,7 +32,7 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
  * Field types are primed and pre-configured with the Field Definitions found in
  * Content Types.
  */
-abstract class FieldType extends SPIFieldType
+abstract class FieldType implements FieldTypeInterface
 {
     /**
      * The setting keys which are available on this field type.
@@ -42,7 +42,7 @@ abstract class FieldType extends SPIFieldType
      *
      * @var mixed
      */
-    protected $settingsSchema = [];
+    protected $settingsSchema = array();
 
     /**
      * The validator configuration schema.
@@ -55,7 +55,7 @@ abstract class FieldType extends SPIFieldType
      *
      * @var mixed
      */
-    protected $validatorConfigurationSchema = [];
+    protected $validatorConfigurationSchema = array();
 
     /**
      * String transformation processor, used to normalize sort string as needed.
@@ -133,7 +133,7 @@ abstract class FieldType extends SPIFieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $value)
     {
-        return [];
+        return array();
     }
 
     /**
@@ -152,15 +152,15 @@ abstract class FieldType extends SPIFieldType
      */
     public function validateValidatorConfiguration($validatorConfiguration)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ((array)$validatorConfiguration as $validatorIdentifier => $constraints) {
             $validationErrors[] = new ValidationError(
                 "Validator '%validator%' is unknown",
                 null,
-                [
+                array(
                     'validator' => $validatorIdentifier,
-                ],
+                ),
                 "[$validatorIdentifier]"
             );
         }
@@ -187,7 +187,7 @@ abstract class FieldType extends SPIFieldType
         foreach ($this->getValidatorConfigurationSchema() as $validatorName => $configurationSchema) {
             // Set configuration of specific validator to empty array if it is not already provided
             if (!isset($validatorConfiguration[$validatorName])) {
-                $validatorConfiguration[$validatorName] = [];
+                $validatorConfiguration[$validatorName] = array();
             }
 
             foreach ($configurationSchema as $settingName => $settingConfiguration) {
@@ -212,19 +212,19 @@ abstract class FieldType extends SPIFieldType
     public function validateFieldSettings($fieldSettings)
     {
         if (!empty($fieldSettings)) {
-            return [
+            return array(
                 new ValidationError(
                     "FieldType '%fieldType%' does not accept settings",
                     null,
-                    [
+                    array(
                         'fieldType' => $this->getFieldTypeIdentifier(),
-                    ],
+                    ),
                     'fieldType'
                 ),
-            ];
+            );
         }
 
-        return [];
+        return array();
     }
 
     /**
@@ -271,7 +271,7 @@ abstract class FieldType extends SPIFieldType
      */
     protected function getSortInfo(Value $value)
     {
-        return null;
+        throw new \RuntimeException('Not implemented, yet.');
     }
 
     /**
@@ -287,11 +287,11 @@ abstract class FieldType extends SPIFieldType
         //       Couldn't this be retrieved with a method, which would initialize
         //       that info on request only?
         return new PersistenceValue(
-            [
+            array(
                 'data' => $this->toHash($value),
                 'externalData' => null,
                 'sortKey' => $this->getSortInfo($value),
-            ]
+            )
         );
     }
 
@@ -575,6 +575,6 @@ abstract class FieldType extends SPIFieldType
      */
     public function getRelations(SPIValue $fieldValue)
     {
-        return [];
+        return array();
     }
 }

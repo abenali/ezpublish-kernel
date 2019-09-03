@@ -44,7 +44,7 @@ class UrlTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -54,7 +54,7 @@ class UrlTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -90,16 +90,16 @@ class UrlTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 23,
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new UrlValue(23),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -133,20 +133,20 @@ class UrlTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new UrlValue(),
-            ],
-            [
+            ),
+            array(
                 'http://example.com/sindelfingen',
                 new UrlValue('http://example.com/sindelfingen'),
-            ],
-            [
+            ),
+            array(
                 new UrlValue('http://example.com/sindelfingen', 'Sindelfingen!'),
                 new UrlValue('http://example.com/sindelfingen', 'Sindelfingen!'),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -186,26 +186,26 @@ class UrlTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new UrlValue(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new UrlValue('http://example.com/sindelfingen'),
-                [
+                array(
                     'link' => 'http://example.com/sindelfingen',
                     'text' => '',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 new UrlValue('http://example.com/sindelfingen', 'Sindelfingen!'),
-                [
+                array(
                     'link' => 'http://example.com/sindelfingen',
                     'text' => 'Sindelfingen!',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -245,26 +245,26 @@ class UrlTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new UrlValue(),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'link' => 'http://example.com/sindelfingen',
                     'text' => null,
-                ],
+                ),
                 new UrlValue('http://example.com/sindelfingen'),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'link' => 'http://example.com/sindelfingen',
                     'text' => 'Sindelfingen!',
-                ],
+                ),
                 new UrlValue('http://example.com/sindelfingen', 'Sindelfingen!'),
-            ],
-        ];
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -272,11 +272,11 @@ class UrlTest extends FieldTypeTest
         return 'ezurl';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new UrlValue('', 'Url text'), [], 'en_GB', 'Url text'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new UrlValue('', 'Url text'), 'Url text'),
+        );
     }
 }

@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\SPI\Tests\FieldType;
 
-use eZ\Publish\API\Repository\Tests\Container\Compiler\SetAllServicesPublicPass;
 use eZ\Publish\Core\Persistence;
 use eZ\Publish\Core\Persistence\TransformationProcessor\DefinitionBased;
 use eZ\Publish\Core\Persistence\Legacy\Tests\TestCase;
@@ -56,7 +55,9 @@ abstract class BaseIntegrationTest extends TestCase
      */
     protected static $contentVersion;
 
-    /** @var \Symfony\Component\DependencyInjection\ContainerBuilder */
+    /**
+     * @var \Symfony\Component\DependencyInjection\ContainerBuilder
+     */
     protected static $container;
 
     /**
@@ -73,7 +74,9 @@ abstract class BaseIntegrationTest extends TestCase
         return $installDir;
     }
 
-    /** @var \eZ\Publish\Core\Persistence\TransformationProcessor */
+    /**
+     * @var \eZ\Publish\Core\Persistence\TransformationProcessor
+     */
     protected $transformationProcessor;
 
     /**
@@ -209,14 +212,14 @@ abstract class BaseIntegrationTest extends TestCase
      * time, which is not required to spent, since we are only reading from the
      * database anyways.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         if (!self::$setUp) {
             self::$container = $this->getContainer();
             $this->handler = self::$container->get('ezpublish.api.storage_engine.legacy.dbhandler');
             $this->db = $this->handler->getName();
             parent::setUp();
-            $this->insertDatabaseFixture(__DIR__ . '/../../../Core/Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+            $this->insertDatabaseFixture(__DIR__ . '/../../../Core/Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
             self::$setUp = $this->handler;
         } else {
             $this->handler = self::$setUp;
@@ -242,8 +245,8 @@ abstract class BaseIntegrationTest extends TestCase
     protected function createContentType()
     {
         $createStruct = new Content\Type\CreateStruct(
-            [
-                'name' => ['eng-GB' => 'Test'],
+            array(
+                'name' => array('eng-GB' => 'Test'),
                 'identifier' => 'test-' . $this->getTypeName(),
                 'status' => 0,
                 'creatorId' => 14,
@@ -252,24 +255,24 @@ abstract class BaseIntegrationTest extends TestCase
                 'modified' => time(),
                 'initialLanguageId' => 2,
                 'remoteId' => 'abcdef',
-            ]
+            )
         );
 
-        $createStruct->fieldDefinitions = [
+        $createStruct->fieldDefinitions = array(
             new Content\Type\FieldDefinition(
-                [
-                    'name' => ['eng-GB' => 'Name'],
+                array(
+                    'name' => array('eng-GB' => 'Name'),
                     'identifier' => 'name',
                     'fieldGroup' => 'main',
                     'position' => 1,
                     'fieldType' => 'ezstring',
                     'isTranslatable' => false,
                     'isRequired' => true,
-                ]
+                )
             ),
             new Content\Type\FieldDefinition(
-                [
-                    'name' => ['eng-GB' => 'Data'],
+                array(
+                    'name' => array('eng-GB' => 'Data'),
                     'identifier' => 'data',
                     'fieldGroup' => 'main',
                     'position' => 2,
@@ -277,9 +280,9 @@ abstract class BaseIntegrationTest extends TestCase
                     'isTranslatable' => false,
                     'isRequired' => true,
                     'fieldTypeConstraints' => $this->getTypeConstraints(),
-                ]
+                )
             ),
-        ];
+        );
 
         $handler = $this->getCustomHandler();
         $contentTypeHandler = $handler->contentTypeHandler();
@@ -364,19 +367,19 @@ abstract class BaseIntegrationTest extends TestCase
     protected function createContent(Type $contentType, $fieldValue, $languageCode = 'eng-GB')
     {
         $createStruct = new Content\CreateStruct(
-            [
-                'name' => [$languageCode => 'Test object'],
+            array(
+                'name' => array($languageCode => 'Test object'),
                 'typeId' => $contentType->id,
                 'sectionId' => 1,
                 'ownerId' => 14,
-                'locations' => [
+                'locations' => array(
                     new Content\Location\CreateStruct(
-                        [
+                        array(
                             'parentId' => 2,
                             'remoteId' => 'sindelfingen',
-                        ]
+                        )
                     ),
-                ],
+                ),
                 // Language with id=2 is eng-US
                 // This is probably a mistake, as the fields are given with eng-GB, but it has a nice
                 // side effect of testing creation with empty value.
@@ -384,30 +387,30 @@ abstract class BaseIntegrationTest extends TestCase
                 'initialLanguageId' => 2,
                 'remoteId' => microtime(),
                 'modified' => time(),
-                'fields' => [
+                'fields' => array(
                     new Content\Field(
-                        [
+                        array(
                             'type' => 'ezstring',
                             'languageCode' => $languageCode,
                             'fieldDefinitionId' => $contentType->fieldDefinitions[0]->id,
                             'value' => new Content\FieldValue(
-                                [
+                                array(
                                     'data' => 'This is just a test object',
                                     'sortKey' => 'this is just a test object',
-                                ]
+                                )
                             ),
-                        ]
+                        )
                     ),
                     new Content\Field(
-                        [
+                        array(
                             'type' => $this->getTypeName(),
                             'languageCode' => $languageCode,
                             'fieldDefinitionId' => $contentType->fieldDefinitions[1]->id,
                             'value' => $fieldValue,
-                        ]
+                        )
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $handler = $this->getCustomHandler();
@@ -487,14 +490,14 @@ abstract class BaseIntegrationTest extends TestCase
 
         $field->value = $this->getUpdatedValue();
         $updateStruct = new UpdateStruct(
-            [
+            array(
                 'creatorId' => 14,
                 'modificationDate' => time(),
                 'initialLanguageId' => 2,
-                'fields' => [
+                'fields' => array(
                     $field,
-                ],
-            ]
+                ),
+            )
         );
 
         $contentHandler = $handler->contentHandler();
@@ -525,11 +528,10 @@ abstract class BaseIntegrationTest extends TestCase
 
     /**
      * @depends testUpdateField
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testDeleteField($content)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $handler = $this->getCustomHandler();
         $contentHandler = $handler->contentHandler();
 
@@ -571,9 +573,8 @@ abstract class BaseIntegrationTest extends TestCase
         $loader->load('io.yml');
         $loader->load('repository.yml');
         $loader->load('repository/inner.yml');
-        $loader->load('repository/event.yml');
+        $loader->load('repository/signalslot.yml');
         $loader->load('repository/siteaccessaware.yml');
-        $loader->load('repository/autowire.yml');
         $loader->load('fieldtype_external_storages.yml');
         $loader->load('storage_engines/common.yml');
         $loader->load('storage_engines/shortcuts.yml');
@@ -585,7 +586,6 @@ abstract class BaseIntegrationTest extends TestCase
         $loader->load('utils.yml');
         $loader->load('tests/common.yml');
         $loader->load('policies.yml');
-        $loader->load('events.yml');
 
         $containerBuilder->setParameter('ezpublish.kernel.root_dir', $installDir);
 
@@ -593,8 +593,6 @@ abstract class BaseIntegrationTest extends TestCase
             'legacy_dsn',
             $this->getDsn()
         );
-
-        $containerBuilder->addCompilerPass(new SetAllServicesPublicPass());
 
         $containerBuilder->compile();
 

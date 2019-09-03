@@ -19,13 +19,17 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class SessionInitByPostListenerTest extends TestCase
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\EventListener\SessionInitByPostListener */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\EventListener\SessionInitByPostListener
+     */
     private $listener;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $session;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->session = $this->createMock(SessionInterface::class);
@@ -35,9 +39,9 @@ class SessionInitByPostListenerTest extends TestCase
     public function testGetSubscribedEvents()
     {
         $this->assertSame(
-            [
-                MVCEvents::SITEACCESS => ['onSiteAccessMatch', 249],
-            ],
+            array(
+                MVCEvents::SITEACCESS => array('onSiteAccessMatch', 249),
+            ),
             SessionInitByPostListener::getSubscribedEvents()
         );
     }

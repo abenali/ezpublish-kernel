@@ -23,7 +23,7 @@ class ContentDownloadRouteReferenceListenerTest extends TestCase
     /** @var \eZ\Publish\Core\Helper\TranslationHelper|\PHPUnit\Framework\MockObject\MockObject */
     protected $translationHelperMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->translationHelperMock = $this->createMock(TranslationHelper::class);
     }
@@ -39,10 +39,11 @@ class ContentDownloadRouteReferenceListenerTest extends TestCase
         self::assertEquals('some_route', $routeReference->getRoute());
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testThrowsExceptionOnBadContentParameter()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $routeReference = new RouteReference(
             ContentDownloadRouteReferenceListener::ROUTE_NAME,
             [
@@ -56,10 +57,11 @@ class ContentDownloadRouteReferenceListenerTest extends TestCase
         $eventListener->onRouteReferenceGeneration($event);
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testThrowsExceptionOnBadFieldIdentifier()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $content = new Content(
             [
                 'internalFields' => [],

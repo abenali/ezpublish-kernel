@@ -18,9 +18,6 @@ use LogicException;
  */
 class FieldRegistryPass implements CompilerPassInterface
 {
-    public const FIELD_TYPE_INDEXABLE_SERVICE_TAG = 'ezplatform.field_type.indexable';
-    public const DEPRECATED_FIELD_TYPE_INDEXABLE_SERVICE_TAG = 'ezpublish.fieldType.indexable';
-
     /**
      * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
      *
@@ -34,37 +31,21 @@ class FieldRegistryPass implements CompilerPassInterface
 
         $fieldRegistryDefinition = $container->getDefinition('ezpublish.search.common.field_registry');
 
-        $deprecatedIndexableFieldTypeTags = $container->findTaggedServiceIds(self::DEPRECATED_FIELD_TYPE_INDEXABLE_SERVICE_TAG);
-        foreach ($deprecatedIndexableFieldTypeTags as $deprecatedIndexableFieldTypeTag) {
-            @trigger_error(
-                sprintf(
-                    '`%s` service tag is deprecated and will be removed in eZ Platform 4.0. Please use `%s`. instead.',
-                    self::DEPRECATED_FIELD_TYPE_INDEXABLE_SERVICE_TAG,
-                    self::FIELD_TYPE_INDEXABLE_SERVICE_TAG
-                ),
-                E_USER_DEPRECATED
-            );
-        }
-        $indexableFieldTypeTags = $container->findTaggedServiceIds(self::FIELD_TYPE_INDEXABLE_SERVICE_TAG);
-        $fieldTypesTags = array_merge($deprecatedIndexableFieldTypeTags, $indexableFieldTypeTags);
-        foreach ($fieldTypesTags as $id => $attributes) {
+        foreach ($container->findTaggedServiceIds('ezpublish.fieldType.indexable') as $id => $attributes) {
             foreach ($attributes as $attribute) {
                 if (!isset($attribute['alias'])) {
                     throw new LogicException(
-                        sprintf(
-                            '%s or %s service tag needs an "alias" attribute to identify the indexable field type. None given.',
-                            self::DEPRECATED_FIELD_TYPE_INDEXABLE_SERVICE_TAG,
-                            self::FIELD_TYPE_INDEXABLE_SERVICE_TAG
-                        )
+                        'ezpublish.fieldType.indexable service tag needs an "alias" attribute to ' .
+                        'identify the indexable field type. None given.'
                     );
                 }
 
                 $fieldRegistryDefinition->addMethodCall(
                     'registerType',
-                    [
+                    array(
                         $attribute['alias'],
                         new Reference($id),
-                    ]
+                    )
                 );
             }
         }

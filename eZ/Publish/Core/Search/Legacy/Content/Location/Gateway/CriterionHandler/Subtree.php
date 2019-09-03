@@ -48,7 +48,7 @@ class Subtree extends CriterionHandler
         Criterion $criterion,
         array $languageSettings
     ) {
-        $statements = [];
+        $statements = array();
         foreach ($criterion->value as $pattern) {
             $statements[] = $query->expr->like(
                 $this->dbHandler->quoteColumn('path_string', 'ezcontentobject_tree'),

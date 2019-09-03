@@ -8,88 +8,57 @@
  */
 namespace eZ\Bundle\EzPublishCoreBundle\Command;
 
-use function count;
-use const DIRECTORY_SEPARATOR;
-use Doctrine\DBAL\Connection;
-use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\SPI\Persistence\Content\ContentInfo;
 use eZ\Publish\Core\Search\Common\Indexer;
 use eZ\Publish\Core\Search\Common\IncrementalIndexer;
 use Doctrine\DBAL\Driver\Statement;
-use eZ\Publish\SPI\Persistence\Content\Location\Handler;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
 use RuntimeException;
 use DateTime;
 use PDO;
 
-class ReindexCommand extends Command
+class ReindexCommand extends ContainerAwareCommand
 {
-    /** @var string string */
-    protected static $defaultName = 'ezplatform:reindex';
-
-    /** @var \eZ\Publish\Core\Search\Common\Indexer|\eZ\Publish\Core\Search\Common\IncrementalIndexer */
+    /**
+     * @var \eZ\Publish\Core\Search\Common\Indexer|\eZ\Publish\Core\Search\Common\IncrementalIndexer
+     */
     private $searchIndexer;
 
-    /** @var \Doctrine\DBAL\Connection */
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
     private $connection;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Location\Handler */
-    private $locationHandler;
-
-    /** @var string */
+    /**
+     * @var string
+     */
     private $phpPath;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $siteaccess;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $env;
 
-    /** @var bool */
-    private $isDebug;
-
     /**
-     * @param \eZ\Publish\Core\Search\Common\IncrementalIndexer|\eZ\Publish\Core\Search\Common\Indexer $searchIndexer
-     * @param \Doctrine\DBAL\Connection $connection
-     * @param \eZ\Publish\SPI\Persistence\Content\Location\Handler $locationHandler
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param string $siteaccess
-     * @param string $env
-     * @param bool $isDebug
-     * @param string|null $phpPath
+     * @var bool
      */
-    public function __construct(
-        $searchIndexer,
-        Connection $connection,
-        Handler $locationHandler,
-        LoggerInterface $logger,
-        string $siteaccess,
-        string $env,
-        bool $isDebug,
-        string $phpPath = null
-    ) {
-        $this->searchIndexer = $searchIndexer;
-        $this->connection = $connection;
-        $this->locationHandler = $locationHandler;
-        $this->phpPath = $phpPath;
-        $this->logger = $logger;
-        $this->siteaccess = $siteaccess;
-        $this->env = $env;
-        $this->isDebug = $isDebug;
-        $this->phpPath = $phpPath;
-
-        parent::__construct();
-    }
+    private $isDebug;
 
     /**
      * Initialize objects required by {@see execute()}.
@@ -100,6 +69,11 @@ class ReindexCommand extends Command
     public function initialize(InputInterface $input, OutputInterface $output)
     {
         parent::initialize($input, $output);
+        $this->searchIndexer = $this->getContainer()->get('ezpublish.spi.search.indexer');
+        $this->connection = $this->getContainer()->get('ezpublish.api.storage_engine.legacy.connection');
+        $this->logger = $this->getContainer()->get('logger');
+        $this->env = $this->getContainer()->getParameter('kernel.environment');
+        $this->isDebug = $this->getContainer()->getParameter('kernel.debug');
         if (!$this->searchIndexer instanceof Indexer) {
             throw new RuntimeException(
                 sprintf(
@@ -188,7 +162,7 @@ EOT
         $iterationCount = $input->getOption('iteration-count');
         $this->siteaccess = $input->getOption('siteaccess');
         if (!is_numeric($iterationCount) || (int) $iterationCount < 1) {
-            throw new InvalidArgumentException('--iteration-count', "Option should be > 0, got '{$iterationCount}'");
+            throw new RuntimeException("'--iteration-count' option should be > 0, got '{$iterationCount}'");
         }
 
         if (!$this->searchIndexer instanceof IncrementalIndexer) {
@@ -287,7 +261,9 @@ EOT
 
     private function runParallelProcess(ProgressBar $progress, Statement $stmt, $processCount, $iterationCount, $commit)
     {
-        /** @var \Symfony\Component\Process\Process[]|null[] */
+        /**
+         * @var \Symfony\Component\Process\Process[]|null[]
+         */
         $processes = array_fill(0, $processCount, null);
         $generator = $this->fetchIteration($stmt, $iterationCount);
         do {
@@ -348,7 +324,11 @@ EOT
      */
     private function getStatementSubtree($locationId, $count = false)
     {
-        $location = $this->locationHandler->load($locationId);
+        /**
+         * @var \eZ\Publish\SPI\Persistence\Content\Location\Handler
+         */
+        $locationHandler = $this->getContainer()->get('ezpublish.spi.persistence.location_handler');
+        $location = $locationHandler->load($locationId);
         $q = $this->connection->createQueryBuilder()
             ->select($count ? 'count(DISTINCT c.id)' : 'DISTINCT c.id')
             ->from('ezcontentobject', 'c')
@@ -390,8 +370,6 @@ EOT
             for ($i = 0; $i < $iterationCount; ++$i) {
                 if ($contentId = $stmt->fetch(PDO::FETCH_COLUMN)) {
                     $contentIds[] = $contentId;
-                } elseif (empty($contentIds)) {
-                    return;
                 } else {
                     break;
                 }
@@ -409,13 +387,8 @@ EOT
      */
     private function getPhpProcess(array $contentIds, $commit)
     {
-        if (empty($contentIds)) {
-            throw new InvalidArgumentException('--content-ids', '$contentIds can not be empty');
-        }
-
         $consolePath = file_exists('bin/console') ? 'bin/console' : 'app/console';
         $subProcessArgs = [
-            $this->getPhpPath(),
             $consolePath,
             'ezplatform:reindex',
             '--content-ids=' . implode(',', $contentIds),
@@ -427,14 +400,16 @@ EOT
         if (!$this->isDebug) {
             $subProcessArgs[] = '--no-debug';
         }
+
+        $process = new ProcessBuilder($subProcessArgs);
+        $process->setTimeout(null);
+        $process->setPrefix($this->getPhpPath());
+
         if (!$commit) {
-            $subProcessArgs[] = '--no-commit';
+            $process->add('--no-commit');
         }
 
-        $process = new Process($subProcessArgs);
-        $process->setTimeout(null);
-
-        return $process;
+        return $process->getProcess();
     }
 
     /**
@@ -449,7 +424,7 @@ EOT
         $phpFinder = new PhpExecutableFinder();
         $this->phpPath = $phpFinder->find();
         if (!$this->phpPath) {
-            throw new RuntimeException(
+            throw new \RuntimeException(
                 'The php executable could not be found, it\'s needed for executing parable sub processes, so add it to your PATH environment variable and try again'
             );
         }
@@ -468,7 +443,7 @@ EOT
             $cpuinfo = file_get_contents('/proc/cpuinfo');
             preg_match_all('/^processor/m', $cpuinfo, $matches);
             $cores = \count($matches[0]);
-        } elseif (DIRECTORY_SEPARATOR === '\\') {
+        } elseif (\DIRECTORY_SEPARATOR === '\\') {
             // Windows
             if (($process = @popen('wmic cpu get NumberOfCores', 'rb')) !== false) {
                 fgets($process);

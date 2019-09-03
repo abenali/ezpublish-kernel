@@ -15,7 +15,9 @@ use LogicException;
 
 class URIElement implements VersatileMatcher, URILexer
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest
+     */
     private $request;
 
     /**
@@ -49,7 +51,7 @@ class URIElement implements VersatileMatcher, URILexer
 
     public function __sleep()
     {
-        return ['elementNumber', 'uriElements'];
+        return array('elementNumber', 'uriElements');
     }
 
     /**
@@ -78,7 +80,7 @@ class URIElement implements VersatileMatcher, URILexer
         if (isset($this->uriElements)) {
             return $this->uriElements;
         } elseif (!isset($this->request)) {
-            return [];
+            return array();
         }
 
         $elements = array_slice(
@@ -174,7 +176,7 @@ class URIElement implements VersatileMatcher, URILexer
      */
     public function reverseMatch($siteAccessName)
     {
-        $elements = $this->elementNumber > 1 ? explode('_', $siteAccessName) : [$siteAccessName];
+        $elements = $this->elementNumber > 1 ? explode('_', $siteAccessName) : array($siteAccessName);
         if (count($elements) !== $this->elementNumber) {
             return null;
         }

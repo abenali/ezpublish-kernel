@@ -32,22 +32,22 @@ abstract class Gateway
     abstract public function updateLanguage(Language $language);
 
     /**
-     * Loads data list for the Language with $ids.
+     * Loads data for the Language with $id.
      *
-     * @param int[] $ids
+     * @param int $id
      *
-     * @return string[][]|iterable
+     * @return string[][]
      */
-    abstract public function loadLanguageListData(array $ids): iterable;
+    abstract public function loadLanguageData($id);
 
     /**
-     * Loads data list for Languages by $languageCodes (eg: eng-GB).
+     * Loads data for the Language with Language Code (eg: eng-GB).
      *
-     * @param string[] $languageCodes
+     * @param string $languageCode
      *
-     * @return string[][]|iterable
+     * @return string[][]
      */
-    abstract public function loadLanguageListDataByLanguageCode(array $languageCodes): iterable;
+    abstract public function loadLanguageDataByLanguageCode($languageCode);
 
     /**
      * Loads the data for all languages.

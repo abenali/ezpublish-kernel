@@ -25,8 +25,6 @@ interface Handler
      * @param int $userId
      * @param string $name
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException If no value is found for given preference name.
-     *
      * @return \eZ\Publish\SPI\Persistence\UserPreference\UserPreference
      */
     public function getUserPreferenceByUserIdAndName(int $userId, string $name): UserPreference;

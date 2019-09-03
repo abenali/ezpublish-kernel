@@ -17,13 +17,19 @@ use eZ\Publish\API\Repository\Values\Translation\Plural;
  */
 class ValidationError implements ValidationErrorInterface
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $singular;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $plural;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $values;
 
     /**
@@ -41,7 +47,7 @@ class ValidationError implements ValidationErrorInterface
      * @param string $plural
      * @param array $values
      */
-    public function __construct($singular, $plural = null, array $values = [], $target = null)
+    public function __construct($singular, $plural = null, array $values = array(), $target = null)
     {
         $this->singular = $singular;
         $this->plural = $plural;

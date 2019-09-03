@@ -15,15 +15,19 @@ use eZ\Publish\Core\FieldType\ImageAsset\AssetMapper;
 use eZ\Publish\Core\MVC\Exception\SourceImageNotFoundException;
 use eZ\Publish\SPI\Variation\VariationHandler;
 use InvalidArgumentException;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFunction;
+use Twig_Extension;
+use Twig_SimpleFunction;
 
-class ImageExtension extends AbstractExtension
+class ImageExtension extends Twig_Extension
 {
-    /** @var VariationHandler */
+    /**
+     * @var VariationHandler
+     */
     private $imageVariationService;
 
-    /** @var \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper */
+    /**
+     * @var \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper
+     */
     protected $assetMapper;
 
     public function __construct(VariationHandler $imageVariationService, AssetMapper $assetMapper)
@@ -39,18 +43,18 @@ class ImageExtension extends AbstractExtension
 
     public function getFunctions()
     {
-        return [
-            new TwigFunction(
+        return array(
+            new Twig_SimpleFunction(
                 'ez_image_alias',
-                [$this, 'getImageVariation'],
-                ['is_safe' => ['html']]
+                array($this, 'getImageVariation'),
+                array('is_safe' => array('html'))
             ),
-            new TwigFunction(
-                'ez_content_field_identifier_image_asset',
-                [$this, 'getImageAssetContentFieldIdentifier'],
-                ['is_safe' => ['html']]
+            new Twig_SimpleFunction(
+                'ez_image_asset_content_field_identifier',
+                array($this, 'getImageAssetContentFieldIdentifier'),
+                array('is_safe' => array('html'))
             ),
-        ];
+        );
     }
 
     /**

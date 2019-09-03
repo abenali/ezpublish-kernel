@@ -44,19 +44,29 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
      */
     const VIEW_ACTION = 'ez_content:viewAction';
 
-    /** @var \Symfony\Component\Routing\RequestContext */
+    /**
+     * @var \Symfony\Component\Routing\RequestContext
+     */
     protected $requestContext;
 
-    /** @var \eZ\Publish\API\Repository\LocationService */
+    /**
+     * @var \eZ\Publish\API\Repository\LocationService
+     */
     protected $locationService;
 
-    /** @var \eZ\Publish\API\Repository\URLAliasService */
+    /**
+     * @var \eZ\Publish\API\Repository\URLAliasService
+     */
     protected $urlAliasService;
 
-    /** @var \eZ\Publish\API\Repository\ContentService */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentService
+     */
     protected $contentService;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\Routing\Generator\UrlAliasGenerator */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Routing\Generator\UrlAliasGenerator
+     */
     protected $generator;
 
     /**
@@ -66,7 +76,9 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
      */
     protected $rootLocationId;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     protected $logger;
 
     public function __construct(
@@ -118,36 +130,36 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
                 $pathPrefix = $this->generator->getPathPrefixByRootLocationId($this->rootLocationId);
             }
 
-            $params = [
+            $params = array(
                 '_route' => self::URL_ALIAS_ROUTE_NAME,
-            ];
+            );
             switch ($urlAlias->type) {
                 case URLAlias::LOCATION:
                     $location = $this->generator->loadLocation($urlAlias->destination);
-                    $params += [
+                    $params += array(
                         '_controller' => static::VIEW_ACTION,
                         'contentId' => $location->contentId,
                         'locationId' => $urlAlias->destination,
                         'viewType' => ViewManager::VIEW_TYPE_FULL,
                         'layout' => true,
-                    ];
+                    );
 
                     // For Location alias setup 301 redirect to Location's current URL when:
                     // 1. alias is history
                     // 2. alias is custom with forward flag true
                     // 3. requested URL is not case-sensitive equal with the one loaded
                     if ($urlAlias->isHistory === true || ($urlAlias->isCustom === true && $urlAlias->forward === true)) {
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => $this->generate($location),
                             'needsRedirect' => true,
                             // Specify not to prepend siteaccess while redirecting when applicable since it would be already present (see UrlAliasGenerator::doGenerate())
                             'prependSiteaccessOnRedirect' => false,
-                        ];
+                        );
                     } elseif ($this->needsCaseRedirect($urlAlias, $requestedPath, $pathPrefix)) {
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => $this->removePathPrefix($urlAlias->path, $pathPrefix),
                             'needsRedirect' => true,
-                        ];
+                        );
 
                         if ($urlAlias->destination instanceof Location) {
                             $params += ['locationId' => $urlAlias->destination->id];
@@ -163,21 +175,21 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
                 case URLAlias::RESOURCE:
                     // In URLAlias terms, "forward" means "redirect".
                     if ($urlAlias->forward) {
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => '/' . trim($urlAlias->destination, '/'),
                             'needsRedirect' => true,
-                        ];
+                        );
                     } elseif ($this->needsCaseRedirect($urlAlias, $requestedPath, $pathPrefix)) {
                         // Handle case-correction redirect
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => $this->removePathPrefix($urlAlias->path, $pathPrefix),
                             'needsRedirect' => true,
-                        ];
+                        );
                     } else {
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => '/' . trim($urlAlias->destination, '/'),
                             'needsForward' => true,
-                        ];
+                        );
                     }
 
                     break;
@@ -185,16 +197,16 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
                 case URLAlias::VIRTUAL:
                     // Handle case-correction redirect
                     if ($this->needsCaseRedirect($urlAlias, $requestedPath, $pathPrefix)) {
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => $this->removePathPrefix($urlAlias->path, $pathPrefix),
                             'needsRedirect' => true,
-                        ];
+                        );
                     } else {
                         // Virtual aliases should load the Content at homepage URL
-                        $params += [
+                        $params += array(
                             'semanticPathinfo' => '/',
                             'needsForward' => true,
-                        ];
+                        );
                     }
 
                     break;
@@ -302,7 +314,7 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
      *
      * @api
      */
-    public function generate($name, $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
+    public function generate($name, $parameters = array(), $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
         // Direct access to Location
         if ($name instanceof Location) {
@@ -390,7 +402,7 @@ class UrlAliasRouter implements ChainedRouterInterface, RequestMatcherInterface
     /**
      * @see Symfony\Cmf\Component\Routing\VersatileGeneratorInterface::getRouteDebugMessage()
      */
-    public function getRouteDebugMessage($name, array $parameters = [])
+    public function getRouteDebugMessage($name, array $parameters = array())
     {
         if ($name instanceof RouteObjectInterface) {
             return 'Route with key ' . $name->getRouteKey();

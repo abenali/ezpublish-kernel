@@ -23,18 +23,18 @@ use eZ\Publish\Core\FieldType\Value as BaseValue;
  */
 class Type extends FieldType
 {
-    protected $validatorConfigurationSchema = [
-        'StringLengthValidator' => [
-            'minStringLength' => [
+    protected $validatorConfigurationSchema = array(
+        'StringLengthValidator' => array(
+            'minStringLength' => array(
                 'type' => 'int',
                 'default' => 0,
-            ],
-            'maxStringLength' => [
+            ),
+            'maxStringLength' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-        ],
-    ];
+            ),
+        ),
+    );
 
     /**
      * Validates the validatorConfiguration of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct.
@@ -45,7 +45,7 @@ class Type extends FieldType
      */
     public function validateValidatorConfiguration($validatorConfiguration)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         $validator = new StringLengthValidator();
 
         foreach ($validatorConfiguration as $validatorIdentifier => $constraints) {
@@ -53,9 +53,9 @@ class Type extends FieldType
                 $validationErrors[] = new ValidationError(
                     "Validator '%validator%' is unknown",
                     null,
-                    [
+                    array(
                         '%validator%' => $validatorIdentifier,
-                    ]
+                    )
                 );
                 continue;
             }
@@ -77,7 +77,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $validationErrors;
@@ -86,7 +86,7 @@ class Type extends FieldType
         $validatorConfiguration = $fieldDefinition->getValidatorConfiguration();
         $constraints = isset($validatorConfiguration['StringLengthValidator'])
             ? $validatorConfiguration['StringLengthValidator']
-            : [];
+            : array();
 
         if (isset($constraints['maxStringLength']) &&
             $constraints['maxStringLength'] !== false &&
@@ -95,9 +95,9 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'The string can not exceed %size% character.',
                 'The string can not exceed %size% characters.',
-                [
+                array(
                     '%size%' => $constraints['maxStringLength'],
-                ],
+                ),
                 'text'
             );
         }
@@ -109,9 +109,9 @@ class Type extends FieldType
             $validationErrors[] = new ValidationError(
                 'The string cannot be shorter than %size% character.',
                 'The string cannot be shorter than %size% characters.',
-                [
+                array(
                     '%size%' => $constraints['minStringLength'],
-                ],
+                ),
                 'text'
             );
         }
@@ -130,9 +130,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\TextLine\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\TextLine\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value->text;
     }

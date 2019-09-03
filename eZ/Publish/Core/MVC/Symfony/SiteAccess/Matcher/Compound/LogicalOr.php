@@ -47,7 +47,7 @@ class LogicalOr extends Compound
                         continue;
                     }
 
-                    $this->setSubMatchers([$subMatcher]);
+                    $this->setSubMatchers(array($subMatcher));
 
                     return $this;
                 }

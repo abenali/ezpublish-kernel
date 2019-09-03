@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
+use eZ\Publish\API\Repository\Tests\SetupFactory\LegacyElasticsearch;
 use EzSystems\EzPlatformSolrSearchEngine\Tests\SetupFactory\LegacySetupFactory as LegacySolrSetupFactory;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
@@ -37,321 +38,321 @@ class SearchServiceTest extends BaseTest
     {
         $fixtureDir = $this->getFixtureDir();
 
-        return [
-            0 => [
-                [
+        return array(
+            0 => array(
+                array(
                     'filter' => new Criterion\ContentId(
-                        [1, 4, 10]
+                        array(1, 4, 10)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'ContentId.php',
-            ],
-            1 => [
-                [
+            ),
+            1 => array(
+                array(
                     'filter' => new Criterion\LogicalAnd(
-                        [
+                        array(
                             new Criterion\ContentId(
-                                [1, 4, 10]
+                                array(1, 4, 10)
                             ),
                             new Criterion\ContentId(
-                                [4, 12]
+                                array(4, 12)
                             ),
-                        ]
+                        )
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LogicalAnd.php',
-            ],
-            2 => [
-                [
+            ),
+            2 => array(
+                array(
                     'filter' => new Criterion\LogicalOr(
-                        [
+                        array(
                             new Criterion\ContentId(
-                                [1, 4, 10]
+                                array(1, 4, 10)
                             ),
                             new Criterion\ContentId(
-                                [4, 12]
+                                array(4, 12)
                             ),
-                        ]
+                        )
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LogicalOr.php',
-            ],
-            3 => [
-                [
+            ),
+            3 => array(
+                array(
                     'filter' => new Criterion\LogicalAnd(
-                        [
+                        array(
                             new Criterion\ContentId(
-                                [1, 4, 10]
+                                array(1, 4, 10)
                             ),
                             new Criterion\LogicalNot(
                                 new Criterion\ContentId(
-                                    [10, 12]
+                                    array(10, 12)
                                 )
                             ),
-                        ]
+                        )
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LogicalNot.php',
-            ],
-            4 => [
-                [
+            ),
+            4 => array(
+                array(
                     'filter' => new Criterion\LogicalAnd(
-                        [
+                        array(
                             new Criterion\ContentId(
-                                [1, 4, 10]
+                                array(1, 4, 10)
                             ),
                             new Criterion\LogicalAnd(
-                                [
+                                array(
                                     new Criterion\LogicalNot(
                                         new Criterion\ContentId(
-                                            [10, 12]
+                                            array(10, 12)
                                         )
                                     ),
-                                ]
+                                )
                             ),
-                        ]
+                        )
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LogicalNot.php',
-            ],
-            5 => [
-                [
+            ),
+            5 => array(
+                array(
                     'filter' => new Criterion\ContentTypeId(
                         4
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'ContentTypeId.php',
-            ],
-            6 => [
-                [
+            ),
+            6 => array(
+                array(
                     'filter' => new Criterion\ContentTypeIdentifier(
                         'user'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'ContentTypeId.php',
-            ],
-            7 => [
-                [
+            ),
+            7 => array(
+                array(
                     'filter' => new Criterion\MatchNone(),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'MatchNone.php',
-            ],
-            8 => [
-                [
+            ),
+            8 => array(
+                array(
                     'filter' => new Criterion\ContentTypeGroupId(
                         2
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'ContentTypeGroupId.php',
-            ],
-            9 => [
-                [
+            ),
+            9 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::MODIFIED,
                         Criterion\Operator::GT,
                         1343140540
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DateMetadataGt.php',
-            ],
-            10 => [
-                [
+            ),
+            10 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::MODIFIED,
                         Criterion\Operator::GTE,
                         1311154215
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DateMetadataGte.php',
-            ],
-            11 => [
-                [
+            ),
+            11 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::MODIFIED,
                         Criterion\Operator::LTE,
                         1311154215
                     ),
                     'limit' => 10,
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DateMetadataLte.php',
-            ],
-            12 => [
-                [
+            ),
+            12 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::MODIFIED,
                         Criterion\Operator::IN,
-                        [1033920794, 1060695457, 1343140540]
+                        array(1033920794, 1060695457, 1343140540)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DateMetadataIn.php',
-            ],
-            13 => [
-                [
+            ),
+            13 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::MODIFIED,
                         Criterion\Operator::BETWEEN,
-                        [1033920776, 1072180276]
+                        array(1033920776, 1072180276)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DateMetadataBetween.php',
-            ],
-            14 => [
-                [
+            ),
+            14 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::CREATED,
                         Criterion\Operator::BETWEEN,
-                        [1033920776, 1072180278]
+                        array(1033920776, 1072180278)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DateMetadataCreated.php',
-            ],
-            15 => [
-                [
+            ),
+            15 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::EQ,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'Field.php',
-            ],
-            16 => [
-                [
+            ),
+            16 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::CONTAINS,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'Field.php',
-            ],
-            17 => [
-                [
+            ),
+            17 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::LT,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'CustomFieldLt.php',
-            ],
-            18 => [
-                [
+            ),
+            18 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::LTE,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'CustomFieldLte.php',
-            ],
-            19 => [
-                [
+            ),
+            19 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::GT,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'CustomFieldGt.php',
-            ],
-            20 => [
-                [
+            ),
+            20 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::GTE,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'CustomFieldGte.php',
-            ],
-            21 => [
-                [
+            ),
+            21 => array(
+                array(
                     'filter' => new Criterion\CustomField(
                         'user_group_name_value_s',
                         Criterion\Operator::BETWEEN,
-                        ['Administrator users', 'Members']
+                        array('Administrator users', 'Members')
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'CustomFieldBetween.php',
-            ],
-            22 => [
-                [
+            ),
+            22 => array(
+                array(
                     'filter' => new Criterion\RemoteId(
-                        ['f5c88a2209584891056f987fd965b0ba', 'faaeb9be3bd98ed09f606fc16d144eca']
+                        array('f5c88a2209584891056f987fd965b0ba', 'faaeb9be3bd98ed09f606fc16d144eca')
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'RemoteId.php',
-            ],
-            23 => [
-                [
+            ),
+            23 => array(
+                array(
                     'filter' => new Criterion\SectionId(
-                        [2]
+                        array(2)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'SectionId.php',
-            ],
-            24 => [
-                [
+            ),
+            24 => array(
+                array(
                     'filter' => new Criterion\Field(
                         'name',
                         Criterion\Operator::EQ,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'Field.php',
-            ],
-            25 => [
-                [
+            ),
+            25 => array(
+                array(
                     'filter' => new Criterion\Field(
                         'name',
                         Criterion\Operator::IN,
-                        ['Members', 'Anonymous Users']
+                        array('Members', 'Anonymous Users')
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldIn.php',
-            ],
-            26 => [
-                [
+            ),
+            26 => array(
+                array(
                     'filter' => new Criterion\DateMetadata(
                         Criterion\DateMetadata::MODIFIED,
                         Criterion\Operator::BETWEEN,
-                        [1033920275, 1033920794]
+                        array(1033920275, 1033920794)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldBetween.php',
-            ],
-            27 => [
-                [
+            ),
+            27 => array(
+                array(
                     'filter' => new Criterion\LogicalOr(
-                        [
+                        array(
                             new Criterion\Field(
                                 'name',
                                 Criterion\Operator::EQ,
@@ -360,59 +361,59 @@ class SearchServiceTest extends BaseTest
                             new Criterion\DateMetadata(
                                 Criterion\DateMetadata::MODIFIED,
                                 Criterion\Operator::BETWEEN,
-                                [1033920275, 1033920794]
+                                array(1033920275, 1033920794)
                             ),
-                        ]
+                        )
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldOr.php',
-            ],
-            28 => [
-                [
+            ),
+            28 => array(
+                array(
                     'filter' => new Criterion\Subtree(
                         '/1/5/'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'Subtree.php',
-            ],
-            29 => [
-                [
+            ),
+            29 => array(
+                array(
                     'filter' => new Criterion\LocationId(
-                        [1, 2, 5]
+                        array(1, 2, 5)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LocationId.php',
-            ],
-            30 => [
-                [
+            ),
+            30 => array(
+                array(
                     'filter' => new Criterion\ParentLocationId(
-                        [1]
+                        array(1)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'ParentLocationId.php',
-            ],
-            31 => [
-                [
+            ),
+            31 => array(
+                array(
                     'filter' => new Criterion\LocationRemoteId(
-                        ['3f6d92f8044aed134f32153517850f5a', 'f3e90596361e31d496d4026eb624c983']
+                        array('3f6d92f8044aed134f32153517850f5a', 'f3e90596361e31d496d4026eb624c983')
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LocationRemoteId.php',
-            ],
-            32 => [
-                [
+            ),
+            32 => array(
+                array(
                     // There is no Status Criterion anymore, this should match all published as well
                     'filter' => new Criterion\Subtree(
                         '/1/'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
+                    'sortClauses' => array(new SortClause\ContentId()),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'Status.php',
                 // Result having the same sort level should be sorted between them to be system independent
                 function (&$data) {
@@ -433,280 +434,280 @@ class SearchServiceTest extends BaseTest
                         }
                     );
                 },
-            ],
-            33 => [
-                [
+            ),
+            33 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::MODIFIER,
                         Criterion\Operator::EQ,
                         14
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            34 => [
-                [
+            ),
+            34 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::MODIFIER,
                         Criterion\Operator::IN,
-                        [14]
+                        array(14)
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            35 => [
-                [
+            ),
+            35 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::OWNER,
                         Criterion\Operator::EQ,
                         14
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            36 => [
-                [
+            ),
+            36 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::OWNER,
                         Criterion\Operator::IN,
-                        [14]
+                        array(14)
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            37 => [
-                [
+            ),
+            37 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::GROUP,
                         Criterion\Operator::EQ,
                         12
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            38 => [
-                [
+            ),
+            38 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::GROUP,
                         Criterion\Operator::IN,
-                        [12]
+                        array(12)
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            39 => [
-                [
+            ),
+            39 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::GROUP,
                         Criterion\Operator::EQ,
                         4
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            40 => [
-                [
+            ),
+            40 => array(
+                array(
                     'filter' => new Criterion\UserMetadata(
                         Criterion\UserMetadata::GROUP,
                         Criterion\Operator::IN,
-                        [4]
+                        array(4)
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'UserMetadata.php',
-            ],
-            41 => [
-                [
+            ),
+            41 => array(
+                array(
                     'filter' => new Criterion\Ancestor(
-                        [
+                        array(
                             '/1/5/44/',
                             '/1/5/44/45/',
-                        ]
+                        )
                     ),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentId(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'AncestorContent.php',
-            ],
-        ];
+            ),
+        );
     }
 
     public function getContentQuerySearches()
     {
         $fixtureDir = $this->getFixtureDir();
 
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'filter' => new Criterion\ContentId(
-                        [58, 10]
+                        array(58, 10)
                     ),
                     'query' => new Criterion\FullText('contact'),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FullTextFiltered.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\FullText(
                         'contact',
-                        [
-                            'boost' => [
+                        array(
+                            'boost' => array(
                                 'title' => 2,
-                            ],
+                            ),
                             'fuzziness' => .5,
-                        ]
+                        )
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FullText.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\FullText(
                         'Contact*'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FullTextWildcard.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\LanguageCode('eng-GB', false),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LanguageCode.php',
-            ],
-            [
-                [
-                    'query' => new Criterion\LanguageCode(['eng-US', 'eng-GB']),
+            ),
+            array(
+                array(
+                    'query' => new Criterion\LanguageCode(array('eng-US', 'eng-GB')),
                     'offset' => 10,
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LanguageCodeIn.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\LanguageCode('eng-GB'),
                     'offset' => 10,
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'LanguageCodeAlwaysAvailable.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\Visibility(
                         Criterion\Visibility::VISIBLE
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
+                    'sortClauses' => array(new SortClause\ContentId()),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'Visibility.php',
-            ],
-        ];
+            ),
+        );
     }
 
     public function getLocationQuerySearches()
     {
         $fixtureDir = $this->getFixtureDir();
 
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'query' => new Criterion\Location\Depth(Criterion\Operator::EQ, 1),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'Depth.php',
-            ],
-            [
-                [
-                    'query' => new Criterion\Location\Depth(Criterion\Operator::IN, [1, 3]),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+            ),
+            array(
+                array(
+                    'query' => new Criterion\Location\Depth(Criterion\Operator::IN, array(1, 3)),
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DepthIn.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\Location\Depth(Criterion\Operator::GT, 2),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'DepthGt.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\Location\Depth(Criterion\Operator::GTE, 2),
-                    'sortClauses' => [new SortClause\ContentId()],
+                    'sortClauses' => array(new SortClause\ContentId()),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'DepthGte.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\Location\Depth(Criterion\Operator::LT, 2),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'Depth.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'query' => new Criterion\Location\Depth(Criterion\Operator::LTE, 2),
-                    'sortClauses' => [new SortClause\ContentId()],
+                    'sortClauses' => array(new SortClause\ContentId()),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'DepthLte.php',
-            ],
-            [
-                [
-                    'query' => new Criterion\Location\Depth(Criterion\Operator::BETWEEN, [1, 2]),
-                    'sortClauses' => [new SortClause\ContentId()],
+            ),
+            array(
+                array(
+                    'query' => new Criterion\Location\Depth(Criterion\Operator::BETWEEN, array(1, 2)),
+                    'sortClauses' => array(new SortClause\ContentId()),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'DepthLte.php',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'filter' => new Criterion\Ancestor('/1/5/44/45/'),
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Location\Depth(),
-                    ],
+                    ),
                     'limit' => 50,
-                ],
+                ),
                 $fixtureDir . 'AncestorLocation.php',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -757,12 +758,12 @@ class SearchServiceTest extends BaseTest
     {
         $this->assertQueryFixture(
             new Query(
-                [
+                array(
                     'query' => new Criterion\ContentId(
-                        [1, 4, 10]
+                        array(1, 4, 10)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             ),
             $this->getFixtureDir() . 'DeprecatedContentIdQuery.php'
         );
@@ -821,38 +822,38 @@ class SearchServiceTest extends BaseTest
 
     public function getCaseInsensitiveSearches()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'filter' => new Criterion\Field(
                         'name',
                         Criterion\Operator::EQ,
                         'Members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
-            ],
-            [
-                [
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
+            ),
+            array(
+                array(
                     'filter' => new Criterion\Field(
                         'name',
                         Criterion\Operator::EQ,
                         'members'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
-            ],
-            [
-                [
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
+            ),
+            array(
+                array(
                     'filter' => new Criterion\Field(
                         'name',
                         Criterion\Operator::EQ,
                         'MEMBERS'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
-            ],
-        ];
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
+            ),
+        );
     }
 
     /**
@@ -891,74 +892,74 @@ class SearchServiceTest extends BaseTest
     {
         $fixtureDir = $this->getFixtureDir();
 
-        return [
-            0 => [
-                [
+        return array(
+            0 => array(
+                array(
                     'filter' => new Criterion\FieldRelation(
                         'image',
                         Criterion\Operator::IN,
-                        [1, 4, 10]
+                        array(1, 4, 10)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldRelation.php',
-            ],
-            1 => [
-                [
+            ),
+            1 => array(
+                array(
                     'filter' => new Criterion\FieldRelation(
                         'image',
                         Criterion\Operator::IN,
-                        [4, 49]
+                        array(4, 49)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldRelationAll.php',
-            ],
-            2 => [
-                [
+            ),
+            2 => array(
+                array(
                     'filter' => new Criterion\FieldRelation(
                         'image',
                         Criterion\Operator::IN,
-                        [4]
+                        array(4)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldRelation.php',
-            ],
-            3 => [
-                [
+            ),
+            3 => array(
+                array(
                     'filter' => new Criterion\FieldRelation(
                         'image',
                         Criterion\Operator::CONTAINS,
-                        [1, 4, 10]
+                        array(1, 4, 10)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'MatchNone.php',
-            ],
-            4 => [
-                [
+            ),
+            4 => array(
+                array(
                     'filter' => new Criterion\FieldRelation(
                         'image',
                         Criterion\Operator::CONTAINS,
-                        [4, 49]
+                        array(4, 49)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'MatchNone.php',
-            ],
-            5 => [
-                [
+            ),
+            5 => array(
+                array(
                     'filter' => new Criterion\FieldRelation(
                         'image',
                         Criterion\Operator::CONTAINS,
-                        [4]
+                        array(4)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ],
+                    'sortClauses' => array(new SortClause\ContentId()),
+                ),
                 $fixtureDir . 'FieldRelation.php',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -1024,7 +1025,7 @@ class SearchServiceTest extends BaseTest
 
         $content = $searchService->findSingle(
             new Criterion\ContentId(
-                [4]
+                array(4)
             )
         );
 
@@ -1042,7 +1043,7 @@ class SearchServiceTest extends BaseTest
         $query = new Query();
         $query->performCount = false;
         $query->query = new Criterion\ContentTypeId(
-            [4]
+            array(4)
         );
 
         $searchHit = $searchService->findContent($query);
@@ -1059,10 +1060,11 @@ class SearchServiceTest extends BaseTest
         }
     }
 
+    /**
+     * @expectedException \RuntimeException
+     */
     public function testFindNoPerformCountException()
     {
-        $this->expectException(\RuntimeException::class);
-
         if (ltrim(get_class($this->getSetupFactory()), '\\') !== 'eZ\Publish\API\Repository\Tests\SetupFactory\Legacy') {
             $this->markTestSkipped('Only applicable to Legacy/DB based search');
         }
@@ -1074,7 +1076,7 @@ class SearchServiceTest extends BaseTest
         $query->performCount = false;
         $query->limit = 0;
         $query->query = new Criterion\ContentTypeId(
-            [4]
+            array(4)
         );
 
         $searchService->findContent($query);
@@ -1088,7 +1090,7 @@ class SearchServiceTest extends BaseTest
         $query = new LocationQuery();
         $query->performCount = false;
         $query->query = new Criterion\ContentTypeId(
-            [4]
+            array(4)
         );
 
         $searchHit = $searchService->findLocations($query);
@@ -1105,10 +1107,11 @@ class SearchServiceTest extends BaseTest
         }
     }
 
+    /**
+     * @expectedException \RuntimeException
+     */
     public function testFindLocationsNoPerformCountException()
     {
-        $this->expectException(\RuntimeException::class);
-
         if (ltrim(get_class($this->getSetupFactory()), '\\') !== 'eZ\Publish\API\Repository\Tests\SetupFactory\Legacy') {
             $this->markTestSkipped('Only applicable to Legacy/DB based search');
         }
@@ -1120,7 +1123,7 @@ class SearchServiceTest extends BaseTest
         $query->performCount = false;
         $query->limit = 0;
         $query->query = new Criterion\ContentTypeId(
-            [4]
+            array(4)
         );
 
         $searchService->findLocations($query);
@@ -1140,22 +1143,22 @@ class SearchServiceTest extends BaseTest
         $createStruct = $contentTypeService->newContentTypeCreateStruct('countries-multiple');
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->remoteId = 'countries-multiple-123';
-        $createStruct->names = ['eng-GB' => 'Multiple countries'];
+        $createStruct->names = array('eng-GB' => 'Multiple countries');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new \DateTime();
 
         $fieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('countries', 'ezcountry');
-        $fieldCreate->names = ['eng-GB' => 'Countries'];
+        $fieldCreate->names = array('eng-GB' => 'Countries');
         $fieldCreate->fieldGroup = 'main';
         $fieldCreate->position = 1;
         $fieldCreate->isTranslatable = false;
         $fieldCreate->isSearchable = true;
-        $fieldCreate->fieldSettings = ['isMultiple' => true];
+        $fieldCreate->fieldSettings = array('isMultiple' => true);
 
         $createStruct->addFieldDefinition($fieldCreate);
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $contentTypeDraft = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $contentTypeDraft = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
 
@@ -1164,7 +1167,7 @@ class SearchServiceTest extends BaseTest
         $createStruct->alwaysAvailable = false;
         $createStruct->setField(
             'countries',
-            ['BE', 'DE', 'FR', 'HR', 'NO', 'PT', 'RU']
+            array('BE', 'DE', 'FR', 'HR', 'NO', 'PT', 'RU')
         );
 
         $draft = $contentService->createContent($createStruct);
@@ -1185,13 +1188,13 @@ class SearchServiceTest extends BaseTest
         $testContent = $this->createMultipleCountriesContent();
 
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'countries',
                     Criterion\Operator::CONTAINS,
                     'Belgium'
                 ),
-            ]
+            )
         );
 
         $repository = $this->getRepository();
@@ -1215,13 +1218,13 @@ class SearchServiceTest extends BaseTest
     {
         $this->createMultipleCountriesContent();
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'countries',
                     Criterion\Operator::CONTAINS,
                     'Netherlands Antilles'
                 ),
-            ]
+            )
         );
 
         $repository = $this->getRepository();
@@ -1231,131 +1234,138 @@ class SearchServiceTest extends BaseTest
         $this->assertEquals(0, $result->totalCount);
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument '$criterion->target' is invalid: No searchable fields found for the given criterion target 'some_hopefully_unknown_field'
+     */
     public function testInvalidFieldIdentifierRange()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'$criterion->target\' is invalid: No searchable fields found for the given criterion target \'some_hopefully_unknown_field\'');
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'some_hopefully_unknown_field',
                         Criterion\Operator::BETWEEN,
-                        [10, 1000]
+                        array(10, 1000)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument '$criterion->target' is invalid: No searchable fields found for the given criterion target 'some_hopefully_unknown_field'
+     */
     public function testInvalidFieldIdentifierIn()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'$criterion->target\' is invalid: No searchable fields found for the given criterion target \'some_hopefully_unknown_field\'');
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'some_hopefully_unknown_field',
                         Criterion\Operator::EQ,
                         1000
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument '$criterion->target' is invalid: No searchable fields found for the given criterion target 'tag_cloud_url'
+     */
     public function testFindContentWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'$criterion->target\' is invalid: No searchable fields found for the given criterion target \'tag_cloud_url\'');
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findContent(
             new Query(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'tag_cloud_url',
                         Criterion\Operator::EQ,
                         'http://nimbus.com'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument '$sortClause->targetData' is invalid: No searchable fields found for the given sort clause target 'title' on 'template_look'
+     */
     public function testSortFieldWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'$sortClause->targetData\' is invalid: No searchable fields found for the given sort clause target \'title\' on \'template_look\'');
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findContent(
             new Query(
-                [
-                    'sortClauses' => [new SortClause\Field('template_look', 'title')],
-                ]
+                array(
+                    'sortClauses' => array(new SortClause\Field('template_look', 'title')),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument '$sortClause->targetData' is invalid: No searchable fields found for the given sort clause target 'title' on 'template_look'
+     */
     public function testSortMapLocationDistanceWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'$sortClause->targetData\' is invalid: No searchable fields found for the given sort clause target \'title\' on \'template_look\'');
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findContent(
             new Query(
-                [
-                    'sortClauses' => [
+                array(
+                    'sortClauses' => array(
                         new SortClause\MapLocationDistance(
                             'template_look',
                             'title',
                             1,
                             2
                         ),
-                    ],
-                ]
+                    ),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFindSingleFailMultiple()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findSingle(
             new Criterion\ContentId(
-                [4, 10]
+                array(4, 10)
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFindSingleWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
@@ -1372,14 +1382,14 @@ class SearchServiceTest extends BaseTest
     {
         $fixtureDir = $this->getFixtureDir();
 
-        return [
-            0 => [
-                [
-                    'filter' => new Criterion\SectionId([2]),
+        return array(
+            0 => array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2)),
                     'offset' => 0,
                     'limit' => 10,
-                    'sortClauses' => [],
-                ],
+                    'sortClauses' => array(),
+                ),
                 $fixtureDir . 'SortNone.php',
                 // Result having the same sort level should be sorted between them to be system independent
                 function (&$data) {
@@ -1390,153 +1400,153 @@ class SearchServiceTest extends BaseTest
                         }
                     );
                 },
-            ],
-            1 => [
-                [
-                    'filter' => new Criterion\SectionId([2]),
+            ),
+            1 => array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2)),
                     'offset' => 0,
                     'limit' => 10,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\DatePublished(),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortDatePublished.php',
-            ],
-            2 => [
-                [
-                    'filter' => new Criterion\SectionId([2]),
+            ),
+            2 => array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2)),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\DateModified(),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortDateModified.php',
-            ],
-            3 => [
-                [
-                    'filter' => new Criterion\SectionId([4, 2, 6, 3]),
+            ),
+            3 => array(
+                array(
+                    'filter' => new Criterion\SectionId(array(4, 2, 6, 3)),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\SectionIdentifier(),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortSectionIdentifier.php',
-            ],
-            4 => [
-                [
-                    'filter' => new Criterion\SectionId([4, 2, 6, 3]),
+            ),
+            4 => array(
+                array(
+                    'filter' => new Criterion\SectionId(array(4, 2, 6, 3)),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\SectionName(),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortSectionName.php',
-            ],
-            5 => [
-                [
-                    'filter' => new Criterion\SectionId([2, 3]),
+            ),
+            5 => array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2, 3)),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\ContentName(),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortContentName.php',
-            ],
-            6 => [
-                [
+            ),
+            6 => array(
+                array(
                     'filter' => new Criterion\ContentTypeId(1),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Field('folder', 'name', Query::SORT_ASC),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortFolderName.php',
-            ],
-            7 => [
-                [
-                    'filter' => new Criterion\ContentTypeId([1, 3]),
+            ),
+            7 => array(
+                array(
+                    'filter' => new Criterion\ContentTypeId(array(1, 3)),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Field('folder', 'name', Query::SORT_ASC),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortFieldMultipleTypes.php',
-            ],
-            8 => [
-                [
-                    'filter' => new Criterion\ContentTypeId([1, 3]),
+            ),
+            8 => array(
+                array(
+                    'filter' => new Criterion\ContentTypeId(array(1, 3)),
                     'offset' => 0,
                     'limit' => 50,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Field('folder', 'name', Query::SORT_DESC),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortFieldMultipleTypesReverse.php',
-            ],
-            9 => [
-                [
-                    'filter' => new Criterion\ContentTypeId([1, 3]),
+            ),
+            9 => array(
+                array(
+                    'filter' => new Criterion\ContentTypeId(array(1, 3)),
                     'offset' => 3,
                     'limit' => 5,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Field('folder', 'name', Query::SORT_ASC),
                         new SortClause\Field('user', 'first_name', Query::SORT_ASC),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortFieldMultipleTypesSlice.php',
-            ],
-            10 => [
-                [
-                    'filter' => new Criterion\ContentTypeId([1, 3]),
+            ),
+            10 => array(
+                array(
+                    'filter' => new Criterion\ContentTypeId(array(1, 3)),
                     'offset' => 3,
                     'limit' => 5,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Field('folder', 'name', Query::SORT_DESC),
                         new SortClause\Field('user', 'first_name', Query::SORT_ASC),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortFieldMultipleTypesSliceReverse.php',
-            ],
-        ];
+            ),
+        );
     }
 
     public function getSortedLocationSearches()
     {
         $fixtureDir = $this->getFixtureDir();
 
-        return [
-            [
-                [
-                    'filter' => new Criterion\SectionId([2]),
+        return array(
+            array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2)),
                     'offset' => 0,
                     'limit' => 10,
-                    'sortClauses' => [new SortClause\Location\Path(Query::SORT_DESC)],
-                ],
+                    'sortClauses' => array(new SortClause\Location\Path(Query::SORT_DESC)),
+                ),
                 $fixtureDir . 'SortPathString.php',
-            ],
-            [
-                [
-                    'filter' => new Criterion\SectionId([2]),
+            ),
+            array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2)),
                     'offset' => 0,
                     'limit' => 10,
-                    'sortClauses' => [new SortClause\Location\Depth(Query::SORT_ASC)],
-                ],
+                    'sortClauses' => array(new SortClause\Location\Depth(Query::SORT_ASC)),
+                ),
                 $fixtureDir . 'SortLocationDepth.php',
                 // Result having the same sort level should be sorted between them to be system independent
                 function (&$data) {
@@ -1544,7 +1554,7 @@ class SearchServiceTest extends BaseTest
                     //     4 has depth = 1
                     //     11, 12, 13, 42, 59 have depth = 2
                     //     10, 14 have depth = 3
-                    $map = [
+                    $map = array(
                         4 => 0,
                         11 => 1,
                         12 => 2,
@@ -1553,7 +1563,7 @@ class SearchServiceTest extends BaseTest
                         59 => 5,
                         10 => 6,
                         14 => 7,
-                    ];
+                    );
                     usort(
                         $data->searchHits,
                         function ($a, $b) use ($map) {
@@ -1561,32 +1571,32 @@ class SearchServiceTest extends BaseTest
                         }
                     );
                 },
-            ],
-            [
-                [
-                    'filter' => new Criterion\SectionId([3]),
+            ),
+            array(
+                array(
+                    'filter' => new Criterion\SectionId(array(3)),
                     'offset' => 0,
                     'limit' => 10,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Location\Path(Query::SORT_DESC),
                         new SortClause\ContentName(Query::SORT_ASC),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortMultiple.php',
-            ],
-            [
-                [
-                    'filter' => new Criterion\SectionId([2]),
+            ),
+            array(
+                array(
+                    'filter' => new Criterion\SectionId(array(2)),
                     'offset' => 0,
                     'limit' => 10,
-                    'sortClauses' => [
+                    'sortClauses' => array(
                         new SortClause\Location\Priority(Query::SORT_DESC),
                         new SortClause\ContentId(),
-                    ],
-                ],
+                    ),
+                ),
                 $fixtureDir . 'SortDesc.php',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -1599,12 +1609,12 @@ class SearchServiceTest extends BaseTest
 
         $createStruct = $contentTypeService->newContentTypeCreateStruct('test-type');
         $createStruct->mainLanguageCode = 'eng-GB';
-        $createStruct->names = ['eng-GB' => 'Test type'];
+        $createStruct->names = array('eng-GB' => 'Test type');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new \DateTime();
 
         $translatableFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('integer', 'ezinteger');
-        $translatableFieldCreate->names = ['eng-GB' => 'Simple translatable integer field'];
+        $translatableFieldCreate->names = array('eng-GB' => 'Simple translatable integer field');
         $translatableFieldCreate->fieldGroup = 'main';
         $translatableFieldCreate->position = 1;
         $translatableFieldCreate->isTranslatable = true;
@@ -1613,7 +1623,7 @@ class SearchServiceTest extends BaseTest
         $createStruct->addFieldDefinition($translatableFieldCreate);
 
         $nonTranslatableFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('integer2', 'ezinteger');
-        $nonTranslatableFieldCreate->names = ['eng-GB' => 'Simple non-translatable integer field'];
+        $nonTranslatableFieldCreate->names = array('eng-GB' => 'Simple non-translatable integer field');
         $nonTranslatableFieldCreate->fieldGroup = 'main';
         $nonTranslatableFieldCreate->position = 2;
         $nonTranslatableFieldCreate->isTranslatable = false;
@@ -1622,7 +1632,7 @@ class SearchServiceTest extends BaseTest
         $createStruct->addFieldDefinition($nonTranslatableFieldCreate);
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $contentTypeDraft = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $contentTypeDraft = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
 
@@ -1662,7 +1672,7 @@ class SearchServiceTest extends BaseTest
         $createStruct->setField('integer2', $fieldValue2, $mainLanguageCode);
 
         $locationCreateStruct = $repository->getLocationService()->newLocationCreateStruct(2);
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $content = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
@@ -1670,26 +1680,34 @@ class SearchServiceTest extends BaseTest
         return $content;
     }
 
+    protected function checkPrioritizedLanguagesSupport()
+    {
+        $setupFactory = $this->getSetupFactory();
+        if ($setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestIncomplete('Prioritized languages are not supported with Elasticsearch engine');
+        }
+    }
+
     public function providerForTestMultilingualFieldSort()
     {
-        return [
-            0 => [
-                [
-                    1 => [1, 2, 1],
-                    2 => [2, 1, 2],
-                    3 => [2, 1, 3],
-                    4 => [1, 2, 4],
-                ],
-                [
-                    'languages' => [
+        return array(
+            0 => array(
+                array(
+                    1 => array(1, 2, 1),
+                    2 => array(2, 1, 2),
+                    3 => array(2, 1, 3),
+                    4 => array(1, 2, 4),
+                ),
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_ASC),
                     new SortClause\Field('test-type', 'integer2', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1698,25 +1716,25 @@ class SearchServiceTest extends BaseTest
                  * Content 3, 2, 1, 3
                  * Content 2, 2, 1, 2
                  */
-                [4, 1, 3, 2],
-            ],
-            1 => [
-                [
-                    1 => [1, 2, 1],
-                    2 => [2, 1, 2],
-                    3 => [2, 1, 3],
-                    4 => [1, 2, 4],
-                ],
-                [
-                    'languages' => [
+                array(4, 1, 3, 2),
+            ),
+            1 => array(
+                array(
+                    1 => array(1, 2, 1),
+                    2 => array(2, 1, 2),
+                    3 => array(2, 1, 3),
+                    4 => array(1, 2, 4),
+                ),
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'eng-GB',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_ASC),
                     new SortClause\Field('test-type', 'integer2', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1725,96 +1743,70 @@ class SearchServiceTest extends BaseTest
                  * Content 4, 1, 2, 4
                  * Content 1, 1, 2, 1
                  */
-                [3, 2, 4, 1],
-            ],
-            2 => [
-                [
-                    1 => [null, 2, null, 'ger-DE'],
-                    2 => [3, null, null, 'eng-GB'],
-                    3 => [4, null, null, 'eng-GB'],
-                    4 => [null, 1, null, 'ger-DE'],
-                ],
-                [
-                    'languages' => [
+                array(3, 2, 4, 1),
+            ),
+            2 => array(
+                array(
+                    1 => array(null, 2, null, 'ger-DE'),
+                    2 => array(3, null, null, 'eng-GB'),
+                    3 => array(4, null, null, 'eng-GB'),
+                    4 => array(null, 1, null, 'ger-DE'),
+                ),
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
                  * Content 3, 4, -
                  * Content 2, 3, -
                  */
-                [3, 2],
-            ],
-            3 => [
-                [
-                    1 => [null, 2, null, 'ger-DE'],
-                    2 => [3, null, null, 'eng-GB'],
-                    3 => [4, null, null, 'eng-GB'],
-                    4 => [null, 1, null, 'ger-DE'],
-                ],
-                [
-                    'languages' => [
+                array(3, 2),
+            ),
+            3 => array(
+                array(
+                    1 => array(null, 2, null, 'ger-DE'),
+                    2 => array(3, null, null, 'eng-GB'),
+                    3 => array(4, null, null, 'eng-GB'),
+                    4 => array(null, 1, null, 'ger-DE'),
+                ),
+                array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
                  * Content 1, -, 2
                  * Content 4, -, 1
                  */
-                [1, 4],
-            ],
-            4 => [
-                [
-                    1 => [null, 2, null, 'ger-DE'],
-                    2 => [3, null, null, 'eng-GB'],
-                    3 => [4, null, null, 'eng-GB'],
-                    4 => [null, 1, null, 'ger-DE'],
-                ],
-                [
-                    'languages' => [
+                array(1, 4),
+            ),
+            4 => array(
+                array(
+                    1 => array(null, 2, null, 'ger-DE'),
+                    2 => array(3, null, null, 'eng-GB'),
+                    3 => array(4, null, null, 'eng-GB'),
+                    4 => array(null, 1, null, 'ger-DE'),
+                ),
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
-                /**
-                 * Expected order, Value eng-GB, Value ger-DE.
-                 *
-                 * Content 3, 4, -
-                 * Content 2, 3, -
-                 * Content 1, -, 2
-                 * Content 4, -, 1
-                 */
-                [3, 2, 1, 4],
-            ],
-            5 => [
-                [
-                    1 => [null, 2, null, 'ger-DE'],
-                    2 => [3, null, null, 'eng-GB'],
-                    3 => [4, null, null, 'eng-GB'],
-                    4 => [null, 1, null, 'ger-DE'],
-                ],
-                [
-                    'languages' => [
-                        'ger-DE',
-                        'eng-GB',
-                    ],
-                ],
-                [
-                    new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1823,24 +1815,50 @@ class SearchServiceTest extends BaseTest
                  * Content 1, -, 2
                  * Content 4, -, 1
                  */
-                [3, 2, 1, 4],
-            ],
-            6 => [
-                [
-                    1 => [null, 2, null, 'ger-DE'],
-                    2 => [3, 4, null, 'eng-GB'],
-                    3 => [4, 3, null, 'eng-GB'],
-                    4 => [null, 1, null, 'ger-DE'],
-                ],
-                [
-                    'languages' => [
+                array(3, 2, 1, 4),
+            ),
+            5 => array(
+                array(
+                    1 => array(null, 2, null, 'ger-DE'),
+                    2 => array(3, null, null, 'eng-GB'),
+                    3 => array(4, null, null, 'eng-GB'),
+                    4 => array(null, 1, null, 'ger-DE'),
+                ),
+                array(
+                    'languages' => array(
+                        'ger-DE',
+                        'eng-GB',
+                    ),
+                ),
+                array(
+                    new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
+                ),
+                /**
+                 * Expected order, Value eng-GB, Value ger-DE.
+                 *
+                 * Content 3, 4, -
+                 * Content 2, 3, -
+                 * Content 1, -, 2
+                 * Content 4, -, 1
+                 */
+                array(3, 2, 1, 4),
+            ),
+            6 => array(
+                array(
+                    1 => array(null, 2, null, 'ger-DE'),
+                    2 => array(3, 4, null, 'eng-GB'),
+                    3 => array(4, 3, null, 'eng-GB'),
+                    4 => array(null, 1, null, 'ger-DE'),
+                ),
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1849,24 +1867,24 @@ class SearchServiceTest extends BaseTest
                  * Content 1, -, 2
                  * Content 4, -, 1
                  */
-                [3, 2, 1, 4],
-            ],
-            7 => [
-                [
-                    1 => [null, 2, null, 'ger-DE'],
-                    2 => [3, 4, null, 'eng-GB'],
-                    3 => [4, 3, null, 'eng-GB'],
-                    4 => [null, 1, null, 'ger-DE'],
-                ],
-                [
-                    'languages' => [
+                array(3, 2, 1, 4),
+            ),
+            7 => array(
+                array(
+                    1 => array(null, 2, null, 'ger-DE'),
+                    2 => array(3, 4, null, 'eng-GB'),
+                    3 => array(4, 3, null, 'eng-GB'),
+                    4 => array(null, 1, null, 'ger-DE'),
+                ),
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'eng-GB',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1875,23 +1893,23 @@ class SearchServiceTest extends BaseTest
                  * Content 1, -, 2
                  * Content 4, -, 1
                  */
-                [2, 3, 1, 4],
-            ],
-            8 => [
-                [
-                    1 => [null, 1, null, 'ger-DE', true],
-                    2 => [4, null, null, 'eng-GB', true],
-                    3 => [3, null, null, 'eng-GB', false],
-                    4 => [null, 2, null, 'ger-DE', false],
-                ],
-                [
-                    'languages' => [
+                array(2, 3, 1, 4),
+            ),
+            8 => array(
+                array(
+                    1 => array(null, 1, null, 'ger-DE', true),
+                    2 => array(4, null, null, 'eng-GB', true),
+                    3 => array(3, null, null, 'eng-GB', false),
+                    4 => array(null, 2, null, 'ger-DE', false),
+                ),
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_ASC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1899,23 +1917,23 @@ class SearchServiceTest extends BaseTest
                  * Content 3, 3, -
                  * Content 2, 4, -
                  */
-                [1, 3, 2],
-            ],
-            9 => [
-                [
-                    1 => [null, 1, null, 'ger-DE', true],
-                    2 => [4, null, null, 'eng-GB', true],
-                    3 => [3, null, null, 'eng-GB', false],
-                    4 => [null, 2, null, 'ger-DE', false],
-                ],
-                [
-                    'languages' => [
+                array(1, 3, 2),
+            ),
+            9 => array(
+                array(
+                    1 => array(null, 1, null, 'ger-DE', true),
+                    2 => array(4, null, null, 'eng-GB', true),
+                    3 => array(3, null, null, 'eng-GB', false),
+                    4 => array(null, 2, null, 'ger-DE', false),
+                ),
+                array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
@@ -1923,57 +1941,57 @@ class SearchServiceTest extends BaseTest
                  * Content 4, -, 2
                  * Content 1, -, 1
                  */
-                [2, 4, 1],
-            ],
-            10 => [
-                [
-                    1 => [null, 1, null, 'ger-DE', true],
-                    2 => [4, null, null, 'eng-GB', true],
-                    3 => [3, null, null, 'eng-GB', false],
-                    4 => [null, 2, null, 'ger-DE', false],
-                ],
-                [
-                    'languages' => [
+                array(2, 4, 1),
+            ),
+            10 => array(
+                array(
+                    1 => array(null, 1, null, 'ger-DE', true),
+                    2 => array(4, null, null, 'eng-GB', true),
+                    3 => array(3, null, null, 'eng-GB', false),
+                    4 => array(null, 2, null, 'ger-DE', false),
+                ),
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_ASC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
                  * Content 3, 3, -
                  * Content 2, 4, -
                  */
-                [3, 2],
-            ],
-            11 => [
-                [
-                    1 => [null, 1, null, 'ger-DE', true],
-                    2 => [4, null, null, 'eng-GB', true],
-                    3 => [3, null, null, 'eng-GB', false],
-                    4 => [null, 2, null, 'ger-DE', false],
-                ],
-                [
-                    'languages' => [
+                array(3, 2),
+            ),
+            11 => array(
+                array(
+                    1 => array(null, 1, null, 'ger-DE', true),
+                    2 => array(4, null, null, 'eng-GB', true),
+                    3 => array(3, null, null, 'eng-GB', false),
+                    4 => array(null, 2, null, 'ger-DE', false),
+                ),
+                array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
+                ),
+                array(
                     new SortClause\Field('test-type', 'integer', Query::SORT_DESC),
-                ],
+                ),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
                  * Content 4, -, 2
                  * Content 1, -, 1
                  */
-                [4, 1],
-            ],
-        ];
+                array(4, 1),
+            ),
+        );
     }
 
     /**
@@ -2041,6 +2059,7 @@ class SearchServiceTest extends BaseTest
         $expected,
         $contentSearch = true
     ) {
+        $this->checkPrioritizedLanguagesSupport();
         $contentType = $this->createTestContentType();
 
         // Create a draft to account for behaviour with ContentType in different states
@@ -2048,8 +2067,8 @@ class SearchServiceTest extends BaseTest
         $contentTypeService = $repository->getContentTypeService();
         $contentTypeService->createContentTypeDraft($contentType);
 
-        $defaults = [null, null, null, 'eng-GB', false];
-        $contentIdList = [];
+        $defaults = array(null, null, null, 'eng-GB', false);
+        $contentIdList = array();
         foreach ($contentDataList as $key => $contentData) {
             $contentData = $contentData + $defaults;
             list(
@@ -2079,25 +2098,25 @@ class SearchServiceTest extends BaseTest
         $searchService = $repository->getSearchService();
         if ($contentSearch) {
             $query = new Query(
-                [
+                array(
                     'query' => new Criterion\ContentTypeId($contentType->id),
                     'sortClauses' => $sortClauses,
-                ]
+                )
             );
             $result = $searchService->findContent($query, $languageSettings);
         } else {
             $query = new LocationQuery(
-                [
+                array(
                     'query' => new Criterion\ContentTypeId($contentType->id),
                     'sortClauses' => $sortClauses,
-                ]
+                )
             );
             $result = $searchService->findLocations($query, $languageSettings);
         }
 
         $this->assertEquals(count($expected), $result->totalCount);
 
-        $expectedIdList = [];
+        $expectedIdList = array();
         foreach ($expected as $contentNumber) {
             $expectedIdList[] = $contentIdList[$contentNumber];
         }
@@ -2107,20 +2126,20 @@ class SearchServiceTest extends BaseTest
 
     public function providerForTestMultilingualFieldFilter()
     {
-        return [
-            0 => [
-                $fixture = [
-                    1 => [null, 1, null, 'ger-DE', true],
-                    2 => [4, null, null, 'eng-GB', true],
-                    3 => [3, null, null, 'eng-GB', false],
-                    4 => [null, 2, null, 'ger-DE', false],
-                    5 => [5, null, null, 'eng-GB', true],
-                ],
-                $languageSettings = [
-                    'languages' => [
+        return array(
+            0 => array(
+                $fixture = array(
+                    1 => array(null, 1, null, 'ger-DE', true),
+                    2 => array(4, null, null, 'eng-GB', true),
+                    3 => array(3, null, null, 'eng-GB', false),
+                    4 => array(null, 2, null, 'ger-DE', false),
+                    5 => array(5, null, null, 'eng-GB', true),
+                ),
+                $languageSettings = array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
-                ],
+                    ),
+                ),
                 new Criterion\Field('integer', Criterion\Operator::LT, 5),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
@@ -2129,31 +2148,31 @@ class SearchServiceTest extends BaseTest
                  * Content 4, -, 2
                  * Content 1, -, 1
                  */
-                [2, 4, 1],
-            ],
-            1 => [
+                array(2, 4, 1),
+            ),
+            1 => array(
                 $fixture,
-                [
-                    'languages' => [
+                array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
+                ),
                 new Criterion\Field('integer', Criterion\Operator::LT, 2),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
                  * Content 1, -, 1
                  */
-                [1],
-            ],
-            2 => [
+                array(1),
+            ),
+            2 => array(
                 $fixture,
-                [
-                    'languages' => [
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
-                ],
+                    ),
+                ),
                 new Criterion\Field('integer', Criterion\Operator::LTE, 4),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
@@ -2163,16 +2182,16 @@ class SearchServiceTest extends BaseTest
                  * Content 3, 3, -
                  * Content 1, -, 1
                  */
-                [2, 3, 1],
-            ],
-            3 => [
+                array(2, 3, 1),
+            ),
+            3 => array(
                 $fixture,
-                [
-                    'languages' => [
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
+                ),
                 new Criterion\Field('integer', Criterion\Operator::LTE, 4),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
@@ -2180,9 +2199,9 @@ class SearchServiceTest extends BaseTest
                  * Content 2, 4, -
                  * Content 3, 3, -
                  */
-                [2, 3],
-            ],
-            4 => [
+                array(2, 3),
+            ),
+            4 => array(
                 $fixture,
                 $languageSettings,
                 new Criterion\Field('integer', Criterion\Operator::LTE, 4),
@@ -2193,9 +2212,9 @@ class SearchServiceTest extends BaseTest
                  * Content 4, -, 2
                  * Content 1, -, 1
                  */
-                [2, 4, 1],
-            ],
-            5 => [
+                array(2, 4, 1),
+            ),
+            5 => array(
                 $fixture,
                 $languageSettings,
                 new Criterion\Field('integer', Criterion\Operator::GT, 1),
@@ -2206,9 +2225,9 @@ class SearchServiceTest extends BaseTest
                  * Content 2, 4, -
                  * Content 4, -, 2
                  */
-                [5, 2, 4],
-            ],
-            6 => [
+                array(5, 2, 4),
+            ),
+            6 => array(
                 $fixture,
                 $languageSettings,
                 new Criterion\Field('integer', Criterion\Operator::GTE, 2),
@@ -2219,27 +2238,27 @@ class SearchServiceTest extends BaseTest
                  * Content 2, 4, -
                  * Content 4, -, 2
                  */
-                [5, 2, 4],
-            ],
-            7 => [
+                array(5, 2, 4),
+            ),
+            7 => array(
                 $fixture,
                 $languageSettings,
-                new Criterion\Field('integer', Criterion\Operator::BETWEEN, [2, 4]),
+                new Criterion\Field('integer', Criterion\Operator::BETWEEN, array(2, 4)),
                 /**
                  * Expected order, Value eng-GB, Value ger-DE.
                  *
                  * Content 2, 4, -
                  * Content 4, -, 2
                  */
-                [2, 4],
-            ],
-            8 => [
+                array(2, 4),
+            ),
+            8 => array(
                 $fixture,
                 $languageSettings,
-                new Criterion\Field('integer', Criterion\Operator::BETWEEN, [4, 2]),
-                [],
-            ],
-            9 => [
+                new Criterion\Field('integer', Criterion\Operator::BETWEEN, array(4, 2)),
+                array(),
+            ),
+            9 => array(
                 $fixture,
                 $languageSettings,
                 new Criterion\Field('integer', Criterion\Operator::EQ, 4),
@@ -2248,9 +2267,9 @@ class SearchServiceTest extends BaseTest
                  *
                  * Content 4, -, 2
                  */
-                [2],
-            ],
-            10 => [
+                array(2),
+            ),
+            10 => array(
                 $fixture,
                 $languageSettings,
                 new Criterion\Field('integer', Criterion\Operator::EQ, 2),
@@ -2259,9 +2278,9 @@ class SearchServiceTest extends BaseTest
                  *
                  * Content 2, 4, -
                  */
-                [4],
-            ],
-        ];
+                array(4),
+            ),
+        );
     }
 
     /**
@@ -2329,6 +2348,7 @@ class SearchServiceTest extends BaseTest
         $expected,
         $contentSearch = true
     ) {
+        $this->checkPrioritizedLanguagesSupport();
         $contentType = $this->createTestContentType();
 
         // Create a draft to account for behaviour with ContentType in different states
@@ -2336,8 +2356,8 @@ class SearchServiceTest extends BaseTest
         $contentTypeService = $repository->getContentTypeService();
         $contentTypeService->createContentTypeDraft($contentType);
 
-        $defaults = [null, null, null, 'eng-GB', false];
-        $contentIdList = [];
+        $defaults = array(null, null, null, 'eng-GB', false);
+        $contentIdList = array();
         foreach ($contentDataList as $key => $contentData) {
             $contentData = $contentData + $defaults;
             list(
@@ -2362,35 +2382,35 @@ class SearchServiceTest extends BaseTest
         $searchService = $repository->getSearchService();
         if ($contentSearch) {
             $query = new Query(
-                [
+                array(
                     'query' => new Criterion\LogicalAnd(
-                        [
+                        array(
                             new Criterion\ContentTypeId($contentType->id),
                             $criterion,
-                        ]
+                        )
                     ),
-                    'sortClauses' => [$sortClause],
-                ]
+                    'sortClauses' => array($sortClause),
+                )
             );
             $result = $searchService->findContent($query, $languageSettings);
         } else {
             $query = new LocationQuery(
-                [
+                array(
                     'query' => new Criterion\LogicalAnd(
-                        [
+                        array(
                             new Criterion\ContentTypeId($contentType->id),
                             $criterion,
-                        ]
+                        )
                     ),
-                    'sortClauses' => [$sortClause],
-                ]
+                    'sortClauses' => array($sortClause),
+                )
             );
             $result = $searchService->findLocations($query, $languageSettings);
         }
 
         $this->assertEquals(count($expected), $result->totalCount);
 
-        $expectedIdList = [];
+        $expectedIdList = array();
         foreach ($expected as $contentNumber) {
             $expectedIdList[] = $contentIdList[$contentNumber];
         }
@@ -2499,7 +2519,7 @@ class SearchServiceTest extends BaseTest
     public function testQueryCustomField()
     {
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\CustomField(
                     'custom_field',
                     Criterion\Operator::EQ,
@@ -2507,8 +2527,8 @@ class SearchServiceTest extends BaseTest
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [new SortClause\ContentId()],
-            ]
+                'sortClauses' => array(new SortClause\ContentId()),
+            )
         );
         $this->assertQueryFixture(
             $query,
@@ -2536,7 +2556,7 @@ class SearchServiceTest extends BaseTest
         }
 
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'first_name',
                     Criterion\Operator::EQ,
@@ -2544,8 +2564,8 @@ class SearchServiceTest extends BaseTest
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [new SortClause\ContentId()],
-            ]
+                'sortClauses' => array(new SortClause\ContentId()),
+            )
         );
         $query->query->setCustomField('user', 'first_name', 'custom_field');
 
@@ -2579,15 +2599,15 @@ class SearchServiceTest extends BaseTest
         $sortClause->setCustomField('folder', 'short_name', 'folder_name_value_s');
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\ContentTypeId(1),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     $sortClause,
                     new SortClause\ContentId(),
-                ],
-            ]
+                ),
+            )
         );
 
         $this->assertQueryFixture(
@@ -2606,12 +2626,12 @@ class SearchServiceTest extends BaseTest
 
         $createStruct = $contentTypeService->newContentTypeCreateStruct('testtype');
         $createStruct->mainLanguageCode = 'eng-GB';
-        $createStruct->names = ['eng-GB' => 'Test type'];
+        $createStruct->names = array('eng-GB' => 'Test type');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new \DateTime();
 
         $translatableFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('maplocation', 'ezgmaplocation');
-        $translatableFieldCreate->names = ['eng-GB' => 'Map location field'];
+        $translatableFieldCreate->names = array('eng-GB' => 'Map location field');
         $translatableFieldCreate->fieldGroup = 'main';
         $translatableFieldCreate->position = 1;
         $translatableFieldCreate->isTranslatable = false;
@@ -2620,7 +2640,7 @@ class SearchServiceTest extends BaseTest
         $createStruct->addFieldDefinition($translatableFieldCreate);
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $contentTypeDraft = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $contentTypeDraft = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
 
@@ -2648,11 +2668,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2664,11 +2684,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2678,9 +2698,9 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -2689,12 +2709,12 @@ class SearchServiceTest extends BaseTest
                             43.756825,
                             15.775074
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -2728,11 +2748,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2744,11 +2764,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2758,9 +2778,9 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -2769,12 +2789,12 @@ class SearchServiceTest extends BaseTest
                             43.756825,
                             15.775074
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -2808,11 +2828,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2824,11 +2844,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2840,11 +2860,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2854,23 +2874,23 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
                             Criterion\Operator::BETWEEN,
-                            [239, 241],
+                            array(239, 241),
                             43.756825,
                             15.775074
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -2912,11 +2932,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 89,
                 'longitude' => -164,
                 'address' => 'Polar bear media tower',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2926,23 +2946,23 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
                             Criterion\Operator::BETWEEN,
-                            [221, 350],
+                            array(221, 350),
                             89,
                             16
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -2976,11 +2996,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -2992,11 +3012,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3008,11 +3028,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3021,15 +3041,15 @@ class SearchServiceTest extends BaseTest
 
         $this->refreshSearch($repository);
 
-        $wellInVodice = [
+        $wellInVodice = array(
             'latitude' => 43.756825,
             'longitude' => 15.775074,
-        ];
+        );
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -3038,11 +3058,11 @@ class SearchServiceTest extends BaseTest
                             $wellInVodice['latitude'],
                             $wellInVodice['longitude']
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\MapLocationDistance(
                         'testtype',
                         'maplocation',
@@ -3050,8 +3070,8 @@ class SearchServiceTest extends BaseTest
                         $wellInVodice['longitude'],
                         Query::SORT_ASC
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3093,11 +3113,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3109,11 +3129,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3125,11 +3145,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3138,15 +3158,15 @@ class SearchServiceTest extends BaseTest
 
         $this->refreshSearch($repository);
 
-        $well = [
+        $well = array(
             'latitude' => 43.756825,
             'longitude' => 15.775074,
-        ];
+        );
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -3155,11 +3175,11 @@ class SearchServiceTest extends BaseTest
                             $well['latitude'],
                             $well['longitude']
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\MapLocationDistance(
                         'testtype',
                         'maplocation',
@@ -3167,8 +3187,8 @@ class SearchServiceTest extends BaseTest
                         $well['longitude'],
                         Query::SORT_DESC
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3197,6 +3217,11 @@ class SearchServiceTest extends BaseTest
      */
     public function testMapLocationDistanceWithCustomField()
     {
+        $setupFactory = $this->getSetupFactory();
+        if ($setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestIncomplete("TODO: Some issues with 'copy_to' and 'geo_point'");
+        }
+
         $contentType = $this->createTestPlaceContentType();
 
         // Create a draft to account for behaviour with ContentType in different states
@@ -3210,11 +3235,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3226,11 +3251,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3249,17 +3274,17 @@ class SearchServiceTest extends BaseTest
         $distanceCriterion->setCustomField('testtype', 'maplocation', 'custom_geolocation_field');
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         $distanceCriterion,
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3280,6 +3305,11 @@ class SearchServiceTest extends BaseTest
      */
     public function testMapLocationDistanceWithCustomFieldSort()
     {
+        $setupFactory = $this->getSetupFactory();
+        if ($setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestIncomplete("TODO: Some issues with 'copy_to' and 'geo_point'");
+        }
+
         $contentType = $this->createTestPlaceContentType();
 
         // Create a draft to account for behaviour with ContentType in different states
@@ -3293,11 +3323,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3309,11 +3339,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3325,11 +3355,11 @@ class SearchServiceTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
@@ -3338,10 +3368,10 @@ class SearchServiceTest extends BaseTest
 
         $this->refreshSearch($repository);
 
-        $well = [
+        $well = array(
             'latitude' => 43.756825,
             'longitude' => 15.775074,
-        ];
+        );
 
         $sortClause = new SortClause\MapLocationDistance(
             'testtype',
@@ -3353,9 +3383,9 @@ class SearchServiceTest extends BaseTest
         $sortClause->setCustomField('testtype', 'maplocation', 'custom_geolocation_field');
 
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -3364,14 +3394,14 @@ class SearchServiceTest extends BaseTest
                             $well['latitude'],
                             $well['longitude']
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     $sortClause,
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3415,19 +3445,19 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ParentLocationId($designLocationId),
                         new Criterion\Location\IsMainLocation(
                             Criterion\Location\IsMainLocation::MAIN
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3459,19 +3489,19 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ParentLocationId($designLocationId),
                         new Criterion\Location\IsMainLocation(
                             Criterion\Location\IsMainLocation::NOT_MAIN
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3504,16 +3534,16 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\ParentLocationId($designLocationId),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\Location\IsMainLocation(
                         LocationQuery::SORT_ASC
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3547,16 +3577,16 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\ParentLocationId($designLocationId),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\Location\IsMainLocation(
                         LocationQuery::SORT_DESC
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3596,12 +3626,12 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\ContentId($content->id),
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\Location\Id(LocationQuery::SORT_ASC),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -3654,7 +3684,7 @@ class SearchServiceTest extends BaseTest
 
         // Create a Content to be found through Editors UserGroup id.
         // This ensures data is indexed, it could also be done by updating metadata of
-        // an existing Content, but listener would need to reindex Content and that should
+        // an existing Content, but slot would need to reindex Content and that should
         // be tested elsewhere (dedicated indexing integration tests, missing ATM).
         $contentType = $contentTypeService->loadContentTypeByIdentifier('folder');
 
@@ -3662,7 +3692,7 @@ class SearchServiceTest extends BaseTest
         $createStruct->setField('name', 'test');
 
         $locationCreateStruct = $locationService->newLocationCreateStruct(2);
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $content = $contentService->publishVersion($draft->getVersionInfo());
         $contentTypeService->createContentTypeDraft($contentType);
 
@@ -3688,12 +3718,12 @@ class SearchServiceTest extends BaseTest
 
         $content = $this->createContentForTestUserMetadataGroupHorizontal();
 
-        $criteria = [];
+        $criteria = array();
         $setupFactory = $this->getSetupFactory();
 
         // Do not limit for LSE, as it does not not require reindexing.
         // See explanation below.
-        if ($setupFactory instanceof LegacySolrSetupFactory) {
+        if ($setupFactory instanceof LegacySolrSetupFactory || $setupFactory instanceof LegacyElasticsearch) {
             $criteria[] = new Criterion\ContentTypeIdentifier('folder');
         }
 
@@ -3704,22 +3734,22 @@ class SearchServiceTest extends BaseTest
         );
 
         $query = new Query(
-            [
+            array(
                 $queryType => new Criterion\LogicalAnd($criteria),
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\ContentId(),
-                ],
+                ),
                 'limit' => 50,
-            ]
+            )
         );
 
-        if ($setupFactory instanceof LegacySolrSetupFactory) {
+        if ($setupFactory instanceof LegacySolrSetupFactory || $setupFactory instanceof LegacyElasticsearch) {
             $result = $searchService->findContent($query);
 
             // Administrator User is owned by itself, when additional Locations are added
             // it should be reindexed and its UserGroups will updated, which means it should
             // also be found as a Content of Editors UserGroup. However we do not handle this
-            // in listeners yet, and also miss SPI methods to do it without using Search (also
+            // in slots yet, and also miss SPI methods to do it without using Search (also
             // needed to decouple services), because as indexing is asynchronous Search
             // should not eat its own dog food for reindexing.
             $this->assertEquals(1, $result->totalCount);
@@ -3730,7 +3760,7 @@ class SearchServiceTest extends BaseTest
             );
         } else {
             // This is how it should eventually work for all search engines,
-            // with required reindexing listeners properly implemented.
+            // with required reindexing slots properly implemented.
 
             $result = $searchService->findContent($query);
 
@@ -3741,11 +3771,11 @@ class SearchServiceTest extends BaseTest
             $this->assertEquals($content->id, $foundContent1->valueObject->id);
 
             $this->simplifySearchResult($result);
-            $this->assertEqualsWithDelta(
+            $this->assertEquals(
                 include $this->getFixtureDir() . '/UserMetadata.php',
                 $result,
-                .1, // Be quite generous regarding delay -- most important for scores
                 'Search results do not match.',
+                .1 // Be quite generous regarding delay -- most important for scores
             );
         }
     }
@@ -3777,12 +3807,12 @@ class SearchServiceTest extends BaseTest
 
         $content = $this->createContentForTestUserMetadataGroupHorizontal();
 
-        $criteria = [];
+        $criteria = array();
         $setupFactory = $this->getSetupFactory();
 
         // Do not limit for LSE, as it does not not require reindexing.
         // See explanation below.
-        if ($setupFactory instanceof LegacySolrSetupFactory) {
+        if ($setupFactory instanceof LegacySolrSetupFactory || $setupFactory instanceof LegacyElasticsearch) {
             $criteria[] = new Criterion\ContentTypeIdentifier('folder');
         }
 
@@ -3793,22 +3823,22 @@ class SearchServiceTest extends BaseTest
         );
 
         $query = new LocationQuery(
-            [
+            array(
                 $queryType => new Criterion\LogicalAnd($criteria),
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\Location\Id(),
-                ],
+                ),
                 'limit' => 50,
-            ]
+            )
         );
 
-        if ($setupFactory instanceof LegacySolrSetupFactory) {
+        if ($setupFactory instanceof LegacySolrSetupFactory || $setupFactory instanceof LegacyElasticsearch) {
             $result = $searchService->findLocations($query);
 
             // Administrator User is owned by itself, when additional Locations are added
             // it should be reindexed and its UserGroups will updated, which means it should
             // also be found as a Content of Editors UserGroup. However we do not handle this
-            // in listeners yet, and also miss SPI methods to do it without using Search (also
+            // in slots yet, and also miss SPI methods to do it without using Search (also
             // needed to decouple services), because as indexing is asynchronous Search
             // should not eat its own dog food for reindexing.
             $this->assertEquals(1, $result->totalCount);
@@ -3819,7 +3849,7 @@ class SearchServiceTest extends BaseTest
             );
         } else {
             // This is how it should eventually work for all search engines,
-            // with required reindexing listeners properly implemented.
+            // with required reindexing slots properly implemented.
 
             $result = $searchService->findLocations($query);
 
@@ -3840,11 +3870,11 @@ class SearchServiceTest extends BaseTest
             );
 
             $this->simplifySearchResult($result);
-            $this->assertEqualsWithDelta(
+            $this->assertEquals(
                 include $this->getFixtureDir() . '/UserMetadataLocation.php',
                 $result,
-                .1, // Be quite generous regarding delay -- most important for scores
                 'Search results do not match.',
+                .1 // Be quite generous regarding delay -- most important for scores
             );
         }
     }
@@ -3882,16 +3912,16 @@ class SearchServiceTest extends BaseTest
         $englishContent = $contentService->publishVersion(
             $contentService->createContent(
                 $contentCreateStruct,
-                [$locationService->newLocationCreateStruct(2)]
+                array($locationService->newLocationCreateStruct(2))
             )->versionInfo
         );
 
         $this->refreshSearch($repository);
 
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\FullText('foxes'),
-            ]
+            )
         );
 
         $searchResult = $searchService->findContentInfo($query);
@@ -3907,7 +3937,10 @@ class SearchServiceTest extends BaseTest
      */
     public function testLanguageAnalysisSeparateContent()
     {
-        $this->markTestSkipped('Language analysis is currently not supported');
+        $setupFactory = $this->getSetupFactory();
+        if (!$setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestSkipped('Language analysis is implemented only for Elasticsearch storage');
+        }
 
         $repository = $this->getRepository();
         $contentService = $repository->getContentService();
@@ -3932,7 +3965,7 @@ class SearchServiceTest extends BaseTest
         $englishContent = $contentService->publishVersion(
             $contentService->createContent(
                 $contentCreateStruct,
-                [$locationService->newLocationCreateStruct(2)]
+                array($locationService->newLocationCreateStruct(2))
             )->versionInfo
         );
 
@@ -3946,16 +3979,16 @@ class SearchServiceTest extends BaseTest
         $russianContent = $contentService->publishVersion(
             $contentService->createContent(
                 $contentCreateStruct,
-                [$locationService->newLocationCreateStruct(2)]
+                array($locationService->newLocationCreateStruct(2))
             )->versionInfo
         );
 
         // Only Content in English should be found, because Content in Russian
         // will not be correctly stemmed
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\FullText('foxing'),
-            ]
+            )
         );
 
         $searchResult = $searchService->findContent($query);
@@ -3971,7 +4004,10 @@ class SearchServiceTest extends BaseTest
      */
     public function testLanguageAnalysisSameContent()
     {
-        $this->markTestSkipped('Language analysis is currently not supported');
+        $setupFactory = $this->getSetupFactory();
+        if (!$setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestSkipped('Language analysis is implemented only for Elasticsearch storage');
+        }
 
         $repository = $this->getRepository();
         $contentService = $repository->getContentService();
@@ -3997,15 +4033,15 @@ class SearchServiceTest extends BaseTest
         $mixedContent = $contentService->publishVersion(
             $contentService->createContent(
                 $contentCreateStruct,
-                [$locationService->newLocationCreateStruct(2)]
+                array($locationService->newLocationCreateStruct(2))
             )->versionInfo
         );
 
         // Content will be found because translation in Russian will be correctly stemmed
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\FullText('важнее'),
-            ]
+            )
         );
 
         $searchResult = $searchService->findContent($query);
@@ -4021,7 +4057,10 @@ class SearchServiceTest extends BaseTest
      */
     public function testLanguageAnalysisSameContentNotFound()
     {
-        $this->markTestSkipped('Language analysis is currently not supported');
+        $setupFactory = $this->getSetupFactory();
+        if (!$setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestSkipped('Language analysis is implemented only for Elasticsearch storage');
+        }
 
         $repository = $this->getRepository();
         $contentService = $repository->getContentService();
@@ -4047,20 +4086,20 @@ class SearchServiceTest extends BaseTest
         $mixedContent = $contentService->publishVersion(
             $contentService->createContent(
                 $contentCreateStruct,
-                [$locationService->newLocationCreateStruct(2)]
+                array($locationService->newLocationCreateStruct(2))
             )->versionInfo
         );
 
         // Content should be found because translation in Russian will be correctly stemmed
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\FullText('важнее'),
-            ]
+            )
         );
 
         // Filtering fields for only English will cause no match because the term will
         // not be correctly stemmed
-        $searchResult = $searchService->findContent($query, ['languages' => ['eng-GB']]);
+        $searchResult = $searchService->findContent($query, array('languages' => array('eng-GB')));
 
         $this->assertEquals(0, $searchResult->totalCount);
     }
@@ -4224,6 +4263,12 @@ class SearchServiceTest extends BaseTest
     public function testFulltextLocationSearchComplex(array $data)
     {
         $setupFactory = $this->getSetupFactory();
+        if ($setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestIncomplete(
+                'Fulltext criterion is not supported with Location search in Elasticsearch engine'
+            );
+        }
+
         if ($setupFactory instanceof LegacySolrSetupFactory && getenv('SOLR_VERSION') === '4.10.4') {
             $this->markTestSkipped('Skipping location search score test on Solr 4.10, you need Solr 6 for this!');
         }
@@ -4284,6 +4329,16 @@ class SearchServiceTest extends BaseTest
 
         try {
             if ($query instanceof LocationQuery) {
+                $setupFactory = $this->getSetupFactory();
+                if ($setupFactory instanceof LegacySolrSetupFactory) {
+                    // @todo When we want to test score again by default we will need fixtures for Solr
+                }
+
+                if ($setupFactory instanceof LegacyElasticsearch) {
+                    $position = strrpos($fixture, '/');
+                    $fixture = substr_replace($fixture, '/Location', $position, 0);
+                }
+
                 $result = $searchService->findLocations($query);
             } elseif ($query instanceof Query) {
                 if ($info) {
@@ -4321,7 +4376,7 @@ class SearchServiceTest extends BaseTest
         }
 
         if ($ignoreScore) {
-            foreach ([$fixture, $result] as $set) {
+            foreach (array($fixture, $result) as $set) {
                 $property = new \ReflectionProperty(get_class($set), 'maxScore');
                 $property->setAccessible(true);
                 $property->setValue($set, 0.0);
@@ -4334,7 +4389,7 @@ class SearchServiceTest extends BaseTest
             }
         }
 
-        foreach ([$fixture, $result] as $set) {
+        foreach (array($fixture, $result) as $set) {
             foreach ($set->searchHits as $hit) {
                 $property = new \ReflectionProperty(get_class($hit), 'index');
                 $property->setAccessible(true);
@@ -4350,11 +4405,11 @@ class SearchServiceTest extends BaseTest
             }
         }
 
-        $this->assertEqualsWithDelta(
+        $this->assertEquals(
             $fixture,
             $result,
-            .99, // Be quite generous regarding delay -- most important for scores
             'Search results do not match.',
+            .99 // Be quite generous regarding delay -- most important for scores
         );
     }
 
@@ -4391,17 +4446,17 @@ class SearchServiceTest extends BaseTest
             switch (true) {
                 case $hit->valueObject instanceof Content:
                 case $hit->valueObject instanceof Location:
-                    $hit->valueObject = [
+                    $hit->valueObject = array(
                         'id' => $hit->valueObject->contentInfo->id,
                         'title' => $hit->valueObject->contentInfo->name,
-                    ];
+                    );
                     break;
 
                 case $hit->valueObject instanceof ContentInfo:
-                    $hit->valueObject = [
+                    $hit->valueObject = array(
                         'id' => $hit->valueObject->id,
                         'title' => $hit->valueObject->name,
-                    ];
+                    );
                     break;
 
                 default:
@@ -4463,13 +4518,13 @@ class SearchServiceTest extends BaseTest
             'foo'
         );
         $query = new Query(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'title',
                     Criterion\Operator::EQ,
                     'foo'
                 ),
-            ]
+            )
         );
 
         $repository = $this->getRepository();
@@ -4521,134 +4576,5 @@ class SearchServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         return $content;
-    }
-
-    /**
-     * Test for the findContent() method with random sort clause.
-     *
-     * There is a slight chance when this test could fail, if by some reason,
-     * we got to same _random_ results, or mt_rand() provides same seed for seed-supported DB implementation.
-     *
-     * @see \eZ\Publish\API\Repository\SearchService::findContent()
-     *
-     * @dataProvider getSeedsForRandomSortClause
-     */
-    public function testRandomSortContent(?int $firstSeed, ?int $secondSeed)
-    {
-        if ($firstSeed || $secondSeed) {
-            $this->skipIfSeedNotImplemented();
-        }
-
-        $firstQuery = new Query([
-            'sortClauses' => [
-                new SortClause\Random($firstSeed),
-            ],
-        ]);
-
-        $secondQuery = new Query([
-            'sortClauses' => [
-                new SortClause\Random($secondSeed),
-            ],
-        ]);
-
-        $repository = $this->getRepository();
-        $searchService = $repository->getSearchService();
-
-        $method = 'assertNotEquals';
-
-        if ($firstSeed !== null && $secondSeed !== null && ($firstSeed === $secondSeed)) {
-            $method = 'assertEquals';
-        }
-
-        try {
-            $this->$method(
-                $searchService->findContent($firstQuery)->searchHits,
-                $searchService->findContent($secondQuery)->searchHits
-            );
-        } catch (NotImplementedException $e) {
-            $this->markTestSkipped(
-                'This feature is not supported by the current search backend: ' . $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Test for the findLocations() method.
-     *
-     * @see \eZ\Publish\API\Repository\SearchService::findLocations()
-     *
-     * @dataProvider getSeedsForRandomSortClause
-     */
-    public function testRandomSortLocation(?int $firstSeed, ?int $secondSeed)
-    {
-        if ($firstSeed || $secondSeed) {
-            $this->skipIfSeedNotImplemented();
-        }
-
-        $firstQuery = new LocationQuery([
-            'sortClauses' => [
-                new SortClause\Random($firstSeed),
-            ],
-        ]);
-
-        $secondQuery = new LocationQuery([
-            'sortClauses' => [
-                new SortClause\Random($secondSeed),
-            ],
-        ]);
-
-        $repository = $this->getRepository();
-        $searchService = $repository->getSearchService();
-
-        $method = 'assertNotEquals';
-
-        if ($firstSeed !== null && $secondSeed !== null && ($firstSeed === $secondSeed)) {
-            $method = 'assertEquals';
-        }
-
-        try {
-            $this->$method(
-                $searchService->findLocations($firstQuery)->searchHits,
-                $searchService->findLocations($secondQuery)->searchHits
-            );
-        } catch (NotImplementedException $e) {
-            $this->markTestSkipped(
-                'This feature is not supported by the current search backend: ' . $e->getMessage()
-            );
-        }
-    }
-
-    public function getSeedsForRandomSortClause()
-    {
-        $randomSeed = mt_rand();
-
-        return [
-            [
-                null,
-                null,
-            ],
-            [
-                123456,
-                123456,
-            ],
-            [
-               $randomSeed,
-               2 * $randomSeed,
-            ],
-        ];
-    }
-
-    private function skipIfSeedNotImplemented()
-    {
-        /** @var \eZ\Publish\API\Repository\Tests\SetupFactory\Legacy $setupFactory */
-        $setupFactory = $this->getSetupFactory();
-
-        $db = $setupFactory->getDB();
-
-        if (in_array($db, ['sqlite', 'pgsql'])) {
-            $this->markTestSkipped(
-                'Seed function is not implemented in ' . $db . '.'
-            );
-        }
     }
 }

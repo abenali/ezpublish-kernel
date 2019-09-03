@@ -18,7 +18,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class RepositoryAuthenticationProvider extends DaoAuthenticationProvider
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
     public function setRepository(Repository $repository)

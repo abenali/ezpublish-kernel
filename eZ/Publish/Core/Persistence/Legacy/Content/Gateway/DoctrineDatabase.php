@@ -110,10 +110,10 @@ class DoctrineDatabase extends Gateway
      */
     public function getContext()
     {
-        return [
+        return array(
             'identifier' => 'LegacyStorage',
             'connection' => $this->dbHandler,
-        ];
+        );
     }
 
     /**
@@ -192,17 +192,17 @@ class DoctrineDatabase extends Gateway
     }
 
     /**
-     * Generates a language mask for $fields.
+     * Generates a language mask for $version.
      *
      * @param \eZ\Publish\SPI\Persistence\Content\Field[] $fields
      * @param string $initialLanguageCode
-     * @param bool $isAlwaysAvailable
+     * @param bool $alwaysAvailable
      *
      * @return int
      */
-    protected function generateLanguageMask(array $fields, string $initialLanguageCode, bool $isAlwaysAvailable): int
+    protected function generateLanguageMask(array $fields, $initialLanguageCode, $alwaysAvailable)
     {
-        $languages = [$initialLanguageCode => true];
+        $languages = array($initialLanguageCode => true);
         foreach ($fields as $field) {
             if (isset($languages[$field->languageCode])) {
                 continue;
@@ -211,7 +211,11 @@ class DoctrineDatabase extends Gateway
             $languages[$field->languageCode] = true;
         }
 
-        return $this->languageMaskGenerator->generateLanguageMaskFromLanguageCodes(array_keys($languages), $isAlwaysAvailable);
+        if ($alwaysAvailable) {
+            $languages['always-available'] = true;
+        }
+
+        return $this->languageMaskGenerator->generateLanguageMask($languages);
     }
 
     /**
@@ -329,20 +333,21 @@ class DoctrineDatabase extends Gateway
             );
         }
         if ($prePublishVersionInfo !== null) {
-            $mask = $this->languageMaskGenerator->generateLanguageMaskFromLanguageCodes(
-                $prePublishVersionInfo->languageCodes,
-                $struct->alwaysAvailable ?? $prePublishVersionInfo->contentInfo->alwaysAvailable
-            );
+            $languages = [];
+            foreach ($prePublishVersionInfo->languageCodes as $languageCodes) {
+                if (!isset($languages[$languageCodes])) {
+                    $languages[$languageCodes] = true;
+                }
+            }
+
+            $languages['always-available'] = isset($struct->alwaysAvailable) ? $struct->alwaysAvailable :
+                $prePublishVersionInfo->contentInfo->alwaysAvailable;
+
+            $mask = $this->languageMaskGenerator->generateLanguageMask($languages);
 
             $q->set(
                 $this->dbHandler->quoteColumn('language_mask'),
                 $q->bindValue($mask, null, \PDO::PARAM_INT)
-            );
-        }
-        if (isset($struct->isHidden)) {
-            $q->set(
-                $this->dbHandler->quoteColumn('is_hidden'),
-                $q->bindValue($struct->isHidden, null, \PDO::PARAM_BOOL)
             );
         }
         $q->where(
@@ -861,7 +866,6 @@ class DoctrineDatabase extends Gateway
                 'c.status AS ezcontentobject_status',
                 'c.name AS ezcontentobject_name',
                 'c.language_mask AS ezcontentobject_language_mask',
-                'c.is_hidden AS ezcontentobject_is_hidden',
                 'v.id AS ezcontentobject_version_id',
                 'v.version AS ezcontentobject_version_version',
                 'v.modified AS ezcontentobject_version_modified',
@@ -1171,7 +1175,7 @@ class DoctrineDatabase extends Gateway
         $statement = $query->prepare();
         $statement->execute();
 
-        $results = [];
+        $results = array();
         $previousId = null;
         foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $row) {
             if ($row['ezcontentobject_version_id'] == $previousId) {
@@ -1313,10 +1317,10 @@ class DoctrineDatabase extends Gateway
         $statement = $query->prepare();
         $statement->execute();
 
-        $result = [];
+        $result = array();
         foreach ($statement->fetchAll() as $row) {
             if (!isset($result[$row['data_type_string']])) {
-                $result[$row['data_type_string']] = [];
+                $result[$row['data_type_string']] = array();
             }
             $result[$row['data_type_string']][] = (int)$row['id'];
         }
@@ -2028,7 +2032,7 @@ class DoctrineDatabase extends Gateway
     public function loadVersionedNameData($rows)
     {
         $query = $this->queryBuilder->createNamesQuery();
-        $conditions = [];
+        $conditions = array();
         foreach ($rows as $row) {
             $conditions[] = $query->expr->lAnd(
                 $query->expr->eq(

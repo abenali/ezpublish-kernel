@@ -20,10 +20,12 @@ use PHPUnit\Framework\TestCase;
 
 class CompoundOrTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $matcherBuilder;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcherBuilder = $this->createMock(MatcherBuilderInterface::class);
@@ -43,22 +45,22 @@ class CompoundOrTest extends TestCase
     private function buildMatcher()
     {
         return new LogicalOr(
-            [
-                [
-                    'matchers' => [
-                        'Map\\URI' => ['eng' => true],
-                        'Map\\Host' => ['fr.ezpublish.dev' => true],
-                    ],
+            array(
+                array(
+                    'matchers' => array(
+                        'Map\\URI' => array('eng' => true),
+                        'Map\\Host' => array('fr.ezpublish.dev' => true),
+                    ),
                     'match' => 'fr_eng',
-                ],
-                [
-                    'matchers' => [
-                        'Map\\URI' => ['fre' => true],
-                        'Map\\Host' => ['jp.ezpublish.dev' => true],
-                    ],
+                ),
+                array(
+                    'matchers' => array(
+                        'Map\\URI' => array('fre' => true),
+                        'Map\\Host' => array('jp.ezpublish.dev' => true),
+                    ),
                     'match' => 'fr_jp',
-                ],
-            ]
+                ),
+            )
         );
     }
 
@@ -75,7 +77,7 @@ class CompoundOrTest extends TestCase
         $compoundMatcher->setRequest($this->createMock(SimplifiedRequest::class));
         $compoundMatcher->setMatcherBuilder($this->matcherBuilder);
         $matchers = $compoundMatcher->getSubMatchers();
-        $this->assertIsArray($matchers);
+        $this->assertInternalType('array', $matchers);
         foreach ($matchers as $matcher) {
             $this->assertInstanceOf(Matcher::class, $matcher);
         }
@@ -97,17 +99,17 @@ class CompoundOrTest extends TestCase
 
     public function matchProvider()
     {
-        return [
-            [SimplifiedRequest::fromUrl('http://fr.ezpublish.dev/eng'), 'fr_eng'],
-            [SimplifiedRequest::fromUrl('http://ezpublish.dev/eng'), 'fr_eng'],
-            [SimplifiedRequest::fromUrl('http://fr.ezpublish.dev/fre'), 'fr_eng'],
-            [SimplifiedRequest::fromUrl('http://fr.ezpublish.dev/'), 'fr_eng'],
-            [SimplifiedRequest::fromUrl('http://us.ezpublish.dev/eng'), 'fr_eng'],
-            [SimplifiedRequest::fromUrl('http://us.ezpublish.dev/foo'), false],
-            [SimplifiedRequest::fromUrl('http://us.ezpublish.dev/fre'), 'fr_jp'],
-            [SimplifiedRequest::fromUrl('http://jp.ezpublish.dev/foo'), 'fr_jp'],
-            [SimplifiedRequest::fromUrl('http://ezpublish.dev/fr'), false],
-        ];
+        return array(
+            array(SimplifiedRequest::fromUrl('http://fr.ezpublish.dev/eng'), 'fr_eng'),
+            array(SimplifiedRequest::fromUrl('http://ezpublish.dev/eng'), 'fr_eng'),
+            array(SimplifiedRequest::fromUrl('http://fr.ezpublish.dev/fre'), 'fr_eng'),
+            array(SimplifiedRequest::fromUrl('http://fr.ezpublish.dev/'), 'fr_eng'),
+            array(SimplifiedRequest::fromUrl('http://us.ezpublish.dev/eng'), 'fr_eng'),
+            array(SimplifiedRequest::fromUrl('http://us.ezpublish.dev/foo'), false),
+            array(SimplifiedRequest::fromUrl('http://us.ezpublish.dev/fre'), 'fr_jp'),
+            array(SimplifiedRequest::fromUrl('http://jp.ezpublish.dev/foo'), 'fr_jp'),
+            array(SimplifiedRequest::fromUrl('http://ezpublish.dev/fr'), false),
+        );
     }
 
     public function testReverseMatchSiteAccessNotConfigured()
@@ -127,18 +129,18 @@ class CompoundOrTest extends TestCase
     {
         $request = $this->createMock(SimplifiedRequest::class);
         $siteAccessName = 'fr_eng';
-        $mapUriConfig = ['eng' => true];
-        $mapHostConfig = ['fr.ezpublish.dev' => true];
+        $mapUriConfig = array('eng' => true);
+        $mapHostConfig = array('fr.ezpublish.dev' => true);
         $compoundMatcher = new LogicalOr(
-            [
-                [
-                    'matchers' => [
+            array(
+                array(
+                    'matchers' => array(
                         'Map\URI' => $mapUriConfig,
                         'Map\Host' => $mapHostConfig,
-                    ],
+                    ),
                     'match' => $siteAccessName,
-                ],
-            ]
+                ),
+            )
         );
         $compoundMatcher->setRequest($request);
 
@@ -156,10 +158,10 @@ class CompoundOrTest extends TestCase
             ->method('buildMatcher')
             ->will(
                 $this->returnValueMap(
-                    [
-                        ['Map\URI', $mapUriConfig, $request, $matcher1],
-                        ['Map\Host', $mapHostConfig, $request, $matcher2],
-                    ]
+                    array(
+                        array('Map\URI', $mapUriConfig, $request, $matcher1),
+                        array('Map\Host', $mapHostConfig, $request, $matcher2),
+                    )
                 )
             );
 
@@ -178,18 +180,18 @@ class CompoundOrTest extends TestCase
     {
         $request = $this->createMock(SimplifiedRequest::class);
         $siteAccessName = 'fr_eng';
-        $mapUriConfig = ['eng' => true];
-        $mapHostConfig = ['fr.ezpublish.dev' => true];
+        $mapUriConfig = array('eng' => true);
+        $mapHostConfig = array('fr.ezpublish.dev' => true);
         $compoundMatcher = new LogicalOr(
-            [
-                [
-                    'matchers' => [
+            array(
+                array(
+                    'matchers' => array(
                         'Map\URI' => $mapUriConfig,
                         'Map\Host' => $mapHostConfig,
-                    ],
+                    ),
                     'match' => $siteAccessName,
-                ],
-            ]
+                ),
+            )
         );
         $compoundMatcher->setRequest($request);
 
@@ -200,10 +202,10 @@ class CompoundOrTest extends TestCase
             ->method('buildMatcher')
             ->will(
                 $this->returnValueMap(
-                    [
-                        ['Map\URI', $mapUriConfig, $request, $matcher1],
-                        ['Map\Host', $mapHostConfig, $request, $matcher2],
-                    ]
+                    array(
+                        array('Map\URI', $mapUriConfig, $request, $matcher1),
+                        array('Map\Host', $mapHostConfig, $request, $matcher2),
+                    )
                 )
             );
 
@@ -226,18 +228,18 @@ class CompoundOrTest extends TestCase
     {
         $request = $this->createMock(SimplifiedRequest::class);
         $siteAccessName = 'fr_eng';
-        $mapUriConfig = ['eng' => true];
-        $mapHostConfig = ['fr.ezpublish.dev' => true];
+        $mapUriConfig = array('eng' => true);
+        $mapHostConfig = array('fr.ezpublish.dev' => true);
         $compoundMatcher = new LogicalOr(
-            [
-                [
-                    'matchers' => [
+            array(
+                array(
+                    'matchers' => array(
                         'Map\URI' => $mapUriConfig,
                         'Map\Host' => $mapHostConfig,
-                    ],
+                    ),
                     'match' => $siteAccessName,
-                ],
-            ]
+                ),
+            )
         );
         $compoundMatcher->setRequest($request);
 
@@ -248,10 +250,10 @@ class CompoundOrTest extends TestCase
             ->method('buildMatcher')
             ->will(
                 $this->returnValueMap(
-                    [
-                        ['Map\URI', $mapUriConfig, $request, $matcher1],
-                        ['Map\Host', $mapHostConfig, $request, $matcher2],
-                    ]
+                    array(
+                        array('Map\URI', $mapUriConfig, $request, $matcher1),
+                        array('Map\Host', $mapHostConfig, $request, $matcher2),
+                    )
                 )
             );
 
@@ -277,18 +279,18 @@ class CompoundOrTest extends TestCase
     {
         $request = $this->createMock(SimplifiedRequest::class);
         $siteAccessName = 'fr_eng';
-        $mapUriConfig = ['eng' => true];
-        $mapHostConfig = ['fr.ezpublish.dev' => true];
+        $mapUriConfig = array('eng' => true);
+        $mapHostConfig = array('fr.ezpublish.dev' => true);
         $compoundMatcher = new LogicalOr(
-            [
-                [
-                    'matchers' => [
+            array(
+                array(
+                    'matchers' => array(
                         'Map\URI' => $mapUriConfig,
                         'Map\Host' => $mapHostConfig,
-                    ],
+                    ),
                     'match' => $siteAccessName,
-                ],
-            ]
+                ),
+            )
         );
         $compoundMatcher->setRequest($request);
 
@@ -299,10 +301,10 @@ class CompoundOrTest extends TestCase
             ->method('buildMatcher')
             ->will(
                 $this->returnValueMap(
-                    [
-                        ['Map\URI', $mapUriConfig, $request, $matcher1],
-                        ['Map\Host', $mapHostConfig, $request, $matcher2],
-                    ]
+                    array(
+                        array('Map\URI', $mapUriConfig, $request, $matcher1),
+                        array('Map\Host', $mapHostConfig, $request, $matcher2),
+                    )
                 )
             );
 
@@ -328,12 +330,12 @@ class CompoundOrTest extends TestCase
 
     public function testSerialize()
     {
-        $matcher = new LogicalOr([]);
-        $matcher->setRequest(new SimplifiedRequest(['pathinfo' => '/foo/bar']));
+        $matcher = new LogicalOr(array());
+        $matcher->setRequest(new SimplifiedRequest(array('pathinfo' => '/foo/bar')));
         $sa = new SiteAccess('test', 'test', $matcher);
         $serializedSA1 = serialize($sa);
 
-        $matcher->setRequest(new SimplifiedRequest(['pathinfo' => '/foo/bar/baz']));
+        $matcher->setRequest(new SimplifiedRequest(array('pathinfo' => '/foo/bar/baz')));
         $serializedSA2 = serialize($sa);
 
         $this->assertSame($serializedSA1, $serializedSA2);

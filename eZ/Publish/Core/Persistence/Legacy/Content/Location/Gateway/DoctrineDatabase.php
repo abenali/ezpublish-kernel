@@ -44,7 +44,9 @@ class DoctrineDatabase extends Gateway
      */
     protected $handler;
 
-    /** @var \Doctrine\DBAL\Connection */
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
     protected $connection;
 
     /**
@@ -288,8 +290,7 @@ class DoctrineDatabase extends Gateway
                 $this->handler->quoteColumn('node_id'),
                 $this->handler->quoteColumn('parent_node_id'),
                 $this->handler->quoteColumn('path_string'),
-                $this->handler->quoteColumn('path_identification_string'),
-                $this->handler->quoteColumn('is_hidden')
+                $this->handler->quoteColumn('path_identification_string')
             )
             ->from($this->handler->quoteTable('ezcontentobject_tree'))
             ->where(
@@ -315,15 +316,12 @@ class DoctrineDatabase extends Gateway
                 $destinationNodeData['path_string'],
                 'prefix' . $row['path_string']
             );
-            $replace = rtrim($destinationNodeData['path_identification_string'], '/');
-            if (empty($oldParentPathIdentificationString)) {
-                $replace .= '/';
-            }
             $newPathIdentificationString = str_replace(
                 'prefix' . $oldParentPathIdentificationString,
-                $replace,
+                $destinationNodeData['path_identification_string'] . '/',
                 'prefix' . $row['path_identification_string']
             );
+
             $newParentId = $row['parent_node_id'];
             if ($row['path_string'] === $fromPathString) {
                 $newParentId = (int)implode('', array_slice(explode('/', $newPathString), -3, 1));
@@ -423,15 +421,6 @@ class DoctrineDatabase extends Gateway
      */
     public function hideSubtree($pathString)
     {
-        $this->setNodeWithChildrenInvisible($pathString);
-        $this->setNodeHidden($pathString);
-    }
-
-    /**
-     * @param string $pathString
-     **/
-    public function setNodeWithChildrenInvisible(string $pathString): void
-    {
         $query = $this->handler->createUpdateQuery();
         $query
             ->update($this->handler->quoteTable('ezcontentobject_tree'))
@@ -449,30 +438,14 @@ class DoctrineDatabase extends Gateway
                     $query->bindValue($pathString . '%')
                 )
             );
-
         $query->prepare()->execute();
-    }
 
-    /**
-     * @param string $pathString
-     **/
-    public function setNodeHidden(string $pathString): void
-    {
-        $this->setNodeHiddenStatus($pathString, true);
-    }
-
-    /**
-     * @param string $pathString
-     * @param bool $isHidden
-     */
-    private function setNodeHiddenStatus(string $pathString, bool $isHidden): void
-    {
         $query = $this->handler->createUpdateQuery();
         $query
             ->update($this->handler->quoteTable('ezcontentobject_tree'))
             ->set(
                 $this->handler->quoteColumn('is_hidden'),
-                $query->bindValue((int) $isHidden)
+                $query->bindValue(1)
             )
             ->where(
                 $query->expr->eq(
@@ -480,7 +453,6 @@ class DoctrineDatabase extends Gateway
                     $query->bindValue($pathString)
                 )
             );
-
         $query->prepare()->execute();
     }
 
@@ -492,34 +464,32 @@ class DoctrineDatabase extends Gateway
      */
     public function unHideSubtree($pathString)
     {
-        $this->setNodeUnhidden($pathString);
-        $this->setNodeWithChildrenVisible($pathString);
-    }
+        // Unhide the requested node
+        $query = $this->handler->createUpdateQuery();
+        $query
+            ->update($this->handler->quoteTable('ezcontentobject_tree'))
+            ->set(
+                $this->handler->quoteColumn('is_hidden'),
+                $query->bindValue(0)
+            )
+            ->where(
+                $query->expr->eq(
+                    $this->handler->quoteColumn('path_string'),
+                    $query->bindValue($pathString)
+                )
+            );
+        $query->prepare()->execute();
 
-    /**
-     * Sets a location + children to visible unless a parent is hiding the tree.
-     *
-     * @param string $pathString
-     **/
-    public function setNodeWithChildrenVisible(string $pathString): void
-    {
         // Check if any parent nodes are explicitly hidden
         $query = $this->handler->createSelectQuery();
         $query
             ->select($this->handler->quoteColumn('path_string'))
             ->from($this->handler->quoteTable('ezcontentobject_tree'))
-            ->leftJoin('ezcontentobject', 'ezcontentobject_tree.contentobject_id', 'ezcontentobject.id')
             ->where(
                 $query->expr->lAnd(
-                    $query->expr->lOr(
-                        $query->expr->eq(
-                            $this->handler->quoteColumn('is_hidden', 'ezcontentobject_tree'),
-                            $query->bindValue(1)
-                        ),
-                        $query->expr->eq(
-                            $this->handler->quoteColumn('is_hidden', 'ezcontentobject'),
-                            $query->bindValue(1)
-                        )
+                    $query->expr->eq(
+                        $this->handler->quoteColumn('is_hidden'),
+                        $query->bindValue(1)
                     ),
                     $query->expr->in(
                         $this->handler->quoteColumn('node_id'),
@@ -527,7 +497,6 @@ class DoctrineDatabase extends Gateway
                     )
                 )
             );
-
         $statement = $query->prepare();
         $statement->execute();
         if (count($statement->fetchAll(\PDO::FETCH_COLUMN))) {
@@ -542,18 +511,11 @@ class DoctrineDatabase extends Gateway
         $query
             ->select($this->handler->quoteColumn('path_string'))
             ->from($this->handler->quoteTable('ezcontentobject_tree'))
-            ->leftJoin('ezcontentobject', 'ezcontentobject_tree.contentobject_id', 'ezcontentobject.id')
             ->where(
                 $query->expr->lAnd(
-                    $query->expr->lOr(
-                        $query->expr->eq(
-                            $this->handler->quoteColumn('is_hidden', 'ezcontentobject_tree'),
-                            $query->bindValue(1)
-                        ),
-                        $query->expr->eq(
-                            $this->handler->quoteColumn('is_hidden', 'ezcontentobject'),
-                            $query->bindValue(1)
-                        )
+                    $query->expr->eq(
+                        $this->handler->quoteColumn('is_hidden'),
+                        $query->bindValue(1)
                     ),
                     $query->expr->like(
                         $this->handler->quoteColumn('path_string'),
@@ -603,17 +565,7 @@ class DoctrineDatabase extends Gateway
             );
         }
         $query->where($where);
-        $query->prepare()->execute();
-    }
-
-    /**
-     * Sets location to be unhidden.
-     *
-     * @param string $pathString
-     **/
-    public function setNodeUnhidden(string $pathString): void
-    {
-        $this->setNodeHiddenStatus($pathString, false);
+        $statement = $query->prepare()->execute();
     }
 
     /**
@@ -622,12 +574,12 @@ class DoctrineDatabase extends Gateway
      * Make the location identified by $locationId1 refer to the Content
      * referred to by $locationId2 and vice versa.
      *
-     * @param int $locationId1
-     * @param int $locationId2
+     * @param mixed $locationId1
+     * @param mixed $locationId2
      *
      * @return bool
      */
-    public function swap(int $locationId1, int $locationId2): bool
+    public function swap($locationId1, $locationId2)
     {
         $queryBuilder = $this->connection->createQueryBuilder();
         $expr = $queryBuilder->expr();
@@ -969,7 +921,7 @@ class DoctrineDatabase extends Gateway
             $isInvisible = $row['is_hidden'] || $parentLocationData['is_hidden'] || $parentLocationData['is_invisible'];
             $this->create(
                 new CreateStruct(
-                    [
+                    array(
                         'contentId' => $row['contentobject_id'],
                         'contentVersion' => $row['contentobject_version'],
                         'mainLocationId' => $mainLocationId,
@@ -979,7 +931,7 @@ class DoctrineDatabase extends Gateway
                         'priority' => $row['priority'],
                         'hidden' => $row['is_hidden'],
                         'invisible' => $isInvisible,
-                    ]
+                    )
                 ),
                 $parentLocationData
             );
@@ -1236,7 +1188,7 @@ class DoctrineDatabase extends Gateway
 
         $newLocation = $this->create(
             new CreateStruct(
-                [
+                array(
                     'priority' => $row['priority'],
                     'hidden' => $row['is_hidden'],
                     'invisible' => $row['is_invisible'],
@@ -1246,7 +1198,7 @@ class DoctrineDatabase extends Gateway
                     'mainLocationId' => true, // Restored location is always main location
                     'sortField' => $row['sort_field'],
                     'sortOrder' => $row['sort_order'],
-                ]
+                )
             ),
             $this->getBasicNodeData($newParentId ?: $row['parent_node_id'])
         );
@@ -1324,7 +1276,7 @@ class DoctrineDatabase extends Gateway
             ->select('*')
             ->from($this->handler->quoteTable('ezcontentobject_trash'));
 
-        $sort = $sort ?: [];
+        $sort = $sort ?: array();
         foreach ($sort as $condition) {
             $sortDirection = $condition->direction === Query::SORT_ASC ? SelectQuery::ASC : SelectQuery::DESC;
             switch (true) {
@@ -1356,7 +1308,7 @@ class DoctrineDatabase extends Gateway
         $statement = $query->prepare();
         $statement->execute();
 
-        $rows = [];
+        $rows = array();
         while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
             $rows[] = $row;
         }
@@ -1646,10 +1598,7 @@ class DoctrineDatabase extends Gateway
         if (!empty($translations)) {
             $dbPlatform = $this->connection->getDatabasePlatform();
             $expr = $queryBuilder->expr();
-            $mask = $this->languageMaskGenerator->generateLanguageMaskFromLanguageCodes(
-                $translations,
-                $useAlwaysAvailable
-            );
+            $mask = $this->generateLanguageMaskFromLanguageCodes($translations, $useAlwaysAvailable);
 
             $queryBuilder->innerJoin(
                 't',
@@ -1666,5 +1615,28 @@ class DoctrineDatabase extends Gateway
         }
 
         return $queryBuilder;
+    }
+
+    /**
+     * Generates a language mask for $translations argument.
+     *
+     * @todo Move logic to languageMaskGenerator in master.
+     */
+    private function generateLanguageMaskFromLanguageCodes(array $translations, bool $useAlwaysAvailable = true): int
+    {
+        $languages = [];
+        foreach ($translations as $translation) {
+            if (isset($languages[$translation])) {
+                continue;
+            }
+
+            $languages[$translation] = true;
+        }
+
+        if ($useAlwaysAvailable) {
+            $languages['always-available'] = true;
+        }
+
+        return $this->languageMaskGenerator->generateLanguageMask($languages);
     }
 }

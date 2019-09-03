@@ -19,16 +19,18 @@ use eZ\Publish\Core\Base\Exceptions\BadStateException;
  */
 class LimitationService
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $settings;
 
     /**
      * @param array $settings
      */
-    public function __construct(array $settings = [])
+    public function __construct(array $settings = array())
     {
         // Union makes sure default settings are ignored if provided in argument
-        $this->settings = $settings + ['limitationTypes' => []];
+        $this->settings = $settings + array('limitationTypes' => array());
     }
 
     /**
@@ -63,7 +65,7 @@ class LimitationService
      */
     public function validateLimitations(array $limitations)
     {
-        $allErrors = [];
+        $allErrors = array();
         foreach ($limitations as $limitation) {
             $errors = $this->validateLimitation($limitation);
             if (!empty($errors)) {
@@ -93,7 +95,9 @@ class LimitationService
             );
         }
 
-        /** @var \eZ\Publish\SPI\Limitation\Type */
+        /**
+         * @var \eZ\Publish\SPI\Limitation\Type
+         */
         $type = $this->settings['limitationTypes'][$identifier];
 
         // This will throw if it does not pass

@@ -8,20 +8,17 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
-use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
-
 class URLAliasServiceAuthorizationTest extends BaseTest
 {
     /**
      * Test for the createUrlAlias() method.
      *
      * @covers \eZ\Publish\API\Repository\URLAliasService::createUrlAlias()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends \eZ\Publish\API\Repository\Tests\URLAliasServiceTest::testCreateUrlAlias
      */
     public function testCreateUrlAliasThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -34,13 +31,12 @@ class URLAliasServiceAuthorizationTest extends BaseTest
         $urlAliasService = $repository->getURLAliasService();
         $locationService = $repository->getLocationService();
 
-        $content = $this->createFolder(['eng-GB' => 'Foo'], $parentLocationId);
-        $location = $locationService->loadLocation($content->contentInfo->mainLocationId);
+        $location = $locationService->newLocationCreateStruct($parentLocationId);
 
         $anonymousUser = $userService->loadUser($anonymousUserId);
         $repository->getPermissionResolver()->setCurrentUserReference($anonymousUser);
 
-        $this->expectException(UnauthorizedException::class);
+        // This call will fail with an UnauthorizedException
         $urlAliasService->createUrlAlias($location, '/Home/My-New-Site', 'eng-US');
         /* END: Use Case */
     }
@@ -49,12 +45,11 @@ class URLAliasServiceAuthorizationTest extends BaseTest
      * Test for the createGlobalUrlAlias() method.
      *
      * @covers \eZ\Publish\API\Repository\URLAliasService::createGlobalUrlAlias()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends \eZ\Publish\API\Repository\Tests\URLAliasServiceTest::testCreateGlobalUrlAlias
      */
     public function testCreateGlobalUrlAliasThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -76,12 +71,11 @@ class URLAliasServiceAuthorizationTest extends BaseTest
      * Test for the removeAliases() method.
      *
      * @covers \eZ\Publish\API\Repository\URLAliasService::removeAliases()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends \eZ\Publish\API\Repository\Tests\URLAliasServiceTest::testRemoveAliases
      */
     public function testRemoveAliasesThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $anonymousUserId = $this->generateId('user', 10);
 

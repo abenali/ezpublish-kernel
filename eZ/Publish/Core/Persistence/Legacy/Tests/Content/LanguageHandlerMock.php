@@ -11,30 +11,30 @@ use eZ\Publish\SPI\Persistence\Content\Language\CreateStruct;
  */
 class LanguageHandlerMock implements LanguageHandler
 {
-    protected $languages = [];
+    protected $languages = array();
 
     public function __construct()
     {
         $this->languages[] = new Language(
-            [
+            array(
                 'id' => 2,
                 'languageCode' => 'eng-US',
                 'name' => 'US english',
-            ]
+            )
         );
         $this->languages[] = new Language(
-            [
+            array(
                 'id' => 4,
                 'languageCode' => 'eng-GB',
                 'name' => 'British english',
-            ]
+            )
         );
         $this->languages[] = new Language(
-            [
+            array(
                 'id' => 8,
                 'languageCode' => 'ger-DE',
                 'name' => 'German',
-            ]
+            )
         );
     }
 
@@ -120,35 +120,5 @@ class LanguageHandlerMock implements LanguageHandler
     public function delete($id)
     {
         throw new \RuntimeException('Not implemented, yet.');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadList(array $ids): iterable
-    {
-        $languages = [];
-        foreach ($this->languages as $language) {
-            if (in_array($language->id, $ids)) {
-                $languages[$language->id] = $language;
-            }
-        }
-
-        return $languages;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadListByLanguageCodes(array $languageCodes): iterable
-    {
-        $languages = [];
-        foreach ($this->languages as $language) {
-            if (in_array($language->languageCode, $languageCodes)) {
-                $languages[$language->languageCode] = $language;
-            }
-        }
-
-        return $languages;
     }
 }

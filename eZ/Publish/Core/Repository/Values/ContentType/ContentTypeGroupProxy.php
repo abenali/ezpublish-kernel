@@ -18,7 +18,9 @@ class ContentTypeGroupProxy extends APIContentTypeGroup
 {
     use GeneratorProxyTrait;
 
-    /** @var \eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup|null */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup|null
+     */
     protected $object;
 
     public function getNames()

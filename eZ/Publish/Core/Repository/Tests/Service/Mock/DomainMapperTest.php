@@ -8,16 +8,13 @@
  */
 namespace eZ\Publish\Core\Repository\Tests\Service\Mock;
 
-use eZ\Publish\API\Repository\Exceptions\InvalidArgumentException;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
 use eZ\Publish\API\Repository\Values\Content\VersionInfo as APIVersionInfo;
 use eZ\Publish\Core\Repository\Tests\Service\Mock\Base as BaseServiceMockTest;
 use eZ\Publish\Core\Repository\Helper\DomainMapper;
-use eZ\Publish\Core\Repository\Values\Content\Content;
 use eZ\Publish\SPI\Persistence\Content\ContentInfo;
 use eZ\Publish\SPI\Persistence\Content\Location;
-use eZ\Publish\API\Repository\Values\Content\Location as APILocation;
 use eZ\Publish\SPI\Persistence\Content\VersionInfo as SPIVersionInfo;
 use eZ\Publish\SPI\Persistence\Content\ContentInfo as SPIContentInfo;
 
@@ -30,103 +27,81 @@ class DomainMapperTest extends BaseServiceMockTest
      * @covers \eZ\Publish\Core\Repository\Helper\DomainMapper::buildVersionInfoDomainObject
      * @dataProvider providerForBuildVersionInfo
      */
-    public function testBuildVersionInfo(SPIVersionInfo $spiVersionInfo)
+    public function testBuildVersionInfo(SPIVersionInfo $spiVersionInfo, array $languages, array $expected)
     {
         $languageHandlerMock = $this->getLanguageHandlerMock();
         $languageHandlerMock->expects($this->never())->method('load');
 
         $versionInfo = $this->getDomainMapper()->buildVersionInfoDomainObject($spiVersionInfo);
-
         $this->assertInstanceOf(APIVersionInfo::class, $versionInfo);
-    }
 
-    /**
-     * @covers \eZ\Publish\Core\Repository\Helper\DomainMapper::buildLocationWithContent
-     */
-    public function testBuildLocationWithContentForRootLocation()
-    {
-        $spiRootLocation = new Location(['id' => 1, 'parentId' => 1]);
-        $apiRootLocation = $this->getDomainMapper()->buildLocationWithContent($spiRootLocation, null);
-
-        $expectedContentInfo = new ContentInfo([
-            'id' => 0,
-        ]);
-        $expectedContent = new Content();
-
-        $this->assertInstanceOf(APILocation::class, $apiRootLocation);
-        $this->assertEquals($spiRootLocation->id, $apiRootLocation->id);
-        $this->assertEquals($expectedContentInfo->id, $apiRootLocation->getContentInfo()->id);
-        $this->assertEquals($expectedContent, $apiRootLocation->getContent());
-    }
-
-    /**
-     * @covers \eZ\Publish\Core\Repository\Helper\DomainMapper::buildLocationWithContent
-     */
-    public function testBuildLocationWithContentThrowsInvalidArgumentException()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'$content\' is invalid: Location 2 has missing Content');
-
-        $nonRootLocation = new Location(['id' => 2, 'parentId' => 1]);
-
-        $this->getDomainMapper()->buildLocationWithContent($nonRootLocation, null);
-    }
-
-    public function testBuildLocationWithContentIsAlignedWithBuildLocation()
-    {
-        $spiRootLocation = new Location(['id' => 1, 'parentId' => 1]);
-
-        $this->assertEquals(
-            $this->getDomainMapper()->buildLocationWithContent($spiRootLocation, null),
-            $this->getDomainMapper()->buildLocation($spiRootLocation)
-        );
+        foreach ($expected as $expectedProperty => $expectedValue) {
+            $this->assertAttributeSame(
+                $expectedValue,
+                $expectedProperty,
+                $versionInfo
+            );
+        }
     }
 
     public function providerForBuildVersionInfo()
     {
-        return [
-            [
+        return array(
+            array(
                 new SPIVersionInfo(
-                    [
+                    array(
                         'status' => 44,
                         'contentInfo' => new SPIContentInfo(),
-                    ]
+                    )
                 ),
-            ],
-            [
+                array(),
+                array('status' => APIVersionInfo::STATUS_DRAFT),
+            ),
+            array(
                 new SPIVersionInfo(
-                    [
+                    array(
                         'status' => SPIVersionInfo::STATUS_DRAFT,
                         'contentInfo' => new SPIContentInfo(),
-                    ]
+                    )
                 ),
-            ],
-            [
+                array(),
+                array('status' => APIVersionInfo::STATUS_DRAFT),
+            ),
+            array(
                 new SPIVersionInfo(
-                    [
+                    array(
                         'status' => SPIVersionInfo::STATUS_PENDING,
                         'contentInfo' => new SPIContentInfo(),
-                    ]
+                    )
                 ),
-            ],
-            [
+                array(),
+                array('status' => APIVersionInfo::STATUS_DRAFT),
+            ),
+            array(
                 new SPIVersionInfo(
-                    [
+                    array(
                         'status' => SPIVersionInfo::STATUS_ARCHIVED,
                         'contentInfo' => new SPIContentInfo(),
-                        'languageCodes' => ['eng-GB', 'nor-NB', 'fre-FR'],
-                    ]
+                        'languageCodes' => array('eng-GB', 'nor-NB', 'fre-FR'),
+                    )
                 ),
-            ],
-            [
+                array(1 => 'eng-GB', 3 => 'nor-NB', 5 => 'fre-FR'),
+                array(
+                    'status' => APIVersionInfo::STATUS_ARCHIVED,
+                    'languageCodes' => array('eng-GB', 'nor-NB', 'fre-FR'),
+                ),
+            ),
+            array(
                 new SPIVersionInfo(
-                    [
+                    array(
                         'status' => SPIVersionInfo::STATUS_PUBLISHED,
                         'contentInfo' => new SPIContentInfo(),
-                    ]
+                    )
                 ),
-            ],
-        ];
+                array(),
+                array('status' => APIVersionInfo::STATUS_PUBLISHED),
+            ),
+        );
     }
 
     public function providerForBuildLocationDomainObjectsOnSearchResult()
@@ -174,7 +149,7 @@ class DomainMapperTest extends BaseServiceMockTest
 
         $spiResult = clone $result;
         $missingLocations = $this->getDomainMapper()->buildLocationDomainObjectsOnSearchResult($result, $languageFilter);
-        $this->assertIsArray($missingLocations);
+        $this->assertInternalType('array', $missingLocations);
 
         if (!$missing) {
             $this->assertEmpty($missingLocations);

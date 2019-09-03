@@ -9,13 +9,17 @@ use eZ\Publish\Core\Persistence\Doctrine\ConnectionHandler;
 
 abstract class TestCase extends BaseTestCase
 {
-    /** @var \Doctrine\DBAL\Connection */
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
     protected $connection;
 
-    /** @var \eZ\Publish\Core\Persistence\Doctrine\ConnectionHandler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Doctrine\ConnectionHandler
+     */
     protected $handler;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $dsn = getenv('DATABASE');
 

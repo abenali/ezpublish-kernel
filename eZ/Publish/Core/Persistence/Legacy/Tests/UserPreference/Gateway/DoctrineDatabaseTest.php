@@ -25,7 +25,7 @@ class DoctrineDatabaseTest extends TestCase
         'value' => 'America/New_York',
     ];
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 

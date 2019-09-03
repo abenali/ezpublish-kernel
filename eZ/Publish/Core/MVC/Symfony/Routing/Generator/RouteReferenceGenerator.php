@@ -19,7 +19,9 @@ class RouteReferenceGenerator implements RouteReferenceGeneratorInterface
 {
     use RequestStackAware;
 
-    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
     private $dispatcher;
 
     public function __construct(EventDispatcherInterface $dispatcher)
@@ -36,16 +38,16 @@ class RouteReferenceGenerator implements RouteReferenceGeneratorInterface
      *
      * @return \eZ\Publish\Core\MVC\Symfony\Routing\RouteReference
      */
-    public function generate($resource = null, array $params = [])
+    public function generate($resource = null, array $params = array())
     {
         $request = $this->getCurrentRequest();
         if ($resource === null) {
             $resource = $request->attributes->get('_route');
-            $params += $request->attributes->get('_route_params', []);
+            $params += $request->attributes->get('_route_params', array());
         }
 
         $event = new RouteReferenceGenerationEvent(new RouteReference($resource, $params), $request);
-        $this->dispatcher->dispatch($event, MVCEvents::ROUTE_REFERENCE_GENERATION);
+        $this->dispatcher->dispatch(MVCEvents::ROUTE_REFERENCE_GENERATION, $event);
 
         return $event->getRouteReference();
     }

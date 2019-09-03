@@ -20,10 +20,12 @@ use PHPUnit\Framework\TestCase;
  */
 class CheckboxTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\CheckboxConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\CheckboxConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->converter = new CheckboxConverter();
@@ -77,9 +79,9 @@ class CheckboxTest extends TestCase
         $defaultValue = new FieldValue();
         $defaultValue->data = $defaultBool;
         $fieldDef = new PersistenceFieldDefinition(
-            [
+            array(
                 'defaultValue' => $defaultValue,
-            ]
+            )
         );
 
         $this->converter->toStorageFieldDefinition($fieldDef, $storageFieldDef);
@@ -99,9 +101,9 @@ class CheckboxTest extends TestCase
         $defaultBool = true;
         $fieldDef = new PersistenceFieldDefinition();
         $storageDef = new StorageFieldDefinition(
-            [
+            array(
                 'dataInt3' => 1,
-            ]
+            )
         );
 
         $this->converter->toFieldDefinition($storageDef, $fieldDef);

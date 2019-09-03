@@ -9,19 +9,25 @@
 namespace eZ\Publish\Core\MVC\Symfony\Controller;
 
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
-use eZ\Publish\Core\MVC\Symfony\View\LoginFormView;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Templating\EngineInterface;
 
 class SecurityController
 {
-    /** @var \Symfony\Component\Templating\EngineInterface */
+    /**
+     * @var \Symfony\Component\Templating\EngineInterface
+     */
     protected $templateEngine;
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     protected $configResolver;
 
-    /** @var \Symfony\Component\Security\Http\Authentication\AuthenticationUtils */
+    /**
+     * @var \Symfony\Component\Security\Http\Authentication\AuthenticationUtils
+     */
     protected $authenticationUtils;
 
     public function __construct(EngineInterface $templateEngine, ConfigResolverInterface $configResolver, AuthenticationUtils $authenticationUtils)
@@ -33,13 +39,15 @@ class SecurityController
 
     public function loginAction()
     {
-        $view = new LoginFormView($this->configResolver->getParameter('security.login_template'));
-        $view->setLastUsername($this->authenticationUtils->getLastUsername());
-        $view->setLastAuthenticationError($this->authenticationUtils->getLastAuthenticationError());
-        $view->addParameters([
-            'layout' => $this->configResolver->getParameter('security.base_layout'),
-        ]);
-
-        return $view;
+        return new Response(
+            $this->templateEngine->render(
+                $this->configResolver->getParameter('security.login_template'),
+                array(
+                    'last_username' => $this->authenticationUtils->getLastUsername(),
+                    'error' => $this->authenticationUtils->getLastAuthenticationError(),
+                    'layout' => $this->configResolver->getParameter('security.base_layout'),
+                )
+            )
+        );
     }
 }

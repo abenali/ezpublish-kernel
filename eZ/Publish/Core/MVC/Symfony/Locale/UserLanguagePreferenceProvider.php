@@ -10,74 +10,61 @@ namespace eZ\Publish\Core\MVC\Symfony\Locale;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use eZ\Publish\API\Repository\UserPreferenceService;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 
 class UserLanguagePreferenceProvider implements UserLanguagePreferenceProviderInterface
 {
-    /** @var \Symfony\Component\HttpFoundation\RequestStack */
+    /**
+     * @var \Symfony\Component\HttpFoundation\RequestStack
+     */
     private $requestStack;
 
-    /** @var \eZ\Publish\API\Repository\UserPreferenceService */
-    private $userPreferenceService;
-
-    /** @var array */
+    /**
+     * @var array
+     */
     private $languageCodesMap;
-
-    /** @var string */
-    private $localeFallback;
 
     /**
      * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
-     * @param \eZ\Publish\API\Repository\UserPreferenceService $userPreferenceService
      * @param array $languageCodesMap
-     * @param string $localeFallback
      */
-    public function __construct(
-        RequestStack $requestStack,
-        UserPreferenceService $userPreferenceService,
-        array $languageCodesMap,
-        string $localeFallback
-    ) {
+    public function __construct(RequestStack $requestStack, array $languageCodesMap)
+    {
         $this->requestStack = $requestStack;
-        $this->userPreferenceService = $userPreferenceService;
         $this->languageCodesMap = $languageCodesMap;
-        $this->localeFallback = $localeFallback;
     }
 
     public function getPreferredLocales(Request $request = null): array
     {
-        $languages = [$this->localeFallback];
-
         $request = $request ?? $this->requestStack->getCurrentRequest();
-        if (null !== $request) {
-            $browserLanguages = $request->getLanguages();
-            if ([] !== $browserLanguages) {
-                $languages = $browserLanguages;
-            }
-        }
+        $preferredLocales = $request->headers->get('Accept-Language') ?? '';
+        $preferredLocales = array_reduce(
+            explode(',', $preferredLocales),
+            function (array $result, string $languageWithQuality) {
+                [$language, $quality] = array_merge(explode(';q=', $languageWithQuality), [1]);
+                $result[$language] = (float) $quality;
 
-        try {
-            $preferredLanguage = $this->userPreferenceService->getUserPreference('language')->value;
-            array_unshift($languages, $preferredLanguage);
-        } catch (NotFoundException $e) {
-        }
+                return $result;
+            },
+            []
+        );
+        arsort($preferredLocales);
 
-        return array_unique($languages);
+        return array_keys($preferredLocales);
     }
 
     public function getPreferredLanguages(): array
     {
-        $languageCodes = [[]];
+        $languageCodes = [];
         foreach ($this->getPreferredLocales() as $locale) {
             $locale = strtolower($locale);
-            if (!isset($this->languageCodesMap[$locale])) {
-                continue;
+            if (isset($this->languageCodesMap[$locale])) {
+                $languageCodes = array_merge($languageCodes, $this->languageCodesMap[$locale]);
+            } elseif (preg_match('/^([a-z]{3})-([a-z]{2})$/', $locale, $matches)) {
+                // if the given locale is already in the eZ format
+                $languageCodes[] = strtolower($matches[1]) . '-' . strtoupper($matches[2]);
             }
-
-            $languageCodes[] = $this->languageCodesMap[$locale];
         }
 
-        return array_unique(array_merge(...$languageCodes));
+        return array_unique($languageCodes);
     }
 }

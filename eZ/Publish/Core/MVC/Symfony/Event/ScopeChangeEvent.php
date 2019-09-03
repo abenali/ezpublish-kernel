@@ -9,14 +9,16 @@
 namespace eZ\Publish\Core\MVC\Symfony\Event;
 
 use eZ\Publish\Core\MVC\Symfony\SiteAccess;
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * This event is sent when configuration scope is changed (e.g. for content preview in a given siteaccess).
  */
 class ScopeChangeEvent extends Event
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\SiteAccess */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\SiteAccess
+     */
     private $siteAccess;
 
     public function __construct(SiteAccess $siteAccess)

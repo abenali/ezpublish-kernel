@@ -5,8 +5,10 @@ cd ../../..;
 echo '# Extract Kernel : EzPublishCoreBundle';
 ./bin/console translation:extract en -v \
   --dir=./vendor/ezsystems/ezpublish-kernel/eZ \
+  --exclude-dir=Bundle/PlatformBehatBundle \
   --exclude-dir=Tests \
   --exclude-dir=Features \
+  --exclude-dir=Publish/Core/REST/Client \
   --exclude-dir=tests \
   --output-dir=./vendor/ezsystems/ezpublish-kernel/eZ/Bundle/EzPublishCoreBundle/Resources/translations \
   --enable-extractor=ez_fieldtypes \

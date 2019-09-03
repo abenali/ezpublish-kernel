@@ -24,15 +24,21 @@ use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
  */
 class DefaultRouter extends Router implements RequestMatcherInterface, SiteAccessAware
 {
-    /** @var SiteAccess */
+    /**
+     * @var SiteAccess
+     */
     protected $siteAccess;
 
-    protected $nonSiteAccessAwareRoutes = [];
+    protected $nonSiteAccessAwareRoutes = array();
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     protected $configResolver;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessRouterInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessRouterInterface
+     */
     protected $siteAccessRouter;
 
     public function setConfigResolver(ConfigResolverInterface $configResolver)
@@ -69,7 +75,7 @@ class DefaultRouter extends Router implements RequestMatcherInterface, SiteAcces
         return $this->match($request->attributes->get('semanticPathinfo', $request->getPathInfo()));
     }
 
-    public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
+    public function generate($name, $parameters = array(), $referenceType = self::ABSOLUTE_PATH)
     {
         $siteAccess = $this->siteAccess;
         $originalContext = $context = $this->getContext();

@@ -7,8 +7,7 @@
  */
 namespace eZ\Publish\Core\Repository\Tests\Helper;
 
-use eZ\Publish\Core\Base\Exceptions\NotFound\FieldTypeNotFoundException;
-use eZ\Publish\Core\FieldType\FieldTypeRegistry;
+use eZ\Publish\Core\Repository\Helper\FieldTypeRegistry;
 use eZ\Publish\SPI\FieldType\FieldType;
 use PHPUnit\Framework\TestCase;
 
@@ -17,15 +16,17 @@ use PHPUnit\Framework\TestCase;
  */
 class FieldTypeRegistryTest extends TestCase
 {
-    private const FIELD_TYPE_ID = 'one';
-
     public function testConstructor()
     {
-        $fieldType = $this->getFieldTypeMock();
-        $fieldTypes = [self::FIELD_TYPE_ID => $fieldType];
+        $fieldTypes = array('field types');
 
         $registry = new FieldTypeRegistry($fieldTypes);
-        $this->assertTrue($registry->hasFieldType(self::FIELD_TYPE_ID));
+
+        $this->assertAttributeSame(
+            $fieldTypes,
+            'fieldTypes',
+            $registry
+        );
     }
 
     protected function getFieldTypeMock()
@@ -33,15 +34,22 @@ class FieldTypeRegistryTest extends TestCase
         return $this->createMock(FieldType::class);
     }
 
+    protected function getClosure($returnValue)
+    {
+        return function () use ($returnValue) {
+            return $returnValue;
+        };
+    }
+
     public function testGetFieldType()
     {
-        $fieldTypes = [
-            self::FIELD_TYPE_ID => $this->getFieldTypeMock(),
-        ];
+        $fieldTypes = array(
+            'one' => $this->getFieldTypeMock(),
+        );
 
         $registry = new FieldTypeRegistry($fieldTypes);
 
-        $fieldType = $registry->getFieldType(self::FIELD_TYPE_ID);
+        $fieldType = $registry->getFieldType('one');
 
         $this->assertInstanceOf(
             FieldType::class,
@@ -49,23 +57,57 @@ class FieldTypeRegistryTest extends TestCase
         );
     }
 
+    public function testGetClosureFieldType()
+    {
+        $fieldTypes = array(
+            'one' => $this->getClosure($this->getFieldTypeMock()),
+        );
+
+        $registry = new FieldTypeRegistry($fieldTypes);
+
+        $fieldType = $registry->getFieldType('one');
+
+        $this->assertInstanceOf(
+            FieldType::class,
+            $fieldType
+        );
+    }
+
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFound\FieldTypeNotFoundException
+     */
     public function testGetFieldTypeThrowsNotFoundException()
     {
-        $this->expectException(FieldTypeNotFoundException::class);
-
-        $registry = new FieldTypeRegistry([]);
+        $registry = new FieldTypeRegistry(array());
 
         $registry->getFieldType('none');
     }
 
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage $fieldTypes[none] must be instance of SPI\FieldType\FieldType or callable
+     */
     public function testGetFieldTypeThrowsRuntimeExceptionIncorrectType()
     {
-        $this->expectException(\TypeError::class);
-
         $registry = new FieldTypeRegistry(
-            [
+            array(
                 'none' => "I'm not a field type",
-            ]
+            )
+        );
+
+        $registry->getFieldType('none');
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage $fieldTypes[none] must be instance of SPI\FieldType\FieldType or callable
+     */
+    public function testGetClosureFieldTypeThrowsRuntimeExceptionIncorrectType()
+    {
+        $registry = new FieldTypeRegistry(
+            array(
+                'none' => $this->getClosure("I'm not a field type"),
+            )
         );
 
         $registry->getFieldType('none');
@@ -73,21 +115,21 @@ class FieldTypeRegistryTest extends TestCase
 
     public function testGetFieldTypes()
     {
-        $fieldTypes = [
-            self::FIELD_TYPE_ID => $this->getFieldTypeMock(),
-            'two' => $this->getFieldTypeMock(),
-        ];
+        $fieldTypes = array(
+            'one' => $this->getFieldTypeMock(),
+            'two' => $this->getClosure($this->getFieldTypeMock()),
+        );
 
         $registry = new FieldTypeRegistry($fieldTypes);
 
         $fieldTypes = $registry->getFieldTypes();
 
-        $this->assertIsArray($fieldTypes);
+        $this->assertInternalType('array', $fieldTypes);
         $this->assertCount(2, $fieldTypes);
-        $this->assertArrayHasKey(self::FIELD_TYPE_ID, $fieldTypes);
+        $this->assertArrayHasKey('one', $fieldTypes);
         $this->assertInstanceOf(
             FieldType::class,
-            $fieldTypes[self::FIELD_TYPE_ID]
+            $fieldTypes['one']
         );
         $this->assertArrayHasKey('two', $fieldTypes);
         $this->assertInstanceOf(

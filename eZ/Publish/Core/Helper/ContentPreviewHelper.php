@@ -19,22 +19,34 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ContentPreviewHelper implements SiteAccessAware
 {
-    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
     protected $eventDispatcher;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessRouterInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessRouterInterface
+     */
     protected $siteAccessRouter;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\SiteAccess */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\SiteAccess
+     */
     protected $originalSiteAccess;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $previewActive = false;
 
-    /** @var \eZ\Publish\API\Repository\Values\Content\Content */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\Content
+     */
     private $previewedContent;
 
-    /** @var \eZ\Publish\API\Repository\Values\Content\Location */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\Location
+     */
     private $previewedLocation;
 
     public function __construct(EventDispatcherInterface $eventDispatcher, SiteAccessRouterInterface $siteAccessRouter)
@@ -68,7 +80,7 @@ class ContentPreviewHelper implements SiteAccessAware
     public function changeConfigScope($siteAccessName)
     {
         $event = new ScopeChangeEvent($this->siteAccessRouter->matchByName($siteAccessName));
-        $this->eventDispatcher->dispatch($event, MVCEvents::CONFIG_SCOPE_CHANGE);
+        $this->eventDispatcher->dispatch(MVCEvents::CONFIG_SCOPE_CHANGE, $event);
 
         return $event->getSiteAccess();
     }
@@ -81,7 +93,7 @@ class ContentPreviewHelper implements SiteAccessAware
     public function restoreConfigScope()
     {
         $event = new ScopeChangeEvent($this->originalSiteAccess);
-        $this->eventDispatcher->dispatch($event, MVCEvents::CONFIG_SCOPE_RESTORE);
+        $this->eventDispatcher->dispatch(MVCEvents::CONFIG_SCOPE_RESTORE, $event);
 
         return $event->getSiteAccess();
     }

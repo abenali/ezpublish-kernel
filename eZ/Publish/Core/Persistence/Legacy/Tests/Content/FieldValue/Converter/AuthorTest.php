@@ -27,24 +27,28 @@ use DOMDocument;
  */
 class AuthorTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\AuthorConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\AuthorConverter
+     */
     protected $converter;
 
-    /** @var \eZ\Publish\Core\FieldType\Author\Author[] */
+    /**
+     * @var \eZ\Publish\Core\FieldType\Author\Author[]
+     */
     private $authors;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->converter = new AuthorConverter();
-        $this->authors = [
-            ['id' => 21, 'name' => 'Boba Fett', 'email' => 'boba.fett@bountyhunters.com'],
-            ['id' => 42, 'name' => 'Darth Vader', 'email' => 'darth.vader@evilempire.biz'],
-            ['id' => 63, 'name' => 'Luke Skywalker', 'email' => 'luke@imtheone.net'],
-        ];
+        $this->authors = array(
+            array('id' => 21, 'name' => 'Boba Fett', 'email' => 'boba.fett@bountyhunters.com'),
+            array('id' => 42, 'name' => 'Darth Vader', 'email' => 'darth.vader@evilempire.biz'),
+            array('id' => 63, 'name' => 'Luke Skywalker', 'email' => 'luke@imtheone.net'),
+        );
     }
 
-    protected function tearDown(): void
+    protected function tearDown()
     {
         unset($this->authors);
         parent::tearDown();
@@ -105,7 +109,7 @@ EOT;
         $fieldValue = new FieldValue();
 
         $this->converter->toFieldValue($storageFieldValue, $fieldValue);
-        self::assertIsArray($fieldValue->data);
+        self::assertInternalType('array', $fieldValue->data);
 
         $authorsXml = $doc->getElementsByTagName('author');
         self::assertSame($authorsXml->length, count($fieldValue->data));
@@ -132,14 +136,14 @@ EOT;
         $storageFieldDef = new StorageFieldDefinition();
         $fieldTypeConstraints = new FieldTypeConstraints();
         $fieldTypeConstraints->fieldSettings = new FieldSettings(
-            [
+            array(
                 'defaultAuthor' => AuthorType::DEFAULT_CURRENT_USER,
-            ]
+            )
         );
         $fieldDef = new SPIFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => $fieldTypeConstraints,
-            ]
+            )
         );
 
         $this->converter->toStorageFieldDefinition($fieldDef, $storageFieldDef);
@@ -157,14 +161,14 @@ EOT;
         $storageFieldDef = new StorageFieldDefinition();
         $fieldTypeConstraints = new FieldTypeConstraints();
         $fieldTypeConstraints->fieldSettings = new FieldSettings(
-            [
+            array(
                 'defaultAuthor' => AuthorType::DEFAULT_VALUE_EMPTY,
-            ]
+            )
         );
         $fieldDef = new SPIFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => $fieldTypeConstraints,
-            ]
+            )
         );
 
         $this->converter->toStorageFieldDefinition($fieldDef, $storageFieldDef);

@@ -82,24 +82,24 @@ class IntegerIntegrationTest extends BaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        return [
+        return array(
             // The ezint field type does not have any special field definition
             // properties
-            ['fieldType', 'ezinteger'],
-            [
+            array('fieldType', 'ezinteger'),
+            array(
                 'fieldTypeConstraints',
                 new Content\FieldTypeConstraints(
-                    [
-                        'validators' => [
-                            'IntegerValueValidator' => [
+                    array(
+                        'validators' => array(
+                            'IntegerValueValidator' => array(
                                 'minIntegerValue' => false,
                                 'maxIntegerValue' => false,
-                            ],
-                        ],
-                    ]
+                            ),
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -110,11 +110,11 @@ class IntegerIntegrationTest extends BaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => 42,
                 'externalData' => null,
                 'sortKey' => 42,
-            ]
+            )
         );
     }
 
@@ -128,11 +128,11 @@ class IntegerIntegrationTest extends BaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => 23,
                 'externalData' => null,
                 'sortKey' => 23,
-            ]
+            )
         );
     }
 }

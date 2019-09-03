@@ -20,18 +20,21 @@ use PHPUnit\Framework\TestCase;
 
 class SudoMainLocationLoaderTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Helper\ContentInfoLocationLoader\SudoMainLocationLoader */
+    /**
+     * @var \eZ\Publish\Core\Helper\ContentInfoLocationLoader\SudoMainLocationLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->loader = new SudoMainLocationLoader($this->getRepositoryMock());
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     */
     public function testLoadLocationNoMainLocation()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $contentInfo = new ContentInfo();
 
         $this->getLocationServiceMock()
@@ -65,10 +68,11 @@ class SudoMainLocationLoaderTest extends TestCase
         $this->assertSame($location, $this->loader->loadLocation($contentInfo));
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     */
     public function testLoadLocationError()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $contentInfo = new ContentInfo(['mainLocationId' => 42]);
         $location = new Location();
 
@@ -109,7 +113,7 @@ class SudoMainLocationLoaderTest extends TestCase
                 ->setMethods(
                     array_diff(
                         get_class_methods($repositoryClass),
-                        ['sudo']
+                        array('sudo')
                     )
                 )
                 ->getMock();

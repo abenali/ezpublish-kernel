@@ -45,7 +45,7 @@ class TimeTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -55,16 +55,16 @@ class TimeTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [
-            'useSeconds' => [
+        return array(
+            'useSeconds' => array(
                 'type' => 'bool',
                 'default' => false,
-            ],
-            'defaultType' => [
+            ),
+            'defaultType' => array(
                 'type' => 'choice',
                 'default' => Time::DEFAULT_EMPTY,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -100,12 +100,12 @@ class TimeTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
-                [],
+        return array(
+            array(
+                array(),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -217,20 +217,20 @@ class TimeTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new TimeValue(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new TimeValue(0),
                 0,
-            ],
-            [
+            ),
+            array(
                 new TimeValue(200),
                 200,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -270,20 +270,20 @@ class TimeTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new TimeValue(),
-            ],
-            [
+            ),
+            array(
                 0,
                 new TimeValue(0),
-            ],
-            [
+            ),
+            array(
                 200,
                 new TimeValue(200),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -310,23 +310,23 @@ class TimeTest extends FieldTypeTest
      */
     public function provideValidFieldSettings()
     {
-        return [
-            [
-                [],
-            ],
-            [
-                [
+        return array(
+            array(
+                array(),
+            ),
+            array(
+                array(
                     'useSeconds' => true,
                     'defaultType' => Time::DEFAULT_EMPTY,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     'useSeconds' => false,
                     'defaultType' => Time::DEFAULT_CURRENT_TIME,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -354,20 +354,20 @@ class TimeTest extends FieldTypeTest
      */
     public function provideInValidFieldSettings()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     // useSeconds must be bool
                     'useSeconds' => 23,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     // defaultType must be constant
                     'defaultType' => 42,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -375,11 +375,11 @@ class TimeTest extends FieldTypeTest
         return 'eztime';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new TimeValue(200), [], 'en_GB', '12:03:20 am'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new TimeValue(200), '12:03:20 am'),
+        );
     }
 }

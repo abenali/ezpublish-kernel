@@ -107,16 +107,16 @@ class LanguageServiceTest extends BaseTest
     public function testCreateLanguageSetsExpectedProperties($language)
     {
         $this->assertEquals(
-            [
+            array(
                 true,
                 'English (New Zealand)',
                 'eng-NZ',
-            ],
-            [
+            ),
+            array(
                 $language->enabled,
                 $language->name,
                 $language->languageCode,
-            ]
+            )
         );
     }
 
@@ -124,13 +124,12 @@ class LanguageServiceTest extends BaseTest
      * Test for the createLanguage() method.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::createLanguage
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument 'languageCreateStruct' is invalid: language with specified language code already exists
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testCreateLanguage
      */
     public function testCreateLanguageThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'languageCreateStruct\' is invalid: language with specified language code already exists');
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -153,13 +152,13 @@ class LanguageServiceTest extends BaseTest
      * Test for the loadLanguageById() method.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguageById
-     * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguageListById
-     * @depends testCreateLanguage
+     * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testCreateLanguage
      */
     public function testLoadLanguageById()
     {
         $repository = $this->getRepository();
 
+        /* BEGIN: Use Case */
         $languageService = $repository->getContentLanguageService();
 
         $languageCreate = $languageService->newLanguageCreateStruct();
@@ -170,25 +169,20 @@ class LanguageServiceTest extends BaseTest
         $languageId = $languageService->createLanguage($languageCreate)->id;
 
         $language = $languageService->loadLanguageById($languageId);
+        /* END: Use Case */
 
         $this->assertInstanceOf(
             Language::class,
             $language
         );
-
-        $languages = $languageService->loadLanguageListById([$languageId]);
-
-        $this->assertIsIterable($languages);
-        $this->assertCount(1, $languages);
-        $this->assertInstanceOf(Language::class, $languages[$languageId]);
     }
 
     /**
      * Test for the loadLanguageById() method.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguageById
-     * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguageListById
-     * @depends testLoadLanguageById
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testLoadLanguageById
      */
     public function testLoadLanguageByIdThrowsNotFoundException()
     {
@@ -198,13 +192,7 @@ class LanguageServiceTest extends BaseTest
         /* BEGIN: Use Case */
         $languageService = $repository->getContentLanguageService();
 
-        $languages = $languageService->loadLanguageListById([$nonExistentLanguageId]);
-
-        $this->assertIsIterable($languages);
-        $this->assertCount(0, $languages);
-
-        $this->expectException(NotFoundException::class);
-
+        // This call should fail with a "NotFoundException"
         $languageService->loadLanguageById($nonExistentLanguageId);
         /* END: Use Case */
     }
@@ -260,17 +248,16 @@ class LanguageServiceTest extends BaseTest
      * Test service method for updating language name throwing InvalidArgumentException.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::updateLanguageName
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument 'newName' is invalid: '1' is wrong value
      */
     public function testUpdateLanguageNameThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'newName\' is invalid: \'\' is wrong value');
-
         $repository = $this->getRepository();
         $languageService = $repository->getContentLanguageService();
 
         $language = $languageService->loadLanguage('eng-GB');
-        $languageService->updateLanguageName($language, '');
+        $languageService->updateLanguageName($language, 1);
     }
 
     /**
@@ -335,8 +322,7 @@ class LanguageServiceTest extends BaseTest
      * Test for the loadLanguage() method.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguage
-     * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguageListByCode
-     * @depends testCreateLanguage
+     * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testCreateLanguage
      */
     public function testLoadLanguage()
     {
@@ -365,56 +351,36 @@ class LanguageServiceTest extends BaseTest
             ],
             $language
         );
-
-        $languages = $languageService->loadLanguageListByCode(['eng-NZ']);
-
-        $this->assertIsIterable($languages);
-        $this->assertCount(1, $languages);
-
-        $this->assertPropertiesCorrect(
-            [
-                'id' => $languageId,
-                'languageCode' => 'eng-NZ',
-                'name' => 'English',
-                'enabled' => true,
-            ],
-            $languages['eng-NZ']
-        );
     }
 
     /**
      * Test for the loadLanguage() method.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguage
-     * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguageListByCode
-     * @depends testLoadLanguage
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testLoadLanguage
      */
     public function testLoadLanguageThrowsNotFoundException()
     {
         $repository = $this->getRepository();
 
+        /* BEGIN: Use Case */
         $languageService = $repository->getContentLanguageService();
 
-        $languages = $languageService->loadLanguageListByCode(['fre-FR']);
-
-        $this->assertIsIterable($languages);
-        $this->assertCount(0, $languages);
-
-        $this->expectException(NotFoundException::class);
-
+        // This call should fail with an exception
         $languageService->loadLanguage('fre-FR');
+        /* END: Use Case */
     }
 
     /**
      * Test service method for loading language throwing InvalidArgumentException.
      *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument 'languageCode' is invalid: language code has an invalid value
      * @covers \eZ\Publish\API\Repository\LanguageService::loadLanguage
      */
     public function testLoadLanguageThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'languageCode\' is invalid: language code has an invalid value');
-
         $repository = $this->getRepository();
 
         $repository->getContentLanguageService()->loadLanguage(PHP_INT_MAX);
@@ -449,7 +415,7 @@ class LanguageServiceTest extends BaseTest
         $languageService->createLanguage($languageCreateFrench);
 
         $languages = $languageService->loadLanguages();
-        self::assertIsArray($languages);
+        self::assertInternalType('array', $languages);
         foreach ($languages as $language) {
             self::assertInstanceOf(Language::class, $language);
             $singleLanguage = $languageService->loadLanguage($language->languageCode);
@@ -462,7 +428,7 @@ class LanguageServiceTest extends BaseTest
         /* END: Use Case */
 
         // eng-US, eng-GB, ger-DE + 2 newly created
-        $this->assertCount(5, $languages);
+        $this->assertEquals(5, count($languages));
     }
 
     /**
@@ -477,7 +443,7 @@ class LanguageServiceTest extends BaseTest
 
         $languageService = $repository->getContentLanguageService();
 
-        $this->assertSame([], $languageService->loadLanguages());
+        $this->assertSame(array(), $languageService->loadLanguages());
     }
 
     /**
@@ -485,12 +451,11 @@ class LanguageServiceTest extends BaseTest
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::deleteLanguage
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testLoadLanguages
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFoundException
+     * @expectedExceptionMessage Could not find 'Language' with identifier 'eng-NZ'
      */
     public function testDeleteLanguage()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\NotFoundException::class);
-        $this->expectExceptionMessage('Could not find \'Language\' with identifier \'eng-NZ\'');
-
         $repository = $this->getRepository();
         $languageService = $repository->getContentLanguageService();
 
@@ -526,14 +491,13 @@ class LanguageServiceTest extends BaseTest
      * we cannot declare them here.
      *
      * @covers \eZ\Publish\API\Repository\LanguageService::deleteLanguage
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument 'language' is invalid: Deleting language logic error, some content still references that language and therefore it can't be deleted
      * @depends eZ\Publish\API\Repository\Tests\LanguageServiceTest::testDeleteLanguage
      * @depend(s) eZ\Publish\API\Repository\Tests\ContentServiceTest::testPublishVersion
      */
     public function testDeleteLanguageThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'language\' is invalid: Deleting language logic error, some content still references that language and therefore it can\'t be deleted');
-
         $repository = $this->getRepository();
 
         $editorsGroupId = $this->generateId('group', 13);

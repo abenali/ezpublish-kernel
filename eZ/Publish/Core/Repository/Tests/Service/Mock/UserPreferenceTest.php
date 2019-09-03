@@ -24,10 +24,12 @@ class UserPreferenceTest extends BaseServiceMockTest
     const USER_PREFERENCE_NAME = 'setting';
     const USER_PREFERENCE_VALUE = 'value';
 
-    /** @var \eZ\Publish\SPI\Persistence\UserPreference\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\UserPreference\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $userSPIPreferenceHandler;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->userSPIPreferenceHandler = $this->getPersistenceMockHandler('UserPreference\\Handler');
@@ -71,11 +73,10 @@ class UserPreferenceTest extends BaseServiceMockTest
 
     /**
      * @covers \eZ\Publish\Core\Repository\UserPreferenceService::setUserPreference
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testSetUserPreferenceThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $apiUserPreferenceSetStruct = new APIUserPreferenceSetStruct([
             'value' => 'value',
         ]);
@@ -89,11 +90,10 @@ class UserPreferenceTest extends BaseServiceMockTest
 
     /**
      * @covers \eZ\Publish\Core\Repository\UserPreferenceService::setUserPreference
+     * @expectedException \Exception
      */
     public function testSetUserPreferenceWithRollback()
     {
-        $this->expectException(\Exception::class);
-
         $apiUserPreferenceSetStruct = new APIUserPreferenceSetStruct([
             'name' => 'setting',
             'value' => 'value',

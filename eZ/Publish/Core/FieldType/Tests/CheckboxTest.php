@@ -44,7 +44,7 @@ class CheckboxTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -54,7 +54,7 @@ class CheckboxTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -92,16 +92,16 @@ class CheckboxTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 23,
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new CheckboxValue(42),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -135,16 +135,16 @@ class CheckboxTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 false,
                 new CheckboxValue(false),
-            ],
-            [
+            ),
+            array(
                 true,
                 new CheckboxValue(true),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -184,16 +184,16 @@ class CheckboxTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new CheckboxValue(true),
                 true,
-            ],
-            [
+            ),
+            array(
                 new CheckboxValue(false),
                 false,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -233,16 +233,16 @@ class CheckboxTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 true,
                 new CheckboxValue(true),
-            ],
-            [
+            ),
+            array(
                 false,
                 new CheckboxValue(false),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -253,7 +253,7 @@ class CheckboxTest extends FieldTypeTest
         $ft = $this->createFieldTypeUnderTest();
         $fieldValue = $ft->toPersistenceValue(new CheckboxValue(true));
 
-        self::assertTrue($fieldValue->data);
+        self::assertSame(true, $fieldValue->data);
         self::assertSame(1, $fieldValue->sortKey);
     }
 
@@ -273,7 +273,7 @@ class CheckboxTest extends FieldTypeTest
     public function testBuildFieldValueWithoutParam()
     {
         $value = new CheckboxValue();
-        self::assertFalse($value->bool);
+        self::assertSame(false, $value->bool);
     }
 
     /**
@@ -292,11 +292,17 @@ class CheckboxTest extends FieldTypeTest
         return 'ezboolean';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [new CheckboxValue(true), [], 'en_GB', '1'],
-            [new CheckboxValue(false), [], 'en_GB', '0'],
-        ];
+        return array(
+            array(
+                new CheckboxValue(true),
+                '1',
+            ),
+            array(
+                new CheckboxValue(false),
+                '0',
+            ),
+        );
     }
 }

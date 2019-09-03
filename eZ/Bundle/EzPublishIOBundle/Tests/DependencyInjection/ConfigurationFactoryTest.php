@@ -24,7 +24,7 @@ abstract class ConfigurationFactoryTest extends AbstractContainerBuilderTestCase
     /** @var \eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory */
     protected $factory;
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
@@ -57,7 +57,7 @@ abstract class ConfigurationFactoryTest extends AbstractContainerBuilderTestCase
     {
         $handlerConfiguration =
             $this->provideHandlerConfiguration($this->container) +
-            ['name' => 'my_test_handler', 'type' => 'test_handler'];
+            array('name' => 'my_test_handler', 'type' => 'test_handler');
 
         $handlerServiceId = $this->registerHandler($handlerConfiguration['name']);
 

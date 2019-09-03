@@ -33,8 +33,8 @@ class NotificationServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(NotificationList::class, $notificationList);
-        $this->assertIsArray($notificationList->items);
-        $this->assertIsInt($notificationList->totalCount);
+        $this->assertInternalType('array', $notificationList->items);
+        $this->assertInternalType('int', $notificationList->totalCount);
         $this->assertEquals(5, $notificationList->totalCount);
     }
 
@@ -158,11 +158,10 @@ class NotificationServiceTest extends BaseTest
     /**
      * @covers \eZ\Publish\API\Repository\NotificationService::createNotification()
      * @depends testCreateNotification
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateNotificationThrowsInvalidArgumentExceptionOnMissingOwner()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -180,11 +179,10 @@ class NotificationServiceTest extends BaseTest
     /**
      * @covers \eZ\Publish\API\Repository\NotificationService::createNotification()
      * @depends testCreateNotification
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateNotificationThrowsInvalidArgumentExceptionOnMissingType()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */

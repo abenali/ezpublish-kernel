@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * File containing the ContentHandler implementation.
+ *
  * @copyright Copyright (C) eZ Systems AS. All rights reserved.
  * @license For full copyright and license information view LICENSE file distributed with this source code.
  */
@@ -16,13 +18,19 @@ use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
  */
 abstract class AbstractHandler
 {
-    /** @var \Symfony\Component\Cache\Adapter\TagAwareAdapterInterface */
+    /**
+     * @var \Symfony\Component\Cache\Adapter\TagAwareAdapterInterface
+     */
     protected $cache;
 
-    /** @var \eZ\Publish\SPI\Persistence\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Handler
+     */
     protected $persistenceHandler;
 
-    /** @var \eZ\Publish\Core\Persistence\Cache\PersistenceLogger */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Cache\PersistenceLogger
+     */
     protected $logger;
 
     /**
@@ -73,19 +81,20 @@ abstract class AbstractHandler
 
         // Generate unique cache keys
         $cacheKeys = [];
-        $cacheKeysToIdMap = [];
-        foreach (\array_unique($ids) as $id) {
-            $key = $keyPrefix . $id . ($keySuffixes[$id] ?? '');
-            $cacheKeys[] = $key;
-            $cacheKeysToIdMap[$key] = $id;
+        foreach (array_unique($ids) as $id) {
+            $cacheKeys[] = $keyPrefix . $id . ($keySuffixes[$id] ?? '');
         }
 
         // Load cache items by cache keys (will contain hits and misses)
-        /** @var \Symfony\Component\Cache\CacheItem[] $list */
         $list = [];
         $cacheMisses = [];
+        $keyPrefixLength = strlen($keyPrefix);
         foreach ($this->cache->getItems($cacheKeys) as $key => $cacheItem) {
-            $id = $cacheKeysToIdMap[$key];
+            $id = substr($key, $keyPrefixLength);
+            if (!empty($keySuffixes)) {
+                $id = explode('-', $id, 2)[0];
+            }
+
             if ($cacheItem->isHit()) {
                 $list[$id] = $cacheItem->get();
             } else {
@@ -115,14 +124,5 @@ abstract class AbstractHandler
         }
 
         return $list;
-    }
-
-    final protected function escapeForCacheKey(string $identifier)
-    {
-        return \str_replace(
-            ['_', '/', ':', '(', ')', '@', '\\', '{', '}'],
-            ['__', '_S', '_C', '_BO', '_BC', '_A', '_BS', '_CBO', '_CBC'],
-            $identifier
-        );
     }
 }

@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\Persistence\Cache\Tests;
 
-use eZ\Publish\API\Repository\Values\Content\Trash\TrashItemDeleteResult;
 use eZ\Publish\Core\Persistence\Cache\ContentHandler;
 use eZ\Publish\Core\Persistence\Cache\LocationHandler;
 use eZ\Publish\SPI\Persistence\Content\Location;
@@ -161,18 +160,11 @@ class TrashHandlerTest extends AbstractCacheHandlerTest
 
         $innerHandler = $this->createMock($this->getHandlerClassName());
 
-        $trashed = new Trashed(['id' => $trashedId, 'contentId' => $contentId]);
-        $innerHandler
-            ->expects($this->once())
-            ->method('deleteTrashItem')
-            ->with($trashedId)
-            ->will($this->returnValue(new TrashItemDeleteResult(['trashItemId' => $trashedId, 'contentId' => $contentId])));
-
         $innerHandler
             ->expects($this->once())
             ->method('loadTrashItem')
             ->with($trashedId)
-            ->will($this->returnValue($trashed));
+            ->will($this->returnValue(new Trashed(['id' => $trashedId, 'contentId' => $contentId])));
 
         $this->persistenceHandlerMock
             ->method($handlerMethodName)
@@ -191,10 +183,7 @@ class TrashHandlerTest extends AbstractCacheHandlerTest
             ->will($this->returnValue($contentHandlerMock));
 
         $tags = [
-            'content-' . $contentId,
             'content-fields-' . $relationSourceContentId,
-            'location-' . $trashedId,
-            'location-path-' . $trashedId,
         ];
 
         $this->cacheMock
@@ -240,9 +229,6 @@ class TrashHandlerTest extends AbstractCacheHandlerTest
 
         $tags = [
             'content-fields-' . $relationSourceContentId,
-            'content-' . $contentId,
-            'location-' . $trashedId,
-            'location-path-' . $trashedId,
         ];
 
         $this->cacheMock

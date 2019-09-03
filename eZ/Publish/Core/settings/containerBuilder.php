@@ -8,8 +8,6 @@
  * @copyright Copyright (C) eZ Systems AS. All rights reserved.
  * @license For full copyright and license information view LICENSE file distributed with this source code.
  */
-use eZ\Publish\API\Repository\Tests\Container\Compiler\SetAllServicesPublicPass;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
@@ -37,19 +35,19 @@ $loader->load('indexable_fieldtypes.yml');
 $loader->load('io.yml');
 $loader->load('repository.yml');
 $loader->load('repository/inner.yml');
-$loader->load('repository/event.yml');
+$loader->load('repository/signalslot.yml');
 $loader->load('repository/siteaccessaware.yml');
-$loader->load('repository/autowire.yml');
 $loader->load('roles.yml');
 $loader->load('storage_engines/common.yml');
 $loader->load('storage_engines/cache.yml');
 $loader->load('storage_engines/legacy.yml');
 $loader->load('storage_engines/shortcuts.yml');
+$loader->load('search_engines/common.yml');
 $loader->load('settings.yml');
 $loader->load('utils.yml');
 $loader->load('tests/common.yml');
 $loader->load('policies.yml');
-$loader->load('events.yml');
+$loader->load('richtext.yml');
 
 // Cache settings (takes same env variables as ezplatform does, only supports "singleredis" setup)
 if (getenv('CUSTOM_CACHE_POOL') === 'singleredis') {
@@ -72,8 +70,8 @@ if (getenv('CUSTOM_CACHE_POOL') === 'singleredis') {
 
 $containerBuilder->setParameter('ezpublish.kernel.root_dir', $installDir);
 
-$containerBuilder->addCompilerPass(new Compiler\FieldTypeRegistryPass(), PassConfig::TYPE_OPTIMIZE);
-$containerBuilder->addCompilerPass(new Compiler\Persistence\FieldTypeRegistryPass(), PassConfig::TYPE_OPTIMIZE);
+$containerBuilder->addCompilerPass(new Compiler\FieldTypeCollectionPass());
+$containerBuilder->addCompilerPass(new Compiler\FieldTypeNameableCollectionPass());
 $containerBuilder->addCompilerPass(new Compiler\RegisterLimitationTypePass());
 
 $containerBuilder->addCompilerPass(new Compiler\Storage\ExternalStorageRegistryPass());
@@ -83,11 +81,5 @@ $containerBuilder->addCompilerPass(new Compiler\Storage\Legacy\RoleLimitationCon
 $containerBuilder->addCompilerPass(new Compiler\Search\Legacy\CriteriaConverterPass());
 $containerBuilder->addCompilerPass(new Compiler\Search\Legacy\CriterionFieldValueHandlerRegistryPass());
 $containerBuilder->addCompilerPass(new Compiler\Search\Legacy\SortClauseConverterPass());
-
-//
-// Symfony 4 makes services private by default. Test cases are not prepared for this.
-// This is a simple workaround to override services as public.
-//
-$containerBuilder->addCompilerPass(new SetAllServicesPublicPass());
 
 return $containerBuilder;

@@ -34,11 +34,11 @@ EOT
     {
         $database = $this->getContainer()->get('ezpublish.connection')->getConnection()->getParams();
         if (is_array($database)) {
-            $driverMap = [
+            $driverMap = array(
                 'pdo_mysql' => 'mysql',
                 'pdo_pgsql' => 'pgsql',
                 'pdo_sqlite' => 'sqlite',
-            ];
+            );
 
             $dbType = $driverMap[$database['driver']];
             $database = $database['dbname'];
@@ -72,12 +72,12 @@ EOT
     public function insertData($dbType)
     {
         // Get Initial fixture data and union with some tables that must be present but sometimes aren't
-        $data = $this->getInitialData() + [
-            'ezcontentobject_trash' => [],
-            'ezurlwildcard' => [],
-            'ezmedia' => [],
-            'ezkeyword' => [],
-        ];
+        $data = $this->getInitialData() + array(
+            'ezcontentobject_trash' => array(),
+            'ezurlwildcard' => array(),
+            'ezmedia' => array(),
+            'ezkeyword' => array(),
+        );
         $handler = $this->getDatabaseHandler();
         foreach ($data as $table => $rows) {
             // Cleanup before inserting
@@ -95,7 +95,7 @@ EOT
             $q->insertInto($handler->quoteIdentifier($table));
 
             // Contains the bound parameters
-            $values = [];
+            $values = array();
 
             // Binding the parameters
             foreach ($rows[0] as $col => $val) {
@@ -143,7 +143,7 @@ EOT
             return array_filter(preg_split('(;\\s*$)m', file_get_contents($setvalPath)));
         }
 
-        return [];
+        return array();
     }
 
     /**

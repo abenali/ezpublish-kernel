@@ -257,7 +257,9 @@ interface RoleService
     public function loadRoleByIdentifier($identifier);
 
     /**
-     * Loads all roles, excluding the ones the current user is not allowed to read.
+     * Loads all roles.
+     *
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed to read the roles
      *
      * @return \eZ\Publish\API\Repository\Values\User\Role[]
      */
@@ -361,11 +363,12 @@ interface RoleService
     public function getRoleAssignments(Role $role);
 
     /**
-     * Returns UserRoleAssignments assigned to the given User, excluding the ones the current user is not allowed to read.
+     * Returns UserRoleAssignments assigned to the given User.
      *
      * If second parameter \$inherited is true then UserGroupRoleAssignment is also returned for UserGroups User is
      * placed in as well as those inherited from parent UserGroups.
      *
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the current user is not allowed to read a role
      * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException On invalid User object
      *
      * @param \eZ\Publish\API\Repository\Values\User\User $user
@@ -376,7 +379,9 @@ interface RoleService
     public function getRoleAssignmentsForUser(User $user, $inherited = false);
 
     /**
-     * Returns the UserGroupRoleAssignments assigned to the given UserGroup, excluding the ones the current user is not allowed to read.
+     * Returns the UserGroupRoleAssignments assigned to the given UserGroup.
+     *
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException if the authenticated user is not allowed to read a user group
      *
      * @param \eZ\Publish\API\Repository\Values\User\UserGroup $userGroup
      *

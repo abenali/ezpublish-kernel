@@ -22,16 +22,22 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class BackgroundIndexingTerminateListenerTest extends TestCase
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\EventListener\BackgroundIndexingTerminateListener */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\EventListener\BackgroundIndexingTerminateListener
+     */
     protected $listener;
 
-    /** @var \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     protected $persistenceMock;
 
-    /** @var \eZ\Publish\SPI\Search\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Search\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     protected $searchMock;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->persistenceMock = $this->createMock(PersistenceHandler::class);
@@ -42,7 +48,7 @@ class BackgroundIndexingTerminateListenerTest extends TestCase
         );
     }
 
-    protected function tearDown(): void
+    protected function tearDown()
     {
         unset($this->persistenceMock, $this->searchMock, $this->listener);
         parent::tearDown();

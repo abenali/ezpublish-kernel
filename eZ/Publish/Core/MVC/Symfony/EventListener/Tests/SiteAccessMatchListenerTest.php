@@ -19,33 +19,72 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestMatcherInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class SiteAccessMatchListenerTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $saRouter;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $eventDispatcher;
 
-    /** @var SiteAccessMatchListener */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
+    private $userHashMatcher;
+
+    /**
+     * @var SiteAccessMatchListener
+     */
     private $listener;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->saRouter = $this->createMock(Router::class);
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
-        $this->listener = new SiteAccessMatchListener($this->saRouter, $this->eventDispatcher);
+        $this->userHashMatcher = $this->createMock(RequestMatcherInterface::class);
+        $this->listener = new SiteAccessMatchListener($this->saRouter, $this->eventDispatcher, $this->userHashMatcher);
     }
 
     public function testGetSubscribedEvents()
     {
         $this->assertSame(
-            [KernelEvents::REQUEST => ['onKernelRequest', 45]],
+            array(KernelEvents::REQUEST => array('onKernelRequest', 45)),
             SiteAccessMatchListener::getSubscribedEvents()
         );
+    }
+
+    public function testOnKernelRequestUserHashNoOriginalRequest()
+    {
+        $request = new Request();
+        $event = new GetResponseEvent(
+            $this->createMock(HttpKernelInterface::class),
+            $request,
+            HttpKernelInterface::MASTER_REQUEST
+        );
+
+        $this->userHashMatcher
+            ->expects($this->once())
+            ->method('matches')
+            ->with($request)
+            ->will($this->returnValue(true));
+
+        $this->saRouter
+            ->expects($this->never())
+            ->method('match');
+        $this->eventDispatcher
+            ->expects($this->never())
+            ->method('dispatch');
+
+        $this->listener->onKernelRequest($event);
+        $this->assertFalse($request->attributes->has('siteaccess'));
     }
 
     public function testOnKernelRequestSerializedSA()
@@ -59,6 +98,12 @@ class SiteAccessMatchListenerTest extends TestCase
             HttpKernelInterface::MASTER_REQUEST
         );
 
+        $this->userHashMatcher
+            ->expects($this->once())
+            ->method('matches')
+            ->with($request)
+            ->will($this->returnValue(false));
+
         $this->saRouter
             ->expects($this->never())
             ->method('match');
@@ -67,7 +112,7 @@ class SiteAccessMatchListenerTest extends TestCase
         $this->eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($postSAMatchEvent), MVCEvents::SITEACCESS);
+            ->with(MVCEvents::SITEACCESS, $this->equalTo($postSAMatchEvent));
 
         $this->listener->onKernelRequest($event);
         $this->assertEquals($siteAccess, $request->attributes->get('siteaccess'));
@@ -85,6 +130,12 @@ class SiteAccessMatchListenerTest extends TestCase
             HttpKernelInterface::MASTER_REQUEST
         );
 
+        $this->userHashMatcher
+            ->expects($this->once())
+            ->method('matches')
+            ->with($request)
+            ->will($this->returnValue(false));
+
         $this->saRouter
             ->expects($this->never())
             ->method('match');
@@ -93,7 +144,7 @@ class SiteAccessMatchListenerTest extends TestCase
         $this->eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($postSAMatchEvent), MVCEvents::SITEACCESS);
+            ->with(MVCEvents::SITEACCESS, $this->equalTo($postSAMatchEvent));
 
         $this->listener->onKernelRequest($event);
         $this->assertSame($siteAccess, $request->attributes->get('siteaccess'));
@@ -113,8 +164,14 @@ class SiteAccessMatchListenerTest extends TestCase
             HttpKernelInterface::MASTER_REQUEST
         );
 
+        $this->userHashMatcher
+            ->expects($this->once())
+            ->method('matches')
+            ->with($request)
+            ->will($this->returnValue(false));
+
         $simplifiedRequest = new SimplifiedRequest(
-            [
+            array(
                 'scheme' => $request->getScheme(),
                 'host' => $request->getHost(),
                 'port' => $request->getPort(),
@@ -122,9 +179,8 @@ class SiteAccessMatchListenerTest extends TestCase
                 'queryParams' => $request->query->all(),
                 'languages' => $request->getLanguages(),
                 'headers' => $request->headers->all(),
-            ]
+            )
         );
-
         $this->saRouter
             ->expects($this->once())
             ->method('match')
@@ -135,7 +191,7 @@ class SiteAccessMatchListenerTest extends TestCase
         $this->eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($postSAMatchEvent), MVCEvents::SITEACCESS);
+            ->with(MVCEvents::SITEACCESS, $this->equalTo($postSAMatchEvent));
 
         $this->listener->onKernelRequest($event);
         $this->assertSame($siteAccess, $request->attributes->get('siteaccess'));
@@ -157,8 +213,14 @@ class SiteAccessMatchListenerTest extends TestCase
             HttpKernelInterface::MASTER_REQUEST
         );
 
+        $this->userHashMatcher
+            ->expects($this->once())
+            ->method('matches')
+            ->with($request)
+            ->will($this->returnValue(true));
+
         $simplifiedRequest = new SimplifiedRequest(
-            [
+            array(
                 'scheme' => $originalRequest->getScheme(),
                 'host' => $originalRequest->getHost(),
                 'port' => $originalRequest->getPort(),
@@ -166,9 +228,8 @@ class SiteAccessMatchListenerTest extends TestCase
                 'queryParams' => $originalRequest->query->all(),
                 'languages' => $originalRequest->getLanguages(),
                 'headers' => $originalRequest->headers->all(),
-            ]
+            )
         );
-
         $this->saRouter
             ->expects($this->once())
             ->method('match')
@@ -179,7 +240,7 @@ class SiteAccessMatchListenerTest extends TestCase
         $this->eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($postSAMatchEvent), MVCEvents::SITEACCESS);
+            ->with(MVCEvents::SITEACCESS, $this->equalTo($postSAMatchEvent));
 
         $this->listener->onKernelRequest($event);
         $this->assertSame($siteAccess, $request->attributes->get('siteaccess'));

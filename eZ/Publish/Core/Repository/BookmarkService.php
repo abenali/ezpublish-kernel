@@ -20,10 +20,14 @@ use eZ\Publish\SPI\Persistence\Bookmark\Handler as BookmarkHandler;
 
 class BookmarkService implements BookmarkServiceInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
-    /** @var \eZ\Publish\SPI\Persistence\Bookmark\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Bookmark\Handler
+     */
     protected $bookmarkHandler;
 
     /**

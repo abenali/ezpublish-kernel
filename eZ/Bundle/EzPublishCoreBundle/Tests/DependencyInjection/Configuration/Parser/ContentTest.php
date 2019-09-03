@@ -14,14 +14,14 @@ use Symfony\Component\Yaml\Yaml;
 
 class ContentTest extends AbstractParserTestCase
 {
-    protected function getContainerExtensions(): array
+    protected function getContainerExtensions()
     {
-        return [
-            new EzPublishCoreExtension([new ContentConfigParser()]),
-        ];
+        return array(
+            new EzPublishCoreExtension(array(new ContentConfigParser())),
+        );
     }
 
-    protected function getMinimalConfiguration(): array
+    protected function getMinimalConfiguration()
     {
         return Yaml::parse(file_get_contents(__DIR__ . '/../../Fixtures/ezpublish_minimal.yml'));
     }
@@ -41,11 +41,11 @@ class ContentTest extends AbstractParserTestCase
     public function testContentSettings(array $config, array $expected)
     {
         $this->load(
-            [
-                'system' => [
+            array(
+                'system' => array(
                     'ezdemo_site' => $config,
-                ],
-            ]
+                ),
+            )
         );
 
         foreach ($expected as $key => $val) {
@@ -55,77 +55,77 @@ class ContentTest extends AbstractParserTestCase
 
     public function contentSettingsProvider()
     {
-        return [
-            [
-                [
-                    'content' => [
+        return array(
+            array(
+                array(
+                    'content' => array(
                         'view_cache' => true,
                         'ttl_cache' => true,
                         'default_ttl' => 100,
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     'content.view_cache' => true,
                     'content.ttl_cache' => true,
                     'content.default_ttl' => 100,
-                ],
-            ],
-            [
-                [
-                    'content' => [
+                ),
+            ),
+            array(
+                array(
+                    'content' => array(
                         'view_cache' => false,
                         'ttl_cache' => false,
                         'default_ttl' => 123,
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     'content.view_cache' => false,
                     'content.ttl_cache' => false,
                     'content.default_ttl' => 123,
-                ],
-            ],
-            [
-                [
-                    'content' => [
+                ),
+            ),
+            array(
+                array(
+                    'content' => array(
                         'view_cache' => false,
-                    ],
-                ],
-                [
+                    ),
+                ),
+                array(
                     'content.view_cache' => false,
                     'content.ttl_cache' => true,
                     'content.default_ttl' => 60,
-                ],
-            ],
-            [
-                [
-                    'content' => [
-                        'tree_root' => ['location_id' => 123],
-                    ],
-                ],
-                [
+                ),
+            ),
+            array(
+                array(
+                    'content' => array(
+                        'tree_root' => array('location_id' => 123),
+                    ),
+                ),
+                array(
                     'content.view_cache' => true,
                     'content.ttl_cache' => true,
                     'content.default_ttl' => 60,
                     'content.tree_root.location_id' => 123,
-                ],
-            ],
-            [
-                [
-                    'content' => [
-                        'tree_root' => [
+                ),
+            ),
+            array(
+                array(
+                    'content' => array(
+                        'tree_root' => array(
                             'location_id' => 456,
-                            'excluded_uri_prefixes' => ['/media/images', '/products'],
-                        ],
-                    ],
-                ],
-                [
+                            'excluded_uri_prefixes' => array('/media/images', '/products'),
+                        ),
+                    ),
+                ),
+                array(
                     'content.view_cache' => true,
                     'content.ttl_cache' => true,
                     'content.default_ttl' => 60,
                     'content.tree_root.location_id' => 456,
-                    'content.tree_root.excluded_uri_prefixes' => ['/media/images', '/products'],
-                ],
-            ],
-        ];
+                    'content.tree_root.excluded_uri_prefixes' => array('/media/images', '/products'),
+                ),
+            ),
+        );
     }
 }

@@ -21,14 +21,14 @@ class StorageConnectionFactoryTest extends TestCase
      */
     public function testGetConnection($repositoryAlias, $doctrineConnection)
     {
-        $repositories = [
-            $repositoryAlias => [
-                'storage' => [
+        $repositories = array(
+            $repositoryAlias => array(
+                'storage' => array(
                     'engine' => 'legacy',
                     'connection' => $doctrineConnection,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
 
         $configResolver = $this->getConfigResolverMock();
         $configResolver
@@ -61,25 +61,26 @@ class StorageConnectionFactoryTest extends TestCase
 
     public function getConnectionProvider()
     {
-        return [
-            ['my_repository', 'my_doctrine_connection'],
-            ['foo', 'default'],
-            ['répository_de_dédé', 'la_connexion_de_bébêrt'],
-        ];
+        return array(
+            array('my_repository', 'my_doctrine_connection'),
+            array('foo', 'default'),
+            array('répository_de_dédé', 'la_connexion_de_bébêrt'),
+        );
     }
 
+    /**
+     * @expectedException \eZ\Bundle\EzPublishCoreBundle\ApiLoader\Exception\InvalidRepositoryException
+     */
     public function testGetConnectionInvalidRepository()
     {
-        $this->expectException(\eZ\Bundle\EzPublishCoreBundle\ApiLoader\Exception\InvalidRepositoryException::class);
-
-        $repositories = [
-            'foo' => [
-                'storage' => [
+        $repositories = array(
+            'foo' => array(
+                'storage' => array(
                     'engine' => 'legacy',
                     'connection' => 'my_doctrine_connection',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
 
         $configResolver = $this->getConfigResolverMock();
         $configResolver
@@ -94,18 +95,19 @@ class StorageConnectionFactoryTest extends TestCase
         $factory->getConnection();
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testGetConnectionInvalidConnection()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $repositoryConfigurationProviderMock = $this->createMock(RepositoryConfigurationProvider::class);
-        $repositoryConfig = [
+        $repositoryConfig = array(
             'alias' => 'foo',
-            'storage' => [
+            'storage' => array(
                 'engine' => 'legacy',
                 'connection' => 'my_doctrine_connection',
-            ],
-        ];
+            ),
+        );
         $repositoryConfigurationProviderMock
             ->expects($this->once())
             ->method('getRepositoryConfig')
@@ -121,7 +123,7 @@ class StorageConnectionFactoryTest extends TestCase
             ->expects($this->once())
             ->method('getParameter')
             ->with('doctrine.connections')
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
         $factory = new StorageConnectionFactory($repositoryConfigurationProviderMock);
         $factory->setContainer($container);
         $factory->getConnection();

@@ -27,11 +27,11 @@ class ParentDepthLimitationTest extends BaseLimitationTest
      *
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ContentTypeLimitation
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ParentDepthLimitation
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testParentDepthLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $contentTypeId = $this->generateId('contentType', 22);
@@ -45,12 +45,12 @@ class ParentDepthLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentDepthLimitation(
-                ['limitationValues' => [3]]
+                array('limitationValues' => array(3))
             )
         );
         $policyCreate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 
@@ -90,12 +90,12 @@ class ParentDepthLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentDepthLimitation(
-                ['limitationValues' => [1, 2, 3, 4]]
+                array('limitationValues' => array(1, 2, 3, 4))
             )
         );
         $policyCreate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 
@@ -132,12 +132,12 @@ class ParentDepthLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentDepthLimitation(
-                ['limitationValues' => [1, 2, 3, 4]]
+                array('limitationValues' => array(1, 2, 3, 4))
             )
         );
         $policyCreate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 

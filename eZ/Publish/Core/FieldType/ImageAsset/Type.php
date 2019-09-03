@@ -10,7 +10,6 @@ namespace eZ\Publish\Core\FieldType\ImageAsset;
 
 use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\ContentTypeService;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
@@ -18,41 +17,40 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\API\Repository\Values\Content\Relation;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
-use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
 use eZ\Publish\Core\FieldType\Value as BaseValue;
 
 class Type extends FieldType
 {
     const FIELD_TYPE_IDENTIFIER = 'ezimageasset';
 
-    /** @var \eZ\Publish\API\Repository\ContentService */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentService
+     */
     private $contentService;
 
-    /** @var \eZ\Publish\API\Repository\ContentTypeService */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentTypeService
+     */
     private $contentTypeService;
 
-    /** @var \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper */
+    /**
+     * @var \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper
+     */
     private $assetMapper;
-
-    /** @var \eZ\Publish\SPI\Persistence\Content\Handler */
-    private $handler;
 
     /**
      * @param \eZ\Publish\API\Repository\ContentService $contentService
      * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
      * @param \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper $mapper
-     * @param \eZ\Publish\SPI\Persistence\Content\Handler $handler
      */
     public function __construct(
         ContentService $contentService,
         ContentTypeService $contentTypeService,
-        AssetMapper $mapper,
-        SPIContentHandler $handler
+        AssetMapper $mapper
     ) {
         $this->contentService = $contentService;
         $this->contentTypeService = $contentTypeService;
         $this->assetMapper = $mapper;
-        $this->handler = $handler;
     }
 
     /**
@@ -100,22 +98,18 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\ImageAsset\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\ImageAsset\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value): string
     {
-        if (empty($value->destinationContentId)) {
-            return '';
-        }
-
-        try {
-            $contentInfo = $this->handler->loadContentInfo($value->destinationContentId);
-            $versionInfo = $this->handler->loadVersionInfo($value->destinationContentId, $contentInfo->currentVersionNo);
-        } catch (NotFoundException $e) {
-            return '';
-        }
-
-        return $versionInfo->names[$languageCode] ?? $versionInfo->names[$contentInfo->mainLanguageCode];
+        throw new \RuntimeException('Name generation provided via NameableField set via "ezpublish.fieldType.nameable" service tag');
     }
 
     /**

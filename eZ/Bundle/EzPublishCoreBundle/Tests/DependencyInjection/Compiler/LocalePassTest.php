@@ -22,7 +22,7 @@ class LocalePassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new LocalePass());
     }
@@ -34,12 +34,12 @@ class LocalePassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'locale_listener',
             'setConfigResolver',
-            [new Reference('ezpublish.config.resolver')]
+            array(new Reference('ezpublish.config.resolver'))
         );
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'locale_listener',
             'setLocaleConverter',
-            [new Reference('ezpublish.locale.converter')]
+            array(new Reference('ezpublish.locale.converter'))
         );
     }
 }

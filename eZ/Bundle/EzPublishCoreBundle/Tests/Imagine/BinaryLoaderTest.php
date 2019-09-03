@@ -21,16 +21,22 @@ use Symfony\Component\HttpFoundation\File\MimeType\ExtensionGuesserInterface;
 
 class BinaryLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $ioService;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $extensionGuesser;
 
-    /** @var BinaryLoader */
+    /**
+     * @var BinaryLoader
+     */
     private $binaryLoader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->ioService = $this->createMock(IOServiceInterface::class);
@@ -38,10 +44,11 @@ class BinaryLoaderTest extends TestCase
         $this->binaryLoader = new BinaryLoader($this->ioService, $this->extensionGuesser);
     }
 
+    /**
+     * @expectedException \Liip\ImagineBundle\Exception\Binary\Loader\NotLoadableException
+     */
     public function testFindNotFound()
     {
-        $this->expectException(\Liip\ImagineBundle\Exception\Binary\Loader\NotLoadableException::class);
-
         $path = 'something.jpg';
         $this->ioService
             ->expects($this->once())
@@ -52,10 +59,11 @@ class BinaryLoaderTest extends TestCase
         $this->binaryLoader->find($path);
     }
 
+    /**
+     * @expectedException \Liip\ImagineBundle\Exception\Binary\Loader\NotLoadableException
+     */
     public function testFindMissing()
     {
-        $this->expectException(\Liip\ImagineBundle\Exception\Binary\Loader\NotLoadableException::class);
-
         $path = 'something.jpg';
         $this->ioService
             ->expects($this->once())
@@ -78,7 +86,7 @@ class BinaryLoaderTest extends TestCase
         try {
             $this->binaryLoader->find($path);
         } catch (NotLoadableException $e) {
-            $this->assertStringContainsString(
+            $this->assertContains(
                 "Suggested value: '1/2/3/123-name/name.png'",
                 $e->getMessage()
             );
@@ -90,7 +98,7 @@ class BinaryLoaderTest extends TestCase
         $path = 'something.jpg';
         $mimeType = 'foo/mime-type';
         $content = 'some content';
-        $binaryFile = new BinaryFile(['id' => $path]);
+        $binaryFile = new BinaryFile(array('id' => $path));
         $this->ioService
             ->expects($this->once())
             ->method('loadBinaryFile')

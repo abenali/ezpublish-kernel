@@ -69,11 +69,11 @@ class URLWildcardServiceTest extends BaseTest
     public function testCreateSetsPropertiesOnURLWildcard(URLWildcard $urlWildcard)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'sourceUrl' => '/articles/*',
                 'destinationUrl' => '/content/{1}',
                 'forward' => false,
-            ],
+            ),
             $urlWildcard
         );
     }
@@ -96,11 +96,11 @@ class URLWildcardServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'sourceUrl' => '/articles/*',
                 'destinationUrl' => '/content/{1}',
                 'forward' => true,
-            ],
+            ),
             $urlWildcard
         );
     }
@@ -109,12 +109,11 @@ class URLWildcardServiceTest extends BaseTest
      * Test for the create() method.
      *
      * @see \eZ\Publish\API\Repository\URLWildcardService::create()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\URLWildcardServiceTest::testCreate
      */
     public function testCreateThrowsInvalidArgumentExceptionOnDuplicateSourceUrl()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -133,12 +132,11 @@ class URLWildcardServiceTest extends BaseTest
      * Test for the create() method.
      *
      * @see \eZ\Publish\API\Repository\URLWildcardService::create()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentValidationException
      * @depends eZ\Publish\API\Repository\Tests\URLWildcardServiceTest::testCreate
      */
     public function testCreateThrowsContentValidationExceptionWhenPatternsAndPlaceholdersNotMatch()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\ContentValidationException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -154,12 +152,11 @@ class URLWildcardServiceTest extends BaseTest
      * Test for the create() method.
      *
      * @see \eZ\Publish\API\Repository\URLWildcardService::create()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentValidationException
      * @depends eZ\Publish\API\Repository\Tests\URLWildcardServiceTest::testCreate
      */
     public function testCreateThrowsContentValidationExceptionWhenPlaceholdersNotValidNumberSequence()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\ContentValidationException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -212,11 +209,11 @@ class URLWildcardServiceTest extends BaseTest
     public function testLoadSetsPropertiesOnURLWildcard(URLWildcard $urlWildcard)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'sourceUrl' => '/articles/*',
                 'destinationUrl' => '/content/{1}',
                 'forward' => true,
-            ],
+            ),
             $urlWildcard
         );
     }
@@ -227,12 +224,11 @@ class URLWildcardServiceTest extends BaseTest
      * @param \eZ\Publish\API\Repository\Values\Content\URLWildcard $urlWildcard
      *
      * @see \eZ\Publish\API\Repository\URLWildcardService::load()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\URLWildcardServiceTest::testLoad
      */
     public function testLoadThrowsNotFoundException(URLWildcard $urlWildcard)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -247,12 +243,11 @@ class URLWildcardServiceTest extends BaseTest
      * Test for the remove() method.
      *
      * @see \eZ\Publish\API\Repository\URLWildcardService::remove()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\URLWildcardServiceTest::testLoad
      */
     public function testRemove()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -294,10 +289,10 @@ class URLWildcardServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertEquals(
-            [
+            array(
                 $urlWildcardOne,
                 $urlWildcardTwo,
-            ],
+            ),
             $allUrlWildcards
         );
     }
@@ -323,7 +318,7 @@ class URLWildcardServiceTest extends BaseTest
         $allUrlWildcards = $urlWildcardService->loadAll(1);
         /* END: Use Case */
 
-        $this->assertEquals([$urlWildcardTwo], $allUrlWildcards);
+        $this->assertEquals(array($urlWildcardTwo), $allUrlWildcards);
     }
 
     /**
@@ -347,7 +342,7 @@ class URLWildcardServiceTest extends BaseTest
         $allUrlWildcards = $urlWildcardService->loadAll(0, 1);
         /* END: Use Case */
 
-        $this->assertEquals([$urlWildcardOne], $allUrlWildcards);
+        $this->assertEquals(array($urlWildcardOne), $allUrlWildcards);
     }
 
     /**
@@ -367,7 +362,7 @@ class URLWildcardServiceTest extends BaseTest
         $allUrlWildcards = $urlWildcardService->loadAll();
         /* END: Use Case */
 
-        $this->assertSame([], $allUrlWildcards);
+        $this->assertSame(array(), $allUrlWildcards);
     }
 
     /**
@@ -411,10 +406,10 @@ class URLWildcardServiceTest extends BaseTest
     public function testTranslateSetsPropertiesOnTranslationResult(URLWildcardTranslationResult $result)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'uri' => '/content/2012/05/sindelfingen',
                 'forward' => false,
-            ],
+            ),
             $result
         );
     }
@@ -440,10 +435,10 @@ class URLWildcardServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'uri' => '/content/sindelfingen/year/2012',
                 'forward' => true,
-            ],
+            ),
             $result
         );
     }
@@ -478,12 +473,11 @@ class URLWildcardServiceTest extends BaseTest
      * @return \eZ\Publish\API\Repository\Values\Content\URLAlias
      *
      * @see \eZ\Publish\API\Repository\URLWildcardService::translate()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\URLWildcardServiceTest::testTranslate
      */
     public function testTranslateThrowsNotFoundExceptionWhenNotAliasOrWildcardMatches()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */

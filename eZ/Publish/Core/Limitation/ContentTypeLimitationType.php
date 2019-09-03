@@ -19,15 +19,14 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\API\Repository\Values\User\Limitation\ContentTypeLimitation as APIContentTypeLimitation;
 use eZ\Publish\API\Repository\Values\User\Limitation as APILimitationValue;
-use eZ\Publish\SPI\Limitation\Target;
-use eZ\Publish\SPI\Limitation\TargetAwareType as SPITargetAwareLimitationType;
+use eZ\Publish\SPI\Limitation\Type as SPILimitationTypeInterface;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 
 /**
  * ContentTypeLimitation is a Content limitation.
  */
-class ContentTypeLimitationType extends AbstractPersistenceLimitationType implements SPITargetAwareLimitationType
+class ContentTypeLimitationType extends AbstractPersistenceLimitationType implements SPILimitationTypeInterface
 {
     /**
      * Accepts a Limitation value and checks for structural validity.
@@ -64,7 +63,7 @@ class ContentTypeLimitationType extends AbstractPersistenceLimitationType implem
      */
     public function validate(APILimitationValue $limitationValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         foreach ($limitationValue->limitationValues as $key => $id) {
             try {
                 $this->persistence->contentTypeHandler()->load($id);
@@ -72,10 +71,10 @@ class ContentTypeLimitationType extends AbstractPersistenceLimitationType implem
                 $validationErrors[] = new ValidationError(
                     "limitationValues[%key%] => '%value%' does not exist in the backend",
                     null,
-                    [
+                    array(
                         'value' => $id,
                         'key' => $key,
-                    ]
+                    )
                 );
             }
         }
@@ -92,7 +91,7 @@ class ContentTypeLimitationType extends AbstractPersistenceLimitationType implem
      */
     public function buildValue(array $limitationValues)
     {
-        return new APIContentTypeLimitation(['limitationValues' => $limitationValues]);
+        return new APIContentTypeLimitation(array('limitationValues' => $limitationValues));
     }
 
     /**
@@ -108,26 +107,10 @@ class ContentTypeLimitationType extends AbstractPersistenceLimitationType implem
      * @param \eZ\Publish\API\Repository\Values\ValueObject $object
      * @param \eZ\Publish\API\Repository\Values\ValueObject[]|null $targets The context of the $object, like Location of Content, if null none where provided by caller
      *
-     * @return bool|null
+     * @return bool
      */
-    public function evaluate(APILimitationValue $value, APIUserReference $currentUser, ValueObject $object, array $targets = null): ?bool
+    public function evaluate(APILimitationValue $value, APIUserReference $currentUser, ValueObject $object, array $targets = null)
     {
-        $targets = $targets ?? [];
-        foreach ($targets as $target) {
-            if (!$target instanceof Target\Version) {
-                continue;
-            }
-
-            $accessVote = $this->evaluateVersionTarget($target, $value);
-
-            // continue evaluation of targets if there was no explicit grant/deny
-            if ($accessVote === self::ACCESS_ABSTAIN) {
-                continue;
-            }
-
-            return $accessVote;
-        }
-
         if (!$value instanceof APIContentTypeLimitation) {
             throw new InvalidArgumentException('$value', 'Must be of type: APIContentTypeLimitation');
         }
@@ -190,47 +173,5 @@ class ContentTypeLimitationType extends AbstractPersistenceLimitationType implem
     public function valueSchema()
     {
         throw new \eZ\Publish\API\Repository\Exceptions\NotImplementedException(__METHOD__);
-    }
-
-    /**
-     * Evaluate permissions to create new Version.
-     *
-     * @param \eZ\Publish\SPI\Limitation\Target\Version $version
-     * @param \eZ\Publish\API\Repository\Values\User\Limitation $value
-     *
-     * @return bool|null
-     */
-    private function evaluateVersionTarget(
-        Target\Version $version,
-        APILimitationValue $value
-    ): ?bool {
-        $accessVote = self::ACCESS_ABSTAIN;
-
-        // ... unless there's a specific list of target translations
-        if (!empty($version->allContentTypeIdsList)) {
-            $accessVote = $this->evaluateMatchingAnyLimitation(
-                $version->allContentTypeIdsList,
-                $value->limitationValues
-            );
-        }
-
-        return $accessVote;
-    }
-
-    /**
-     * Allow access if any of the given ContentTypes matches any of the limitation values.
-     *
-     * @param int[] $contentTypeIdsList
-     * @param string[] $limitationValues
-     *
-     * @return bool
-     */
-    private function evaluateMatchingAnyLimitation(
-        array $contentTypeIdsList,
-        array $limitationValues
-    ): bool {
-        return empty(array_intersect(array_map('strval', $contentTypeIdsList), $limitationValues))
-            ? self::ACCESS_DENIED
-            : self::ACCESS_GRANTED;
     }
 }

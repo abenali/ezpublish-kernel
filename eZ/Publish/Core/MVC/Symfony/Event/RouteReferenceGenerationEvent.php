@@ -9,7 +9,7 @@
 namespace eZ\Publish\Core\MVC\Symfony\Event;
 
 use eZ\Publish\Core\MVC\Symfony\Routing\RouteReference;
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -17,10 +17,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class RouteReferenceGenerationEvent extends Event
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Routing\RouteReference */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Routing\RouteReference
+     */
     private $routeReference;
 
-    /** @var \Symfony\Component\HttpFoundation\Request */
+    /**
+     * @var \Symfony\Component\HttpFoundation\Request
+     */
     private $request;
 
     public function __construct(RouteReference $routeReference, Request $request)

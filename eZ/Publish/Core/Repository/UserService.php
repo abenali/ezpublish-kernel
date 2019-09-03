@@ -8,41 +8,41 @@
  */
 namespace eZ\Publish\Core\Repository;
 
-use Exception;
-use eZ\Publish\API\Repository\Repository as RepositoryInterface;
-use eZ\Publish\API\Repository\UserService as UserServiceInterface;
-use eZ\Publish\API\Repository\Values\Content\Content as APIContent;
-use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ContentTypeId as CriterionContentTypeId;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LocationId as CriterionLocationId;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalAnd as CriterionLogicalAnd;
-use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ParentLocationId as CriterionParentLocationId;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
-use eZ\Publish\API\Repository\Values\User\User as APIUser;
+use eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct;
+use eZ\Publish\Core\Base\Exceptions\UserPasswordValidationException;
+use eZ\Publish\Core\Repository\Validator\UserPasswordValidator;
+use eZ\Publish\Core\Repository\Values\User\UserCreateStruct;
 use eZ\Publish\API\Repository\Values\User\UserCreateStruct as APIUserCreateStruct;
+use eZ\Publish\API\Repository\Values\User\UserUpdateStruct;
+use eZ\Publish\Core\Repository\Values\User\User;
+use eZ\Publish\API\Repository\Values\User\User as APIUser;
+use eZ\Publish\Core\Repository\Values\User\UserGroup;
 use eZ\Publish\API\Repository\Values\User\UserGroup as APIUserGroup;
+use eZ\Publish\Core\Repository\Values\User\UserGroupCreateStruct;
 use eZ\Publish\API\Repository\Values\User\UserGroupCreateStruct as APIUserGroupCreateStruct;
 use eZ\Publish\API\Repository\Values\User\UserGroupUpdateStruct;
-use eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct;
-use eZ\Publish\API\Repository\Values\User\UserUpdateStruct;
-use eZ\Publish\Core\Base\Exceptions\BadStateException;
+use eZ\Publish\API\Repository\Values\Content\Location;
+use eZ\Publish\API\Repository\Values\Content\Content as APIContent;
+use eZ\Publish\SPI\Persistence\User\UserTokenUpdateStruct as SPIUserTokenUpdateStruct;
+use eZ\Publish\SPI\Persistence\User\Handler;
+use eZ\Publish\API\Repository\Repository as RepositoryInterface;
+use eZ\Publish\API\Repository\UserService as UserServiceInterface;
+use eZ\Publish\SPI\Persistence\User as SPIUser;
+use eZ\Publish\Core\FieldType\User\Value as UserValue;
+use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LogicalAnd as CriterionLogicalAnd;
+use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ContentTypeId as CriterionContentTypeId;
+use eZ\Publish\API\Repository\Values\Content\Query\Criterion\LocationId as CriterionLocationId;
+use eZ\Publish\API\Repository\Values\Content\Query\Criterion\ParentLocationId as CriterionParentLocationId;
 use eZ\Publish\Core\Base\Exceptions\ContentValidationException;
-use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue;
+use eZ\Publish\Core\Base\Exceptions\BadStateException;
+use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use eZ\Publish\Core\Base\Exceptions\UnauthorizedException;
-use eZ\Publish\Core\Base\Exceptions\UserPasswordValidationException;
-use eZ\Publish\Core\FieldType\User\Value as UserValue;
-use eZ\Publish\Core\Repository\Validator\UserPasswordValidator;
-use eZ\Publish\Core\Repository\Values\User\User;
-use eZ\Publish\Core\Repository\Values\User\UserCreateStruct;
-use eZ\Publish\Core\Repository\Values\User\UserGroup;
-use eZ\Publish\Core\Repository\Values\User\UserGroupCreateStruct;
-use eZ\Publish\SPI\Persistence\User as SPIUser;
-use eZ\Publish\SPI\Persistence\User\Handler;
-use eZ\Publish\SPI\Persistence\Content\Location\Handler as LocationHandler;
-use eZ\Publish\SPI\Persistence\User\UserTokenUpdateStruct as SPIUserTokenUpdateStruct;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -52,16 +52,19 @@ use Psr\Log\LoggerInterface;
  */
 class UserService implements UserServiceInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
-    /** @var \eZ\Publish\SPI\Persistence\User\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\User\Handler
+     */
     protected $userHandler;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Location\Handler */
-    private $locationHandler;
-
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $settings;
 
     /** @var \Psr\Log\LoggerInterface|null */
@@ -80,27 +83,21 @@ class UserService implements UserServiceInterface
      *
      * @param \eZ\Publish\API\Repository\Repository $repository
      * @param \eZ\Publish\SPI\Persistence\User\Handler $userHandler
-     * @param \eZ\Publish\SPI\Persistence\Content\Location\Handler $locationHandler
      * @param array $settings
      */
-    public function __construct(
-        RepositoryInterface $repository,
-        Handler $userHandler,
-        LocationHandler $locationHandler,
-        array $settings = []
-    ) {
+    public function __construct(RepositoryInterface $repository, Handler $userHandler, array $settings = array())
+    {
         $this->repository = $repository;
         $this->permissionResolver = $repository->getPermissionResolver();
         $this->userHandler = $userHandler;
-        $this->locationHandler = $locationHandler;
         // Union makes sure default settings are ignored if provided in argument
-        $this->settings = $settings + [
+        $this->settings = $settings + array(
             'defaultUserPlacement' => 12,
             'userClassID' => 4, // @todo Rename this settings to swap out "Class" for "Type"
             'userGroupClassID' => 3,
             'hashType' => APIUser::DEFAULT_PASSWORD_HASH,
             'siteName' => 'ez.no',
-        ];
+        );
     }
 
     /**
@@ -143,7 +140,7 @@ class UserService implements UserServiceInterface
 
         $this->repository->beginTransaction();
         try {
-            $contentDraft = $contentService->createContent($userGroupCreateStruct, [$locationCreateStruct]);
+            $contentDraft = $contentService->createContent($userGroupCreateStruct, array($locationCreateStruct));
             $publishedContent = $contentService->publishVersion($contentDraft->getVersionInfo());
             $this->repository->commit();
         } catch (Exception $e) {
@@ -194,7 +191,7 @@ class UserService implements UserServiceInterface
         }
 
         if ($loadedUserGroup->getVersionInfo()->getContentInfo()->mainLocationId === null) {
-            return [];
+            return array();
         }
 
         $mainGroupLocation = $locationService->loadLocation(
@@ -203,10 +200,10 @@ class UserService implements UserServiceInterface
 
         $searchResult = $this->searchSubGroups($mainGroupLocation, $offset, $limit);
         if ($searchResult->totalCount == 0) {
-            return [];
+            return array();
         }
 
-        $subUserGroups = [];
+        $subUserGroups = array();
         foreach ($searchResult->searchHits as $searchHit) {
             $subUserGroups[] = $this->buildDomainUserGroupObject(
                 $this->repository->getContentService()->internalLoadContent(
@@ -242,7 +239,7 @@ class UserService implements UserServiceInterface
 
         $searchQuery->sortClauses = $location->getSortClauses();
 
-        return $this->repository->getSearchService()->findLocations($searchQuery, [], false);
+        return $this->repository->getSearchService()->findLocations($searchQuery, array(), false);
     }
 
     /**
@@ -429,7 +426,7 @@ class UserService implements UserServiceInterface
             throw new UserPasswordValidationException('password', $errors);
         }
 
-        $locationCreateStructs = [];
+        $locationCreateStructs = array();
         foreach ($parentGroups as $parentGroup) {
             $parentGroup = $this->loadUserGroup($parentGroup->id);
             if ($parentGroup->getVersionInfo()->getContentInfo()->mainLocationId !== null) {
@@ -459,9 +456,9 @@ class UserService implements UserServiceInterface
                     $userCreateStruct->fields[$index]->value->login = $userCreateStruct->login;
                 } else {
                     $userCreateStruct->fields[$index]->value = new UserValue(
-                        [
+                        array(
                             'login' => $userCreateStruct->login,
-                        ]
+                        )
                     );
                 }
 
@@ -473,9 +470,9 @@ class UserService implements UserServiceInterface
             $userCreateStruct->setField(
                 $userFieldDefinition->identifier,
                 new UserValue(
-                    [
+                    array(
                         'login' => $userCreateStruct->login,
-                    ]
+                    )
                 )
             );
         }
@@ -486,7 +483,7 @@ class UserService implements UserServiceInterface
             // Create user before publishing, so that external data can be returned
             $spiUser = $this->userHandler->create(
                 new SPIUser(
-                    [
+                    array(
                         'id' => $contentDraft->id,
                         'login' => $userCreateStruct->login,
                         'email' => $userCreateStruct->email,
@@ -499,7 +496,7 @@ class UserService implements UserServiceInterface
                         'hashAlgorithm' => $this->settings['hashType'],
                         'isEnabled' => $userCreateStruct->enabled,
                         'maxLogin' => 0,
-                    ]
+                    )
                 )
             );
             $publishedContent = $contentService->publishVersion($contentDraft->getVersionInfo());
@@ -682,7 +679,7 @@ class UserService implements UserServiceInterface
             throw new InvalidArgumentValue('email', $email);
         }
 
-        $users = [];
+        $users = array();
         foreach ($this->userHandler->loadByEmail($email) as $spiUser) {
             $users[] = $this->buildDomainUserObject($spiUser, null, $prioritizedLanguages);
         }
@@ -847,7 +844,7 @@ class UserService implements UserServiceInterface
 
             $this->userHandler->update(
                 new SPIUser(
-                    [
+                    array(
                         'id' => $loadedUser->id,
                         'login' => $loadedUser->login,
                         'email' => $userUpdateStruct->email ?: $loadedUser->email,
@@ -864,7 +861,7 @@ class UserService implements UserServiceInterface
                             $loadedUser->hashAlgorithm,
                         'isEnabled' => $userUpdateStruct->enabled !== null ? $userUpdateStruct->enabled : $loadedUser->enabled,
                         'maxLogin' => $userUpdateStruct->maxLogin !== null ? (int)$userUpdateStruct->maxLogin : $loadedUser->maxLogin,
-                    ]
+                    )
                 )
             );
 
@@ -906,11 +903,11 @@ class UserService implements UserServiceInterface
         try {
             $this->userHandler->updateUserToken(
                 new SPIUserTokenUpdateStruct(
-                    [
+                    array(
                         'userId' => $loadedUser->id,
                         'hashKey' => $userTokenUpdateStruct->hashKey,
                         'time' => $userTokenUpdateStruct->time->getTimestamp(),
-                    ]
+                    )
                 )
             );
             $this->repository->commit();
@@ -954,7 +951,7 @@ class UserService implements UserServiceInterface
         $loadedGroup = $this->loadUserGroup($userGroup->id);
         $locationService = $this->repository->getLocationService();
 
-        $existingGroupIds = [];
+        $existingGroupIds = array();
         $userLocations = $locationService->loadLocations($loadedUser->getVersionInfo()->getContentInfo());
         foreach ($userLocations as $userLocation) {
             $existingGroupIds[] = $userLocation->parentLocationId;
@@ -1058,7 +1055,7 @@ class UserService implements UserServiceInterface
             $user->getVersionInfo()->getContentInfo()
         );
 
-        $parentLocationIds = [];
+        $parentLocationIds = array();
         foreach ($userLocations as $userLocation) {
             if ($userLocation->parentLocationId !== null) {
                 $parentLocationIds[] = $userLocation->parentLocationId;
@@ -1200,15 +1197,15 @@ class UserService implements UserServiceInterface
         }
 
         return new UserCreateStruct(
-            [
+            array(
                 'contentType' => $contentType,
                 'mainLanguageCode' => $mainLanguageCode,
                 'login' => $login,
                 'email' => $email,
                 'password' => $password,
                 'enabled' => true,
-                'fields' => [],
-            ]
+                'fields' => array(),
+            )
         );
     }
 
@@ -1229,11 +1226,11 @@ class UserService implements UserServiceInterface
         }
 
         return new UserGroupCreateStruct(
-            [
+            array(
                 'contentType' => $contentType,
                 'mainLanguageCode' => $mainLanguageCode,
-                'fields' => [],
-            ]
+                'fields' => array(),
+            )
         );
     }
 
@@ -1308,14 +1305,14 @@ class UserService implements UserServiceInterface
             $mainLocation = $locationService->loadLocation(
                 $content->getVersionInfo()->getContentInfo()->mainLocationId
             );
-            $parentLocation = $this->locationHandler->load($mainLocation->parentLocationId);
+            $parentLocation = $locationService->loadLocation($mainLocation->parentLocationId);
         }
 
         return new UserGroup(
-            [
+            array(
                 'content' => $content,
-                'parentId' => $parentLocation->contentId ?? null,
-            ]
+                'parentId' => isset($parentLocation) ? $parentLocation->contentId : null,
+            )
         );
     }
 
@@ -1341,7 +1338,7 @@ class UserService implements UserServiceInterface
         }
 
         return new User(
-            [
+            array(
                 'content' => $content,
                 'login' => $spiUser->login,
                 'email' => $spiUser->email,
@@ -1349,7 +1346,7 @@ class UserService implements UserServiceInterface
                 'hashAlgorithm' => (int)$spiUser->hashAlgorithm,
                 'enabled' => $spiUser->isEnabled,
                 'maxLogin' => (int)$spiUser->maxLogin,
-            ]
+            )
         );
     }
 

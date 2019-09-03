@@ -23,28 +23,42 @@ use PHPUnit\Framework\TestCase;
 
 class RequestEventListenerTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $configResolver;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $router;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject|LoggerInterface */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|LoggerInterface
+     */
     private $logger;
 
-    /** @var RequestEventListener */
+    /**
+     * @var RequestEventListener
+     */
     private $requestEventListener;
 
-    /** @var Request */
+    /**
+     * @var Request
+     */
     private $request;
 
-    /** @var GetResponseEvent */
+    /**
+     * @var GetResponseEvent
+     */
     private $event;
 
-    /** @var HttpKernelInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var HttpKernelInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $httpKernel;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -56,7 +70,7 @@ class RequestEventListenerTest extends TestCase
 
         $this->request = $this
             ->getMockBuilder(Request::class)
-            ->setMethods(['getSession', 'hasSession'])
+            ->setMethods(array('getSession', 'hasSession'))
             ->getMock();
 
         $this->httpKernel = $this->createMock(HttpKernelInterface::class);
@@ -70,12 +84,12 @@ class RequestEventListenerTest extends TestCase
     public function testSubscribedEvents()
     {
         $this->assertSame(
-            [
-                KernelEvents::REQUEST => [
-                    ['onKernelRequestForward', 10],
-                    ['onKernelRequestRedirect', 0],
-                ],
-            ],
+            array(
+                KernelEvents::REQUEST => array(
+                    array('onKernelRequestForward', 10),
+                    array('onKernelRequestRedirect', 0),
+                ),
+            ),
             $this->requestEventListener->getSubscribedEvents()
         );
     }
@@ -92,8 +106,8 @@ class RequestEventListenerTest extends TestCase
 
     public function testOnKernelRequestForward()
     {
-        $queryParameters = ['some' => 'thing'];
-        $cookieParameters = ['cookie' => 'value'];
+        $queryParameters = array('some' => 'thing');
+        $cookieParameters = array('cookie' => 'value');
         $request = Request::create('/test_sa/foo/bar', 'GET', $queryParameters, $cookieParameters);
         $semanticPathinfo = '/foo/something';
         $request->attributes->set('semanticPathinfo', $semanticPathinfo);
@@ -126,8 +140,8 @@ class RequestEventListenerTest extends TestCase
 
     public function testOnKernelRequestRedirect()
     {
-        $queryParameters = ['some' => 'thing'];
-        $cookieParameters = ['cookie' => 'value'];
+        $queryParameters = array('some' => 'thing');
+        $cookieParameters = array('cookie' => 'value');
         $request = Request::create('/test_sa/foo/bar', 'GET', $queryParameters, $cookieParameters);
         $semanticPathinfo = '/foo/something';
         $request->attributes->set('semanticPathinfo', $semanticPathinfo);
@@ -147,8 +161,8 @@ class RequestEventListenerTest extends TestCase
 
     public function testOnKernelRequestRedirectWithLocationId()
     {
-        $queryParameters = ['some' => 'thing'];
-        $cookieParameters = ['cookie' => 'value'];
+        $queryParameters = array('some' => 'thing');
+        $cookieParameters = array('cookie' => 'value');
         $request = Request::create('/test_sa/foo/bar', 'GET', $queryParameters, $cookieParameters);
         $semanticPathinfo = '/foo/something';
         $request->attributes->set('semanticPathinfo', $semanticPathinfo);
@@ -170,8 +184,8 @@ class RequestEventListenerTest extends TestCase
 
     public function testOnKernelRequestRedirectPrependSiteaccess()
     {
-        $queryParameters = ['some' => 'thing'];
-        $cookieParameters = ['cookie' => 'value'];
+        $queryParameters = array('some' => 'thing');
+        $cookieParameters = array('cookie' => 'value');
         $siteaccessMatcher = $this->createMock(SiteAccess\URILexer::class);
         $siteaccess = new SiteAccess('test', 'foo', $siteaccessMatcher);
         $semanticPathinfo = '/foo/something';

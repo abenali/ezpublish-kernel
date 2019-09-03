@@ -9,7 +9,7 @@
 namespace eZ\Bundle\EzPublishDebugBundle\Twig;
 
 use Symfony\Component\Filesystem\Filesystem;
-use Twig\Template;
+use Twig_Template;
 
 /**
  * Meant to be used as a Twig base template class.
@@ -17,11 +17,11 @@ use Twig\Template;
  * Wraps the display method to:
  * - Inject debug info into template to be able to see in the markup which one is used
  */
-class DebugTemplate extends Template
+class DebugTemplate extends Twig_Template
 {
     private $fileSystem;
 
-    public function display(array $context, array $blocks = [])
+    public function display(array $context, array $blocks = array())
     {
         $this->fileSystem = $this->fileSystem ?: new Filesystem();
 
@@ -86,7 +86,7 @@ class DebugTemplate extends Template
     /**
      * {@inheritdoc}
      */
-    protected function doDisplay(array $context, array $blocks = [])
+    protected function doDisplay(array $context, array $blocks = array())
     {
         return '';
     }
@@ -96,6 +96,6 @@ class DebugTemplate extends Template
      */
     public function getDebugInfo()
     {
-        return [];
+        return array();
     }
 }

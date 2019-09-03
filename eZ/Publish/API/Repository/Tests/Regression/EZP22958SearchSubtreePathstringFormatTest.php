@@ -17,7 +17,7 @@ use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
  */
 class EZP22958SearchSubtreePathstringFormatTest extends BaseTest
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
     }
@@ -26,15 +26,14 @@ class EZP22958SearchSubtreePathstringFormatTest extends BaseTest
      * Tests that invalid path string provided for subtree criterion result in exception.
      *
      * @dataProvider searchContentQueryWithInvalidDataProvider
+     * @expectedException \InvalidArgumentException
      */
     public function testSearchContentSubtreeShouldThrowException($pathString)
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\Subtree($pathString),
-            ]
+            )
         );
 
         $result = $this->getRepository()->getSearchService()->findContent($query);
@@ -48,9 +47,9 @@ class EZP22958SearchSubtreePathstringFormatTest extends BaseTest
     public function testSearchContentSubtree($pathString)
     {
         $query = new Query(
-            [
+            array(
                 'filter' => new Criterion\Subtree($pathString),
-            ]
+            )
         );
 
         $result = $this->getRepository()->getSearchService()->findContent($query);
@@ -58,31 +57,31 @@ class EZP22958SearchSubtreePathstringFormatTest extends BaseTest
 
     public function searchContentQueryProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 '/1/2/',
-            ],
-            [
-                ['/1/2/', '/1/2/4/'],
-            ],
-            [
+            ),
+            array(
+                array('/1/2/', '/1/2/4/'),
+            ),
+            array(
                 '/1/id0/',
-            ],
-        ];
+            ),
+        );
     }
 
     public function searchContentQueryWithInvalidDataProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 '/1/2',
-            ],
-            [
-                ['/1/2/', '/1/2/4'],
-            ],
-            [
+            ),
+            array(
+                array('/1/2/', '/1/2/4'),
+            ),
+            array(
                 '/1/id0',
-            ],
-        ];
+            ),
+        );
     }
 }

@@ -12,7 +12,9 @@ use eZ\Publish\API\Repository\Repository;
 
 abstract class RepositoryAware implements RepositoryAwareInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
     /**

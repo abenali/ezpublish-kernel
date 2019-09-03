@@ -15,10 +15,12 @@ use eZ\Publish\Core\MVC\Symfony\Matcher\Tests\ContentBased\BaseTest;
 
 class ContentTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\Content */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\Content
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new ContentIdMatcher();
@@ -41,28 +43,28 @@ class ContentTest extends BaseTest
 
     public function matchLocationProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
                 $this->generateLocationForContentId(123),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
                 $this->generateLocationForContentId(456),
                 false,
-            ],
-            [
-                [123, 789],
+            ),
+            array(
+                array(123, 789),
                 $this->generateLocationForContentId(456),
                 false,
-            ],
-            [
-                [123, 789],
+            ),
+            array(
+                array(123, 789),
                 $this->generateLocationForContentId(789),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -80,7 +82,7 @@ class ContentTest extends BaseTest
             ->method('getContentInfo')
             ->will(
                 $this->returnValue(
-                    $this->getContentInfoMock(['id' => $contentId])
+                    $this->getContentInfoMock(array('id' => $contentId))
                 )
             );
 
@@ -104,27 +106,27 @@ class ContentTest extends BaseTest
 
     public function matchContentInfoProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
-                $this->getContentInfoMock(['id' => 123]),
+                $this->getContentInfoMock(array('id' => 123)),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
-                $this->getContentInfoMock(['id' => 456]),
+                $this->getContentInfoMock(array('id' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getContentInfoMock(['id' => 456]),
+            ),
+            array(
+                array(123, 789),
+                $this->getContentInfoMock(array('id' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getContentInfoMock(['id' => 789]),
+            ),
+            array(
+                array(123, 789),
+                $this->getContentInfoMock(array('id' => 789)),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 }

@@ -9,10 +9,12 @@ use PHPUnit\Framework\TestCase;
 
 class ChainConfigResolverTest extends TestCase
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ChainConfigResolver */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ChainConfigResolver
+     */
     private $chainResolver;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->chainResolver = new ChainConfigResolver();
     }
@@ -24,7 +26,7 @@ class ChainConfigResolverTest extends TestCase
      */
     public function testPriority()
     {
-        $this->assertEquals([], $this->chainResolver->getAllResolvers());
+        $this->assertEquals(array(), $this->chainResolver->getAllResolvers());
 
         list($low, $high) = $this->createResolverMocks();
 
@@ -32,10 +34,10 @@ class ChainConfigResolverTest extends TestCase
         $this->chainResolver->addResolver($high, 100);
 
         $this->assertEquals(
-            [
+            array(
                 $high,
                 $low,
-            ],
+            ),
             $this->chainResolver->getAllResolvers()
         );
     }
@@ -54,21 +56,21 @@ class ChainConfigResolverTest extends TestCase
         // We're using a mock here and not $this->chainResolver because we need to ensure that the sorting operation is done only once.
         $resolver = $this->buildMock(
             ChainConfigResolver::class,
-            ['sortResolvers']
+            array('sortResolvers')
         );
         $resolver
             ->expects($this->once())
             ->method('sortResolvers')
             ->will(
                 $this->returnValue(
-                    [$high, $medium, $low]
+                    array($high, $medium, $low)
                 )
             );
 
         $resolver->addResolver($low, 10);
         $resolver->addResolver($medium, 50);
         $resolver->addResolver($high, 100);
-        $expectedSortedRouters = [$high, $medium, $low];
+        $expectedSortedRouters = array($high, $medium, $low);
         // Let's get all routers 5 times, we should only sort once.
         for ($i = 0; $i < 5; ++$i) {
             $this->assertSame($expectedSortedRouters, $resolver->getAllResolvers());
@@ -89,14 +91,14 @@ class ChainConfigResolverTest extends TestCase
         // We're using a mock here and not $this->chainResolver because we need to ensure that the sorting operation is done only once.
         $resolver = $this->buildMock(
             ChainConfigResolver::class,
-            ['sortResolvers']
+            array('sortResolvers')
         );
         $resolver
             ->expects($this->at(0))
             ->method('sortResolvers')
             ->will(
                 $this->returnValue(
-                    [$high, $medium, $low]
+                    array($high, $medium, $low)
                 )
             );
         // The second time sortResolvers() is called, we're supposed to get the newly added router ($highest)
@@ -105,7 +107,7 @@ class ChainConfigResolverTest extends TestCase
             ->method('sortResolvers')
             ->will(
                 $this->returnValue(
-                    [$highest, $high, $medium, $low]
+                    array($highest, $high, $medium, $low)
                 )
             );
 
@@ -113,25 +115,24 @@ class ChainConfigResolverTest extends TestCase
         $resolver->addResolver($medium, 50);
         $resolver->addResolver($high, 100);
         $this->assertSame(
-            [$high, $medium, $low],
+            array($high, $medium, $low),
             $resolver->getAllResolvers()
         );
 
         // Now adding another resolver on the fly, sorting must have been reset
         $resolver->addResolver($highest, 101);
         $this->assertSame(
-            [$highest, $high, $medium, $low],
+            array($highest, $high, $medium, $low),
             $resolver->getAllResolvers()
         );
     }
 
     /**
+     * @expectedException \LogicException
      * @covers \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ChainConfigResolver::getDefaultNamespace
      */
     public function testGetDefaultNamespace()
     {
-        $this->expectException(\LogicException::class);
-
         $this->chainResolver->getDefaultNamespace();
     }
 
@@ -153,12 +154,11 @@ class ChainConfigResolverTest extends TestCase
     }
 
     /**
+     * @expectedException \eZ\Publish\Core\MVC\Exception\ParameterNotFoundException
      * @covers \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ChainConfigResolver::getParameter
      */
     public function testGetParameterInvalid()
     {
-        $this->expectException(\eZ\Publish\Core\MVC\Exception\ParameterNotFoundException::class);
-
         $paramName = 'foo';
         $namespace = 'namespace';
         $scope = 'scope';
@@ -199,12 +199,12 @@ class ChainConfigResolverTest extends TestCase
 
     public function getParameterProvider()
     {
-        return [
-            ['foo', 'namespace', 'scope', 'someValue'],
-            ['some.parameter', 'wowNamespace', 'mySiteaccess', ['foo', 'bar']],
-            ['another.parameter.but.longer.name', 'yetAnotherNamespace', 'anotherSiteaccess', ['foo', ['fruit' => 'apple']]],
-            ['boolean.parameter', 'yetAnotherNamespace', 'admin', false],
-        ];
+        return array(
+            array('foo', 'namespace', 'scope', 'someValue'),
+            array('some.parameter', 'wowNamespace', 'mySiteaccess', array('foo', 'bar')),
+            array('another.parameter.but.longer.name', 'yetAnotherNamespace', 'anotherSiteaccess', array('foo', array('fruit' => 'apple'))),
+            array('boolean.parameter', 'yetAnotherNamespace', 'admin', false),
+        );
     }
 
     /**
@@ -264,14 +264,14 @@ class ChainConfigResolverTest extends TestCase
      */
     private function createResolverMocks()
     {
-        return [
+        return array(
             $this->createMock(ConfigResolverInterface::class),
             $this->createMock(ConfigResolverInterface::class),
             $this->createMock(ConfigResolverInterface::class),
-        ];
+        );
     }
 
-    private function buildMock($class, array $methods = [])
+    private function buildMock($class, array $methods = array())
     {
         return $this
             ->getMockBuilder($class)

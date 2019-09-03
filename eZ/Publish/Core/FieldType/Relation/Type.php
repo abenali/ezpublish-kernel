@@ -8,15 +8,12 @@
  */
 namespace eZ\Publish\Core\FieldType\Relation;
 
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\API\Repository\Values\Content\Relation;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
-use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
 use eZ\Publish\Core\FieldType\Value as BaseValue;
 
 /**
@@ -49,14 +46,6 @@ class Type extends FieldType
         ],
     ];
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Handler */
-    private $handler;
-
-    public function __construct(SPIContentHandler $handler)
-    {
-        $this->handler = $handler;
-    }
-
     /**
      * @see \eZ\Publish\Core\FieldType\FieldType::validateFieldSettings()
      *
@@ -66,16 +55,16 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (!isset($this->settingsSchema[$name])) {
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
                 continue;
@@ -87,11 +76,11 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' must be either %selection_browse% or %selection_dropdown%",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
                                 '%selection_browse%' => self::SELECTION_BROWSE,
                                 '%selection_dropdown%' => self::SELECTION_DROPDOWN,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -101,9 +90,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of either null, string or integer",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -137,26 +126,18 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\Relation\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\Relation\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
-        if (empty($value->destinationContentId)) {
-            return '';
-        }
-
-        try {
-            $contentInfo = $this->handler->loadContentInfo($value->destinationContentId);
-            $versionInfo = $this->handler->loadVersionInfo($value->destinationContentId, $contentInfo->currentVersionNo);
-        } catch (NotFoundException $e) {
-            return '';
-        }
-
-        if (isset($versionInfo->names[$languageCode])) {
-            return $versionInfo->names[$languageCode];
-        }
-
-        return $versionInfo->names[$contentInfo->mainLanguageCode];
+        throw new \RuntimeException('Name generation provided via NameableField set via "ezpublish.fieldType.nameable" service tag');
     }
 
     /**
@@ -253,7 +234,7 @@ class Type extends FieldType
      */
     public function toHash(SPIValue $value)
     {
-        return ['destinationContentId' => $value->destinationContentId];
+        return array('destinationContentId' => $value->destinationContentId);
     }
 
     /**
@@ -293,9 +274,9 @@ class Type extends FieldType
      */
     public function getRelations(SPIValue $fieldValue)
     {
-        $relations = [];
+        $relations = array();
         if ($fieldValue->destinationContentId !== null) {
-            $relations[Relation::FIELD] = [$fieldValue->destinationContentId];
+            $relations[Relation::FIELD] = array($fieldValue->destinationContentId);
         }
 
         return $relations;

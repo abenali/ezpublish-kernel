@@ -24,14 +24,14 @@ class Type extends FieldType
     /**
      * @see eZ\Publish\Core\FieldType::$validatorConfigurationSchema
      */
-    protected $validatorConfigurationSchema = [
-        'FileSizeValidator' => [
-            'maxFileSize' => [
+    protected $validatorConfigurationSchema = array(
+        'FileSizeValidator' => array(
+            'maxFileSize' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-        ],
-    ];
+            ),
+        ),
+    );
 
     /**
      * Returns the field type identifier for this field type.
@@ -44,11 +44,18 @@ class Type extends FieldType
     }
 
     /**
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
      * @param \eZ\Publish\Core\FieldType\Image\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
-        return $value->alternativeText ?? (string)$value->fileName;
+        return !empty($value->alternativeText) ? $value->alternativeText : (string)$value->fileName;
     }
 
     /**
@@ -141,7 +148,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $errors = [];
+        $errors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $errors;
@@ -169,9 +176,9 @@ class Type extends FieldType
                         $errors[] = new ValidationError(
                             'The file size cannot exceed %size% byte.',
                             'The file size cannot exceed %size% bytes.',
-                            [
+                            array(
                                 '%size%' => $parameters['maxFileSize'],
-                            ],
+                            ),
                             'fileSize'
                         );
                     }
@@ -198,7 +205,7 @@ class Type extends FieldType
                 !getimagesize($filePath)
             )
         ) {
-            $errors[] = new ValidationError('A valid image file is required.', null, [], $errorContext);
+            $errors[] = new ValidationError('A valid image file is required.', null, array(), $errorContext);
         }
     }
 
@@ -211,7 +218,7 @@ class Type extends FieldType
      */
     public function validateValidatorConfiguration($validatorConfiguration)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($validatorConfiguration as $validatorIdentifier => $parameters) {
             switch ($validatorIdentifier) {
@@ -220,10 +227,10 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             'Validator %validator% expects parameter %parameter% to be set.',
                             null,
-                            [
+                            array(
                                 '%validator%' => $validatorIdentifier,
                                 '%parameter%' => 'maxFileSize',
-                            ],
+                            ),
                             "[$validatorIdentifier]"
                         );
                         break;
@@ -232,11 +239,11 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             'Validator %validator% expects parameter %parameter% to be of %type%.',
                             null,
-                            [
+                            array(
                                 '%validator%' => $validatorIdentifier,
                                 '%parameter%' => 'maxFileSize',
                                 '%type%' => 'integer',
-                            ],
+                            ),
                             "[$validatorIdentifier][maxFileSize]"
                         );
                     }
@@ -245,9 +252,9 @@ class Type extends FieldType
                     $validationErrors[] = new ValidationError(
                         "Validator '%validator%' is unknown",
                         null,
-                        [
+                        array(
                             '%validator%' => $validatorIdentifier,
-                        ],
+                        ),
                         "[$validatorIdentifier]"
                     );
             }
@@ -293,7 +300,7 @@ class Type extends FieldType
             return null;
         }
 
-        return [
+        return array(
             'id' => $value->id,
             'path' => $value->inputUri ?: $value->id,
             'alternativeText' => $value->alternativeText,
@@ -304,7 +311,7 @@ class Type extends FieldType
             'inputUri' => $value->inputUri,
             'width' => $value->width,
             'height' => $value->height,
-        ];
+        );
     }
 
     /**
@@ -318,11 +325,11 @@ class Type extends FieldType
     {
         // Store original data as external (to indicate they need to be stored)
         return new FieldValue(
-            [
+            array(
                 'data' => null,
                 'externalData' => $this->toHash($value),
                 'sortKey' => $this->getSortInfo($value),
-            ]
+            )
         );
     }
 
@@ -342,7 +349,7 @@ class Type extends FieldType
         // Restored data comes in $data, since it has already been processed
         // there might be more data in the persistence value than needed here
         $result = $this->fromHash(
-            [
+            array(
                 'id' => (isset($fieldValue->data['id'])
                     ? $fieldValue->data['id']
                     : null),
@@ -367,7 +374,7 @@ class Type extends FieldType
                 'height' => (isset($fieldValue->data['height'])
                     ? $fieldValue->data['height']
                     : null),
-            ]
+            )
         );
 
         return $result;

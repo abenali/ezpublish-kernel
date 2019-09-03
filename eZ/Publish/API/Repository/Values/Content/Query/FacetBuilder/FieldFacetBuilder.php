@@ -34,8 +34,6 @@ class FieldFacetBuilder extends FacetBuilder
     /**
      * A regex filter for field values.
      *
-     * @deprecated This field is not in use and will be replaced in the future by similar features.
-     *
      * @var string
      */
     public $regex;
@@ -44,8 +42,6 @@ class FieldFacetBuilder extends FacetBuilder
      * The sort order of the terms.
      *
      * One of FieldFacetBuilder::COUNT_ASC, FieldFacetBuilder::COUNT_DESC, FieldFacetBuilder::TERM_ASC, FieldFacetBuilder::TERM_DESC
-     *
-     * Note: A given Search engine might not support all options.
      *
      * @var int
      */

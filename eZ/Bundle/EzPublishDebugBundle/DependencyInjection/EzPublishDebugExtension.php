@@ -35,7 +35,7 @@ class EzPublishDebugExtension extends Extension implements PrependExtensionInter
         if ($container->getParameter('kernel.debug')) {
             $container->prependExtensionConfig(
                 'twig',
-                ['base_template_class' => 'eZ\Bundle\EzPublishDebugBundle\Twig\DebugTemplate']
+                array('base_template_class' => 'eZ\Bundle\EzPublishDebugBundle\Twig\DebugTemplate')
             );
         }
     }

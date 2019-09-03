@@ -20,16 +20,22 @@ use PHPUnit\Framework\TestCase;
 
 class ContentPreviewHelperTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $eventDispatcher;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $siteAccessRouter;
 
-    /** @var \eZ\Publish\Core\Helper\ContentPreviewHelper */
+    /**
+     * @var \eZ\Publish\Core\Helper\ContentPreviewHelper
+     */
     private $previewHelper;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->eventDispatcher = $this->createMock(EventDispatcherInterface::class);
@@ -52,7 +58,7 @@ class ContentPreviewHelperTest extends TestCase
         $this->eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($event), MVCEvents::CONFIG_SCOPE_CHANGE);
+            ->with(MVCEvents::CONFIG_SCOPE_CHANGE, $this->equalTo($event));
 
         $originalSiteAccess = new SiteAccess('foo', 'bar');
         $this->previewHelper->setSiteAccess($originalSiteAccess);
@@ -69,7 +75,7 @@ class ContentPreviewHelperTest extends TestCase
         $this->eventDispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($event), MVCEvents::CONFIG_SCOPE_RESTORE);
+            ->with(MVCEvents::CONFIG_SCOPE_RESTORE, $this->equalTo($event));
 
         $this->previewHelper->setSiteAccess($originalSiteAccess);
         $this->assertEquals(

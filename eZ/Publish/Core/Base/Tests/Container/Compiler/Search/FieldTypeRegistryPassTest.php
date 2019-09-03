@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class FieldTypeRegistryPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.search.common.field_registry', new Definition());
@@ -28,7 +28,7 @@ class FieldTypeRegistryPassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new FieldRegistryPass());
     }
@@ -38,7 +38,7 @@ class FieldTypeRegistryPassTest extends AbstractCompilerPassTestCase
         $fieldTypeIdentifier = 'field_type_identifier';
         $serviceId = 'service_id';
         $def = new Definition();
-        $def->addTag('ezpublish.fieldType.indexable', ['alias' => $fieldTypeIdentifier]);
+        $def->addTag('ezpublish.fieldType.indexable', array('alias' => $fieldTypeIdentifier));
         $this->setDefinition($serviceId, $def);
 
         $this->compile();
@@ -46,14 +46,15 @@ class FieldTypeRegistryPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.common.field_registry',
             'registerType',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRegisterFieldTypeNoAlias()
     {
-        $this->expectException(\LogicException::class);
-
         $fieldTypeIdentifier = 'field_type_identifier';
         $serviceId = 'service_id';
         $def = new Definition();
@@ -65,7 +66,7 @@ class FieldTypeRegistryPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.common.field_registry',
             'registerType',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 }

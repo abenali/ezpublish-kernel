@@ -25,7 +25,7 @@ class ContentTypeCreateStruct extends APIContentTypeCreateStruct
      *
      * @var \eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionCreateStruct[]
      */
-    public $fieldDefinitions = [];
+    public $fieldDefinitions = array();
 
     /**
      * Adds a new field definition.

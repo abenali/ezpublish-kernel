@@ -74,11 +74,10 @@ class BookmarkServiceTest extends BaseTest
     /**
      * @covers \eZ\Publish\Core\Repository\BookmarkService::createBookmark
      * @depends testCreateBookmark
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateBookmarkThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -115,11 +114,10 @@ class BookmarkServiceTest extends BaseTest
     /**
      * @covers \eZ\Publish\Core\Repository\BookmarkService::deleteBookmark
      * @depends testDeleteBookmark
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testDeleteBookmarkThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */

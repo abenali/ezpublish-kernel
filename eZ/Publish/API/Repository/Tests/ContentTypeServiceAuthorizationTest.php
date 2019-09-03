@@ -22,12 +22,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the createContentTypeGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::createContentTypeGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testCreateContentTypeGroup
      */
     public function testCreateContentTypeGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $creatorId = $this->generateId('user', 14);
@@ -62,12 +61,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the updateContentTypeGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::updateContentTypeGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testUpdateContentTypeGroup
      */
     public function testUpdateContentTypeGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $modifierId = $this->generateId('user', 42);
@@ -111,12 +109,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the deleteContentTypeGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::deleteContentTypeGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testDeleteContentTypeGroup
      */
     public function testDeleteContentTypeGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -147,12 +144,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the createContentType() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::createContentType()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testCreateContentType
      */
     public function testCreateContentTypeThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $creatorId = $this->generateId('user', 14);
@@ -178,12 +174,12 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
         $typeCreate->creatorId = $creatorId;
         $typeCreate->creationDate = $this->createDateTime();
         $typeCreate->mainLanguageCode = 'eng-GB';
-        $typeCreate->names = ['eng-GB' => 'A name.'];
-        $typeCreate->descriptions = ['eng-GB' => 'A description.'];
+        $typeCreate->names = array('eng-GB' => 'A name.');
+        $typeCreate->descriptions = array('eng-GB' => 'A description.');
 
         $titleFieldCreateStruct = $contentTypeService->newFieldDefinitionCreateStruct('title', 'ezstring');
-        $titleFieldCreateStruct->names = ['eng-GB' => 'Title'];
-        $titleFieldCreateStruct->descriptions = ['eng-GB' => 'The Title'];
+        $titleFieldCreateStruct->names = array('eng-GB' => 'Title');
+        $titleFieldCreateStruct->descriptions = array('eng-GB' => 'The Title');
         $titleFieldCreateStruct->fieldGroup = 'content';
         $titleFieldCreateStruct->position = 10;
         $titleFieldCreateStruct->isTranslatable = true;
@@ -195,7 +191,7 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
         $repository->setCurrentUser($userService->loadUser($anonymousUserId));
 
         // This call will fail with a "UnauthorizedException"
-        $contentTypeService->createContentType($typeCreate, [$contentTypeGroup]);
+        $contentTypeService->createContentType($typeCreate, array($contentTypeGroup));
         /* END: Use Case */
     }
 
@@ -203,12 +199,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the updateContentTypeDraft() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::updateContentTypeDraft()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testUpdateContentTypeDraft
      */
     public function testUpdateContentTypeDraftThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $contentTypeService = $repository->getContentTypeService();
 
@@ -230,14 +225,14 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
         // $modifierId is the ID of a random user
         $typeUpdate->modifierId = $modifierId;
         $typeUpdate->modificationDate = $this->createDateTime();
-        $typeUpdate->names = [
+        $typeUpdate->names = array(
             'eng-GB' => 'News article',
             'ger-DE' => 'Nachrichten-Artikel',
-        ];
-        $typeUpdate->descriptions = [
+        );
+        $typeUpdate->descriptions = array(
             'eng-GB' => 'A news article',
             'ger-DE' => 'Ein Nachrichten-Artikel',
-        ];
+        );
 
         // Load the user service
         $userService = $repository->getUserService();
@@ -254,12 +249,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the addFieldDefinition() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::addFieldDefinition()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testAddFieldDefinition
      */
     public function testAddFieldDefinitionThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $contentTypeService = $repository->getContentTypeService();
 
@@ -270,28 +264,28 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
         $contentTypeDraft = $this->createContentTypeDraft();
 
         $fieldDefCreate = $contentTypeService->newFieldDefinitionCreateStruct('tags', 'string');
-        $fieldDefCreate->names = [
+        $fieldDefCreate->names = array(
             'eng-GB' => 'Tags',
             'ger-DE' => 'Schlagworte',
-        ];
-        $fieldDefCreate->descriptions = [
+        );
+        $fieldDefCreate->descriptions = array(
             'eng-GB' => 'Tags of the blog post',
             'ger-DE' => 'Schlagworte des Blog-Eintrages',
-        ];
+        );
         $fieldDefCreate->fieldGroup = 'blog-meta';
         $fieldDefCreate->position = 1;
         $fieldDefCreate->isTranslatable = true;
         $fieldDefCreate->isRequired = true;
         $fieldDefCreate->isInfoCollector = false;
-        $fieldDefCreate->validatorConfiguration = [
-            'StringLengthValidator' => [
+        $fieldDefCreate->validatorConfiguration = array(
+            'StringLengthValidator' => array(
                 'minStringLength' => 0,
                 'maxStringLength' => 0,
-            ],
-        ];
-        $fieldDefCreate->fieldSettings = [
+            ),
+        );
+        $fieldDefCreate->fieldSettings = array(
             'textRows' => 10,
-        ];
+        );
         $fieldDefCreate->isSearchable = true;
 
         // Load the user service
@@ -309,12 +303,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the removeFieldDefinition() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::removeFieldDefinition()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testRemoveFieldDefinition
      */
     public function testRemoveFieldDefinitionThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $contentTypeService = $repository->getContentTypeService();
 
@@ -341,12 +334,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the updateFieldDefinition() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::updateFieldDefinition()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testUpdateFieldDefinition
      */
     public function testUpdateFieldDefinitionThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $contentTypeService = $repository->getContentTypeService();
 
@@ -366,23 +358,23 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
 
         $bodyUpdateStruct = $contentTypeService->newFieldDefinitionUpdateStruct();
         $bodyUpdateStruct->identifier = 'blog-body';
-        $bodyUpdateStruct->names = [
+        $bodyUpdateStruct->names = array(
             'eng-GB' => 'Blog post body',
             'ger-DE' => 'Blog-Eintrags-Textkörper',
-        ];
-        $bodyUpdateStruct->descriptions = [
+        );
+        $bodyUpdateStruct->descriptions = array(
             'eng-GB' => 'Blog post body of the blog post',
             'ger-DE' => 'Blog-Eintrags-Textkörper des Blog-Eintrages',
-        ];
+        );
         $bodyUpdateStruct->fieldGroup = 'updated-blog-content';
         $bodyUpdateStruct->position = 3;
         $bodyUpdateStruct->isTranslatable = false;
         $bodyUpdateStruct->isRequired = false;
         $bodyUpdateStruct->isInfoCollector = true;
-        $bodyUpdateStruct->validatorConfiguration = [];
-        $bodyUpdateStruct->fieldSettings = [
+        $bodyUpdateStruct->validatorConfiguration = array();
+        $bodyUpdateStruct->fieldSettings = array(
             'textRows' => 60,
-        ];
+        );
         $bodyUpdateStruct->isSearchable = false;
 
         // This call will fail with a "UnauthorizedException"
@@ -398,12 +390,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the publishContentTypeDraft() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::publishContentTypeDraft()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testPublishContentTypeDraft
      */
     public function testPublishContentTypeDraftThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $contentTypeService = $repository->getContentTypeService();
 
@@ -428,12 +419,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the createContentTypeDraft() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::createContentTypeDraft()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testCreateContentTypeDraft
      */
     public function testCreateContentTypeDraftThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -459,12 +449,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the deleteContentType() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::deleteContentType()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testDeleteContentType
      */
     public function testDeleteContentTypeThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -490,12 +479,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the copyContentType() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::copyContentType()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testCopyContentType
      */
     public function testCopyContentTypeThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -521,12 +509,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the assignContentTypeGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::assignContentTypeGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testAssignContentTypeGroup
      */
     public function testAssignContentTypeGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -553,12 +540,11 @@ class ContentTypeServiceAuthorizationTest extends BaseContentTypeServiceTest
      * Test for the unassignContentTypeGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ContentTypeService::unassignContentTypeGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ContentTypeServiceTest::testUnassignContentTypeGroup
      */
     public function testUnassignContentTypeGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);

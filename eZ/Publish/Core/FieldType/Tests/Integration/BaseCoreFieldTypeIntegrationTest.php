@@ -15,7 +15,7 @@ use eZ\Publish\API\Repository\Tests\BaseTest as APIBaseTest;
  */
 abstract class BaseCoreFieldTypeIntegrationTest extends APIBaseTest
 {
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         parent::setUpBeforeClass();
 

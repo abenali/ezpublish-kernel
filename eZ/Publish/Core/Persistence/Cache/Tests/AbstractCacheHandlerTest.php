@@ -58,10 +58,14 @@ abstract class AbstractCacheHandlerTest extends AbstractBaseHandlerTest
                 ->expects(!empty($key) ? $this->once() : $this->never())
                 ->method('deleteItem')
                 ->with($key);
+        } else {
+            $this->cacheMock
+                ->expects($this->never())
+                ->method($this->anything());
         }
 
         $handler = $this->persistenceCacheHandler->$handlerMethodName();
-        call_user_func_array([$handler, $method], $arguments);
+        call_user_func_array(array($handler, $method), $arguments);
     }
 
     abstract public function providerForCachedLoadMethods(): array;

@@ -23,7 +23,7 @@ class MapLocationDistance extends SortClause implements CustomFieldInterface
      *
      * @var array
      */
-    protected $customFields = [];
+    protected $customFields = array();
 
     /**
      * Constructs a new MapLocationDistance SortClause on Type $typeIdentifier and Field $fieldIdentifier.

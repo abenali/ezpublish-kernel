@@ -17,25 +17,26 @@ use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 
 class ConfigParserTest extends TestCase
 {
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentType
+     */
     public function testConstructWrongInnerParser()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\InvalidArgumentType::class);
-
         new ConfigParser(
-            [
+            array(
                 $this->getConfigurationParserMock(),
                 new stdClass(),
-            ]
+            )
         );
     }
 
     public function testConstruct()
     {
-        $innerParsers = [
+        $innerParsers = array(
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
-        ];
+        );
         $configParser = new ConfigParser($innerParsers);
         $this->assertSame($innerParsers, $configParser->getConfigParsers());
     }
@@ -43,29 +44,29 @@ class ConfigParserTest extends TestCase
     public function testGetSetInnerParsers()
     {
         $configParser = new ConfigParser();
-        $this->assertSame([], $configParser->getConfigParsers());
+        $this->assertSame(array(), $configParser->getConfigParsers());
 
-        $innerParsers = [
+        $innerParsers = array(
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
-        ];
+        );
         $configParser->setConfigParsers($innerParsers);
         $this->assertSame($innerParsers, $configParser->getConfigParsers());
     }
 
     public function testMapConfig()
     {
-        $parsers = [
+        $parsers = array(
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
-        ];
+        );
         $configParser = new ConfigParser($parsers);
 
-        $scopeSettings = [
+        $scopeSettings = array(
             'foo' => 'bar',
             'some' => 'thing',
-        ];
+        );
         $currentScope = 'the_current_scope';
         $contextualizer = $this->createMock(ContextualizerInterface::class);
 
@@ -82,16 +83,16 @@ class ConfigParserTest extends TestCase
 
     public function testPrePostMap()
     {
-        $parsers = [
+        $parsers = array(
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
-        ];
+        );
         $configParser = new ConfigParser($parsers);
 
-        $config = [
+        $config = array(
             'foo' => 'bar',
             'some' => 'thing',
-        ];
+        );
         $contextualizer = $this->createMock(ContextualizerInterface::class);
 
         foreach ($parsers as $parser) {
@@ -112,10 +113,10 @@ class ConfigParserTest extends TestCase
 
     public function testAddSemanticConfig()
     {
-        $parsers = [
+        $parsers = array(
             $this->getConfigurationParserMock(),
             $this->getConfigurationParserMock(),
-        ];
+        );
         $configParser = new ConfigParser($parsers);
 
         $nodeBuilder = new NodeBuilder();

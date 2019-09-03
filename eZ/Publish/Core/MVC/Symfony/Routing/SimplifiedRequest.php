@@ -156,8 +156,8 @@ class SimplifiedRequest extends ValueObject
     public function __sleep()
     {
         // Clean up headers for serialization not have a too heavy string (i.e. for ESI/Hinclude tags).
-        $this->headers = [];
+        $this->headers = array();
 
-        return ['scheme', 'host', 'port', 'pathinfo', 'queryParams', 'languages', 'headers'];
+        return array('scheme', 'host', 'port', 'pathinfo', 'queryParams', 'languages', 'headers');
     }
 }

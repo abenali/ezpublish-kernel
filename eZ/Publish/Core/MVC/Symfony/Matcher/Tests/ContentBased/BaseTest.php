@@ -21,10 +21,12 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $repositoryMock;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->repositoryMock = $this->getRepositoryMock();
@@ -35,17 +37,17 @@ abstract class BaseTest extends TestCase
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    protected function getPartiallyMockedViewProvider(array $matchingConfig = [])
+    protected function getPartiallyMockedViewProvider(array $matchingConfig = array())
     {
         return $this
             ->getMockBuilder(Configured::class)
             ->setConstructorArgs(
-                [
+                array(
                     $this->repositoryMock,
                     $matchingConfig,
-                ]
+                )
             )
-            ->setMethods(['getMatcher'])
+            ->setMethods(array('getMatcher'))
             ->getMock();
     }
 
@@ -62,7 +64,7 @@ abstract class BaseTest extends TestCase
             ->setMethods(
                 array_diff(
                     get_class_methods($repositoryClass),
-                    ['sudo']
+                    array('sudo')
                 )
             )
             ->getMock();
@@ -73,11 +75,11 @@ abstract class BaseTest extends TestCase
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    protected function getLocationMock(array $properties = [])
+    protected function getLocationMock(array $properties = array())
     {
         return $this
             ->getMockBuilder(Location::class)
-            ->setConstructorArgs([$properties])
+            ->setConstructorArgs(array($properties))
             ->getMockForAbstractClass();
     }
 
@@ -86,11 +88,11 @@ abstract class BaseTest extends TestCase
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    protected function getContentInfoMock(array $properties = [])
+    protected function getContentInfoMock(array $properties = array())
     {
         return $this->
             getMockBuilder(ContentInfo::class)
-            ->setConstructorArgs([$properties])
+            ->setConstructorArgs(array($properties))
             ->getMockForAbstractClass();
     }
 

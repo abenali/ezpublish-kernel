@@ -6,7 +6,6 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
-use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use eZ\Publish\API\Repository\Values\URL\Query\Criterion;
 use eZ\Publish\API\Repository\Values\URL\URLQuery;
 
@@ -16,11 +15,10 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
      * Test for the findUrls() method.
      *
      * @see \eZ\Publish\API\Repository\URLService::findUrls
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testFindUrlsThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -31,12 +29,12 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
         $userService = $repository->getUserService();
         $urlService = $repository->getURLService();
 
-        $repository->getPermissionResolver()->setCurrentUserReference($userService->loadUser($anonymousUserId));
+        $repository->setCurrentUser($userService->loadUser($anonymousUserId));
 
         $query = new URLQuery();
         $query->filter = new Criterion\MatchAll();
 
-        $this->expectException(UnauthorizedException::class);
+        // This call will fail with an UnauthorizedException
         $urlService->findUrls($query);
         /* END: Use Case */
     }
@@ -45,11 +43,10 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
      * Test for the updateUrl() method.
      *
      * @see \eZ\Publish\API\Repository\URLService::updateUrl
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testUpdateUrlThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -61,7 +58,7 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
         $userService = $repository->getUserService();
         $urlService = $repository->getURLService();
 
-        $repository->getPermissionResolver()->setCurrentUserReference($userService->loadUser($anonymousUserId));
+        $repository->setCurrentUser($userService->loadUser($anonymousUserId));
 
         $url = $urlService->loadById($urlId);
         $updateStruct = $urlService->createUpdateStruct();
@@ -76,11 +73,10 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
      * Test for the loadById() method.
      *
      * @see \eZ\Publish\API\Repository\URLService::loadById
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testLoadByIdThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -92,7 +88,7 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
         $userService = $repository->getUserService();
         $urlService = $repository->getURLService();
 
-        $repository->getPermissionResolver()->setCurrentUserReference($userService->loadUser($anonymousUserId));
+        $repository->setCurrentUser($userService->loadUser($anonymousUserId));
 
         // This call will fail with an UnauthorizedException
         $urlService->loadById($urlId);
@@ -103,11 +99,10 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
      * Test for the loadByUrl() method.
      *
      * @see \eZ\Publish\API\Repository\URLService::loadById
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testLoadByUrlThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -120,7 +115,7 @@ class URLServiceAuthorizationTest extends BaseURLServiceTest
         $userService = $repository->getUserService();
         $urlService = $repository->getURLService();
 
-        $repository->getPermissionResolver()->setCurrentUserReference($userService->loadUser($anonymousUserId));
+        $repository->setCurrentUser($userService->loadUser($anonymousUserId));
 
         // This call will fail with an UnauthorizedException
         $urlService->loadByUrl($url);

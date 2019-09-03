@@ -21,7 +21,9 @@ use eZ\Publish\SPI\Persistence\Content\Field;
  */
 class KeywordStorage extends GatewayBasedStorage
 {
-    /** @var \eZ\Publish\Core\FieldType\Keyword\KeywordStorage\Gateway */
+    /**
+     * @var \eZ\Publish\Core\FieldType\Keyword\KeywordStorage\Gateway
+     */
     protected $gateway;
 
     /**

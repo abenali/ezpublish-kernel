@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.api.storage_engine.factory', new Definition());
@@ -29,7 +29,7 @@ class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new RegisterStorageEnginePass());
     }
@@ -38,7 +38,7 @@ class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
     {
         $storageEngineDef = new Definition();
         $storageEngineIdentifier = 'i_am_a_storage_engine';
-        $storageEngineDef->addTag('ezpublish.storageEngine', ['alias' => $storageEngineIdentifier]);
+        $storageEngineDef->addTag('ezpublish.storageEngine', array('alias' => $storageEngineIdentifier));
         $serviceId = 'storage_engine_service';
         $this->setDefinition($serviceId, $storageEngineDef);
 
@@ -47,7 +47,7 @@ class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.api.storage_engine.factory',
             'registerStorageEngine',
-            [$serviceId, $storageEngineIdentifier]
+            array($serviceId, $storageEngineIdentifier)
         );
     }
 
@@ -57,7 +57,7 @@ class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
         $storageEngineIdentifier = 'i_am_a_storage_engine';
 
         $this->container->setParameter('ezpublish.api.storage_engine.default', $storageEngineIdentifier);
-        $storageEngineDef->addTag('ezpublish.storageEngine', ['alias' => $storageEngineIdentifier]);
+        $storageEngineDef->addTag('ezpublish.storageEngine', array('alias' => $storageEngineIdentifier));
         $serviceId = 'storage_engine_service';
         $this->setDefinition($serviceId, $storageEngineDef);
 
@@ -66,14 +66,15 @@ class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.api.storage_engine.factory',
             'registerStorageEngine',
-            [new Reference($serviceId), $storageEngineIdentifier]
+            array(new Reference($serviceId), $storageEngineIdentifier)
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRegisterStorageEngineNoAlias()
     {
-        $this->expectException(\LogicException::class);
-
         $storageEngineDef = new Definition();
         $storageEngineIdentifier = 'i_am_a_storage_engine';
         $storageEngineDef->addTag('ezpublish.storageEngine');
@@ -85,7 +86,7 @@ class RegisterStorageEnginePassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.api.storage_engine.factory',
             'registerStorageEngine',
-            [$serviceId, $storageEngineIdentifier]
+            array($serviceId, $storageEngineIdentifier)
         );
     }
 }

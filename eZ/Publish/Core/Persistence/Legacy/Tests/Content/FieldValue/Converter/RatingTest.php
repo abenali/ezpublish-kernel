@@ -20,10 +20,12 @@ use PHPUnit\Framework\TestCase;
  */
 class RatingTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\RatingConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\RatingConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->converter = new RatingConverter();

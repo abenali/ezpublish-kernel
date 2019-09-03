@@ -114,7 +114,7 @@ abstract class Location extends ValueObject
     protected $priority;
 
     /**
-     * Indicates that the Location entity is hidden (explicitly or hidden by content).
+     * Indicates that the Location entity has been explicitly marked as hidden.
      *
      * @var bool
      */
@@ -127,13 +127,6 @@ abstract class Location extends ValueObject
      * @var bool
      */
     protected $invisible;
-
-    /**
-     * Indicates that the Location entity has been explicitly marked as hidden.
-     *
-     * @var bool
-     */
-    protected $explicitlyHidden;
 
     /**
      * Remote ID.
@@ -200,7 +193,9 @@ abstract class Location extends ValueObject
      */
     protected $sortOrder;
 
-    /** @var \eZ\Publish\API\Repository\Values\Content\Content */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\Content
+     */
     protected $content;
 
     /**

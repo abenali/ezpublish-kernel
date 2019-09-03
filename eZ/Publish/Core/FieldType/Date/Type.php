@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\FieldType\Date;
 
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\Core\FieldType\ValidationError;
@@ -28,13 +27,13 @@ class Type extends FieldType
      */
     const DEFAULT_CURRENT_DATE = 1;
 
-    protected $settingsSchema = [
+    protected $settingsSchema = array(
         // One of the DEFAULT_* class constants
-        'defaultType' => [
+        'defaultType' => array(
             'type' => 'choice',
             'default' => self::DEFAULT_EMPTY,
-        ],
-    ];
+        ),
+    );
 
     /**
      * Returns the field type identifier for this field type.
@@ -47,9 +46,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\Date\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\Date\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         if ($this->isEmptyValue($value)) {
             return '';
@@ -168,16 +174,16 @@ class Type extends FieldType
         }
 
         if ($value->date instanceof DateTime) {
-            return [
+            return array(
                 'timestamp' => $value->date->getTimestamp(),
                 'rfc850' => $value->date->format(DateTime::RFC850),
-            ];
+            );
         }
 
-        return [
+        return array(
             'timestamp' => 0,
             'rfc850' => null,
-        ];
+        );
     }
 
     /**
@@ -199,16 +205,16 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (!isset($this->settingsSchema[$name])) {
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
                 continue;
@@ -216,17 +222,17 @@ class Type extends FieldType
 
             switch ($name) {
                 case 'defaultType':
-                    $definedTypes = [
+                    $definedTypes = array(
                         self::DEFAULT_EMPTY,
                         self::DEFAULT_CURRENT_DATE,
-                    ];
+                    );
                     if (!in_array($value, $definedTypes, true)) {
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' is of unknown type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }

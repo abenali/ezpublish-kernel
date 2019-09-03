@@ -46,7 +46,7 @@ class DateAndTimeTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -56,20 +56,20 @@ class DateAndTimeTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [
-            'useSeconds' => [
+        return array(
+            'useSeconds' => array(
                 'type' => 'bool',
                 'default' => false,
-            ],
-            'defaultType' => [
+            ),
+            'defaultType' => array(
                 'type' => 'choice',
                 'default' => DateAndTime::DEFAULT_EMPTY,
-            ],
-            'dateInterval' => [
+            ),
+            'dateInterval' => array(
                 'type' => 'dateInterval',
                 'default' => null,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -105,12 +105,12 @@ class DateAndTimeTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
-                [],
+        return array(
+            array(
+                array(),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -144,24 +144,24 @@ class DateAndTimeTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new DateAndTimeValue(),
-            ],
-            [
+            ),
+            array(
                 '2012-08-28 12:20 Europe/Berlin',
                 DateAndTimeValue::fromString('2012-08-28 12:20 Europe/Berlin'),
-            ],
-            [
+            ),
+            array(
                 1346149200,
                 DateAndTimeValue::fromTimestamp(1346149200),
-            ],
-            [
+            ),
+            array(
                 ($dateTime = new \DateTime()),
                 new DateAndTimeValue($dateTime),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -201,19 +201,19 @@ class DateAndTimeTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new DateAndTimeValue(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new DateAndTimeValue($date = new \DateTime('Tue, 28 Aug 2012 12:20:00 +0200')),
-                [
+                array(
                     'rfc850' => $date->format(\DateTime::RFC850),
                     'timestamp' => $date->getTimeStamp(),
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -257,25 +257,25 @@ class DateAndTimeTest extends FieldTypeTest
     {
         $date = new \DateTime('Tue, 28 Aug 2012 12:20:00 +0200');
 
-        return [
-            [
+        return array(
+            array(
                 null,
                 new DateAndTimeValue(),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'rfc850' => $date->format(\DateTime::RFC850),
                     'timestamp' => $date->getTimeStamp(),
-                ],
+                ),
                 new DateAndTimeValue($date),
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'timestamp' => $date->getTimeStamp(),
-                ],
+                ),
                 DateAndTimeValue::fromTimestamp($date->getTimeStamp()),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -323,26 +323,26 @@ class DateAndTimeTest extends FieldTypeTest
      */
     public function provideInputForTimeStringFromHash()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'timestring' => 'now',
-                ],
+                ),
                 'P0Y',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'timestring' => '+42 seconds',
-                ],
+                ),
                 'PT42S',
-            ],
-            [
-                [
+            ),
+            array(
+                array(
                     'timestring' => '+3 months 2 days 5 hours',
-                ],
+                ),
                 'P3M2DT5H',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -369,30 +369,30 @@ class DateAndTimeTest extends FieldTypeTest
      */
     public function provideValidFieldSettings()
     {
-        return [
-            [
-                [],
-            ],
-            [
-                [
+        return array(
+            array(
+                array(),
+            ),
+            array(
+                array(
                     'useSeconds' => true,
                     'defaultType' => DateAndTime::DEFAULT_EMPTY,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     'useSeconds' => false,
                     'defaultType' => DateAndTime::DEFAULT_CURRENT_DATE,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     'useSeconds' => false,
                     'defaultType' => DateAndTime::DEFAULT_CURRENT_DATE_ADJUSTED,
                     'dateInterval' => new DateInterval('P2Y'),
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -420,34 +420,34 @@ class DateAndTimeTest extends FieldTypeTest
      */
     public function provideInValidFieldSettings()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     // useSeconds must be bool
                     'useSeconds' => 23,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     // defaultType must be constant
                     'defaultType' => 42,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     // No dateInterval allowed with this defaultType
                     'defaultType' => DateAndTime::DEFAULT_EMPTY,
                     'dateInterval' => new DateInterval('P2Y'),
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     // dateInterval must be a \DateInterval
                     'defaultType' => DateAndTime::DEFAULT_CURRENT_DATE_ADJUSTED,
                     'dateInterval' => new stdClass(),
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -455,11 +455,17 @@ class DateAndTimeTest extends FieldTypeTest
         return 'ezdatetime';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [DateAndTimeValue::fromTimestamp(438512400), [], 'en_GB', 'Thu 1983-24-11 09:00:00'],
-        ];
+        return array(
+            array(
+                $this->getEmptyValueExpectation(),
+                '',
+            ),
+            array(
+                DateAndTimeValue::fromTimestamp(438512400),
+                'Thu 1983-24-11 09:00:00',
+            ),
+        );
     }
 }

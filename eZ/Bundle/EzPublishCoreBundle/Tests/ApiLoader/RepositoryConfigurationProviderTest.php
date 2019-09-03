@@ -18,16 +18,16 @@ class RepositoryConfigurationProviderTest extends TestCase
     {
         $configResolver = $this->getConfigResolverMock();
         $repositoryAlias = 'main';
-        $repositoryConfig = [
+        $repositoryConfig = array(
             'engine' => 'foo',
             'connection' => 'some_connection',
-        ];
-        $repositories = [
+        );
+        $repositories = array(
             $repositoryAlias => $repositoryConfig,
-            'another' => [
+            'another' => array(
                 'engine' => 'bar',
-            ],
-        ];
+            ),
+        );
         $provider = new RepositoryConfigurationProvider($configResolver, $repositories);
 
         $configResolver
@@ -37,7 +37,7 @@ class RepositoryConfigurationProviderTest extends TestCase
             ->will($this->returnValue($repositoryAlias));
 
         $this->assertSame(
-            ['alias' => $repositoryAlias] + $repositoryConfig,
+            array('alias' => $repositoryAlias) + $repositoryConfig,
             $provider->getRepositoryConfig()
         );
     }
@@ -46,16 +46,16 @@ class RepositoryConfigurationProviderTest extends TestCase
     {
         $configResolver = $this->getConfigResolverMock();
         $repositoryAlias = 'main';
-        $repositoryConfig = [
+        $repositoryConfig = array(
             'engine' => 'foo',
             'connection' => 'some_connection',
-        ];
-        $repositories = [
+        );
+        $repositories = array(
             $repositoryAlias => $repositoryConfig,
-            'another' => [
+            'another' => array(
                 'engine' => 'bar',
-            ],
-        ];
+            ),
+        );
         $provider = new RepositoryConfigurationProvider($configResolver, $repositories);
 
         $configResolver
@@ -65,24 +65,25 @@ class RepositoryConfigurationProviderTest extends TestCase
             ->will($this->returnValue(null));
 
         $this->assertSame(
-            ['alias' => $repositoryAlias] + $repositoryConfig,
+            array('alias' => $repositoryAlias) + $repositoryConfig,
             $provider->getRepositoryConfig()
         );
     }
 
+    /**
+     * @expectedException \eZ\Bundle\EzPublishCoreBundle\ApiLoader\Exception\InvalidRepositoryException
+     */
     public function testGetRepositoryConfigUndefinedRepository()
     {
-        $this->expectException(\eZ\Bundle\EzPublishCoreBundle\ApiLoader\Exception\InvalidRepositoryException::class);
-
         $configResolver = $this->getConfigResolverMock();
-        $repositories = [
-            'main' => [
+        $repositories = array(
+            'main' => array(
                 'engine' => 'foo',
-            ],
-            'another' => [
+            ),
+            'another' => array(
                 'engine' => 'bar',
-            ],
-        ];
+            ),
+        );
 
         $configResolver
             ->expects($this->once())

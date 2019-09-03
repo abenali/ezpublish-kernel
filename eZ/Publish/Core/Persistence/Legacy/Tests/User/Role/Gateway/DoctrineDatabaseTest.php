@@ -27,12 +27,27 @@ class DoctrineDatabaseTest extends TestCase
     /**
      * Inserts DB fixture.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
         $this->insertDatabaseFixture(
             __DIR__ . '/../../_fixtures/roles.php'
+        );
+    }
+
+    /**
+     * @covers \eZ\Publish\Core\Persistence\Legacy\User\Role\Gateway\DoctrineDatabase::__construct
+     */
+    public function testCtor()
+    {
+        $handler = $this->getDatabaseHandler();
+        $gateway = $this->getDatabaseGateway();
+
+        $this->assertAttributeSame(
+            $handler,
+            'handler',
+            $gateway
         );
     }
 

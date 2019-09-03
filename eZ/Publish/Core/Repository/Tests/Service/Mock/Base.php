@@ -6,8 +6,6 @@
  */
 namespace eZ\Publish\Core\Repository\Tests\Service\Mock;
 
-use eZ\Publish\API\Repository\PermissionResolver;
-use eZ\Publish\Core\FieldType\FieldTypeRegistry;
 use eZ\Publish\Core\Repository\Helper\RelationProcessor;
 use eZ\Publish\Core\Search\Common\BackgroundIndexer\NullIndexer;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +17,8 @@ use eZ\Publish\API\Repository\Repository as APIRepository;
 use eZ\Publish\Core\Repository\Values\User\User;
 use eZ\Publish\Core\Repository\FieldTypeService;
 use eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper;
+use eZ\Publish\Core\Repository\Helper\FieldTypeRegistry;
+use eZ\Publish\Core\Repository\Helper\NameableFieldTypeRegistry;
 use eZ\Publish\SPI\Persistence\Handler;
 
 /**
@@ -26,16 +26,19 @@ use eZ\Publish\SPI\Persistence\Handler;
  */
 abstract class Base extends TestCase
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
-    /** @var \eZ\Publish\API\Repository\Repository|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $repositoryMock;
 
-    /** @var \eZ\Publish\API\Repository\PermissionResolver|\PHPUnit\Framework\MockObject\MockObject */
-    private $permissionResolverMock;
-
-    /** @var \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $persistenceMock;
 
     /**
@@ -45,9 +48,11 @@ abstract class Base extends TestCase
      *
      * @see getPersistenceMockHandler()
      */
-    private $spiMockHandlers = [];
+    private $spiMockHandlers = array();
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper
+     */
     private $contentTypeDomainMapperMock;
 
     /**
@@ -57,7 +62,7 @@ abstract class Base extends TestCase
      *
      * @return \eZ\Publish\API\Repository\Repository
      */
-    protected function getRepository(array $serviceSettings = [])
+    protected function getRepository(array $serviceSettings = array())
     {
         if ($this->repository === null || !empty($serviceSettings)) {
             $repository = new Repository(
@@ -65,7 +70,6 @@ abstract class Base extends TestCase
                 $this->getSPIMockHandler('Search\\Handler'),
                 new NullIndexer(),
                 $this->getRelationProcessorMock(),
-                $this->getFieldTypeRegistryMock(),
                 $serviceSettings,
                 $this->getStubbedUser(14)
             );
@@ -97,7 +101,7 @@ abstract class Base extends TestCase
     protected $fieldTypeRegistryMock;
 
     /**
-     * @return \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\FieldType\FieldTypeRegistry
+     * @return \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Repository\Helper\FieldTypeRegistry
      */
     protected function getFieldTypeRegistryMock()
     {
@@ -106,6 +110,20 @@ abstract class Base extends TestCase
         }
 
         return $this->fieldTypeRegistryMock;
+    }
+
+    protected $nameableFieldTypeRegistryMock;
+
+    /**
+     * @return \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Repository\Helper\NameableFieldTypeRegistry
+     */
+    protected function getNameableFieldTypeRegistryMock()
+    {
+        if (!isset($this->nameableFieldTypeRegistryMock)) {
+            $this->nameableFieldTypeRegistryMock = $this->createMock(NameableFieldTypeRegistry::class);
+        }
+
+        return $this->nameableFieldTypeRegistryMock;
     }
 
     /**
@@ -118,18 +136,6 @@ abstract class Base extends TestCase
         }
 
         return $this->repositoryMock;
-    }
-
-    /**
-     * @return \eZ\Publish\API\Repository\PermissionResolver|\PHPUnit\Framework\MockObject\MockObject
-     */
-    protected function getPermissionResolverMock()
-    {
-        if (!isset($this->permissionResolverMock)) {
-            $this->permissionResolverMock = $this->createMock(PermissionResolver::class);
-        }
-
-        return $this->permissionResolverMock;
     }
 
     /**
@@ -218,9 +224,9 @@ abstract class Base extends TestCase
     {
         if (!isset($this->spiMockHandlers[$handler])) {
             $this->spiMockHandlers[$handler] = $this->getMockBuilder("eZ\\Publish\\SPI\\{$handler}")
-                ->setMethods([])
+                ->setMethods(array())
                 ->disableOriginalConstructor()
-                ->setConstructorArgs([])
+                ->setConstructorArgs(array())
                 ->getMock();
         }
 
@@ -249,18 +255,18 @@ abstract class Base extends TestCase
     protected function getStubbedUser($id)
     {
         return new User(
-            [
+            array(
                 'content' => new Content(
-                    [
+                    array(
                         'versionInfo' => new VersionInfo(
-                            [
-                                'contentInfo' => new ContentInfo(['id' => $id]),
-                            ]
+                            array(
+                                'contentInfo' => new ContentInfo(array('id' => $id)),
+                            )
                         ),
-                        'internalFields' => [],
-                    ]
+                        'internalFields' => array(),
+                    )
                 ),
-            ]
+            )
         );
     }
 }

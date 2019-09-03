@@ -5,8 +5,6 @@ _ezpublishLocation:
         _controller: ez_content:viewLocation
         viewType: full
         layout: true
-    options:
-        expose: true # @todo it was originally exposed by AdminUI, discuss if this change is okay
 
 # This route is deprecated and will be removed in future versions.
 # The purpose of the route is to preserve BC by redirecting from the old format
@@ -15,7 +13,7 @@ _ezpublishLocation:
 _ez_content_view_redirect:
     path: /view/content/{contentId}/{language}/{viewType}/{layout}/{locationId}
     defaults:
-        _controller: 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction'
+        _controller: "FrameworkBundle:Redirect:redirect"
         route: _ez_content_view
         permanent: true
         ignoreAttributes: [language]

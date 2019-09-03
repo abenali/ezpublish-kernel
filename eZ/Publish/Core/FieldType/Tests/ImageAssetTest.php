@@ -14,12 +14,9 @@ use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Relation;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
-use eZ\Publish\Core\FieldType\ImageAsset;
+use eZ\Publish\Core\FieldType\ImageAsset as ImageAsset;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
-use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
-use eZ\Publish\SPI\Persistence\Content\VersionInfo;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 
 /**
@@ -28,56 +25,31 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
  */
 class ImageAssetTest extends FieldTypeTest
 {
-    private const DESTINATION_CONTENT_ID = 14;
-
-    /** @var \eZ\Publish\API\Repository\ContentService|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentService|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $contentServiceMock;
 
-    /** @var \eZ\Publish\API\Repository\ContentTypeService|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentTypeService|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $contentTypeServiceMock;
 
-    /** @var \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\Core\FieldType\ImageAsset\AssetMapper|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $assetMapperMock;
-
-    /** @var \eZ\Publish\SPI\Persistence\Content\Handler|\PHPUnit\Framework\MockObject\MockObject */
-    private $contentHandlerMock;
 
     /**
      * {@inheritdoc}
      */
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
         $this->contentServiceMock = $this->createMock(ContentService::class);
         $this->contentTypeServiceMock = $this->createMock(ContentTypeService::class);
         $this->assetMapperMock = $this->createMock(ImageAsset\AssetMapper::class);
-        $this->contentHandlerMock = $this->createMock(SPIContentHandler::class);
-        $versionInfo = new VersionInfo([
-            'versionNo' => 24,
-            'names' => [
-                'en_GB' => 'name_en_GB',
-                'de_DE' => 'Name_de_DE',
-            ],
-        ]);
-        $currentVersionNo = 28;
-        $destinationContentInfo = $this->createMock(ContentInfo::class);
-        $destinationContentInfo
-            ->method('__get')
-            ->willReturnMap([
-                ['currentVersionNo', $currentVersionNo],
-                ['mainLanguageCode', 'en_GB'],
-            ]);
-
-        $this->contentHandlerMock
-            ->method('loadContentInfo')
-            ->with(self::DESTINATION_CONTENT_ID)
-            ->willReturn($destinationContentInfo);
-
-        $this->contentHandlerMock
-            ->method('loadVersionInfo')
-            ->with(self::DESTINATION_CONTENT_ID, $currentVersionNo)
-            ->willReturn($versionInfo);
     }
 
     /**
@@ -96,8 +68,7 @@ class ImageAssetTest extends FieldTypeTest
         return new ImageAsset\Type(
             $this->contentServiceMock,
             $this->contentTypeServiceMock,
-            $this->assetMapperMock,
-            $this->contentHandlerMock
+            $this->assetMapperMock
         );
     }
 
@@ -285,7 +256,7 @@ class ImageAssetTest extends FieldTypeTest
 
         $validationErrors = $this->doValidate([], new ImageAsset\Value($destinationContentId));
 
-        $this->assertIsArray($validationErrors);
+        $this->assertInternalType('array', $validationErrors);
         $this->assertEquals([
             new ValidationError(
                 'Content %type% is not a valid asset target',
@@ -330,7 +301,7 @@ class ImageAssetTest extends FieldTypeTest
 
         $validationErrors = $this->doValidate([], new ImageAsset\Value($destinationContentId));
 
-        $this->assertIsArray($validationErrors);
+        $this->assertInternalType('array', $validationErrors);
         $this->assertEmpty($validationErrors, "Got value:\n" . var_export($validationErrors, true));
     }
 
@@ -340,33 +311,21 @@ class ImageAssetTest extends FieldTypeTest
     public function provideDataForGetName(): array
     {
         return [
-            'empty_destination_content_id' => [
+            [
                 $this->getEmptyValueExpectation(),
-                [],
-                'en_GB',
                 '',
-            ],
-            'destination_content_id' => [
-                new ImageAsset\Value(self::DESTINATION_CONTENT_ID), [], 'en_GB', 'name_en_GB',
-            ],
-            'destination_content_id_de_DE' => [
-                new ImageAsset\Value(self::DESTINATION_CONTENT_ID), [], 'de_DE', 'Name_de_DE',
             ],
         ];
     }
 
     /**
      * @dataProvider provideDataForGetName
+     *
+     * @expectedException \RuntimeException
      */
-    public function testGetName(SPIValue $value, array $fieldSettings = [], string $languageCode = 'en_GB', string $expected)
+    public function testGetName(SPIValue $value, $expected)
     {
-        /** @var \eZ\Publish\API\Repository\Values\ContentType\FieldDefinition|\PHPUnit\Framework\MockObject\MockObject $fieldDefinitionMock */
-        $fieldDefinitionMock = $this->createMock(FieldDefinition::class);
-        $fieldDefinitionMock->method('getFieldSettings')->willReturn($fieldSettings);
-
-        $name = $this->getFieldTypeUnderTest()->getName($value, $fieldDefinitionMock, $languageCode);
-
-        self::assertSame($expected, $name);
+        $this->getFieldTypeUnderTest()->getName($value);
     }
 
     public function testIsSearchable()
@@ -383,9 +342,9 @@ class ImageAssetTest extends FieldTypeTest
         $fieldType = $this->createFieldTypeUnderTest();
 
         $this->assertEquals(
-            [
+            array(
                 Relation::ASSET => [$destinationContentId],
-            ],
+            ),
             $fieldType->getRelations($fieldType->acceptValue($destinationContentId))
         );
     }

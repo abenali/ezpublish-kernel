@@ -138,15 +138,15 @@ class AuthorConverter implements Converter
     private function restoreValueFromXmlString($xmlString)
     {
         $dom = new DOMDocument('1.0', 'utf-8');
-        $authors = [];
+        $authors = array();
 
         if ($dom->loadXML($xmlString) === true) {
             foreach ($dom->getElementsByTagName('author') as $author) {
-                $authors[] = [
+                $authors[] = array(
                     'id' => $author->getAttribute('id'),
                     'name' => $author->getAttribute('name'),
                     'email' => $author->getAttribute('email'),
-                ];
+                );
             }
         }
 

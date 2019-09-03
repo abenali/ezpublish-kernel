@@ -21,14 +21,14 @@ abstract class CriterionHandler
      *
      * @var array
      */
-    protected $comparatorMap = [
+    protected $comparatorMap = array(
         Operator::EQ => 'eq',
         Operator::GT => 'gt',
         Operator::GTE => 'gte',
         Operator::LT => 'lt',
         Operator::LTE => 'lte',
         Operator::LIKE => 'like',
-    ];
+    );
 
     /**
      * Database handler.

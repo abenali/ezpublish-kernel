@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\FieldType\RelationList;
 
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\Core\FieldType\ValidationError;
@@ -16,7 +15,6 @@ use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\API\Repository\Values\Content\Relation;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
-use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
 use eZ\Publish\Core\FieldType\Value as BaseValue;
 
 /**
@@ -41,37 +39,29 @@ class Type extends FieldType
     const SELECTION_TEMPLATE_BASED_MULTIPLE = 5;
     const SELECTION_TEMPLATE_BASED_SINGLE = 6;
 
-    protected $settingsSchema = [
-        'selectionMethod' => [
+    protected $settingsSchema = array(
+        'selectionMethod' => array(
             'type' => 'int',
             'default' => self::SELECTION_BROWSE,
-        ],
-        'selectionDefaultLocation' => [
+        ),
+        'selectionDefaultLocation' => array(
             'type' => 'string',
             'default' => null,
-        ],
-        'selectionContentTypes' => [
+        ),
+        'selectionContentTypes' => array(
             'type' => 'array',
-            'default' => [],
-        ],
-    ];
+            'default' => array(),
+        ),
+    );
 
-    protected $validatorConfigurationSchema = [
-        'RelationListValueValidator' => [
-            'selectionLimit' => [
+    protected $validatorConfigurationSchema = array(
+        'RelationListValueValidator' => array(
+            'selectionLimit' => array(
                 'type' => 'int',
                 'default' => 0,
-            ],
-        ],
-    ];
-
-    /** @var \eZ\Publish\SPI\Persistence\Content\Handler */
-    private $handler;
-
-    public function __construct(SPIContentHandler $handler)
-    {
-        $this->handler = $handler;
-    }
+            ),
+        ),
+    );
 
     /**
      * @see \eZ\Publish\Core\FieldType\FieldType::validateFieldSettings()
@@ -82,16 +72,16 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (!isset($this->settingsSchema[$name])) {
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
                 continue;
@@ -103,7 +93,7 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' must be one of %selection_browse%, %selection_dropdown%, %selection_list_with_radio_buttons%, %selection_list_with_checkboxes%, %selection_multiple_selection_list%, %selection_template_based_multiple%, %selection_template_based_single%",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
                                 '%selection_browse%' => self::SELECTION_BROWSE,
                                 '%selection_dropdown%' => self::SELECTION_DROPDOWN,
@@ -112,7 +102,7 @@ class Type extends FieldType
                                 '%selection_multiple_selection_list%' => self::SELECTION_MULTIPLE_SELECTION_LIST,
                                 '%selection_template_based_multiple%' => self::SELECTION_TEMPLATE_BASED_MULTIPLE,
                                 '%selection_template_based_single%' => self::SELECTION_TEMPLATE_BASED_SINGLE,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -122,9 +112,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of either null, string or integer",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -134,9 +124,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of array type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -146,9 +136,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of integer type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -156,9 +146,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value cannot be lower than 0",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
@@ -178,16 +168,16 @@ class Type extends FieldType
      */
     public function validateValidatorConfiguration($validatorConfiguration)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($validatorConfiguration as $validatorIdentifier => $constraints) {
             if ($validatorIdentifier !== 'RelationListValueValidator') {
                 $validationErrors[] = new ValidationError(
                     "Validator '%validator%' is unknown",
                     null,
-                    [
+                    array(
                         '%validator%' => $validatorIdentifier,
-                    ],
+                    ),
                     "[$validatorIdentifier]"
                 );
 
@@ -200,9 +190,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Validator parameter '%parameter%' value must be an integer",
                             null,
-                            [
+                            array(
                                 '%parameter%' => $name,
-                            ],
+                            ),
                             "[$validatorIdentifier][$name]"
                         );
                     }
@@ -210,9 +200,9 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Validator parameter '%parameter%' value must be equal to/greater than 0",
                             null,
-                            [
+                            array(
                                 '%parameter%' => $name,
-                            ],
+                            ),
                             "[$validatorIdentifier][$name]"
                         );
                     }
@@ -220,9 +210,9 @@ class Type extends FieldType
                     $validationErrors[] = new ValidationError(
                         "Validator parameter '%parameter%' is unknown",
                         null,
-                        [
+                        array(
                             '%parameter%' => $name,
-                        ],
+                        ),
                         "[$validatorIdentifier][$name]"
                     );
                 }
@@ -244,7 +234,7 @@ class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $validationErrors;
@@ -253,18 +243,18 @@ class Type extends FieldType
         $validatorConfiguration = $fieldDefinition->getValidatorConfiguration();
         $constraints = isset($validatorConfiguration['RelationListValueValidator']) ?
             $validatorConfiguration['RelationListValueValidator'] :
-            [];
+            array();
 
-        $validationErrors = [];
+        $validationErrors = array();
 
         if (isset($constraints['selectionLimit']) &&
             $constraints['selectionLimit'] > 0 && count($fieldValue->destinationContentIds) > $constraints['selectionLimit']) {
             $validationErrors[] = new ValidationError(
                 'The selected content items number cannot be higher than %limit%.',
                 null,
-                [
+                array(
                     '%limit%' => $constraints['selectionLimit'],
-                ],
+                ),
                 'destinationContentIds'
             );
         }
@@ -283,31 +273,18 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\RelationList\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\RelationList\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
-        if (empty($value->destinationContentIds)) {
-            return '';
-        }
-
-        $names = [];
-        foreach ($value->destinationContentIds as $contentId) {
-            try {
-                $contentInfo = $this->handler->loadContentInfo($contentId);
-                $versionInfo = $this->handler->loadVersionInfo($contentId, $contentInfo->currentVersionNo);
-            } catch (NotFoundException $e) {
-                continue;
-            }
-
-            if (isset($versionInfo->names[$languageCode])) {
-                $names[] = $versionInfo->names[$languageCode];
-            } else {
-                $names[] = $versionInfo->names[$contentInfo->mainLanguageCode];
-            }
-        }
-
-        return implode(' ', $names);
+        throw new \RuntimeException('Name generation provided via NameableField set via "ezpublish.fieldType.nameable" service tag');
     }
 
     /**
@@ -332,10 +309,10 @@ class Type extends FieldType
     {
         // ContentInfo
         if ($inputValue instanceof ContentInfo) {
-            $inputValue = new Value([$inputValue->id]);
+            $inputValue = new Value(array($inputValue->id));
         } elseif (is_int($inputValue) || is_string($inputValue)) {
             // content id
-            $inputValue = new Value([$inputValue]);
+            $inputValue = new Value(array($inputValue));
         } elseif (is_array($inputValue)) {
             // content id's
             $inputValue = new Value($inputValue);
@@ -407,7 +384,7 @@ class Type extends FieldType
      */
     public function toHash(SPIValue $value)
     {
-        return ['destinationContentIds' => $value->destinationContentIds];
+        return array('destinationContentIds' => $value->destinationContentIds);
     }
 
     /**
@@ -448,9 +425,9 @@ class Type extends FieldType
     public function getRelations(SPIValue $value)
     {
         /* @var \eZ\Publish\Core\FieldType\RelationList\Value $value */
-        return [
+        return array(
             Relation::FIELD => $value->destinationContentIds,
-        ];
+        );
     }
 
     /**

@@ -17,13 +17,19 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConfigScopeListener implements EventSubscriberInterface
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Configuration\VersatileScopeInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Configuration\VersatileScopeInterface
+     */
     private $configResolver;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\View\ViewManagerInterface|\eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessAware */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\View\ViewManagerInterface|\eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessAware
+     */
     private $viewManager;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\View\ViewProvider|\eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessAware */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\View\ViewProvider|\eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessAware
+     */
     private $viewProviders;
 
     public function __construct(
@@ -36,10 +42,10 @@ class ConfigScopeListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
-            MVCEvents::CONFIG_SCOPE_CHANGE => ['onConfigScopeChange', 100],
-            MVCEvents::CONFIG_SCOPE_RESTORE => ['onConfigScopeChange', 100],
-        ];
+        return array(
+            MVCEvents::CONFIG_SCOPE_CHANGE => array('onConfigScopeChange', 100),
+            MVCEvents::CONFIG_SCOPE_RESTORE => array('onConfigScopeChange', 100),
+        );
     }
 
     public function onConfigScopeChange(ScopeChangeEvent $event)

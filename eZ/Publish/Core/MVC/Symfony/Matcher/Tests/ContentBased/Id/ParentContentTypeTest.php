@@ -15,10 +15,12 @@ use eZ\Publish\API\Repository\Repository;
 
 class ParentContentTypeTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\ParentContentType */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\ParentContentType
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new ParentContentTypeMatcher();
@@ -33,7 +35,7 @@ class ParentContentTypeTest extends BaseTest
      */
     private function generateRepositoryMockForContentTypeId($contentTypeId)
     {
-        $parentContentInfo = $this->getContentInfoMock(['contentTypeId' => $contentTypeId]);
+        $parentContentInfo = $this->getContentInfoMock(array('contentTypeId' => $contentTypeId));
         $parentLocation = $this->getLocationMock();
         $parentLocation->expects($this->once())
             ->method('getContentInfo')
@@ -90,28 +92,28 @@ class ParentContentTypeTest extends BaseTest
 
     public function matchLocationProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
                 $this->generateRepositoryMockForContentTypeId(123),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
                 $this->generateRepositoryMockForContentTypeId(456),
                 false,
-            ],
-            [
-                [123, 789],
+            ),
+            array(
+                array(123, 789),
                 $this->generateRepositoryMockForContentTypeId(456),
                 false,
-            ],
-            [
-                [123, 789],
+            ),
+            array(
+                array(123, 789),
                 $this->generateRepositoryMockForContentTypeId(789),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**

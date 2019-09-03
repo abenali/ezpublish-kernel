@@ -19,7 +19,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class LanguageSwitchListener implements EventSubscriberInterface
 {
-    /** @var \eZ\Publish\Core\Helper\TranslationHelper */
+    /**
+     * @var \eZ\Publish\Core\Helper\TranslationHelper
+     */
     private $translationHelper;
 
     public function __construct(TranslationHelper $translationHelper)
@@ -29,9 +31,9 @@ class LanguageSwitchListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
+        return array(
             MVCEvents::ROUTE_REFERENCE_GENERATION => 'onRouteReferenceGeneration',
-        ];
+        );
     }
 
     /**

@@ -9,21 +9,23 @@
 namespace eZ\Bundle\EzPublishCoreBundle\Tests\SiteAccess;
 
 use eZ\Bundle\EzPublishCoreBundle\SiteAccess\MatcherBuilder;
-use eZ\Bundle\EzPublishCoreBundle\SiteAccess\SiteAccessMatcherRegistry;
 use eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest;
 use eZ\Publish\Core\MVC\Symfony\SiteAccess\Matcher;
 use eZ\Bundle\EzPublishCoreBundle\SiteAccess\Matcher as CoreMatcher;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class MatcherBuilderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
-    private $siteAccessMatcherRegistry;
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
+    private $container;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
-        $this->siteAccessMatcherRegistry = $this->createMock(SiteAccessMatcherRegistry::class);
+        $this->container = $this->createMock(ContainerInterface::class);
     }
 
     /**
@@ -33,31 +35,31 @@ class MatcherBuilderTest extends TestCase
      */
     public function testBuildMatcherNoService()
     {
-        $this->siteAccessMatcherRegistry
+        $this->container
             ->expects($this->never())
-            ->method('getMatcher');
-        $matcherBuilder = new MatcherBuilder($this->siteAccessMatcherRegistry);
+            ->method('get');
+        $matcherBuilder = new MatcherBuilder($this->container);
         $matcher = $this->createMock(Matcher::class);
-        $builtMatcher = $matcherBuilder->buildMatcher('\\' . get_class($matcher), [], new SimplifiedRequest());
+        $builtMatcher = $matcherBuilder->buildMatcher('\\' . get_class($matcher), array(), new SimplifiedRequest());
         $this->assertInstanceOf(get_class($matcher), $builtMatcher);
     }
 
     /**
+     * @expectedException \RuntimeException
+     *
      * @covers \eZ\Bundle\EzPublishCoreBundle\SiteAccess\MatcherBuilder::__construct
      * @covers \eZ\Bundle\EzPublishCoreBundle\SiteAccess\MatcherBuilder::buildMatcher
      */
     public function testBuildMatcherServiceWrongInterface()
     {
-        $this->expectException(\TypeError::class);
-
         $serviceId = 'foo';
-        $this->siteAccessMatcherRegistry
+        $this->container
             ->expects($this->once())
-            ->method('getMatcher')
+            ->method('get')
             ->with($serviceId)
             ->will($this->returnValue($this->createMock(Matcher::class)));
-        $matcherBuilder = new MatcherBuilder($this->siteAccessMatcherRegistry);
-        $matcherBuilder->buildMatcher("@$serviceId", [], new SimplifiedRequest());
+        $matcherBuilder = new MatcherBuilder($this->container);
+        $matcherBuilder->buildMatcher("@$serviceId", array(), new SimplifiedRequest());
     }
 
     /**
@@ -68,13 +70,13 @@ class MatcherBuilderTest extends TestCase
     {
         $serviceId = 'foo';
         $matcher = $this->createMock(CoreMatcher::class);
-        $this->siteAccessMatcherRegistry
+        $this->container
             ->expects($this->once())
-            ->method('getMatcher')
+            ->method('get')
             ->with($serviceId)
             ->will($this->returnValue($matcher));
 
-        $matchingConfig = ['foo' => 'bar'];
+        $matchingConfig = array('foo' => 'bar');
         $request = new SimplifiedRequest();
         $matcher
             ->expects($this->once())
@@ -85,7 +87,7 @@ class MatcherBuilderTest extends TestCase
             ->method('setRequest')
             ->with($request);
 
-        $matcherBuilder = new MatcherBuilder($this->siteAccessMatcherRegistry);
+        $matcherBuilder = new MatcherBuilder($this->container);
         $matcherBuilder->buildMatcher("@$serviceId", $matchingConfig, $request);
     }
 }

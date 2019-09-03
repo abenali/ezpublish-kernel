@@ -8,16 +8,16 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\Templating\Tests\Twig\Extension;
 
+use Twig_Test_IntegrationTestCase;
 use eZ\Publish\Core\MVC\Symfony\Templating\Twig\Extension\FileSizeExtension;
+use Symfony\Component\Translation\TranslatorInterface;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\Locale\LocaleConverterInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Test\IntegrationTestCase;
 
 /**
  * Class FileSizeExtensionTest.
  */
-class FileSizeExtensionTest extends IntegrationTestCase
+class FileSizeExtensionTest extends Twig_Test_IntegrationTestCase
 {
     /**
      * @param string $locale
@@ -27,7 +27,7 @@ class FileSizeExtensionTest extends IntegrationTestCase
     /**
      * @param array $suffixes
      */
-    protected $suffixes = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB'];
+    protected $suffixes = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB');
 
     /**
      * @param TranslatorInterface|\PHPUnit\Framework\MockObject\MockObject
@@ -54,19 +54,12 @@ class FileSizeExtensionTest extends IntegrationTestCase
         $this->locale = $locale;
     }
 
-    protected function setUp(): void
-    {
-        $this->markTestSkipped('Skipped since NumberFormatter is behaving differently on PHP 7.3. Needs investigation.');
-
-        parent::setUp();
-    }
-
     /**
      * @return string $locale
      */
     public function getLocale()
     {
-        return [$this->locale];
+        return array($this->locale);
     }
 
     /**
@@ -74,9 +67,9 @@ class FileSizeExtensionTest extends IntegrationTestCase
      */
     protected function getExtensions()
     {
-        return [
+        return array(
             new FileSizeExtension($this->getTranslatorInterfaceMock(), $this->suffixes, $this->getConfigResolverInterfaceMock(), $this->getLocaleConverterInterfaceMock()),
-        ];
+        );
     }
 
     /**
@@ -111,10 +104,10 @@ class FileSizeExtensionTest extends IntegrationTestCase
         ->method('convertToPOSIX')
         ->will(
             $this->returnValueMap(
-                [
-                    ['fre-FR', 'fr-FR'],
-                    ['eng-GB', 'en-GB'],
-                ]
+                array(
+                    array('fre-FR', 'fr-FR'),
+                    array('eng-GB', 'en-GB'),
+                )
             )
         );
 

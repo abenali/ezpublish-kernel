@@ -12,30 +12,39 @@ use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
+use eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue;
 use eZ\Publish\Core\Helper\FieldHelper;
 use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Field;
 use Psr\Log\LoggerInterface;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFunction;
+use Twig_Extension;
+use Twig_SimpleFunction;
 
 /**
  * Twig content extension for eZ Publish specific usage.
  * Exposes helpers to play with public API objects.
  */
-class ContentExtension extends AbstractExtension
+class ContentExtension extends Twig_Extension
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
-    /** @var \eZ\Publish\Core\Helper\TranslationHelper */
+    /**
+     * @var \eZ\Publish\Core\Helper\TranslationHelper
+     */
     protected $translationHelper;
 
-    /** @var \eZ\Publish\Core\Helper\FieldHelper */
+    /**
+     * @var \eZ\Publish\Core\Helper\FieldHelper
+     */
     protected $fieldHelper;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     protected $logger;
 
     public function __construct(
@@ -57,36 +66,40 @@ class ContentExtension extends AbstractExtension
      */
     public function getFunctions()
     {
-        return [
-            new TwigFunction(
+        return array(
+            new Twig_SimpleFunction(
                 'ez_content_name',
-                [$this, 'getTranslatedContentName']
+                array($this, 'getTranslatedContentName')
             ),
-            new TwigFunction(
+            new Twig_SimpleFunction(
                 'ez_field_value',
-                [$this, 'getTranslatedFieldValue']
+                array($this, 'getTranslatedFieldValue')
             ),
-            new TwigFunction(
+            new Twig_SimpleFunction(
                 'ez_field',
-                [$this, 'getTranslatedField']
+                array($this, 'getTranslatedField')
             ),
-            new TwigFunction(
-                'ez_field_is_empty',
-                [$this, 'isFieldEmpty']
+            new Twig_SimpleFunction(
+                'ez_is_field_empty',
+                array($this, 'isFieldEmpty')
             ),
-            new TwigFunction(
+            new Twig_SimpleFunction(
                 'ez_field_name',
-                [$this, 'getTranslatedFieldDefinitionName']
+                array($this, 'getTranslatedFieldDefinitionName')
             ),
-            new TwigFunction(
+            new Twig_SimpleFunction(
                 'ez_field_description',
-                [$this, 'getTranslatedFieldDefinitionDescription']
+                array($this, 'getTranslatedFieldDefinitionDescription')
             ),
-            new TwigFunction(
-                'ez_content_field_identifier_first_filled_image',
-                [$this, 'getFirstFilledImageFieldIdentifier']
+            new Twig_SimpleFunction(
+                'ez_trans_prop',
+                array($this, 'getTranslatedProperty')
             ),
-        ];
+            new Twig_SimpleFunction(
+                'ez_first_filled_image_field_identifier',
+                array($this, 'getFirstFilledImageFieldIdentifier')
+            ),
+        );
     }
 
     /**
@@ -193,6 +206,44 @@ class ContentExtension extends AbstractExtension
         }
 
         throw new InvalidArgumentType('$content', 'Content|ContentInfo', $content);
+    }
+
+    /**
+     * Gets translated property generic helper.
+     *
+     * For generic use, expects property in singular form. For instance if 'name' is provided it will first look for
+     * getName( $lang ) method, then property called ->names[$lang], in either case look for correct translation.
+     *
+     * Languages will consist of either forced language or current SiteAccess languages list, in addition for property
+     * lookup helper will look for mainLanguage property and use it if either alwaysAvailable property is true or non-
+     * existing.
+     *
+     * @param \eZ\Publish\API\Repository\Values\ValueObject $object Can be any kid of Value object which directly holds the translated data
+     * @param string $property Property name, example 'name', 'description'
+     * @param string $forcedLanguage Locale we want the content name translation in (e.g. "fre-FR"). Null by default (takes current locale)
+     *
+     * @throws \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue If $property does not exists as plural or as method
+     *
+     * @return string|null
+     */
+    public function getTranslatedProperty(ValueObject $object, $property, $forcedLanguage = null)
+    {
+        $pluralProperty = $property . 's';
+        if (method_exists($object, 'get' . $property)) {
+            return $this->translationHelper->getTranslatedByMethod(
+                $object,
+                'get' . $property,
+                $forcedLanguage
+            );
+        } elseif (property_exists($object, $pluralProperty) && is_array($object->$pluralProperty)) {
+            return $this->translationHelper->getTranslatedByProperty(
+                $object,
+                $pluralProperty,
+                $forcedLanguage
+            );
+        }
+
+        throw new InvalidArgumentValue('$property', $property, get_class($object));
     }
 
     /**

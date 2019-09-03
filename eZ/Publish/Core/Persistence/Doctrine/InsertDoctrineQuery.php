@@ -19,11 +19,15 @@ use eZ\Publish\Core\Persistence\Database\QueryException;
  */
 class InsertDoctrineQuery extends AbstractDoctrineQuery implements InsertQuery
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $table;
 
-    /** @var array */
-    private $values = [];
+    /**
+     * @var array
+     */
+    private $values = array();
 
     /**
      * Opens the query and sets the target table to $table.

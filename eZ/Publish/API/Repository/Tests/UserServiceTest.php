@@ -14,7 +14,6 @@ use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\VersionInfo as APIVersionInfo;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
-use eZ\Publish\API\Repository\Values\User\Limitation\SubtreeLimitation;
 use eZ\Publish\API\Repository\Values\User\PasswordValidationContext;
 use eZ\Publish\API\Repository\Values\User\UserGroupUpdateStruct;
 use eZ\Publish\API\Repository\Values\User\UserTokenUpdateStruct;
@@ -54,60 +53,22 @@ class UserServiceTest extends BaseTest
         $userGroup = $userService->loadUserGroup($mainGroupId);
         /* END: Use Case */
 
-        $this->assertInstanceOf(UserGroup::class, $userGroup);
+        $this->assertInstanceOf('\\eZ\\Publish\\API\\Repository\\Values\\User\\UserGroup', $userGroup);
 
         // User group happens to also be a Content; isUserGroup() should be true and isUser() should be false
         $this->assertTrue($userService->isUserGroup($userGroup), 'isUserGroup() => false on a user group');
         $this->assertFalse($userService->isUser($userGroup), 'isUser() => true on a user group');
-        $this->assertSame(0, $userGroup->parentId, 'parentId should be equal `0` because it is top level node');
-    }
-
-    /**
-     * Test for the loadUserGroup() method to ensure that DomainUserGroupObject is created properly even if a user
-     * has no access to parent of UserGroup.
-     *
-     * @see \eZ\Publish\API\Repository\UserService::loadUserGroup()
-     */
-    public function testLoadUserGroupWithNoAccessToParent()
-    {
-        $repository = $this->getRepository();
-
-        $mainGroupId = $this->generateId('group', 4);
-        /* BEGIN: Use Case */
-        // $mainGroupId is the ID of the main "Users" group
-
-        $userService = $repository->getUserService();
-
-        $user = $this->createUserWithPolicies(
-            'user',
-            [
-                ['module' => 'content', 'function' => 'read'],
-            ],
-            new SubtreeLimitation(['limitationValues' => ['/1/5']])
-        );
-        $repository->getPermissionResolver()->setCurrentUserReference($user);
-
-        $userGroup = $userService->loadUserGroup($mainGroupId);
-        /* END: Use Case */
-
-        $this->assertInstanceOf(UserGroup::class, $userGroup);
-
-        // User group happens to also be a Content; isUserGroup() should be true and isUser() should be false
-        $this->assertTrue($userService->isUserGroup($userGroup), 'isUserGroup() => false on a user group');
-        $this->assertFalse($userService->isUser($userGroup), 'isUser() => true on a user group');
-        $this->assertSame(0, $userGroup->parentId, 'parentId should be equal `0` because it is top level node');
     }
 
     /**
      * Test for the loadUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
      */
     public function testLoadUserGroupThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $nonExistingGroupId = $this->generateId('group', self::DB_INT_MAX);
@@ -140,7 +101,7 @@ class UserServiceTest extends BaseTest
         $subUserGroups = $userService->loadSubUserGroups($userGroup);
         foreach ($subUserGroups as $subUserGroup) {
             // Do something with the $subUserGroup
-            $this->assertInstanceOf(UserGroup::class, $subUserGroup);
+            $this->assertInstanceOf('\\eZ\\Publish\\API\\Repository\\Values\\User\\UserGroup', $subUserGroup);
         }
         /* END: Use Case */
     }
@@ -149,11 +110,10 @@ class UserServiceTest extends BaseTest
      * Test loading sub groups throwing NotFoundException.
      *
      * @covers \eZ\Publish\API\Repository\UserService::loadSubUserGroups
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLoadSubUserGroupsThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -280,7 +240,7 @@ class UserServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            UserGroup::class,
+            '\\eZ\\Publish\\API\\Repository\\Values\\User\\UserGroup',
             $userGroup
         );
 
@@ -303,12 +263,12 @@ class UserServiceTest extends BaseTest
     public function testCreateUserGroupSetsExpectedProperties($userGroup)
     {
         $this->assertEquals(
-            [
+            array(
                 'parentId' => $this->generateId('group', 4),
-            ],
-            [
+            ),
+            array(
                 'parentId' => $userGroup->parentId,
-            ]
+            )
         );
     }
 
@@ -316,12 +276,11 @@ class UserServiceTest extends BaseTest
      * Test for the createUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
     public function testCreateUserGroupThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $mainGroupId = $this->generateId('group', 4);
@@ -351,12 +310,11 @@ class UserServiceTest extends BaseTest
      * Test for the createUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
     public function testCreateUserGroupThrowsInvalidArgumentExceptionFieldTypeNotAccept()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $mainGroupId = $this->generateId('group', 4);
@@ -385,12 +343,11 @@ class UserServiceTest extends BaseTest
      * Test for the createUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::createUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
     public function testCreateUserGroupWhenMissingField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException::class);
-
         $repository = $this->getRepository();
 
         $mainGroupId = $this->generateId('group', 4);
@@ -469,12 +426,11 @@ class UserServiceTest extends BaseTest
      * Test for the deleteUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::deleteUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUserGroup
      */
     public function testDeleteUserGroup()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -493,11 +449,10 @@ class UserServiceTest extends BaseTest
      * Test deleting user group throwing NotFoundException.
      *
      * @covers \eZ\Publish\API\Repository\UserService::deleteUserGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testDeleteUserGroupThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -560,18 +515,17 @@ class UserServiceTest extends BaseTest
         );
 
         $this->assertEquals($membersGroupId, $userGroup->parentId);
-        $this->assertEquals([$userGroup->id], $subUserGroupIds);
+        $this->assertEquals(array($userGroup->id), $subUserGroupIds);
     }
 
     /**
      * Test moving a user group below another group throws NotFoundException.
      *
      * @covers \eZ\Publish\API\Repository\UserService::moveUserGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testMoveUserGroupThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -652,7 +606,7 @@ class UserServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(
-            UserGroup::class,
+            '\\eZ\\Publish\\API\\Repository\\Values\\User\\UserGroup',
             $userGroup
         );
 
@@ -746,12 +700,11 @@ class UserServiceTest extends BaseTest
      * Test for the updateUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::updateUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUserGroup
      */
     public function testUpdateUserGroupThrowsInvalidArgumentExceptionOnFieldTypeNotAccept()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -808,11 +761,10 @@ class UserServiceTest extends BaseTest
      * Test updating a user group throws ContentFieldValidationException.
      *
      * @covers \eZ\Publish\API\Repository\UserService::updateUserGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      */
     public function testUpdateUserGroupThrowsContentFieldValidationExceptionOnRequiredFieldEmpty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
         $contentService = $repository->getContentService();
@@ -836,18 +788,18 @@ class UserServiceTest extends BaseTest
     public function testNewUserCreateStructSetsExpectedProperties($userCreate)
     {
         $this->assertEquals(
-            [
+            array(
                 'login' => 'user',
                 'email' => 'user@example.com',
                 'password' => 'secret',
                 'mainLanguageCode' => 'eng-US',
-            ],
-            [
+            ),
+            array(
                 'login' => $userCreate->login,
                 'email' => $userCreate->email,
                 'password' => $userCreate->password,
                 'mainLanguageCode' => $userCreate->mainLanguageCode,
-            ]
+            )
         );
     }
 
@@ -885,19 +837,6 @@ class UserServiceTest extends BaseTest
     }
 
     /**
-     * Test for creating user with Active Directory login name.
-     */
-    public function testNewUserWithDomainName()
-    {
-        $repository = $this->getRepository();
-        $userService = $repository->getUserService();
-        $createdUser = $this->createUserVersion1('ez-user-Domain\username-by-login');
-        $loadedUser = $userService->loadUserByLogin('ez-user-Domain\username-by-login');
-
-        $this->assertEquals($createdUser, $loadedUser);
-    }
-
-    /**
      * Test for the createUser() method.
      *
      * @return \eZ\Publish\API\Repository\Values\User\User
@@ -932,16 +871,16 @@ class UserServiceTest extends BaseTest
     public function testCreateUserSetsExpectedProperties(User $user)
     {
         $this->assertEquals(
-            [
+            array(
                 'login' => 'user',
                 'email' => 'user@example.com',
                 'mainLanguageCode' => 'eng-US',
-            ],
-            [
+            ),
+            array(
                 'login' => $user->login,
                 'email' => $user->email,
                 'mainLanguageCode' => $user->contentInfo->mainLanguageCode,
-            ]
+            )
         );
     }
 
@@ -949,12 +888,11 @@ class UserServiceTest extends BaseTest
      * Test for the createUser() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testCreateUserWhenMissingField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException::class);
-
         $repository = $this->getRepository();
 
         $editorsGroupId = $this->generateId('group', 13);
@@ -981,7 +919,7 @@ class UserServiceTest extends BaseTest
 
         // This call will fail with a "ContentFieldValidationException", because the
         // mandatory fields "first_name" and "last_name" are not set.
-        $userService->createUser($userCreate, [$group]);
+        $userService->createUser($userCreate, array($group));
         /* END: Use Case */
     }
 
@@ -989,12 +927,11 @@ class UserServiceTest extends BaseTest
      * Test for the createUser() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::createUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testCreateUserThrowsInvalidArgumentExceptionOnFieldTypeNotAccept()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $editorsGroupId = $this->generateId('group', 13);
@@ -1021,7 +958,7 @@ class UserServiceTest extends BaseTest
 
         // This call will fail with an "InvalidArgumentException", because the
         // value for the firled "first_name" is not accepted by the field type.
-        $userService->createUser($userCreate, [$group]);
+        $userService->createUser($userCreate, array($group));
         /* END: Use Case */
     }
 
@@ -1029,13 +966,12 @@ class UserServiceTest extends BaseTest
      * Test for the createUser() method.
      *
      * @covers \eZ\Publish\API\Repository\UserService::createUser
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument 'userCreateStruct' is invalid: User with provided login already exists
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      */
     public function testCreateUserThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'userCreateStruct\' is invalid: User with provided login already exists');
-
         $repository = $this->getRepository();
 
         $editorsGroupId = $this->generateId('group', 13);
@@ -1062,7 +998,7 @@ class UserServiceTest extends BaseTest
 
         // This call will fail with a "InvalidArgumentException", because the
         // user with "admin" login already exists.
-        $userService->createUser($userCreate, [$group]);
+        $userService->createUser($userCreate, array($group));
         /* END: Use Case */
     }
 
@@ -1108,12 +1044,11 @@ class UserServiceTest extends BaseTest
     /**
      * Test creating a user throwing NotFoundException.
      *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @covers \eZ\Publish\API\Repository\UserService::createUser
      */
     public function testCreateUserThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -1141,13 +1076,12 @@ class UserServiceTest extends BaseTest
     /**
      * Test creating a user throwing UserPasswordValidationException when password doesn't follow specific rules.
      *
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UserPasswordValidationException
+     * @expectedExceptionMessage Argument 'password' is invalid: Password doesn't match the following rules: User password must be at least 8 characters long, User password must include at least one upper case letter, User password must include at least one number, User password must include at least one special character
      * @covers \eZ\Publish\API\Repository\UserService::createUser
      */
     public function testCreateUserWithWeakPasswordThrowsUserPasswordValidationException()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UserPasswordValidationException::class);
-        $this->expectExceptionMessage('Argument \'password\' is invalid: Password doesn\'t match the following rules: User password must be at least 8 characters long, User password must include at least one upper case letter, User password must include at least one number, User password must include at least one special character');
-
         $userContentType = $this->createUserWithStrongPasswordContentType();
 
         /* BEGIN: Use Case */
@@ -1203,12 +1137,11 @@ class UserServiceTest extends BaseTest
      * Test for the loadUser() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUser
      */
     public function testLoadUserThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $nonExistingUserId = $this->generateId('user', self::DB_INT_MAX);
@@ -1274,12 +1207,11 @@ class UserServiceTest extends BaseTest
      * Test for the loadUserByCredentials() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
     public function testLoadUserByCredentialsThrowsNotFoundExceptionForUnknownPassword()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1297,12 +1229,11 @@ class UserServiceTest extends BaseTest
      * Test for the loadUserByCredentials() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
     public function testLoadUserByCredentialsThrowsNotFoundExceptionForUnknownPasswordEmtpy()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1320,12 +1251,11 @@ class UserServiceTest extends BaseTest
      * Test for the loadUserByCredentials() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
     public function testLoadUserByCredentialsThrowsNotFoundExceptionForUnknownLogin()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1343,12 +1273,11 @@ class UserServiceTest extends BaseTest
      * Test for the loadUserByCredentials() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
     public function testLoadUserByCredentialsThrowsInvalidArgumentValueForEmptyLogin()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1382,7 +1311,7 @@ class UserServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'login' => $user->login,
                 'email' => $user->email,
                 'passwordHash' => $user->passwordHash,
@@ -1393,7 +1322,7 @@ class UserServiceTest extends BaseTest
                 'contentInfo' => $user->contentInfo,
                 'versionInfo' => $user->versionInfo,
                 'fields' => $user->fields,
-            ],
+            ),
             $userReloaded
         );
     }
@@ -1402,12 +1331,11 @@ class UserServiceTest extends BaseTest
      * Test for the loadUserByLogin() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByLogin()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByLogin
      */
     public function testLoadUserByLoginThrowsNotFoundExceptionForUnknownLogin()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1441,7 +1369,7 @@ class UserServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'login' => $user->login,
                 'email' => $user->email,
                 'passwordHash' => $user->passwordHash,
@@ -1452,7 +1380,7 @@ class UserServiceTest extends BaseTest
                 'contentInfo' => $user->contentInfo,
                 'versionInfo' => $user->versionInfo,
                 'fields' => $user->fields,
-            ],
+            ),
             $userReloaded
         );
     }
@@ -1463,12 +1391,11 @@ class UserServiceTest extends BaseTest
      * In some cases people use email as login name, make sure system works as exepcted when asking for user by email.
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByLogin()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByLogin
      */
     public function testLoadUserByLoginThrowsNotFoundExceptionForUnknownLoginByEmail()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1500,7 +1427,7 @@ class UserServiceTest extends BaseTest
         $usersReloaded = $userService->loadUsersByEmail('user@example.com');
         /* END: Use Case */
 
-        $this->assertEquals([$user], $usersReloaded);
+        $this->assertEquals(array($user), $usersReloaded);
     }
 
     /**
@@ -1523,20 +1450,19 @@ class UserServiceTest extends BaseTest
         $emptyUserList = $userService->loadUsersByEmail('user42@example.com');
         /* END: Use Case */
 
-        $this->assertEquals([], $emptyUserList);
+        $this->assertEquals(array(), $emptyUserList);
     }
 
     /**
      * Test for the deleteUser() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::deleteUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testCreateUser
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUser
      */
     public function testDeleteUser()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1654,36 +1580,12 @@ class UserServiceTest extends BaseTest
         $userVersion2 = $userService->updateUser($user, $userUpdate);
         /* END: Use Case */
 
-        $this->assertInstanceOf(User::class, $userVersion2);
+        $this->assertInstanceOf(
+            '\\eZ\\Publish\\API\\Repository\\Values\\User\\User',
+            $user
+        );
 
         return $userVersion2;
-    }
-
-    /**
-     * Test for the updateUser() and loadUsersByEmail() method on change to email.
-     */
-    public function testUpdateUserEmail(): void
-    {
-        $repository = $this->getRepository();
-        $userService = $repository->getUserService();
-
-        // Create a user
-        $user = $this->createUserVersion1();
-
-        // Check we get what we expect (and implicit warmup any kind of cache)
-        $users = $userService->loadUsersByEmail('user2@example.com');
-        $this->assertCount(0, $users);
-
-        // Update user with the given email address
-        $userUpdate = $userService->newUserUpdateStruct();
-        $userUpdate->email = 'user2@example.com';
-        $updatedUser = $userService->updateUser($user, $userUpdate);
-        $this->assertInstanceOf(User::class, $updatedUser);
-
-        // Check that we can load user by email
-        $users = $userService->loadUsersByEmail('user2@example.com');
-        $this->assertCount(1, $users);
-        $this->assertInstanceOf(User::class, $users[0]);
     }
 
     /**
@@ -1700,12 +1602,12 @@ class UserServiceTest extends BaseTest
     public function testUpdateUserNoPassword()
     {
         $repository = $this->getRepository();
-        $eventUserService = $repository->getUserService();
+        $signalSlotUserService = $repository->getUserService();
 
-        $eventUserServiceReflection = new ReflectionClass($eventUserService);
-        $userServiceProperty = $eventUserServiceReflection->getProperty('innerService');
+        $signalSlotUserServiceReflection = new ReflectionClass($signalSlotUserService);
+        $userServiceProperty = $signalSlotUserServiceReflection->getProperty('service');
         $userServiceProperty->setAccessible(true);
-        $userService = $userServiceProperty->getValue($eventUserService);
+        $userService = $userServiceProperty->getValue($signalSlotUserService);
 
         $userServiceReflection = new ReflectionClass($userService);
         $settingsProperty = $userServiceReflection->getProperty('settings');
@@ -1771,18 +1673,18 @@ class UserServiceTest extends BaseTest
     public function testUpdateUserUpdatesExpectedProperties(User $user)
     {
         $this->assertEquals(
-            [
+            array(
                 'login' => 'user',
                 'email' => 'user@example.com',
                 'maxLogin' => 42,
                 'enabled' => false,
-            ],
-            [
+            ),
+            array(
                 'login' => $user->login,
                 'email' => $user->email,
                 'maxLogin' => $user->maxLogin,
                 'enabled' => $user->enabled,
-            ]
+            )
         );
     }
 
@@ -1886,12 +1788,11 @@ class UserServiceTest extends BaseTest
      * Test for the updateUser() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
     public function testUpdateUserWhenMissingField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\ContentFieldValidationException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1923,12 +1824,11 @@ class UserServiceTest extends BaseTest
      * Test for the updateUser() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::updateUser()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUpdateUser
      */
     public function testUpdateUserThrowsInvalidArgumentExceptionOnFieldTypeNotAccept()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -1959,13 +1859,12 @@ class UserServiceTest extends BaseTest
     /**
      * Test updating a user throwing UserPasswordValidationException when password doesn't follow specified rules.
      *
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UserPasswordValidationException
+     * @expectedExceptionMessage Argument 'password' is invalid: Password doesn't match the following rules: User password must be at least 8 characters long, User password must include at least one upper case letter, User password must include at least one number, User password must include at least one special character
      * @covers \eZ\Publish\API\Repository\UserService::updateUser
      */
     public function testUpdateUserWithWeakPasswordThrowsUserPasswordValidationException()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UserPasswordValidationException::class);
-        $this->expectExceptionMessage('Argument \'password\' is invalid: Password doesn\'t match the following rules: User password must be at least 8 characters long, User password must include at least one upper case letter, User password must include at least one number, User password must include at least one special character');
-
         $userService = $this->getRepository()->getUserService();
 
         $user = $this->createUserWithPassword('H@xxxiR!_1', $this->createUserWithStrongPasswordContentType());
@@ -2048,13 +1947,13 @@ class UserServiceTest extends BaseTest
         $this->refreshSearch($repository);
 
         // This array will contain the email of the newly created "Editor" user
-        $email = [];
+        $email = array();
         foreach ($userService->loadUsersOfUserGroup($group) as $user) {
             $this->assertInstanceOf(User::class, $user);
             $email[] = $user->email;
         }
         /* END: Use Case */
-        $this->assertEquals(['user@example.com'], $email);
+        $this->assertEquals(array('user@example.com'), $email);
     }
 
     /**
@@ -2082,7 +1981,7 @@ class UserServiceTest extends BaseTest
         );
 
         // This array will contain "Editors" and "Administrator users"
-        $userGroupNames = [];
+        $userGroupNames = array();
         foreach ($userService->loadUserGroupsOfUser($user) as $userGroup) {
             $userGroupNames[] = $userGroup->getFieldValue('name');
         }
@@ -2091,10 +1990,10 @@ class UserServiceTest extends BaseTest
         sort($userGroupNames, SORT_STRING);
 
         $this->assertEquals(
-            [
+            array(
                 'Administrator users',
                 'Editors',
-            ],
+            ),
             $userGroupNames
         );
     }
@@ -2103,13 +2002,12 @@ class UserServiceTest extends BaseTest
      * Test for the assignUserToUserGroup() method.
      *
      * @covers \eZ\Publish\API\Repository\UserService::assignUserToUserGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     * @expectedExceptionMessage Argument 'user' is invalid: user is already in the given user group
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testAssignUserToUserGroup
      */
     public function testAssignUserToUserGroupThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument \'user\' is invalid: user is already in the given user group');
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -2161,25 +2059,24 @@ class UserServiceTest extends BaseTest
         );
 
         // This array will contain "Anonymous Users"
-        $userGroupNames = [];
+        $userGroupNames = array();
         foreach ($userService->loadUserGroupsOfUser($user) as $userGroup) {
             $userGroupNames[] = $userGroup->getFieldValue('name');
         }
         /* END: Use Case */
 
-        $this->assertEquals(['Anonymous Users'], $userGroupNames);
+        $this->assertEquals(array('Anonymous Users'), $userGroupNames);
     }
 
     /**
      * Test for the unAssignUserFromUserGroup() method.
      *
      * @see \eZ\Publish\API\Repository\UserService::unAssignUserFromUserGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUnAssignUserFromUserGroup
      */
     public function testUnAssignUserFromUserGroupThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -2202,13 +2099,12 @@ class UserServiceTest extends BaseTest
      * Test for the unAssignUserFromUserGroup() method removing user from the last group.
      *
      * @covers \eZ\Publish\API\Repository\UserService::unAssignUserFromUserGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\BadStateException
+     * @expectedExceptionMessage Argument 'user' has a bad state: user only has one user group, cannot unassign from last group
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testUnAssignUserFromUserGroup
      */
     public function testUnAssignUserFromUserGroupThrowsBadStateArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\BadStateException::class);
-        $this->expectExceptionMessage('Argument \'user\' has a bad state: user only has one user group, cannot unassign from last group');
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -2729,12 +2625,12 @@ class UserServiceTest extends BaseTest
         $this->expectExceptionMessage("Argument 'type' is invalid: Password hash type '42424242' is not recognized");
 
         $repository = $this->getRepository();
-        $eventUserService = $repository->getUserService();
+        $signalSlotUserService = $repository->getUserService();
 
-        $eventUserServiceReflection = new ReflectionClass($eventUserService);
-        $userServiceProperty = $eventUserServiceReflection->getProperty('innerService');
+        $signalSlotUserServiceReflection = new ReflectionClass($signalSlotUserService);
+        $userServiceProperty = $signalSlotUserServiceReflection->getProperty('service');
         $userServiceProperty->setAccessible(true);
-        $userService = $userServiceProperty->getValue($eventUserService);
+        $userService = $userServiceProperty->getValue($signalSlotUserService);
 
         $userServiceReflection = new ReflectionClass($userService);
         $settingsProperty = $userServiceReflection->getProperty('settings');
@@ -2886,9 +2782,9 @@ class UserServiceTest extends BaseTest
         $contentType = $this->createUserWithStrongPasswordContentType();
 
         /* BEGIN: Use Case */
-        $context = new PasswordValidationContext([
+        $context = new PasswordValidationContext(array(
             'contentType' => $contentType,
-        ]);
+        ));
 
         $actualErrors = $userService->validatePassword($password, $context);
         /* END: Use Case */
@@ -2903,23 +2799,23 @@ class UserServiceTest extends BaseTest
      */
     public function dataProviderForValidatePassword(): array
     {
-        return [
-            [
+        return array(
+            array(
                 'pass',
-                [
-                    new ValidationError('User password must be at least %length% characters long', null, [
+                array(
+                    new ValidationError('User password must be at least %length% characters long', null, array(
                         '%length%' => 8,
-                    ], 'password'),
-                    new ValidationError('User password must include at least one upper case letter', null, [], 'password'),
-                    new ValidationError('User password must include at least one number', null, [], 'password'),
-                    new ValidationError('User password must include at least one special character', null, [], 'password'),
-                ],
-            ],
-            [
+                    ), 'password'),
+                    new ValidationError('User password must include at least one upper case letter', null, array(), 'password'),
+                    new ValidationError('User password must include at least one number', null, array(), 'password'),
+                    new ValidationError('User password must include at least one special character', null, array(), 'password'),
+                ),
+            ),
+            array(
                 'H@xxxi0R!!!',
-                [],
-            ],
-        ];
+                array(),
+            ),
+        );
     }
 
     /**
@@ -2948,9 +2844,9 @@ class UserServiceTest extends BaseTest
         $userCreate->setField('first_name', 'John');
         $userCreate->setField('last_name', 'Doe');
 
-        return $userService->createUser($userCreate, [
+        return $userService->createUser($userCreate, array(
             $userService->loadUserGroup($editorsGroupId),
-        ]);
+        ));
     }
 
     /**
@@ -2969,93 +2865,93 @@ class UserServiceTest extends BaseTest
         $typeCreate->remoteId = '384b94a1bd6bc06826410e284dd9684887bf56fc';
         $typeCreate->urlAliasSchema = 'url|scheme';
         $typeCreate->nameSchema = 'name|scheme';
-        $typeCreate->names = [
+        $typeCreate->names = array(
             'eng-GB' => 'User with strong password',
-        ];
-        $typeCreate->descriptions = [
+        );
+        $typeCreate->descriptions = array(
             'eng-GB' => '',
-        ];
+        );
         $typeCreate->creatorId = $this->generateId('user', $repository->getCurrentUser()->id);
         $typeCreate->creationDate = $this->createDateTime();
 
         $firstNameFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('first_name', 'ezstring');
-        $firstNameFieldCreate->names = [
+        $firstNameFieldCreate->names = array(
             'eng-GB' => 'First name',
-        ];
-        $firstNameFieldCreate->descriptions = [
+        );
+        $firstNameFieldCreate->descriptions = array(
             'eng-GB' => '',
-        ];
+        );
         $firstNameFieldCreate->fieldGroup = 'default';
         $firstNameFieldCreate->position = 1;
         $firstNameFieldCreate->isTranslatable = false;
         $firstNameFieldCreate->isRequired = true;
         $firstNameFieldCreate->isInfoCollector = false;
-        $firstNameFieldCreate->validatorConfiguration = [
-            'StringLengthValidator' => [
+        $firstNameFieldCreate->validatorConfiguration = array(
+            'StringLengthValidator' => array(
                 'minStringLength' => 0,
                 'maxStringLength' => 0,
-            ],
-        ];
-        $firstNameFieldCreate->fieldSettings = [];
+            ),
+        );
+        $firstNameFieldCreate->fieldSettings = array();
         $firstNameFieldCreate->isSearchable = true;
         $firstNameFieldCreate->defaultValue = '';
 
         $typeCreate->addFieldDefinition($firstNameFieldCreate);
 
         $lastNameFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('last_name', 'ezstring');
-        $lastNameFieldCreate->names = [
+        $lastNameFieldCreate->names = array(
             'eng-GB' => 'Last name',
-        ];
-        $lastNameFieldCreate->descriptions = [
+        );
+        $lastNameFieldCreate->descriptions = array(
             'eng-GB' => '',
-        ];
+        );
         $lastNameFieldCreate->fieldGroup = 'default';
         $lastNameFieldCreate->position = 2;
         $lastNameFieldCreate->isTranslatable = false;
         $lastNameFieldCreate->isRequired = true;
         $lastNameFieldCreate->isInfoCollector = false;
-        $lastNameFieldCreate->validatorConfiguration = [
-            'StringLengthValidator' => [
+        $lastNameFieldCreate->validatorConfiguration = array(
+            'StringLengthValidator' => array(
                 'minStringLength' => 0,
                 'maxStringLength' => 0,
-            ],
-        ];
-        $lastNameFieldCreate->fieldSettings = [];
+            ),
+        );
+        $lastNameFieldCreate->fieldSettings = array();
         $lastNameFieldCreate->isSearchable = true;
         $lastNameFieldCreate->defaultValue = '';
 
         $typeCreate->addFieldDefinition($lastNameFieldCreate);
 
         $accountFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('account', 'ezuser');
-        $accountFieldCreate->names = [
+        $accountFieldCreate->names = array(
             'eng-GB' => 'User account',
-        ];
-        $accountFieldCreate->descriptions = [
+        );
+        $accountFieldCreate->descriptions = array(
             'eng-GB' => '',
-        ];
+        );
         $accountFieldCreate->fieldGroup = 'default';
         $accountFieldCreate->position = 3;
         $accountFieldCreate->isTranslatable = false;
         $accountFieldCreate->isRequired = true;
         $accountFieldCreate->isInfoCollector = false;
-        $accountFieldCreate->validatorConfiguration = [
-            'PasswordValueValidator' => [
+        $accountFieldCreate->validatorConfiguration = array(
+            'PasswordValueValidator' => array(
                 'requireAtLeastOneUpperCaseCharacter' => 1,
                 'requireAtLeastOneLowerCaseCharacter' => 1,
                 'requireAtLeastOneNumericCharacter' => 1,
                 'requireAtLeastOneNonAlphanumericCharacter' => 1,
                 'minLength' => 8,
-            ],
-        ];
-        $accountFieldCreate->fieldSettings = [];
+            ),
+        );
+        $accountFieldCreate->fieldSettings = array();
         $accountFieldCreate->isSearchable = false;
         $accountFieldCreate->defaultValue = null;
 
         $typeCreate->addFieldDefinition($accountFieldCreate);
 
-        $contentTypeDraft = $contentTypeService->createContentType($typeCreate, [
+        $contentTypeDraft = $contentTypeService->createContentType($typeCreate, array(
             $contentTypeService->loadContentTypeGroupByIdentifier('Users'),
-        ]);
+        ));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
 
         return $contentTypeService->loadContentTypeByIdentifier('user-with-strong-password');

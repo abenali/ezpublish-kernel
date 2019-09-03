@@ -2,7 +2,7 @@ parameters:
     ezpublish.image_alias.imagine.binary_loader.class: eZ\Bundle\EzPublishCoreBundle\Imagine\BinaryLoader
     ezpublish.image_alias.imagine.cache_resolver_decorator_factory.class: eZ\Bundle\EzPublishCoreBundle\Imagine\Cache\ResolverFactory
     ezpublish.image_alias.imagine.cache_resolver_decorator_relative.class: eZ\Bundle\EzPublishCoreBundle\Imagine\Cache\Resolver\RelativeResolver
-    ezpublish.image_alias.imagine.cache_resolver_decorator_proxy.class: eZ\Bundle\EzPublishCoreBundle\Imagine\Cache\Resolver\ProxyResolver
+    ezpublish.image_alias.imagine.cache_resolver_decorator_proxy.class: Liip\ImagineBundle\Imagine\Cache\Resolver\ProxyResolver
     ezpublish.image_alias.imagine.cache_resolver.class: eZ\Bundle\EzPublishCoreBundle\Imagine\IORepositoryResolver
     ezpublish.image_alias.imagine.cache_resolver_decorator.class: Liip\ImagineBundle\Imagine\Cache\Resolver\ProxyResolver
     ezpublish.image_alias.imagine.cache.alias_generator_decorator.class: eZ\Bundle\EzPublishCoreBundle\Imagine\Cache\AliasGeneratorDecorator
@@ -94,14 +94,12 @@ services:
             - '%ezpublish.image_alias.imagine.cache_resolver_decorator_relative.class%'
 
     ezpublish.image_alias.imagine.cache_resolver_decorator:
-        class: Liip\ImagineBundle\Imagine\Cache\Resolver\ProxyResolver
+        class: Liip\ImagineBundle\Imagine\Cache\Resolver\ResolverInterface
         factory: 'ezpublish.image_alias.imagine.cache_resolver_decorator_factory:createCacheResolver'
         decorates: ezpublish.image_alias.imagine.cache_resolver
-        lazy: true
 
     ezpublish.image_alias.imagine.cache.alias_generator_decorator:
         class: '%ezpublish.image_alias.imagine.cache.alias_generator_decorator.class%'
-        lazy: true
         arguments:
             - '@ezpublish.image_alias.imagine.variation.imagine_alias_generator'
             - '@ezpublish.cache_pool'
@@ -129,6 +127,7 @@ services:
     ezpublish.image_alias.imagine.alias_cleaner:
         class: "%ezpublish.image_alias.imagine.alias_cleaner.class%"
         arguments: ["@ezpublish.image_alias.imagine.cache_resolver"]
+        lazy: true
 
     ezpublish.image_alias.imagine.placeholder_provider.configurator:
         class: 'eZ\Bundle\EzPublishCoreBundle\Imagine\PlaceholderAliasGeneratorConfigurator'

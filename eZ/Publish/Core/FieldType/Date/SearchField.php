@@ -36,13 +36,13 @@ class SearchField implements Indexable
             $value = null;
         }
 
-        return [
+        return array(
             new Search\Field(
                 'value',
                 $value,
                 new Search\FieldType\DateField()
             ),
-        ];
+        );
     }
 
     /**
@@ -52,9 +52,9 @@ class SearchField implements Indexable
      */
     public function getIndexDefinition()
     {
-        return [
+        return array(
             'value' => new Search\FieldType\DateField(),
-        ];
+        );
     }
 
     /**

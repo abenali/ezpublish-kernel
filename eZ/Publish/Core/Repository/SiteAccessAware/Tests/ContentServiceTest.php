@@ -39,7 +39,6 @@ class ContentServiceTest extends AbstractServiceTest
         // string $method, array $arguments, bool $return = true
         return [
             ['loadContentInfo', [42]],
-            ['loadContentInfoList', [[42]], [$contentInfo]],
 
             ['loadContentInfoByRemoteId', ['f348tj4gorgji4']],
 

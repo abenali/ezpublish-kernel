@@ -15,16 +15,22 @@ use PHPUnit\Framework\TestCase;
 
 class TemplateRendererTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\View\Renderer\TemplateRenderer */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\View\Renderer\TemplateRenderer
+     */
     private $renderer;
 
-    /** @var \Symfony\Component\Templating\EngineInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \Symfony\Component\Templating\EngineInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $templateEngineMock;
 
-    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $eventDispatcherMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->templateEngineMock = $this->createMock(EngineInterface::class);
         $this->eventDispatcherMock = $this->createMock(EventDispatcherInterface::class);
@@ -43,8 +49,8 @@ class TemplateRendererTest extends TestCase
             ->expects($this->once())
             ->method('dispatch')
             ->with(
-                $this->isInstanceOf(PreContentViewEvent::class),
-                MVCEvents::PRE_CONTENT_VIEW
+                MVCEvents::PRE_CONTENT_VIEW,
+                $this->isInstanceOf(PreContentViewEvent::class)
             );
 
         $this->templateEngineMock
@@ -58,10 +64,11 @@ class TemplateRendererTest extends TestCase
         $this->renderer->render($view);
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\MVC\Exception\NoViewTemplateException
+     */
     public function testRenderNoViewTemplate()
     {
-        $this->expectException(\eZ\Publish\Core\MVC\Exception\NoViewTemplateException::class);
-
         $this->renderer->render($this->createView());
     }
 

@@ -18,7 +18,9 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector;
  */
 class PersistenceCacheCollector extends DataCollector
 {
-    /** @var PersistenceLogger */
+    /**
+     * @var PersistenceLogger
+     */
     private $logger;
 
     public function __construct(PersistenceLogger $logger)
@@ -29,7 +31,7 @@ class PersistenceCacheCollector extends DataCollector
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
         $this->data = [
-            'stats' => $this->logger->getStats(),
+            'count' => $this->logger->getCount(),
             'calls_logging_enabled' => $this->logger->isCallsLoggingEnabled(),
             'calls' => $this->logger->getCalls(),
             'handlers' => $this->logger->getLoadedUnCachedHandlers(),
@@ -44,25 +46,11 @@ class PersistenceCacheCollector extends DataCollector
     /**
      * Returns call count.
      *
-     * @deprecated since 7.5, use getStats().
-     *
      * @return int
      */
     public function getCount()
     {
-        return $this->data['stats']['call'] + $this->data['stats']['miss'];
-    }
-
-    /**
-     * Returns stats on Persistance cache usage.
-     *
-     * @since 7.5
-     *
-     * @return int[<string>]
-     */
-    public function getStats()
-    {
-        return $this->data['stats'];
+        return $this->data['count'];
     }
 
     /**
@@ -78,42 +66,27 @@ class PersistenceCacheCollector extends DataCollector
     }
 
     /**
-     * Returns all calls.
+     * Returns calls.
      *
      * @return array
      */
     public function getCalls()
     {
-        if (empty($this->data['calls'])) {
-            return [];
-        }
-
-        $calls = $count = [];
-        foreach ($this->data['calls'] as $hash => $call) {
-            list($class, $method) = \explode('::', $call['method']);
-            $namespace = \explode('\\', $class);
-            $class = \array_pop($namespace);
-            $calls[$hash] = [
+        $calls = [];
+        foreach ($this->data['calls'] as $call) {
+            list($class, $method) = explode('::', $call['method']);
+            $namespace = explode('\\', $class);
+            $class = array_pop($namespace);
+            $calls[] = array(
                 'namespace' => $namespace,
                 'class' => $class,
                 'method' => $method,
-                'arguments' => $call['arguments'],
-                'stats' => $call['stats'],
-            ];
-            // Get traces, and order them to have the most called first
-            $calls[$hash]['traces'] = $call['traces'];
-            $traceCount = [];
-            foreach ($call['traces'] as $traceHash => $traceData) {
-                $traceCount[$traceHash] = $traceData['count'];
-            }
-            \array_multisort($traceCount, SORT_DESC, SORT_NUMERIC, $calls[$hash]['traces']);
-
-            // For call sorting count all calls, but weight in-memory lookups lower
-            $count[$hash] = $call['stats']['uncached'] + $call['stats']['miss'] + $call['stats']['hit'] + ($call['stats']['memory'] * 0.001);
+                'arguments' => empty($call['arguments']) ?
+                    '' :
+                    preg_replace(array('/^array\s\(\s/', '/,\s\)$/'), '', var_export($call['arguments'], true)),
+                'trace' => implode(', ', $call['trace']),
+            );
         }
-
-        // Order calls
-        \array_multisort($count, SORT_DESC, SORT_NUMERIC, $calls);
 
         return $calls;
     }
@@ -143,10 +116,5 @@ class PersistenceCacheCollector extends DataCollector
     public function getHandlersCount()
     {
         return array_sum($this->data['handlers']);
-    }
-
-    public function reset(): void
-    {
-        $this->data = [];
     }
 }

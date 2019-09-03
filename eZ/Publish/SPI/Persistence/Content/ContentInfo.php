@@ -129,11 +129,4 @@ class ContentInfo extends ValueObject
      * @var int
      */
     public $status;
-
-    /**
-     * Flag indicating if content is currently hidden.
-     *
-     * @var bool
-     */
-    public $isHidden = false;
 }

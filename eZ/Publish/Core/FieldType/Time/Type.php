@@ -8,13 +8,12 @@
  */
 namespace eZ\Publish\Core\FieldType\Time;
 
-use DateTime;
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
 use eZ\Publish\Core\FieldType\Value as BaseValue;
+use DateTime;
 
 class Type extends FieldType
 {
@@ -28,17 +27,17 @@ class Type extends FieldType
      */
     const DEFAULT_CURRENT_TIME = 1;
 
-    protected $settingsSchema = [
-        'useSeconds' => [
+    protected $settingsSchema = array(
+        'useSeconds' => array(
             'type' => 'bool',
             'default' => false,
-        ],
+        ),
         // One of the DEFAULT_* class constants
-        'defaultType' => [
+        'defaultType' => array(
             'type' => 'choice',
             'default' => self::DEFAULT_EMPTY,
-        ],
-    ];
+        ),
+    );
 
     /**
      * Returns the field type identifier for this field type.
@@ -51,11 +50,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\Time\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
      *
-     * @throws \Exception
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\Time\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         if ($this->isEmptyValue($value)) {
             return '';
@@ -199,16 +203,16 @@ class Type extends FieldType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (!isset($this->settingsSchema[$name])) {
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
                 continue;
@@ -220,25 +224,25 @@ class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' value must be of boolean type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }
                     break;
                 case 'defaultType':
-                    $definedTypes = [
+                    $definedTypes = array(
                         self::DEFAULT_EMPTY,
                         self::DEFAULT_CURRENT_TIME,
-                    ];
+                    );
                     if (!in_array($value, $definedTypes, true)) {
                         $validationErrors[] = new ValidationError(
                             "Setting '%setting%' is of unknown type",
                             null,
-                            [
+                            array(
                                 '%setting%' => $name,
-                            ],
+                            ),
                             "[$name]"
                         );
                     }

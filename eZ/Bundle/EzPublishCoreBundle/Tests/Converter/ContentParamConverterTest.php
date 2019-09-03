@@ -19,12 +19,14 @@ class ContentParamConverterTest extends AbstractParamConverterTest
 
     const CONTENT_CLASS = Content::class;
 
-    /** @var \eZ\Bundle\EzPublishCoreBundle\Converter\ContentParamConverter */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\Converter\ContentParamConverter
+     */
     private $converter;
 
     private $contentServiceMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->contentServiceMock = $this->createMock(ContentService::class);
         $this->converter = new ContentParamConverter($this->contentServiceMock);

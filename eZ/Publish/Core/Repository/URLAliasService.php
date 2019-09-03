@@ -8,9 +8,9 @@
  */
 namespace eZ\Publish\Core\Repository;
 
-use eZ\Publish\API\Repository\PermissionResolver;
 use eZ\Publish\API\Repository\URLAliasService as URLAliasServiceInterface;
 use eZ\Publish\API\Repository\Repository as RepositoryInterface;
+use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\SPI\Persistence\Content\UrlAlias\Handler;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\URLAlias;
@@ -28,20 +28,25 @@ use Exception;
  */
 class URLAliasService implements URLAliasServiceInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\UrlAlias\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\UrlAlias\Handler
+     */
     protected $urlAliasHandler;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $settings;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\NameSchemaService */
+    /**
+     * @var \eZ\Publish\Core\Repository\Helper\NameSchemaService
+     */
     protected $nameSchemaService;
-
-    /** @var \eZ\Publish\API\Repository\PermissionResolver */
-    private $permissionResolver;
 
     /**
      * Setups service with reference to repository object that created it & corresponding handler.
@@ -49,26 +54,23 @@ class URLAliasService implements URLAliasServiceInterface
      * @param \eZ\Publish\API\Repository\Repository $repository
      * @param \eZ\Publish\SPI\Persistence\Content\UrlAlias\Handler $urlAliasHandler
      * @param \eZ\Publish\Core\Repository\Helper\NameSchemaService
-     * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
      * @param array $settings
      */
     public function __construct(
         RepositoryInterface $repository,
         Handler $urlAliasHandler,
         Helper\NameSchemaService $nameSchemaService,
-        PermissionResolver $permissionResolver,
         array $settings = []
     ) {
         $this->repository = $repository;
         $this->urlAliasHandler = $urlAliasHandler;
         // Union makes sure default settings are ignored if provided in argument
-        $this->settings = $settings + [
+        $this->settings = $settings + array(
             'showAllTranslations' => false,
-        ];
+        );
         // Get prioritized languages from language service to not have to call it several times
         $this->settings['prioritizedLanguageList'] = $repository->getContentLanguageService()->getPrioritizedLanguageCodeList();
         $this->nameSchemaService = $nameSchemaService;
-        $this->permissionResolver = $permissionResolver;
     }
 
     /**
@@ -91,7 +93,7 @@ class URLAliasService implements URLAliasServiceInterface
      */
     public function createUrlAlias(Location $location, $path, $languageCode, $forwarding = false, $alwaysAvailable = false)
     {
-        if (!$this->permissionResolver->canUser('content', 'urltranslator', $location)) {
+        if ($this->repository->getPermissionResolver()->hasAccess('content', 'urltranslator') !== true) {
             throw new UnauthorizedException('content', 'urltranslator');
         }
 
@@ -147,7 +149,7 @@ class URLAliasService implements URLAliasServiceInterface
      */
     public function createGlobalUrlAlias($resource, $path, $languageCode, $forwarding = false, $alwaysAvailable = false)
     {
-        if ($this->permissionResolver->hasAccess('content', 'urltranslator') === false) {
+        if ($this->repository->getPermissionResolver()->hasAccess('content', 'urltranslator') !== true) {
             throw new UnauthorizedException('content', 'urltranslator');
         }
 
@@ -165,14 +167,8 @@ class URLAliasService implements URLAliasServiceInterface
                 $locationId = end($resourcePath);
             }
 
-            $location = $this->repository->getLocationService()->loadLocation($locationId);
-
-            if (!$this->permissionResolver->canUser('content', 'urltranslator', $location)) {
-                throw new UnauthorizedException('content', 'urltranslator');
-            }
-
             return $this->createUrlAlias(
-                $location,
+                $this->repository->getLocationService()->loadLocation($locationId),
                 $path,
                 $languageCode,
                 $forwarding,
@@ -229,7 +225,7 @@ class URLAliasService implements URLAliasServiceInterface
         if ($prioritizedLanguageList === null) {
             $prioritizedLanguageList = $this->settings['prioritizedLanguageList'];
         }
-        $urlAliasList = [];
+        $urlAliasList = array();
 
         foreach ($spiUrlAliasList as $spiUrlAlias) {
             if (
@@ -257,7 +253,7 @@ class URLAliasService implements URLAliasServiceInterface
             $urlAliasList[$spiUrlAlias->id] = $this->buildUrlAliasDomainObject($spiUrlAlias, $path);
         }
 
-        $prioritizedAliasList = [];
+        $prioritizedAliasList = array();
         foreach ($prioritizedLanguageList as $prioritizedLanguageCode) {
             foreach ($urlAliasList as $urlAlias) {
                 foreach ($urlAlias->languageCodes as $aliasLanguageCode) {
@@ -329,7 +325,7 @@ class URLAliasService implements URLAliasServiceInterface
         $showAllTranslations,
         array $prioritizedLanguageList
     ) {
-        $pathData = [];
+        $pathData = array();
         $pathLevels = count($spiUrlAlias->pathData);
 
         foreach ($spiUrlAlias->pathData as $level => $levelEntries) {
@@ -400,8 +396,8 @@ class URLAliasService implements URLAliasServiceInterface
      */
     protected function matchPath(SPIURLAlias $spiUrlAlias, $path, $languageCode)
     {
-        $matchedPathElements = [];
-        $matchedPathLanguageCodes = [];
+        $matchedPathElements = array();
+        $matchedPathLanguageCodes = array();
         $pathElements = explode('/', $path);
         $pathLevels = count($spiUrlAlias->pathData);
 
@@ -418,14 +414,14 @@ class URLAliasService implements URLAliasServiceInterface
             }
 
             if ($matchedLanguageCode === false) {
-                return [false, false];
+                return array(false, false);
             }
 
             $matchedPathLanguageCodes[] = $matchedLanguageCode;
             $matchedPathElements[] = $spiUrlAlias->pathData[$level]['translations'][$matchedLanguageCode];
         }
 
-        return [implode('/', $matchedPathElements), $matchedPathLanguageCodes];
+        return array(implode('/', $matchedPathElements), $matchedPathLanguageCodes);
     }
 
     /**
@@ -455,22 +451,22 @@ class URLAliasService implements URLAliasServiceInterface
      */
     private function sortTranslationsByPrioritizedLanguages(array $translations)
     {
-        $sortedTranslations = [];
+        $sortedTranslations = array();
         foreach ($this->settings['prioritizedLanguageList'] as $languageCode) {
             if (isset($translations[$languageCode])) {
-                $sortedTranslations[] = [
+                $sortedTranslations[] = array(
                     'lang' => $languageCode,
                     'text' => $translations[$languageCode],
-                ];
+                );
                 unset($translations[$languageCode]);
             }
         }
 
         foreach ($translations as $languageCode => $translation) {
-            $sortedTranslations[] = [
+            $sortedTranslations[] = array(
                 'lang' => $languageCode,
                 'text' => $translation,
-            ];
+            );
         }
 
         return $sortedTranslations;
@@ -481,8 +477,6 @@ class URLAliasService implements URLAliasServiceInterface
      *
      * @param \eZ\Publish\SPI\Persistence\Content\URLAlias $spiUrlAlias
      * @param string|null $languageCode
-     * @param bool $showAllTranslations
-     * @param string[] $prioritizedLanguageList
      *
      * @return bool
      */
@@ -557,7 +551,7 @@ class URLAliasService implements URLAliasServiceInterface
      */
     public function listGlobalAliases($languageCode = null, $offset = 0, $limit = -1)
     {
-        $urlAliasList = [];
+        $urlAliasList = array();
         $spiUrlAliasList = $this->urlAliasHandler->listGlobalURLAliases(
             $languageCode,
             $offset,
@@ -595,11 +589,11 @@ class URLAliasService implements URLAliasServiceInterface
      */
     public function removeAliases(array $aliasList)
     {
-        if ($this->permissionResolver->hasAccess('content', 'urltranslator') === false) {
+        if ($this->repository->getPermissionResolver()->hasAccess('content', 'urltranslator') !== true) {
             throw new UnauthorizedException('content', 'urltranslator');
         }
 
-        $spiUrlAliasList = [];
+        $spiUrlAliasList = array();
         foreach ($aliasList as $alias) {
             if (!$alias->isCustom) {
                 throw new InvalidArgumentException(
@@ -630,12 +624,12 @@ class URLAliasService implements URLAliasServiceInterface
     protected function buildSPIUrlAlias(URLAlias $urlAlias)
     {
         return new SPIURLAlias(
-            [
+            array(
                 'id' => $urlAlias->id,
                 'type' => $urlAlias->type,
                 'destination' => $urlAlias->destination,
                 'isCustom' => $urlAlias->isCustom,
-            ]
+            )
         );
     }
 
@@ -799,7 +793,7 @@ class URLAliasService implements URLAliasServiceInterface
      */
     public function deleteCorruptedUrlAliases(): int
     {
-        if ($this->repository->getPermissionResolver()->hasAccess('content', 'urltranslator') === false) {
+        if ($this->repository->getPermissionResolver()->hasAccess('content', 'urltranslator') !== true) {
             throw new UnauthorizedException('content', 'urltranslator');
         }
 
@@ -827,7 +821,7 @@ class URLAliasService implements URLAliasServiceInterface
     protected function buildUrlAliasDomainObject(SPIURLAlias $spiUrlAlias, string $path)
     {
         return new URLAlias(
-            [
+            array(
                 'id' => $spiUrlAlias->id,
                 'type' => $spiUrlAlias->type,
                 'destination' => $spiUrlAlias->destination,
@@ -837,7 +831,7 @@ class URLAliasService implements URLAliasServiceInterface
                 'isHistory' => $spiUrlAlias->isHistory,
                 'isCustom' => $spiUrlAlias->isCustom,
                 'forward' => $spiUrlAlias->forward,
-            ]
+            )
         );
     }
 }

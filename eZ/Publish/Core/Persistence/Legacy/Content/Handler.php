@@ -10,7 +10,6 @@ namespace eZ\Publish\Core\Persistence\Legacy\Content;
 
 use Exception;
 use eZ\Publish\Core\Persistence\Legacy\Content\Location\Gateway as LocationGateway;
-use eZ\Publish\SPI\Persistence\Content\Field;
 use eZ\Publish\SPI\Persistence\Content\Handler as BaseContentHandler;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler as ContentTypeHandler;
 use eZ\Publish\Core\Persistence\Legacy\Content\UrlAlias\SlugConverter;
@@ -86,7 +85,9 @@ class Handler implements BaseContentHandler
      */
     protected $treeHandler;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
     /**
@@ -277,13 +278,13 @@ class Handler implements BaseContentHandler
         foreach ($relations as $relation) {
             $this->contentGateway->insertRelation(
                 new RelationCreateStruct(
-                    [
+                    array(
                         'sourceContentId' => $contentId,
                         'sourceContentVersionNo' => $content->versionInfo->versionNo,
                         'sourceFieldDefinitionId' => $relation['ezcontentobject_link_contentclassattribute_id'],
                         'destinationContentId' => $relation['ezcontentobject_link_to_contentobject_id'],
                         'type' => (int)$relation['ezcontentobject_link_relation_type'],
-                    ]
+                    )
                 )
             );
         }
@@ -462,7 +463,7 @@ class Handler implements BaseContentHandler
 
         $versionInfo = $this->mapper->extractVersionInfoListFromRows(
             $rows,
-            $this->contentGateway->loadVersionedNameData([['id' => $contentId, 'version' => $versionNo]])
+            $this->contentGateway->loadVersionedNameData(array(array('id' => $contentId, 'version' => $versionNo)))
         );
 
         return reset($versionInfo);
@@ -479,15 +480,15 @@ class Handler implements BaseContentHandler
     {
         $rows = $this->contentGateway->listVersionsForUser($userId, VersionInfo::STATUS_DRAFT);
         if (empty($rows)) {
-            return [];
+            return array();
         }
 
         $idVersionPairs = array_map(
             function ($row) {
-                return [
+                return array(
                     'id' => $row['ezcontentobject_version_contentobject_id'],
                     'version' => $row['ezcontentobject_version_version'],
-                ];
+                );
             },
             $rows
         );

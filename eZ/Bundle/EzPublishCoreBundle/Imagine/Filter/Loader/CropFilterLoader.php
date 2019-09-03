@@ -17,7 +17,7 @@ use Imagine\Exception\InvalidArgumentException;
  */
 class CropFilterLoader extends FilterLoaderWrapped
 {
-    public function load(ImageInterface $image, array $options = [])
+    public function load(ImageInterface $image, array $options = array())
     {
         if (count($options) < 4) {
             throw new InvalidArgumentException('Invalid options for geometry/crop filter. You must provide array(width, height, offsetX, offsetY)');
@@ -25,10 +25,10 @@ class CropFilterLoader extends FilterLoaderWrapped
 
         return $this->innerLoader->load(
             $image,
-            [
-                'size' => [$options[0], $options[1]],
-                'start' => [$options[2], $options[3]],
-            ]
+            array(
+                'size' => array($options[0], $options[1]),
+                'start' => array($options[2], $options[3]),
+            )
         );
     }
 }

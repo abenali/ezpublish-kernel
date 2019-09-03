@@ -24,7 +24,7 @@ class FlysystemTest extends TestCase
     /** @var \League\Flysystem\FilesystemInterface|\PHPUnit\Framework\MockObject\MockObject */
     private $filesystem;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->filesystem = $this->createMock(FilesystemInterface::class);
         $this->handler = new Flysystem($this->filesystem);
@@ -49,10 +49,10 @@ class FlysystemTest extends TestCase
             ->with($spiCreateStruct->id)
             ->will(
                 $this->returnValue(
-                    [
+                    array(
                         'timestamp' => 1307155200,
                         'size' => 123,
-                    ]
+                    )
                 )
             );
 
@@ -81,10 +81,10 @@ class FlysystemTest extends TestCase
             ->with('prefix/my/file.png')
             ->will(
                 $this->returnValue(
-                    [
+                    array(
                         'timestamp' => 1307155200,
                         'size' => 123,
-                    ]
+                    )
                 )
             );
 
@@ -105,9 +105,9 @@ class FlysystemTest extends TestCase
             ->with('prefix/my/file.png')
             ->will(
                 $this->returnValue(
-                    [
+                    array(
                         'size' => 123,
-                    ]
+                    )
                 )
             );
 
@@ -115,10 +115,11 @@ class FlysystemTest extends TestCase
         $this->assertNull($spiBinaryFile->mtime);
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException
+     */
     public function testLoadNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException::class);
-
         $this->filesystem
             ->expects($this->once())
             ->method('getMetadata')

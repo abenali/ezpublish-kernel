@@ -34,7 +34,7 @@ class LocationSearchAdapterTest extends LocationSearchHitAdapterTest
      */
     protected function getExpectedFinalResultFromHits($hits)
     {
-        $expectedResult = [];
+        $expectedResult = array();
 
         /** @var \eZ\Publish\API\Repository\Values\Content\Search\SearchHit[] $hits */
         foreach ($hits as $hit) {

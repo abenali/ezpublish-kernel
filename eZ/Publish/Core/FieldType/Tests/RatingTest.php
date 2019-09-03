@@ -46,7 +46,7 @@ class RatingTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        [];
+        array();
     }
 
     /**
@@ -56,7 +56,7 @@ class RatingTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -94,20 +94,20 @@ class RatingTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 'sindelfingen',
                 InvalidArgumentException::class,
-            ],
-            [
-                [],
+            ),
+            array(
+                array(),
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new Value('sindelfingen'),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -141,24 +141,24 @@ class RatingTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 false,
                 new Value(false),
-            ],
-            [
+            ),
+            array(
                 true,
                 new Value(true),
-            ],
-            [
+            ),
+            array(
                 new Value(),
                 new Value(false),
-            ],
-            [
+            ),
+            array(
                 new Value(true),
                 new Value(true),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -198,16 +198,16 @@ class RatingTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new Value(true),
                 true,
-            ],
-            [
+            ),
+            array(
                 new Value(false),
                 false,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -247,16 +247,16 @@ class RatingTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 true,
                 new Value(true),
-            ],
-            [
+            ),
+            array(
                 false,
                 new Value(false),
-            ],
-        ];
+            ),
+        );
     }
 
     public function testEmptyValueIsEmpty()
@@ -290,11 +290,10 @@ class RatingTest extends FieldTypeTest
 
     /**
      * @covers \eZ\Publish\Core\FieldType\Rating\Type::acceptValue
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testAcceptValueInvalidFormat()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $ft = $this->createFieldTypeUnderTest();
         $ref = new ReflectionObject($ft);
         $refMethod = $ref->getMethod('acceptValue');
@@ -336,7 +335,7 @@ class RatingTest extends FieldTypeTest
     public function testBuildFieldValueWithParamFalse()
     {
         $value = new Value(false);
-        self::assertFalse($value->isDisabled);
+        self::assertSame(false, $value->isDisabled);
     }
 
     /**
@@ -345,7 +344,7 @@ class RatingTest extends FieldTypeTest
     public function testBuildFieldValueWithParamTrue()
     {
         $value = new Value(true);
-        self::assertTrue($value->isDisabled);
+        self::assertSame(true, $value->isDisabled);
     }
 
     /**
@@ -354,7 +353,7 @@ class RatingTest extends FieldTypeTest
     public function testBuildFieldValueWithoutParam()
     {
         $value = new Value();
-        self::assertFalse($value->isDisabled);
+        self::assertSame(false, $value->isDisabled);
     }
 
     protected function provideFieldTypeIdentifier()
@@ -364,20 +363,19 @@ class RatingTest extends FieldTypeTest
 
     /**
      * @dataProvider provideDataForGetName
+     * @expectedException \RuntimeException
      */
-    public function testGetName(SPIValue $value, array $fieldSettings = [], string $languageCode = 'en_GB', $expected)
+    public function testGetName(SPIValue $value, $expected)
     {
-        $this->expectException(\RuntimeException::class);
-
-        $fieldSettingsMock = $this->getFieldDefinitionMock($fieldSettings);
-
-        $this->getFieldTypeUnderTest()->getName($value, $fieldSettingsMock, $languageCode);
+        $this->getFieldTypeUnderTest()->getName(
+            $value
+        );
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+        );
     }
 }

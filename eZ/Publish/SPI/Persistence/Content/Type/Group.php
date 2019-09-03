@@ -26,7 +26,7 @@ class Group extends ValueObject
      *
      * @var string[]
      */
-    public $name = [];
+    public $name = array();
 
     /**
      * Description.
@@ -35,7 +35,7 @@ class Group extends ValueObject
      *
      * @var string[]
      */
-    public $description = [];
+    public $description = array();
 
     /**
      * Readable string identifier of a group.

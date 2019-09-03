@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
+use eZ\Publish\API\Repository\Tests\SetupFactory\LegacyElasticsearch;
 use eZ\Publish\Core\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
@@ -28,6 +29,16 @@ class SearchServiceLocationTest extends BaseTest
     const QUERY_CLASS = LocationQuery::class;
 
     use Common\FacetedSearchProvider;
+
+    protected function setUp()
+    {
+        $setupFactory = $this->getSetupFactory();
+        if ($setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestSkipped('Field Location search is not yet implemented Elasticsearch search engine');
+        }
+
+        parent::setUp();
+    }
 
     /**
      * Test for the findLocation() method.
@@ -54,22 +65,22 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct = $contentTypeService->newContentTypeCreateStruct('countries-multiple');
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->remoteId = 'countries-multiple-123';
-        $createStruct->names = ['eng-GB' => 'Multiple countries'];
+        $createStruct->names = array('eng-GB' => 'Multiple countries');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new \DateTime();
 
         $fieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('countries', 'ezcountry');
-        $fieldCreate->names = ['eng-GB' => 'Countries'];
+        $fieldCreate->names = array('eng-GB' => 'Countries');
         $fieldCreate->fieldGroup = 'main';
         $fieldCreate->position = 1;
         $fieldCreate->isTranslatable = false;
         $fieldCreate->isSearchable = true;
-        $fieldCreate->fieldSettings = ['isMultiple' => true];
+        $fieldCreate->fieldSettings = array('isMultiple' => true);
 
         $createStruct->addFieldDefinition($fieldCreate);
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $contentTypeDraft = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $contentTypeDraft = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
 
@@ -78,11 +89,11 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->alwaysAvailable = false;
         $createStruct->setField(
             'countries',
-            ['BE', 'DE', 'FR', 'HR', 'NO', 'PT', 'RU']
+            array('BE', 'DE', 'FR', 'HR', 'NO', 'PT', 'RU')
         );
 
         $locationCreateStruct = $repository->getLocationService()->newLocationCreateStruct(2);
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $content = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
@@ -100,13 +111,13 @@ class SearchServiceLocationTest extends BaseTest
         $testContent = $this->createMultipleCountriesContent();
 
         $query = new LocationQuery(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'countries',
                     Criterion\Operator::CONTAINS,
                     'Belgium'
                 ),
-            ]
+            )
         );
 
         $repository = $this->getRepository();
@@ -130,13 +141,13 @@ class SearchServiceLocationTest extends BaseTest
     {
         $this->createMultipleCountriesContent();
         $query = new LocationQuery(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'countries',
                     Criterion\Operator::CONTAINS,
                     'Netherlands Antilles'
                 ),
-            ]
+            )
         );
 
         $repository = $this->getRepository();
@@ -146,65 +157,68 @@ class SearchServiceLocationTest extends BaseTest
         $this->assertEquals(0, $result->totalCount);
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testInvalidFieldIdentifierRange()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findLocations(
             new LocationQuery(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'some_hopefully_unknown_field',
                         Criterion\Operator::BETWEEN,
-                        [10, 1000]
+                        array(10, 1000)
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testInvalidFieldIdentifierIn()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findLocations(
             new LocationQuery(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'some_hopefully_unknown_field',
                         Criterion\Operator::EQ,
                         1000
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testFindLocationsWithNonSearchableField()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
         $searchService->findLocations(
             new LocationQuery(
-                [
+                array(
                     'filter' => new Criterion\Field(
                         'tag_cloud_url',
                         Criterion\Operator::EQ,
                         'http://nimbus.com'
                     ),
-                    'sortClauses' => [new SortClause\ContentId()],
-                ]
+                    'sortClauses' => array(new SortClause\ContentId()),
+                )
             )
         );
     }
@@ -232,7 +246,7 @@ class SearchServiceLocationTest extends BaseTest
     public function testQueryCustomField()
     {
         $query = new LocationQuery(
-            [
+            array(
                 'query' => new Criterion\CustomField(
                     'custom_field',
                     Criterion\Operator::EQ,
@@ -240,8 +254,8 @@ class SearchServiceLocationTest extends BaseTest
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [new SortClause\ContentId()],
-            ]
+                'sortClauses' => array(new SortClause\ContentId()),
+            )
         );
         $this->assertQueryFixture(
             $query,
@@ -271,7 +285,7 @@ class SearchServiceLocationTest extends BaseTest
         }
 
         $query = new LocationQuery(
-            [
+            array(
                 'query' => new Criterion\Field(
                     'first_name',
                     Criterion\Operator::EQ,
@@ -279,8 +293,8 @@ class SearchServiceLocationTest extends BaseTest
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [new SortClause\ContentId()],
-            ]
+                'sortClauses' => array(new SortClause\ContentId()),
+            )
         );
         $query->query->setCustomField('user', 'first_name', 'custom_field');
 
@@ -302,12 +316,12 @@ class SearchServiceLocationTest extends BaseTest
 
         $createStruct = $contentTypeService->newContentTypeCreateStruct('testtype');
         $createStruct->mainLanguageCode = 'eng-GB';
-        $createStruct->names = ['eng-GB' => 'Test type'];
+        $createStruct->names = array('eng-GB' => 'Test type');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new \DateTime();
 
         $translatableFieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('maplocation', 'ezgmaplocation');
-        $translatableFieldCreate->names = ['eng-GB' => 'Map location field'];
+        $translatableFieldCreate->names = array('eng-GB' => 'Map location field');
         $translatableFieldCreate->fieldGroup = 'main';
         $translatableFieldCreate->position = 1;
         $translatableFieldCreate->isTranslatable = false;
@@ -316,7 +330,7 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->addFieldDefinition($translatableFieldCreate);
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $contentTypeDraft = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $contentTypeDraft = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
 
@@ -345,15 +359,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -361,23 +375,23 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -386,12 +400,12 @@ class SearchServiceLocationTest extends BaseTest
                             43.756825,
                             15.775074
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -426,15 +440,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -442,23 +456,23 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -467,12 +481,12 @@ class SearchServiceLocationTest extends BaseTest
                             43.756825,
                             15.775074
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -507,15 +521,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -523,15 +537,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -539,37 +553,37 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $mushrooms = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
                             Criterion\Operator::BETWEEN,
-                            [239, 241],
+                            array(239, 241),
                             43.756825,
                             15.775074
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -604,15 +618,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -620,15 +634,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -636,28 +650,28 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $mushrooms = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
 
-        $wellInVodice = [
+        $wellInVodice = array(
             'latitude' => 43.756825,
             'longitude' => 15.775074,
-        ];
+        );
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -666,11 +680,11 @@ class SearchServiceLocationTest extends BaseTest
                             $wellInVodice['latitude'],
                             $wellInVodice['longitude']
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\MapLocationDistance(
                         'testtype',
                         'maplocation',
@@ -678,8 +692,8 @@ class SearchServiceLocationTest extends BaseTest
                         $wellInVodice['longitude'],
                         LocationQuery::SORT_ASC
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -722,15 +736,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -738,15 +752,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -754,28 +768,28 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $mushrooms = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
 
-        $well = [
+        $well = array(
             'latitude' => 43.756825,
             'longitude' => 15.775074,
-        ];
+        );
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -784,11 +798,11 @@ class SearchServiceLocationTest extends BaseTest
                             $well['latitude'],
                             $well['longitude']
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     new SortClause\MapLocationDistance(
                         'testtype',
                         'maplocation',
@@ -796,8 +810,8 @@ class SearchServiceLocationTest extends BaseTest
                         $well['longitude'],
                         LocationQuery::SORT_DESC
                     ),
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -840,15 +854,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -856,15 +870,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
@@ -879,17 +893,17 @@ class SearchServiceLocationTest extends BaseTest
         $distanceCriterion->setCustomField('testtype', 'maplocation', 'custom_geolocation_field');
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         $distanceCriterion,
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [],
-            ]
+                'sortClauses' => array(),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -924,15 +938,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.894877,
                 'longitude' => 15.972699,
                 'address' => 'Here be wild boars',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $wildBoars = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -940,15 +954,15 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.927334,
                 'longitude' => 15.934847,
                 'address' => 'A lone tree',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $tree = $contentService->publishVersion($draft->getVersionInfo());
 
         $createStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
@@ -956,23 +970,23 @@ class SearchServiceLocationTest extends BaseTest
         $createStruct->mainLanguageCode = 'eng-GB';
         $createStruct->setField(
             'maplocation',
-            [
+            array(
                 'latitude' => 45.903777,
                 'longitude' => 15.958788,
                 'address' => 'Meadow with mushrooms',
-            ],
+            ),
             'eng-GB'
         );
 
-        $draft = $contentService->createContent($createStruct, [$locationCreateStruct]);
+        $draft = $contentService->createContent($createStruct, array($locationCreateStruct));
         $mushrooms = $contentService->publishVersion($draft->getVersionInfo());
 
         $this->refreshSearch($repository);
 
-        $well = [
+        $well = array(
             'latitude' => 43.756825,
             'longitude' => 15.775074,
-        ];
+        );
 
         $sortClause = new SortClause\MapLocationDistance(
             'testtype',
@@ -984,9 +998,9 @@ class SearchServiceLocationTest extends BaseTest
         $sortClause->setCustomField('testtype', 'maplocation', 'custom_geolocation_field');
 
         $query = new LocationQuery(
-            [
+            array(
                 'filter' => new Criterion\LogicalAnd(
-                    [
+                    array(
                         new Criterion\ContentTypeId($contentType->id),
                         new Criterion\MapLocationDistance(
                             'maplocation',
@@ -995,14 +1009,14 @@ class SearchServiceLocationTest extends BaseTest
                             $well['latitude'],
                             $well['longitude']
                         ),
-                    ]
+                    )
                 ),
                 'offset' => 0,
                 'limit' => 10,
-                'sortClauses' => [
+                'sortClauses' => array(
                     $sortClause,
-                ],
-            ]
+                ),
+            )
         );
 
         $searchService = $repository->getSearchService();
@@ -1021,102 +1035,6 @@ class SearchServiceLocationTest extends BaseTest
             $tree->contentInfo->mainLocationId,
             $result->searchHits[0]->valueObject->id
         );
-    }
-
-    /**
-     * Test for the findLocations() method.
-     *
-     * @see \eZ\Publish\API\Repository\SearchService::findLocations()
-     */
-    public function testVisibilityCriterionWithHiddenContent()
-    {
-        $repository = $this->getRepository();
-        $contentTypeService = $repository->getContentTypeService();
-        $contentType = $contentTypeService->loadContentTypeByIdentifier('folder');
-
-        $contentService = $repository->getContentService();
-        $locationService = $repository->getLocationService();
-        $searchService = $repository->getSearchService();
-
-        $testRootContentCreate = $contentService->newContentCreateStruct($contentType, 'eng-US');
-        $testRootContentCreate->setField('name', 'Root for test');
-
-        $rootContent = $contentService->createContent(
-            $testRootContentCreate,
-            [
-                $locationService->newLocationCreateStruct(
-                    $this->generateId('location', 2)
-                ),
-            ]
-        );
-
-        $publishedRootContent = $contentService->publishVersion($rootContent->versionInfo);
-
-        $contentCreate = $contentService->newContentCreateStruct($contentType, 'eng-US');
-        $contentCreate->setField('name', 'To Hide');
-
-        $content = $contentService->createContent(
-            $contentCreate,
-            [
-                $locationService->newLocationCreateStruct(
-                    $publishedRootContent->contentInfo->mainLocationId
-                ),
-            ]
-        );
-        $publishedContent = $contentService->publishVersion($content->versionInfo);
-
-        $childContentCreate = $contentService->newContentCreateStruct($contentType, 'eng-US');
-        $childContentCreate->setField('name', 'Invisible Child');
-
-        $childContent = $contentService->createContent(
-            $childContentCreate,
-            [
-                $locationService->newLocationCreateStruct(
-                    $publishedContent->contentInfo->mainLocationId
-                ),
-            ]
-        );
-        $rootLocation = $locationService->loadLocation($publishedRootContent->contentInfo->mainLocationId);
-
-        $contentService->publishVersion($childContent->versionInfo);
-        $this->refreshSearch($repository);
-
-        $query = new LocationQuery([
-            'query' => new Criterion\LogicalAnd([
-                new Criterion\Visibility(
-                    Criterion\Visibility::VISIBLE
-                ),
-                new Criterion\Subtree(
-                    $rootLocation->pathString
-                ),
-            ]),
-        ]);
-
-        //Sanity check for visible locations
-        $result = $searchService->findLocations($query);
-        $this->assertEquals(3, $result->totalCount);
-
-        //Hide main content
-        $contentService->hideContent($publishedContent->contentInfo);
-        $this->refreshSearch($repository);
-
-        $result = $searchService->findLocations($query);
-        $this->assertEquals(1, $result->totalCount);
-
-        //Query for invisible content
-        $hiddenQuery = new LocationQuery([
-            'query' => new Criterion\LogicalAnd([
-                new Criterion\Visibility(
-                    Criterion\Visibility::HIDDEN
-                ),
-                new Criterion\Subtree(
-                    $rootLocation->pathString
-                ),
-            ]),
-        ]);
-
-        $result = $searchService->findLocations($hiddenQuery);
-        $this->assertEquals(2, $result->totalCount);
     }
 
     /**
@@ -1159,7 +1077,7 @@ class SearchServiceLocationTest extends BaseTest
         }
 
         if ($ignoreScore) {
-            foreach ([$fixture, $result] as $result) {
+            foreach (array($fixture, $result) as $result) {
                 $property = new \ReflectionProperty(get_class($result), 'maxScore');
                 $property->setAccessible(true);
                 $property->setValue($result, 0.0);
@@ -1172,7 +1090,7 @@ class SearchServiceLocationTest extends BaseTest
             }
         }
 
-        foreach ([$fixture, $result] as $set) {
+        foreach (array($fixture, $result) as $set) {
             foreach ($set->searchHits as $hit) {
                 $property = new \ReflectionProperty(get_class($hit), 'index');
                 $property->setAccessible(true);
@@ -1184,11 +1102,11 @@ class SearchServiceLocationTest extends BaseTest
             }
         }
 
-        $this->assertEqualsWithDelta(
+        $this->assertEquals(
             $fixture,
             $result,
-            .2, // Be quite generous regarding delay -- most important for scores
             'Search results do not match.',
+            .2 // Be quite generous regarding delay -- most important for scores
         );
     }
 
@@ -1224,10 +1142,10 @@ class SearchServiceLocationTest extends BaseTest
         foreach ($result->searchHits as $hit) {
             switch (true) {
                 case $hit->valueObject instanceof Location:
-                    $hit->valueObject = [
+                    $hit->valueObject = array(
                         'id' => $hit->valueObject->contentInfo->id,
                         'title' => $hit->valueObject->contentInfo->name,
-                    ];
+                    );
                     break;
 
                 default:

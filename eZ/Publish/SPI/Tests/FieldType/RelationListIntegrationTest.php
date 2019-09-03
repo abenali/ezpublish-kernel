@@ -48,12 +48,11 @@ class RelationListIntegrationTest extends BaseIntegrationTest
     /**
      * Get handler with required custom field types registered.
      *
-     * @return \eZ\Publish\SPI\Persistence\Handler
+     * @return Handler
      */
     public function getCustomHandler()
     {
-        $contentHandler = $this->createMock(Content\Handler::class);
-        $fieldType = new FieldType\RelationList\Type($contentHandler);
+        $fieldType = new FieldType\RelationList\Type();
         $fieldType->setTransformationProcessor($this->getTransformationProcessor());
 
         return $this->getHandler(
@@ -73,18 +72,18 @@ class RelationListIntegrationTest extends BaseIntegrationTest
     public function getTypeConstraints()
     {
         return new Content\FieldTypeConstraints(
-            [
-                'fieldSettings' => [
+            array(
+                'fieldSettings' => array(
                     'selectionMethod' => 0,
                     'selectionDefaultLocation' => '',
-                    'selectionContentTypes' => [],
-                ],
-                'validators' => [
-                    'RelationListValueValidator' => [
+                    'selectionContentTypes' => array(),
+                ),
+                'validators' => array(
+                    'RelationListValueValidator' => array(
                         'selectionLimit' => 3,
-                    ],
-                ],
-            ]
+                    ),
+                ),
+            )
         );
     }
 
@@ -97,25 +96,25 @@ class RelationListIntegrationTest extends BaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        $fieldSettings = [
+        $fieldSettings = array(
             'selectionMethod' => 0,
             'selectionDefaultLocation' => '',
-            'selectionContentTypes' => [],
-        ];
+            'selectionContentTypes' => array(),
+        );
 
-        $validators = [
-            'RelationListValueValidator' => [
+        $validators = array(
+            'RelationListValueValidator' => array(
                 'selectionLimit' => 3,
-            ],
-        ];
+            ),
+        );
 
-        return [
-            ['fieldType', 'ezobjectrelationlist'],
-            ['fieldTypeConstraints', new Content\FieldTypeConstraints([
+        return array(
+            array('fieldType', 'ezobjectrelationlist'),
+            array('fieldTypeConstraints', new Content\FieldTypeConstraints(array(
                 'fieldSettings' => $fieldSettings,
                 'validators' => $validators,
-            ])],
-        ];
+            ))),
+        );
     }
 
     /**
@@ -126,11 +125,11 @@ class RelationListIntegrationTest extends BaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
-                'data' => ['destinationContentIds' => [4]],
+            array(
+                'data' => array('destinationContentIds' => array(4)),
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 
@@ -170,11 +169,11 @@ class RelationListIntegrationTest extends BaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
-                'data' => ['destinationContentIds' => [11]],
+            array(
+                'data' => array('destinationContentIds' => array(11)),
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 

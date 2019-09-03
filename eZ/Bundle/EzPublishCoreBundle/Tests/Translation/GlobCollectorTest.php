@@ -23,7 +23,7 @@ class GlobCollectorTest extends TestCase
         $collector = new GlobCollector($translationRootDir);
 
         $files = $collector->collect();
-        $this->assertCount(3, $files);
+        $this->assertEquals(3, count($files));
         foreach ($files as $file) {
             $this->assertTrue(in_array($file['domain'], ['messages', 'dashboard']));
             $this->assertTrue(in_array($file['locale'], ['fr', 'ach_UG']));

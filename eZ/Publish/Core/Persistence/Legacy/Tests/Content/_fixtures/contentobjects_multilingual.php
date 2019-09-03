@@ -1,8 +1,8 @@
 <?php
 
-return [
-    'ezcontentobject_attribute' => [
-        0 => [
+return array(
+    'ezcontentobject_attribute' => array(
+        0 => array(
             'attribute_original_id' => '0',
             'contentclassattribute_id' => '7',
             'contentobject_id' => '4',
@@ -16,8 +16,8 @@ return [
             'sort_key_int' => '0',
             'sort_key_string' => 'main group',
             'version' => '1',
-        ],
-        1 => [
+        ),
+        1 => array(
             'attribute_original_id' => '0',
             'contentclassattribute_id' => '7',
             'contentobject_id' => '4',
@@ -31,8 +31,8 @@ return [
             'sort_key_int' => '0',
             'sort_key_string' => 'glavna skupina',
             'version' => '1',
-        ],
-        2 => [
+        ),
+        2 => array(
             'attribute_original_id' => '0',
             'contentclassattribute_id' => '7',
             'contentobject_id' => '4',
@@ -46,8 +46,8 @@ return [
             'sort_key_int' => '0',
             'sort_key_string' => 'main group 2',
             'version' => '2',
-        ],
-        3 => [
+        ),
+        3 => array(
             'attribute_original_id' => '0',
             'contentclassattribute_id' => '7',
             'contentobject_id' => '4',
@@ -61,11 +61,11 @@ return [
             'sort_key_int' => '0',
             'sort_key_string' => 'glavna skupina 2',
             'version' => '2',
-        ],
-    ],
-    'ezcontentobject_name' => [],
-    'ezcontentobject' => [
-        0 => [
+        ),
+    ),
+    'ezcontentobject_name' => array(),
+    'ezcontentobject' => array(
+        0 => array(
             'contentclass_id' => '3',
             'current_version' => '2',
             'id' => '4',
@@ -78,6 +78,6 @@ return [
             'remote_id' => 'f5c88a2209584891056f987fd965b0ba',
             'section_id' => '2',
             'status' => '1',
-        ],
-    ],
-];
+        ),
+    ),
+);

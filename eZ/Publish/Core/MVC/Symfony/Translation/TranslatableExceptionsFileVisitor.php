@@ -27,28 +27,44 @@ use Psr\Log\LoggerInterface;
  */
 class TranslatableExceptionsFileVisitor implements LoggerAwareInterface, FileVisitorInterface, NodeVisitor
 {
-    /** @var FileSourceFactory */
+    /**
+     * @var FileSourceFactory
+     */
     private $fileSourceFactory;
 
-    /** @var NodeTraverser */
+    /**
+     * @var NodeTraverser
+     */
     private $traverser;
 
-    /** @var MessageCatalogue */
+    /**
+     * @var MessageCatalogue
+     */
     private $catalogue;
 
-    /** @var \SplFileInfo */
+    /**
+     * @var \SplFileInfo
+     */
     private $file;
 
-    /** @var DocParser */
+    /**
+     * @var DocParser
+     */
     private $docParser;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
-    /** @var Node */
+    /**
+     * @var Node
+     */
     private $previousNode;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $defaultDomain = 'repository_exceptions';
 
     /**
@@ -56,10 +72,10 @@ class TranslatableExceptionsFileVisitor implements LoggerAwareInterface, FileVis
      *
      * @var array method => position of the "domain" parameter
      */
-    protected $exceptionsToExtractFrom = [
+    protected $exceptionsToExtractFrom = array(
         'contentvalidationexception',
         'forbiddenexception',
-    ];
+    );
 
     /**
      * DefaultPhpFileExtractor constructor.

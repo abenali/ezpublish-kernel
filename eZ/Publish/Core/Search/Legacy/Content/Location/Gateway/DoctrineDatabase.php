@@ -35,10 +35,14 @@ class DoctrineDatabase extends Gateway
      */
     protected $handler;
 
-    /** @var \eZ\Publish\Core\Search\Legacy\Content\Common\Gateway\CriteriaConverter */
+    /**
+     * @var \eZ\Publish\Core\Search\Legacy\Content\Common\Gateway\CriteriaConverter
+     */
     private $criteriaConverter;
 
-    /** @var \eZ\Publish\Core\Search\Legacy\Content\Common\Gateway\SortClauseConverter */
+    /**
+     * @var \eZ\Publish\Core\Search\Legacy\Content\Common\Gateway\SortClauseConverter
+     */
     private $sortClauseConverter;
 
     /**
@@ -85,7 +89,7 @@ class DoctrineDatabase extends Gateway
         $offset,
         $limit,
         array $sortClauses = null,
-        array $languageFilter = [],
+        array $languageFilter = array(),
         $doCount = true
     ) {
         $count = $doCount ? $this->getTotalCount($criterion, $languageFilter) : null;
@@ -95,7 +99,7 @@ class DoctrineDatabase extends Gateway
         }
 
         if ($limit === 0 || ($count !== null && $count <= $offset)) {
-            return ['count' => $count, 'rows' => []];
+            return array('count' => $count, 'rows' => array());
         }
 
         $selectQuery = $this->handler->createSelectQuery();
@@ -170,10 +174,10 @@ class DoctrineDatabase extends Gateway
         $statement = $selectQuery->prepare();
         $statement->execute();
 
-        return [
+        return array(
             'count' => $count,
             'rows' => $statement->fetchAll(PDO::FETCH_ASSOC),
-        ];
+        );
     }
 
     /**
@@ -252,7 +256,7 @@ class DoctrineDatabase extends Gateway
     protected function getLanguageMask(array $languageFilter)
     {
         if (!isset($languageFilter['languages'])) {
-            $languageFilter['languages'] = [];
+            $languageFilter['languages'] = array();
         }
 
         if (!isset($languageFilter['useAlwaysAvailable'])) {

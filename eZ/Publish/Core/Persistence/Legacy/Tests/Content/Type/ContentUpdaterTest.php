@@ -58,8 +58,29 @@ class ContentUpdaterTest extends TestCase
      */
     protected $contentUpdater;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper
+     */
     protected $contentMapperMock;
+
+    /**
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Type\ContentUpdater::__construct
+     */
+    public function testCtor()
+    {
+        $updater = $this->getContentUpdater();
+
+        $this->assertAttributeSame(
+            $this->getContentGatewayMock(),
+            'contentGateway',
+            $updater
+        );
+        $this->assertAttributeSame(
+            $this->getConverterRegistryMock(),
+            'converterRegistry',
+            $updater
+        );
+    }
 
     /**
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Type\ContentUpdater::determineActions
@@ -85,7 +106,7 @@ class ContentUpdaterTest extends TestCase
         $actions = $updater->determineActions($fromType, $toType);
 
         $this->assertEquals(
-            [
+            array(
                 new ContentUpdater\Action\RemoveField(
                     $this->getContentGatewayMock(),
                     $fromType->fieldDefinitions[0],
@@ -99,7 +120,7 @@ class ContentUpdaterTest extends TestCase
                     $this->getContentStorageHandlerMock(),
                     $this->getContentMapperMock()
                 ),
-            ],
+            ),
             $actions
         );
     }
@@ -110,7 +131,7 @@ class ContentUpdaterTest extends TestCase
 
         $actionA = $this->getMockForAbstractClass(
             Action::class,
-            [],
+            array(),
             '',
             false
         );
@@ -122,7 +143,7 @@ class ContentUpdaterTest extends TestCase
             ->with(22);
         $actionB = $this->getMockForAbstractClass(
             Action::class,
-            [],
+            array(),
             '',
             false
         );
@@ -133,14 +154,14 @@ class ContentUpdaterTest extends TestCase
             ->method('apply')
             ->with(22);
 
-        $actions = [$actionA, $actionB];
+        $actions = array($actionA, $actionB);
 
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('getContentIdsByContentTypeId')
             ->with(23)
             ->will(
-                $this->returnValue([11, 22])
+                $this->returnValue(array(11, 22))
             );
 
         $updater->applyUpdates(23, $actions);
@@ -163,9 +184,9 @@ class ContentUpdaterTest extends TestCase
         $fieldB->id = 2;
         $fieldB->fieldType = 'ezstring';
 
-        $type->fieldDefinitions = [
+        $type->fieldDefinitions = array(
             $fieldA, $fieldB,
-        ];
+        );
 
         return $type;
     }

@@ -28,7 +28,7 @@ use eZ\Publish\SPI\Persistence\Content\FieldValue;
  * The corresponding {@link fromHash()} method must convert such a
  * representation back into a value, which is understood by the FieldType.
  */
-abstract class FieldType
+interface FieldType
 {
     /**
      * Returns the field type identifier for this field type.
@@ -41,23 +41,22 @@ abstract class FieldType
      *
      * @return string
      */
-    abstract public function getFieldTypeIdentifier();
+    public function getFieldTypeIdentifier();
 
     /**
-     * Returns a human readable string representation from a given value.
+     * Returns a human readable string representation from the given $value.
      *
      * It will be used to generate content name and url alias if current field
      * is designated to be used in the content name/urlAlias pattern.
      *
-     * The used $value can be assumed to be already accepted by {@link FieldType::acceptValue()}.
+     * The used $value can be assumed to be already accepted by {@link * acceptValue()}.
      *
+     * @deprecated Since 6.3/5.4.7, use \eZ\Publish\SPI\FieldType\Nameable
      * @param \eZ\Publish\SPI\FieldType\Value $value
-     * @param \eZ\Publish\API\Repository\Values\ContentType\FieldDefinition $fieldDefinition
-     * @param string $languageCode
      *
      * @return string
      */
-    abstract public function getName(Value $value, FieldDefinition $fieldDefinition, string $languageCode): string;
+    public function getName(Value $value);
 
     /**
      * Returns a schema for the settings expected by the FieldType.
@@ -78,7 +77,7 @@ abstract class FieldType
      *
      * @return mixed
      */
-    abstract public function getSettingsSchema();
+    public function getSettingsSchema();
 
     /**
      * Returns a schema for the validator configuration expected by the FieldType.
@@ -119,7 +118,7 @@ abstract class FieldType
      *
      * @return mixed
      */
-    abstract public function getValidatorConfigurationSchema();
+    public function getValidatorConfigurationSchema();
 
     /**
      * Validates a field based on the validator configuration in the field definition.
@@ -131,7 +130,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\ValidationError[]
      */
-    abstract public function validate(FieldDefinition $fieldDef, Value $value);
+    public function validate(FieldDefinition $fieldDef, Value $value);
 
     /**
      * Validates the validatorConfiguration of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct.
@@ -144,7 +143,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\ValidationError[]
      */
-    abstract public function validateValidatorConfiguration($validatorConfiguration);
+    public function validateValidatorConfiguration($validatorConfiguration);
 
     /**
      * Applies the default values to the given $validatorConfiguration of a FieldDefinitionCreateStruct.
@@ -153,7 +152,7 @@ abstract class FieldType
      *
      * @param mixed $validatorConfiguration
      */
-    abstract public function applyDefaultValidatorConfiguration(&$validatorConfiguration);
+    public function applyDefaultValidatorConfiguration(&$validatorConfiguration);
 
     /**
      * Validates the fieldSettings of a FieldDefinitionCreateStruct or FieldDefinitionUpdateStruct.
@@ -165,7 +164,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\ValidationError[]
      */
-    abstract public function validateFieldSettings($fieldSettings);
+    public function validateFieldSettings($fieldSettings);
 
     /**
      * Applies the default values to the fieldSettings of a FieldDefinitionCreateStruct.
@@ -174,28 +173,28 @@ abstract class FieldType
      *
      * @param mixed $fieldSettings
      */
-    abstract public function applyDefaultSettings(&$fieldSettings);
+    public function applyDefaultSettings(&$fieldSettings);
 
     /**
      * Indicates if the field type supports indexing and sort keys for searching.
      *
      * @return bool
      */
-    abstract public function isSearchable();
+    public function isSearchable();
 
     /**
      * Indicates if the field definition of this type can appear only once in the same ContentType.
      *
      * @return bool
      */
-    abstract public function isSingular();
+    public function isSingular();
 
     /**
      * Indicates if the field definition of this type can be added to a ContentType with Content instances.
      *
      * @return bool
      */
-    abstract public function onlyEmptyInstance();
+    public function onlyEmptyInstance();
 
     /**
      * Returns the empty value for this field type.
@@ -207,7 +206,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\Value
      */
-    abstract public function getEmptyValue();
+    public function getEmptyValue();
 
     /**
      * Returns if the given $value is considered empty by the field type.
@@ -220,7 +219,7 @@ abstract class FieldType
      *
      * @return bool
      */
-    abstract public function isEmptyValue(Value $value);
+    public function isEmptyValue(Value $value);
 
     /**
      * Potentially builds and checks the type and structure of the $inputValue.
@@ -243,7 +242,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\Value The potentially converted and structurally plausible value.
      */
-    abstract public function acceptValue($inputValue);
+    public function acceptValue($inputValue);
 
     /**
      * Converts an $hash to the Value defined by the field type.
@@ -257,7 +256,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\Value
      */
-    abstract public function fromHash($hash);
+    public function fromHash($hash);
 
     /**
      * Converts the given $value into a plain hash format.
@@ -271,7 +270,7 @@ abstract class FieldType
      *
      * @return mixed
      */
-    abstract public function toHash(Value $value);
+    public function toHash(Value $value);
 
     /**
      * Converts the given $fieldSettings to a simple hash format.
@@ -282,7 +281,7 @@ abstract class FieldType
      *
      * @return array|hash|scalar|null
      */
-    abstract public function fieldSettingsToHash($fieldSettings);
+    public function fieldSettingsToHash($fieldSettings);
 
     /**
      * Converts the given $fieldSettingsHash to field settings of the type.
@@ -294,7 +293,7 @@ abstract class FieldType
      *
      * @return mixed
      */
-    abstract public function fieldSettingsFromHash($fieldSettingsHash);
+    public function fieldSettingsFromHash($fieldSettingsHash);
 
     /**
      * Converts the given $validatorConfiguration to a simple hash format.
@@ -305,7 +304,7 @@ abstract class FieldType
      *
      * @return array|hash|scalar|null
      */
-    abstract public function validatorConfigurationToHash($validatorConfiguration);
+    public function validatorConfigurationToHash($validatorConfiguration);
 
     /**
      * Converts the given $validatorConfigurationHash to a validator
@@ -317,7 +316,7 @@ abstract class FieldType
      *
      * @return mixed
      */
-    abstract public function validatorConfigurationFromHash($validatorConfigurationHash);
+    public function validatorConfigurationFromHash($validatorConfigurationHash);
 
     /**
      * Converts a $value to a persistence value.
@@ -341,7 +340,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\Persistence\Content\FieldValue the value processed by the storage engine
      */
-    abstract public function toPersistenceValue(Value $value);
+    public function toPersistenceValue(Value $value);
 
     /**
      * Converts a persistence $value to a Value.
@@ -352,7 +351,7 @@ abstract class FieldType
      *
      * @return \eZ\Publish\SPI\FieldType\Value
      */
-    abstract public function fromPersistenceValue(FieldValue $fieldValue);
+    public function fromPersistenceValue(FieldValue $fieldValue);
 
     /**
      * Returns relation data extracted from value.
@@ -379,5 +378,5 @@ abstract class FieldType
      *  )
      * </code>
      */
-    abstract public function getRelations(Value $value);
+    public function getRelations(Value $value);
 }

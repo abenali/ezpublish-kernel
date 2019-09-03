@@ -56,7 +56,7 @@ class StatusLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'versionread');
         $policyCreate->addLimitation(
             new StatusLimitation(
-                ['limitationValues' => [VersionInfo::STATUS_DRAFT]]
+                array('limitationValues' => array(VersionInfo::STATUS_DRAFT))
             )
         );
 
@@ -93,11 +93,10 @@ class StatusLimitationTest extends BaseLimitationTest
      * Tests a StatusLimitation.
      *
      * @see eZ\Publish\API\Repository\Values\User\Limitation\StatusLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testStatusLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $administratorUserId = $this->generateId('user', 14);
@@ -125,7 +124,7 @@ class StatusLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'versionread');
         $policyCreate->addLimitation(
             new StatusLimitation(
-                ['limitationValues' => [VersionInfo::STATUS_PUBLISHED]]
+                array('limitationValues' => array(VersionInfo::STATUS_PUBLISHED))
             )
         );
 

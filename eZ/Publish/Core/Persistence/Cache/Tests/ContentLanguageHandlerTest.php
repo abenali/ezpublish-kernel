@@ -15,7 +15,7 @@ use eZ\Publish\SPI\Persistence\Content\Language\Handler;
 /**
  * Test case for Persistence\Cache\ContentLanguageHandler.
  */
-class ContentLanguageHandlerTest extends AbstractInMemoryCacheHandlerTest
+class ContentLanguageHandlerTest extends AbstractCacheHandlerTest
 {
     public function getHandlerMethodName(): string
     {
@@ -29,27 +29,23 @@ class ContentLanguageHandlerTest extends AbstractInMemoryCacheHandlerTest
 
     public function providerForUnCachedMethods(): array
     {
-        $language = new SPILanguage(['id' => 5, 'languageCode' => 'eng-GB']);
-
-        // string $method, array $arguments, array? $tags, array? $key
+        // string $method, array $arguments, array? $tags, string? $key
         return [
-            ['create', [new SPILanguageCreateStruct()], null, ['ez-language-list']],
-            ['update', [$language], null, ['ez-language-list', 'ez-language-5', 'ez-language-code-eng-GB']],
+            ['create', [new SPILanguageCreateStruct()]],
+            ['update', [new SPILanguage(['id' => 5])], ['language-5']],
+            ['loadAll', []],
             ['delete', [5], ['language-5']],
         ];
     }
 
     public function providerForCachedLoadMethods(): array
     {
-        $object = new SPILanguage(['id' => 5, 'languageCode' => 'eng-GB']);
+        $object = new SPILanguage(['id' => 5]);
 
-        // string $method, array $arguments, string $key, mixed? $data, bool $multi
+        // string $method, array $arguments, string $key, mixed? $data
         return [
             ['load', [5], 'ez-language-5', $object],
-            ['loadList', [[5]], 'ez-language-5', [5 => $object], true],
-            ['loadAll', [], 'ez-language-list', [5 => $object], false],
-            ['loadByLanguageCode', ['eng-GB'], 'ez-language-code-eng-GB', $object],
-            ['loadListByLanguageCodes', [['eng-GB']], 'ez-language-code-eng-GB', ['eng-GB' => $object], true],
+            ['loadByLanguageCode', ['eng-GB'], 'ez-language-eng-GB-by-code', $object],
         ];
     }
 }

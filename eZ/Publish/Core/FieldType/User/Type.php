@@ -32,15 +32,15 @@ class Type extends FieldType
         'PasswordValueValidator' => [
             'requireAtLeastOneUpperCaseCharacter' => [
                 'type' => 'int',
-                'default' => 1,
+                'default' => null,
             ],
             'requireAtLeastOneLowerCaseCharacter' => [
                 'type' => 'int',
-                'default' => 1,
+                'default' => null,
             ],
             'requireAtLeastOneNumericCharacter' => [
                 'type' => 'int',
-                'default' => 1,
+                'default' => null,
             ],
             'requireAtLeastOneNonAlphanumericCharacter' => [
                 'type' => 'int',
@@ -48,7 +48,7 @@ class Type extends FieldType
             ],
             'minLength' => [
                 'type' => 'int',
-                'default' => 10,
+                'default' => null,
             ],
         ],
     ];
@@ -72,9 +72,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\User\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\User\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value->login;
     }
@@ -203,11 +210,11 @@ class Type extends FieldType
     public function toPersistenceValue(SPIValue $value)
     {
         return new FieldValue(
-            [
+            array(
                 'data' => null,
                 'externalData' => $this->toHash($value),
                 'sortKey' => null,
-            ]
+            )
         );
     }
 

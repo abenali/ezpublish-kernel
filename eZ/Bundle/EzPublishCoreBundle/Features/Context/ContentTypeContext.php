@@ -6,8 +6,10 @@
 namespace eZ\Bundle\EzPublishCoreBundle\Features\Context;
 
 use Behat\Behat\Context\Context;
+use EzSystems\PlatformBehatBundle\Context\RepositoryContext;
 use eZ\Publish\API\Repository\ContentTypeService;
 use eZ\Publish\API\Repository\Exceptions as ApiExceptions;
+use eZ\Publish\API\Repository\Repository;
 use Behat\Gherkin\Node\TableNode;
 use PHPUnit\Framework\Assert as Assertion;
 
@@ -16,6 +18,8 @@ use PHPUnit\Framework\Assert as Assertion;
  */
 class ContentTypeContext implements Context
 {
+    use RepositoryContext;
+
     /**
      * Default ContentTypeGroup.
      */
@@ -26,17 +30,23 @@ class ContentTypeContext implements Context
      */
     const DEFAULT_LANGUAGE = 'eng-GB';
 
-    /** @var \eZ\Publish\API\Repository\ContentTypeService */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentTypeService
+     */
     protected $contentTypeService;
 
-    /** @var \EzSystems\BehatBundle\Context\Object\ContentTypeGroup */
+    /**
+     * @var \EzSystems\BehatBundle\Context\Object\ContentTypeGroup
+     */
     protected $contentTypeGroupContext;
 
     /**
+     * @injectService $repository @ezpublish.api.repository
      * @injectService $contentTypeService @ezpublish.api.service.content_type
      */
-    public function __construct(ContentTypeService $contentTypeService)
+    public function __construct(Repository $repository, ContentTypeService $contentTypeService)
     {
+        $this->setRepository($repository);
         $this->contentTypeService = $contentTypeService;
     }
 
@@ -160,7 +170,7 @@ class ContentTypeContext implements Context
 
         $contentTypeCreateStruct = $contentTypeService->newContentTypeCreateStruct($identifier);
         $contentTypeCreateStruct->mainLanguageCode = self::DEFAULT_LANGUAGE;
-        $contentTypeCreateStruct->names = [self::DEFAULT_LANGUAGE => $contentTypeName];
+        $contentTypeCreateStruct->names = array(self::DEFAULT_LANGUAGE => $contentTypeName);
 
         $fieldPosition = 0;
         foreach ($fields as $field) {
@@ -169,7 +179,7 @@ class ContentTypeContext implements Context
 
             $fieldCreateStruct = $contentTypeService
                 ->newFieldDefinitionCreateStruct($field['identifier'], $field['type']);
-            $fieldCreateStruct->names = [self::DEFAULT_LANGUAGE => $field['name']];
+            $fieldCreateStruct->names = array(self::DEFAULT_LANGUAGE => $field['name']);
             $fieldCreateStruct->position = $fieldPosition;
             if (isset($field['required'])) {
                 $fieldCreateStruct->isRequired = ($field['required'] === 'true');
@@ -185,7 +195,7 @@ class ContentTypeContext implements Context
 
         $contentTypeDraft = $contentTypeService->createContentType(
             $contentTypeCreateStruct,
-            [$contentTypeGroup]
+            array($contentTypeGroup)
         );
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
 

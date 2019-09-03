@@ -20,16 +20,16 @@ class UrlStorageTest extends TestCase
 {
     public function testStoreFieldDataWithExistingUrl()
     {
-        $versionInfo = new VersionInfo(['versionNo' => 24]);
-        $fieldValue = new FieldValue(['externalData' => 'http://ez.no']);
-        $field = new Field(['id' => 42, 'value' => $fieldValue]);
+        $versionInfo = new VersionInfo(array('versionNo' => 24));
+        $fieldValue = new FieldValue(array('externalData' => 'http://ez.no'));
+        $field = new Field(array('id' => 42, 'value' => $fieldValue));
         $gateway = $this->getGatewayMock();
 
         $gateway
             ->expects($this->once())
             ->method('getUrlIdMap')
-            ->with(['http://ez.no'])
-            ->will($this->returnValue(['http://ez.no' => 12]));
+            ->with(array('http://ez.no'))
+            ->will($this->returnValue(array('http://ez.no' => 12)));
 
         $gateway
             ->expects($this->once())
@@ -45,16 +45,16 @@ class UrlStorageTest extends TestCase
 
     public function testStoreFieldDataWithNewUrl()
     {
-        $versionInfo = new VersionInfo(['versionNo' => 24]);
-        $fieldValue = new FieldValue(['externalData' => 'http://ez.no']);
-        $field = new Field(['id' => 42, 'value' => $fieldValue]);
+        $versionInfo = new VersionInfo(array('versionNo' => 24));
+        $fieldValue = new FieldValue(array('externalData' => 'http://ez.no'));
+        $field = new Field(array('id' => 42, 'value' => $fieldValue));
         $gateway = $this->getGatewayMock();
 
         $gateway
             ->expects($this->once())
             ->method('getUrlIdMap')
-            ->with(['http://ez.no'])
-            ->will($this->returnValue([]));
+            ->with(array('http://ez.no'))
+            ->will($this->returnValue(array()));
 
         $gateway
             ->expects($this->once())
@@ -76,9 +76,9 @@ class UrlStorageTest extends TestCase
 
     public function testStoreFieldDataWithEmptyUrl()
     {
-        $versionInfo = new VersionInfo(['versionNo' => 24]);
-        $fieldValue = new FieldValue(['externalData' => '']);
-        $field = new Field(['id' => 42, 'value' => $fieldValue]);
+        $versionInfo = new VersionInfo(array('versionNo' => 24));
+        $fieldValue = new FieldValue(array('externalData' => ''));
+        $field = new Field(array('id' => 42, 'value' => $fieldValue));
         $gateway = $this->getGatewayMock();
 
         $gateway
@@ -103,15 +103,15 @@ class UrlStorageTest extends TestCase
     public function testGetFieldData()
     {
         $versionInfo = new VersionInfo();
-        $fieldValue = new FieldValue(['data' => ['urlId' => 12]]);
-        $field = new Field(['id' => 42, 'value' => $fieldValue]);
+        $fieldValue = new FieldValue(array('data' => array('urlId' => 12)));
+        $field = new Field(array('id' => 42, 'value' => $fieldValue));
         $gateway = $this->getGatewayMock();
 
         $gateway
             ->expects($this->once())
             ->method('getIdUrlMap')
-            ->with([12])
-            ->will($this->returnValue([12 => 'http://ez.no']));
+            ->with(array(12))
+            ->will($this->returnValue(array(12 => 'http://ez.no')));
 
         $storage = $this->getPartlyMockedStorage($gateway);
         $storage->getFieldData($versionInfo, $field, $this->getContext());
@@ -122,15 +122,15 @@ class UrlStorageTest extends TestCase
     public function testGetFieldDataNotFound()
     {
         $versionInfo = new VersionInfo();
-        $fieldValue = new FieldValue(['data' => ['urlId' => 12]]);
-        $field = new Field(['id' => 42, 'value' => $fieldValue]);
+        $fieldValue = new FieldValue(array('data' => array('urlId' => 12)));
+        $field = new Field(array('id' => 42, 'value' => $fieldValue));
         $gateway = $this->getGatewayMock();
 
         $gateway
             ->expects($this->once())
             ->method('getIdUrlMap')
-            ->with([12])
-            ->will($this->returnValue([]));
+            ->with(array(12))
+            ->will($this->returnValue(array()));
 
         $storage = $this->getPartlyMockedStorage($gateway);
         $logger = $this->getLoggerMock();
@@ -147,8 +147,8 @@ class UrlStorageTest extends TestCase
     public function testGetFieldDataWithEmptyUrlId()
     {
         $versionInfo = new VersionInfo();
-        $fieldValue = new FieldValue(['data' => ['urlId' => null]]);
-        $field = new Field(['id' => 42, 'value' => $fieldValue]);
+        $fieldValue = new FieldValue(array('data' => array('urlId' => null)));
+        $field = new Field(array('id' => 42, 'value' => $fieldValue));
         $gateway = $this->getGatewayMock();
 
         $gateway
@@ -168,8 +168,8 @@ class UrlStorageTest extends TestCase
 
     public function testDeleteFieldData()
     {
-        $versionInfo = new VersionInfo(['versionNo' => 24]);
-        $fieldIds = [12, 23, 34];
+        $versionInfo = new VersionInfo(array('versionNo' => 24));
+        $fieldIds = array(12, 23, 34);
         $gateway = $this->getGatewayMock();
 
         foreach ($fieldIds as $index => $id) {
@@ -199,10 +199,10 @@ class UrlStorageTest extends TestCase
         return $this->getMockBuilder(UrlStorage::class)
             ->setMethods(null)
             ->setConstructorArgs(
-                [
+                array(
                     $gateway,
                     $this->getLoggerMock(),
-                ]
+                )
             )
             ->getMock();
     }
@@ -212,10 +212,12 @@ class UrlStorageTest extends TestCase
      */
     protected function getContext()
     {
-        return ['context'];
+        return array('context');
     }
 
-    /** @var \Psr\Log\LoggerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \Psr\Log\LoggerInterface|\PHPUnit\Framework\MockObject\MockObject
+     */
     protected $loggerMock;
 
     /**
@@ -232,7 +234,9 @@ class UrlStorageTest extends TestCase
         return $this->loggerMock;
     }
 
-    /** @var \eZ\Publish\Core\FieldType\Url\UrlStorage\Gateway|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\Core\FieldType\Url\UrlStorage\Gateway|\PHPUnit\Framework\MockObject\MockObject
+     */
     protected $gatewayMock;
 
     /**

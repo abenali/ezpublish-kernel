@@ -66,7 +66,7 @@ class LocationLimitationType extends AbstractPersistenceLimitationType implement
      */
     public function validate(APILimitationValue $limitationValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         foreach ($limitationValue->limitationValues as $key => $id) {
             try {
                 $this->persistence->locationHandler()->load($id);
@@ -74,10 +74,10 @@ class LocationLimitationType extends AbstractPersistenceLimitationType implement
                 $validationErrors[] = new ValidationError(
                     "limitationValues[%key%] => '%value%' does not exist in the backend",
                     null,
-                    [
+                    array(
                         'value' => $id,
                         'key' => $key,
-                    ]
+                    )
                 );
             }
         }
@@ -94,7 +94,7 @@ class LocationLimitationType extends AbstractPersistenceLimitationType implement
      */
     public function buildValue(array $limitationValues)
     {
-        return new APILocationLimitation(['limitationValues' => $limitationValues]);
+        return new APILocationLimitation(array('limitationValues' => $limitationValues));
     }
 
     /**
@@ -174,23 +174,18 @@ class LocationLimitationType extends AbstractPersistenceLimitationType implement
             return false;
         }
 
-        $hasMandatoryTarget = false;
         foreach ($targets as $target) {
-            if ($target instanceof LocationCreateStruct) {
-                $hasMandatoryTarget = true;
-
-                // For ContentCreateStruct all placements must match
-                if (!in_array($target->parentLocationId, $value->limitationValues)) {
-                    return false;
-                }
+            if (!$target instanceof LocationCreateStruct) {
+                throw new InvalidArgumentException(
+                    '$targets',
+                    'If $object is ContentCreateStruct must contain objects of type: LocationCreateStruct'
+                );
             }
-        }
 
-        if (false === $hasMandatoryTarget) {
-            throw new InvalidArgumentException(
-                '$targets',
-                'If $object is ContentCreateStruct must contain objects of type: LocationCreateStruct'
-            );
+            // For ContentCreateStruct all placements must match
+            if (!in_array($target->parentLocationId, $value->limitationValues)) {
+                return false;
+            }
         }
 
         return true;

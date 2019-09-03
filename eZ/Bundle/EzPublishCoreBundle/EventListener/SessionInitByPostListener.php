@@ -20,7 +20,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class SessionInitByPostListener implements EventSubscriberInterface
 {
-    /** @var \Symfony\Component\HttpFoundation\Session\SessionInterface */
+    /**
+     * @var \Symfony\Component\HttpFoundation\Session\SessionInterface
+     */
     private $session;
 
     public function __construct(SessionInterface $session = null)
@@ -30,9 +32,9 @@ class SessionInitByPostListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
-            MVCEvents::SITEACCESS => ['onSiteAccessMatch', 249],
-        ];
+        return array(
+            MVCEvents::SITEACCESS => array('onSiteAccessMatch', 249),
+        );
     }
 
     public function onSiteAccessMatch(PostSiteAccessMatchEvent $event)

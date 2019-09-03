@@ -92,18 +92,18 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
     public function getTypeConstraints()
     {
         return new FieldTypeConstraints(
-            [
-                'validators' => [
-                    'FileSizeValidator' => [
+            array(
+                'validators' => array(
+                    'FileSizeValidator' => array(
                         'maxFileSize' => 2 * 1024 * 1024, // 2 MB
-                    ],
-                ],
-                'fieldSettings' => new FieldType\FieldSettings(
-                    [
-                        'mediaType' => FieldType\Media\Type::TYPE_SILVERLIGHT,
-                    ]
+                    ),
                 ),
-            ]
+                'fieldSettings' => new FieldType\FieldSettings(
+                    array(
+                        'mediaType' => FieldType\Media\Type::TYPE_SILVERLIGHT,
+                    )
+                ),
+            )
         );
     }
 
@@ -116,26 +116,26 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        return [
-            ['fieldType', 'ezmedia'],
-            [
+        return array(
+            array('fieldType', 'ezmedia'),
+            array(
                 'fieldTypeConstraints',
                 new FieldTypeConstraints(
-                    [
-                        'validators' => [
-                            'FileSizeValidator' => [
+                    array(
+                        'validators' => array(
+                            'FileSizeValidator' => array(
                                 'maxFileSize' => 2 * 1024 * 1024, // 2 MB
-                            ],
-                        ],
-                        'fieldSettings' => new FieldType\FieldSettings(
-                            [
-                                'mediaType' => FieldType\Media\Type::TYPE_SILVERLIGHT,
-                            ]
+                            ),
                         ),
-                    ]
+                        'fieldSettings' => new FieldType\FieldSettings(
+                            array(
+                                'mediaType' => FieldType\Media\Type::TYPE_SILVERLIGHT,
+                            )
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -146,9 +146,9 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
-                'externalData' => [
+                'externalData' => array(
                     'id' => null,
                     'inputUri' => ($path = __DIR__ . '/_fixtures/image.jpg'),
                     'fileName' => 'Ice-Flower-Media.jpg',
@@ -160,9 +160,9 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
                     'width' => 23,
                     'height' => 42,
                     'uri' => $path,
-                ],
+                ),
                 'sortKey' => '',
-            ]
+            )
         );
     }
 
@@ -206,9 +206,9 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
-                'externalData' => [
+                'externalData' => array(
                     'id' => null,
                     'inputUri' => ($path = __DIR__ . '/_fixtures/image.png'),
                     'fileName' => 'Blueish-Blue-Media.jpg',
@@ -220,9 +220,9 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
                     'width' => 0,
                     'height' => 0,
                     'uri' => $path,
-                ],
+                ),
                 'sortKey' => '',
-            ]
+            )
         );
     }
 
@@ -246,9 +246,9 @@ class MediaIntegrationTest extends FileBaseIntegrationTest
         );
 
         // Check old file removed before update
-        $this->assertCount(
+        $this->assertEquals(
             1,
-            glob(dirname($path) . '/*')
+            count(glob(dirname($path) . '/*'))
         );
 
         $this->assertEquals('Blueish-Blue-Media.jpg', $field->value->externalData['fileName']);

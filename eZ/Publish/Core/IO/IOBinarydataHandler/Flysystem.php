@@ -22,7 +22,9 @@ class Flysystem implements IOBinaryDataHandler
     /** @var \League\Flysystem\FilesystemInterface */
     private $filesystem;
 
-    /** @var \eZ\Publish\Core\IO\UrlDecorator */
+    /**
+     * @var \eZ\Publish\Core\IO\UrlDecorator
+     */
     private $urlDecorator;
 
     public function __construct(FilesystemInterface $filesystem, UrlDecorator $urlDecorator = null)
@@ -37,19 +39,19 @@ class Flysystem implements IOBinaryDataHandler
             $this->filesystem->writeStream(
                 $binaryFileCreateStruct->id,
                 $binaryFileCreateStruct->getInputStream(),
-                [
+                array(
                     'mimetype' => $binaryFileCreateStruct->mimeType,
                     'visibility' => AdapterInterface::VISIBILITY_PUBLIC,
-                ]
+                )
             );
         } catch (FileExistsException $e) {
             $this->filesystem->updateStream(
                 $binaryFileCreateStruct->id,
                 $binaryFileCreateStruct->getInputStream(),
-                [
+                array(
                     'mimetype' => $binaryFileCreateStruct->mimeType,
                     'visibility' => AdapterInterface::VISIBILITY_PUBLIC,
-                ]
+                )
             );
         }
     }

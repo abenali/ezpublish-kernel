@@ -46,48 +46,51 @@ class MaskGeneratorTest extends LanguageAwareTestCase
     {
         $generator = $this->getMaskGenerator();
 
-        if (isset($languages['always-available'])) {
-            $isAlwaysAvailable = true;
-            unset($languages['always-available']);
-        } else {
-            $isAlwaysAvailable = false;
-        }
+        $isAlwaysAvailable = array_filter(
+            $languages,
+            function ($key) {
+                return $key === 'always-available';
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+
+        $languageCodes = array_diff($languages, $isAlwaysAvailable);
 
         $this->assertSame(
             $expectedMask,
-            $generator->generateLanguageMaskFromLanguageCodes(array_keys($languages), $isAlwaysAvailable)
+            $generator->generateLanguageMaskFromLanguageCodes(array_keys($languageCodes), count($isAlwaysAvailable) > 0)
         );
     }
 
     /**
-     * Returns test data for {@link testGenerateLanguageMask()} and {@link testGenerateLanguageMaskFromLanguagesCodes()}.
+     * Returns test data for {@link testGenerateLanguageMask()}.
      *
      * @return array
      */
     public static function getLanguageMaskData()
     {
-        return [
-            'error' => [
-                [],
+        return array(
+            'error' => array(
+                array(),
                 0,
-            ],
-            'single_lang' => [
-                ['eng-GB' => true],
+            ),
+            'single_lang' => array(
+                array('eng-GB' => true),
                 4,
-            ],
-            'multi_lang' => [
-                ['eng-US' => true, 'eng-GB' => true],
+            ),
+            'multi_lang' => array(
+                array('eng-US' => true, 'eng-GB' => true),
                 6,
-            ],
-            'always_available' => [
-                ['always-available' => 'eng-US', 'eng-US' => true],
+            ),
+            'always_available' => array(
+                array('always-available' => 'eng-US', 'eng-US' => true),
                 3,
-            ],
-            'full' => [
-                ['always-available' => 'eng-US', 'eng-US' => true, 'eng-GB' => true],
+            ),
+            'full' => array(
+                array('always-available' => 'eng-US', 'eng-US' => true, 'eng-GB' => true),
                 7,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -118,18 +121,18 @@ class MaskGeneratorTest extends LanguageAwareTestCase
      */
     public static function getLanguageIndicatorData()
     {
-        return [
-            'not_available' => [
+        return array(
+            'not_available' => array(
                 'eng-GB',
                 false,
                 4,
-            ],
-            'always_available' => [
+            ),
+            'always_available' => array(
                 'eng-US',
                 true,
                 3,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -142,10 +145,10 @@ class MaskGeneratorTest extends LanguageAwareTestCase
         $this->assertTrue(
             $generator->isLanguageAlwaysAvailable(
                 'eng-GB',
-                [
+                array(
                     'always-available' => 'eng-GB',
                     'eng-GB' => 'lala',
-                ]
+                )
             )
         );
     }
@@ -160,10 +163,10 @@ class MaskGeneratorTest extends LanguageAwareTestCase
         $this->assertFalse(
             $generator->isLanguageAlwaysAvailable(
                 'eng-GB',
-                [
+                array(
                     'always-available' => 'eng-US',
                     'eng-GB' => 'lala',
-                ]
+                )
             )
         );
     }
@@ -178,9 +181,9 @@ class MaskGeneratorTest extends LanguageAwareTestCase
         $this->assertFalse(
             $generator->isLanguageAlwaysAvailable(
                 'eng-GB',
-                [
+                array(
                     'eng-GB' => 'lala',
-                ]
+                )
             )
         );
     }
@@ -205,13 +208,13 @@ class MaskGeneratorTest extends LanguageAwareTestCase
      */
     public function isAlwaysAvailableProvider()
     {
-        return [
-            [2, false],
-            [3, true],
-            [62, false],
-            [14, false],
-            [15, true],
-        ];
+        return array(
+            array(2, false),
+            array(3, true),
+            array(62, false),
+            array(14, false),
+            array(15, true),
+        );
     }
 
     /**
@@ -231,12 +234,12 @@ class MaskGeneratorTest extends LanguageAwareTestCase
      */
     public function removeAlwaysAvailableFlagProvider()
     {
-        return [
-            [3, 2],
-            [7, 6],
-            [14, 14],
-            [62, 62],
-        ];
+        return array(
+            array(3, 2),
+            array(7, 6),
+            array(14, 14),
+            array(62, 62),
+        );
     }
 
     /**
@@ -259,20 +262,20 @@ class MaskGeneratorTest extends LanguageAwareTestCase
      */
     public function languageIdsFromMaskProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 2,
-                [2],
-            ],
-            [
+                array(2),
+            ),
+            array(
                 15,
-                [2, 4, 8],
-            ],
-            [
+                array(2, 4, 8),
+            ),
+            array(
                 62,
-                [2, 4, 8, 16, 32],
-            ],
-        ];
+                array(2, 4, 8, 16, 32),
+            ),
+        );
     }
 
     /**
@@ -295,37 +298,28 @@ class MaskGeneratorTest extends LanguageAwareTestCase
         if (!isset($this->languageHandler)) {
             $this->languageHandler = $this->createMock(LanguageHandler::class);
             $this->languageHandler->expects($this->any())
-                                  ->method($this->anything())// loadByLanguageCode && loadListByLanguageCodes
+                                  ->method('loadByLanguageCode')
                                   ->will(
                                       $this->returnCallback(
-                                          function ($languageCodes) {
-                                              if (is_string($languageCodes)) {
-                                                  $language = $languageCodes;
-                                                  $languageCodes = [$language];
+                                          function ($languageCode) {
+                                              switch ($languageCode) {
+                                                  case 'eng-US':
+                                                      return new Language(
+                                                          array(
+                                                              'id' => 2,
+                                                              'languageCode' => 'eng-US',
+                                                              'name' => 'US english',
+                                                          )
+                                                      );
+                                                  case 'eng-GB':
+                                                      return new Language(
+                                                          array(
+                                                              'id' => 4,
+                                                              'languageCode' => 'eng-GB',
+                                                              'name' => 'British english',
+                                                          )
+                                                      );
                                               }
-
-                                              $languages = [];
-                                              if (in_array('eng-US', $languageCodes, true)) {
-                                                  $languages['eng-US'] = new Language(
-                                                      [
-                                                          'id' => 2,
-                                                          'languageCode' => 'eng-US',
-                                                          'name' => 'US english',
-                                                      ]
-                                                  );
-                                              }
-
-                                              if (in_array('eng-GB', $languageCodes, true)) {
-                                                  $languages['eng-GB'] = new Language(
-                                                       [
-                                                           'id' => 4,
-                                                           'languageCode' => 'eng-GB',
-                                                           'name' => 'British english',
-                                                       ]
-                                                   );
-                                              }
-
-                                              return isset($language) ? $languages[$language] : $languages;
                                           }
                                       )
                                   );

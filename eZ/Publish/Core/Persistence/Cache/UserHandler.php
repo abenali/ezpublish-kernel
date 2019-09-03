@@ -20,78 +20,21 @@ use eZ\Publish\SPI\Persistence\User\Policy;
 /**
  * Cache handler for user module.
  */
-class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHandlerInterface
+class UserHandler extends AbstractHandler implements UserHandlerInterface
 {
-    /** @var callable */
-    private $getUserTags;
-
-    /** @var callable */
-    private $getUserKeys;
-
-    /** @var callable */
-    private $getRoleTags;
-
-    /** @var callable */
-    private $getRoleKeys;
-
-    /** @var callable */
-    private $getRoleAssignmentTags;
-
-    /** @var callable */
-    private $getRoleAssignmentKeys;
-
-    /**
-     * Set callback functions for use in cache retrival.
-     */
-    public function init(): void
-    {
-        $this->getUserTags = static function (User $user) {
-            return ['content-' . $user->id, 'user-' . $user->id];
-        };
-        $this->getUserKeys = function (User $user) {
-            return [
-                'ez-user-' . $user->id,
-                'ez-user-' . $this->escapeForCacheKey($user->login) . '-by-login',
-                //'ez-user-' . $hash . '-by-account-key',
-            ];
-        };
-        $this->getRoleTags = static function (Role $role) {
-            return ['role-' . $role->id];
-        };
-        $this->getRoleKeys = static function (Role $role) {
-            return [
-                'ez-role-' . $role->id,
-                'ez-role-' . $role->identifier . '-by-identifier',
-            ];
-        };
-        $this->getRoleAssignmentTags = static function (RoleAssignment $roleAssignment) {
-            return [
-                'role-assignment-' . $roleAssignment->id,
-                'role-assignment-group-list-' . $roleAssignment->contentId,
-                'role-assignment-role-list-' . $roleAssignment->roleId,
-            ];
-        };
-        $this->getRoleAssignmentKeys = static function (RoleAssignment $roleAssignment) {
-            return [
-                'ez-role-assignment-' . $roleAssignment->id,
-            ];
-        };
-    }
-
     /**
      * {@inheritdoc}
      */
     public function create(User $user)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $user]);
+        $this->logger->logCall(__METHOD__, array('struct' => $user));
         $return = $this->persistenceHandler->userHandler()->create($user);
 
         // Clear corresponding content cache as creation of the User changes it's external data
         $this->cache->invalidateTags(['content-fields-' . $user->id]);
         $this->cache->deleteItems([
-            'ez-user-' . $user->id,
-            'ez-user-' . $this->escapeForCacheKey($user->login) . '-by-login',
-            'ez-user-' . $this->escapeForCacheKey($user->email) . '-by-email',
+            'ez-user-' . str_replace('@', '§', $user->login) . '-by-login',
+            'ez-user-' . str_replace('@', '§', $user->email) . '-by-email',
         ]);
 
         return $return;
@@ -102,15 +45,19 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function load($userId)
     {
-        return $this->getCacheValue(
-            $userId,
-            'ez-user-',
-            function ($userId) {
-                return $this->persistenceHandler->userHandler()->load($userId);
-            },
-            $this->getUserTags,
-            $this->getUserKeys
-        );
+        $cacheItem = $this->cache->getItem("ez-user-${userId}");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('user' => $userId));
+        $user = $this->persistenceHandler->userHandler()->load($userId);
+
+        $cacheItem->set($user);
+        $cacheItem->tag(['content-' . $user->id, 'user-' . $user->id]);
+        $this->cache->save($cacheItem);
+
+        return $user;
     }
 
     /**
@@ -118,16 +65,19 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadByLogin($login)
     {
-        return $this->getCacheValue(
-            $this->escapeForCacheKey($login),
-            'ez-user-',
-            function ($escapedLogin) use ($login) {
-                return $this->persistenceHandler->userHandler()->loadByLogin($login);
-            },
-            $this->getUserTags,
-            $this->getUserKeys,
-            '-by-login'
-        );
+        $cacheItem = $this->cache->getItem('ez-user-' . str_replace('@', '§', $login) . '-by-login');
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('user' => $login));
+        $user = $this->persistenceHandler->userHandler()->loadByLogin($login);
+
+        $cacheItem->set($user);
+        $cacheItem->tag(['content-' . $user->id, 'user-' . $user->id]);
+        $this->cache->save($cacheItem);
+
+        return $user;
     }
 
     /**
@@ -135,15 +85,24 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadByEmail($email)
     {
-        // As load by email can return several items we threat it like a list here.
-        return $this->getListCacheValue(
-            'ez-user-' . $this->escapeForCacheKey($email) . '-by-email',
-            function () use ($email) {
-                return $this->persistenceHandler->userHandler()->loadByEmail($email);
-            },
-            $this->getUserTags,
-            $this->getUserKeys
-        );
+        $cacheItem = $this->cache->getItem('ez-user-' . str_replace('@', '§', $email) . '-by-email');
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('email' => $email));
+        $users = $this->persistenceHandler->userHandler()->loadByEmail($email);
+
+        $cacheItem->set($users);
+        $cacheTags = [];
+        foreach ($users as $user) {
+            $cacheTags[] = 'content-' . $user->id;
+            $cacheTags[] = 'user-' . $user->id;
+        }
+        $cacheItem->tag($cacheTags);
+        $this->cache->save($cacheItem);
+
+        return $users;
     }
 
     /**
@@ -151,30 +110,19 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadUserByToken($hash)
     {
-        $getUserKeysFn = $this->getUserKeys;
-        $getUserTagsFn = $this->getUserTags;
+        $cacheItem = $this->cache->getItem('ez-user-' . $hash . '-by-account-key');
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
 
-        return $this->getCacheValue(
-            $hash,
-            'ez-user-',
-            function ($hash) {
-                return $this->persistenceHandler->userHandler()->loadUserByToken($hash);
-            },
-            static function (User $user) use ($getUserTagsFn) {
-                $tags = $getUserTagsFn($user);
-                // See updateUserToken()
-                $tags[] = 'user-' . $user->id . '-account-key';
+        $this->logger->logCall(__METHOD__, array('hash' => $hash));
+        $user = $this->persistenceHandler->userHandler()->loadUserByToken($hash);
 
-                return $tags;
-            },
-            static function (User $user) use ($hash, $getUserKeysFn) {
-                $keys = $getUserKeysFn($user);
-                $keys[] = 'ez-user-' . $hash . '-by-account-key';
+        $cacheItem->set($user);
+        $cacheItem->tag(['content-' . $user->id, 'user-' . $user->id]);
+        $this->cache->save($cacheItem);
 
-                return $keys;
-            },
-            '-by-account-key'
-        );
+        return $user;
     }
 
     /**
@@ -182,13 +130,11 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function update(User $user)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $user]);
+        $this->logger->logCall(__METHOD__, array('struct' => $user));
         $return = $this->persistenceHandler->userHandler()->update($user);
 
         // Clear corresponding content cache as update of the User changes it's external data
         $this->cache->invalidateTags(['content-fields-' . $user->id, 'user-' . $user->id]);
-        // Clear especially by email key as it might already be cached and this might represent change to email
-        $this->cache->deleteItems(['ez-user-' . $this->escapeForCacheKey($user->email) . '-by-email']);
 
         return $return;
     }
@@ -198,12 +144,11 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function updateUserToken(UserTokenUpdateStruct $userTokenUpdateStruct)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $userTokenUpdateStruct]);
+        $this->logger->logCall(__METHOD__, array('struct' => $userTokenUpdateStruct));
         $return = $this->persistenceHandler->userHandler()->updateUserToken($userTokenUpdateStruct);
 
-        // As we 1. don't know original hash, and 2. hash is not guaranteed to be unique, we do it like this for now
-        $this->cache->invalidateTags(['user-' . $userTokenUpdateStruct->userId . '-account-key']);
-        $this->cache->deleteItems(['ez-user-' . $userTokenUpdateStruct->hashKey . '-by-account-key']);
+        // Clear corresponding content cache as update of the User changes it's external data
+        $this->cache->invalidateTags(['content-fields-' . $userTokenUpdateStruct->userId, 'user-' . $userTokenUpdateStruct->userId]);
 
         return $return;
     }
@@ -213,9 +158,8 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function expireUserToken($hash)
     {
-        $this->logger->logCall(__METHOD__, ['hash' => $hash]);
+        $this->logger->logCall(__METHOD__, array('hash' => $hash));
         $return = $this->persistenceHandler->userHandler()->expireUserToken($hash);
-        $this->cache->deleteItems(['ez-user-' . $hash . '-by-account-key']);
 
         return $return;
     }
@@ -225,7 +169,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function delete($userId)
     {
-        $this->logger->logCall(__METHOD__, ['user' => $userId]);
+        $this->logger->logCall(__METHOD__, array('user' => $userId));
         $return = $this->persistenceHandler->userHandler()->delete($userId);
 
         // user id == content id == group id
@@ -239,7 +183,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function createRole(RoleCreateStruct $createStruct)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $createStruct]);
+        $this->logger->logCall(__METHOD__, array('struct' => $createStruct));
 
         return $this->persistenceHandler->userHandler()->createRole($createStruct);
     }
@@ -249,7 +193,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function createRoleDraft($roleId)
     {
-        $this->logger->logCall(__METHOD__, ['role' => $roleId]);
+        $this->logger->logCall(__METHOD__, array('role' => $roleId));
 
         return $this->persistenceHandler->userHandler()->createRoleDraft($roleId);
     }
@@ -260,20 +204,24 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
     public function loadRole($roleId, $status = Role::STATUS_DEFINED)
     {
         if ($status !== Role::STATUS_DEFINED) {
-            $this->logger->logCall(__METHOD__, ['role' => $roleId]);
+            $this->logger->logCall(__METHOD__, array('role' => $roleId));
 
             return $this->persistenceHandler->userHandler()->loadRole($roleId, $status);
         }
 
-        return $this->getCacheValue(
-            $roleId,
-            'ez-role-',
-            function ($roleId) {
-                return $this->persistenceHandler->userHandler()->loadRole($roleId);
-            },
-            $this->getRoleTags,
-            $this->getRoleKeys
-        );
+        $cacheItem = $this->cache->getItem("ez-role-${roleId}");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('role' => $roleId));
+        $role = $this->persistenceHandler->userHandler()->loadRole($roleId, $status);
+
+        $cacheItem->set($role);
+        $cacheItem->tag(['role-' . $role->id]);
+        $this->cache->save($cacheItem);
+
+        return $role;
     }
 
     /**
@@ -282,21 +230,24 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
     public function loadRoleByIdentifier($identifier, $status = Role::STATUS_DEFINED)
     {
         if ($status !== Role::STATUS_DEFINED) {
-            $this->logger->logCall(__METHOD__, ['role' => $identifier]);
+            $this->logger->logCall(__METHOD__, array('role' => $identifier));
 
             return $this->persistenceHandler->userHandler()->loadRoleByIdentifier($identifier, $status);
         }
 
-        return $this->getCacheValue(
-            $identifier,
-            'ez-role-',
-            function ($identifier) {
-                return $this->persistenceHandler->userHandler()->loadRoleByIdentifier($identifier);
-            },
-            $this->getRoleTags,
-            $this->getRoleKeys,
-            '-by-identifier'
-        );
+        $cacheItem = $this->cache->getItem("ez-role-${identifier}-by-identifier");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('role' => $identifier));
+        $role = $this->persistenceHandler->userHandler()->loadRoleByIdentifier($identifier, $status);
+
+        $cacheItem->set($role);
+        $cacheItem->tag(['role-' . $role->id]);
+        $this->cache->save($cacheItem);
+
+        return $role;
     }
 
     /**
@@ -304,7 +255,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadRoleDraftByRoleId($roleId)
     {
-        $this->logger->logCall(__METHOD__, ['role' => $roleId]);
+        $this->logger->logCall(__METHOD__, array('role' => $roleId));
 
         return $this->persistenceHandler->userHandler()->loadRoleDraftByRoleId($roleId);
     }
@@ -324,15 +275,19 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadRoleAssignment($roleAssignmentId)
     {
-        return $this->getCacheValue(
-            $roleAssignmentId,
-            'ez-role-assignment-',
-            function ($roleAssignmentId) {
-                return $this->persistenceHandler->userHandler()->loadRoleAssignment($roleAssignmentId);
-            },
-            $this->getRoleAssignmentTags,
-            $this->getRoleAssignmentKeys
-        );
+        $cacheItem = $this->cache->getItem("ez-role-assignment-${roleAssignmentId}");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('assignment' => $roleAssignmentId));
+        $roleAssignment = $this->persistenceHandler->userHandler()->loadRoleAssignment($roleAssignmentId);
+
+        $cacheItem->set($roleAssignment);
+        $cacheItem->tag($this->getCacheTagsForRoleAssignment($roleAssignment));
+        $this->cache->save($cacheItem);
+
+        return $roleAssignment;
     }
 
     /**
@@ -340,19 +295,26 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadRoleAssignmentsByRoleId($roleId)
     {
-        return $this->getListCacheValue(
-            "ez-role-assignment-${roleId}-by-role",
-            function () use ($roleId) {
-                return $this->persistenceHandler->userHandler()->loadRoleAssignmentsByRoleId($roleId);
-            },
-            $this->getRoleAssignmentTags,
-            $this->getRoleAssignmentKeys,
-            /* Role update (policies) changes role assignment id, also need list tag in case of empty result */
-            static function () use ($roleId) {
-                return ['role-assignment-role-list-' . $roleId, 'role-' . $roleId];
-            },
-            [$roleId]
-        );
+        $cacheItem = $this->cache->getItem("ez-role-assignment-${roleId}-by-role");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $this->logger->logCall(__METHOD__, array('role' => $roleId));
+        $roleAssignments = $this->persistenceHandler->userHandler()->loadRoleAssignmentsByRoleId($roleId);
+
+        $cacheItem->set($roleAssignments);
+        $cacheTags = [
+            'role-assignment-role-list-' . $roleId,
+            'role-' . $roleId, /* Role update (policies) changes role assignment id */
+        ];
+        foreach ($roleAssignments as $roleAssignment) {
+            $cacheTags = $this->getCacheTagsForRoleAssignment($roleAssignment, $cacheTags);
+        }
+        $cacheItem->tag($cacheTags);
+        $this->cache->save($cacheItem);
+
+        return $roleAssignments;
     }
 
     /**
@@ -360,35 +322,40 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadRoleAssignmentsByGroupId($groupId, $inherit = false)
     {
-        $innerHandler = $this->persistenceHandler;
         if ($inherit) {
-            $key = "ez-role-assignment-${groupId}-by-group-inherited";
+            $cacheItem = $this->cache->getItem("ez-role-assignment-${groupId}-by-group-inherited");
         } else {
-            $key = "ez-role-assignment-${groupId}-by-group";
+            $cacheItem = $this->cache->getItem("ez-role-assignment-${groupId}-by-group");
         }
 
-        return $this->getListCacheValue(
-            $key,
-            function () use ($groupId, $inherit) {
-                return $this->persistenceHandler->userHandler()->loadRoleAssignmentsByGroupId($groupId, $inherit);
-            },
-            $this->getRoleAssignmentTags,
-            $this->getRoleAssignmentKeys,
-            static function () use ($groupId, $innerHandler) {
-                // Tag needed for empty results, if not empty will alse be added by getRoleAssignmentTags().
-                $cacheTags = ['role-assignment-group-list-' . $groupId];
-                // To make sure tree operations affecting this can clear the permission cache
-                $locations = $innerHandler->locationHandler()->loadLocationsByContent($groupId);
-                foreach ($locations as $location) {
-                    foreach (explode('/', trim($location->pathString, '/')) as $pathId) {
-                        $cacheTags[] = 'location-path-' . $pathId;
-                    }
-                }
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
 
-                return $cacheTags;
-            },
-            [$groupId, $inherit]
-        );
+        $this->logger->logCall(__METHOD__, array('group' => $groupId, 'inherit' => $inherit));
+        $roleAssignments = $this->persistenceHandler->userHandler()->loadRoleAssignmentsByGroupId($groupId, $inherit);
+
+        $cacheItem->set($roleAssignments);
+        $cacheTags = [
+            'role-assignment-group-list-' . $groupId, /* empty results,  non empty it might have duplicated tags but cache will reduce those. */
+            'role-' . $groupId, /* Role update (policies) changes role assignment id */
+        ];
+        foreach ($roleAssignments as $roleAssignment) {
+            $cacheTags = $this->getCacheTagsForRoleAssignment($roleAssignment, $cacheTags);
+        }
+
+        // To make sure tree operations affecting this can clear the permission cache
+        $locations = $this->persistenceHandler->locationHandler()->loadLocationsByContent($groupId);
+        foreach ($locations as $location) {
+            foreach (explode('/', trim($location->pathString, '/')) as $pathId) {
+                $cacheTags[] = 'location-path-' . $pathId;
+            }
+        }
+
+        $cacheItem->tag($cacheTags);
+        $this->cache->save($cacheItem);
+
+        return $roleAssignments;
     }
 
     /**
@@ -396,7 +363,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function updateRole(RoleUpdateStruct $struct)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $struct]);
+        $this->logger->logCall(__METHOD__, array('struct' => $struct));
         $this->persistenceHandler->userHandler()->updateRole($struct);
 
         $this->cache->invalidateTags(['role-' . $struct->id]);
@@ -407,7 +374,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function deleteRole($roleId, $status = Role::STATUS_DEFINED)
     {
-        $this->logger->logCall(__METHOD__, ['role' => $roleId]);
+        $this->logger->logCall(__METHOD__, array('role' => $roleId));
         $return = $this->persistenceHandler->userHandler()->deleteRole($roleId, $status);
 
         if ($status === Role::STATUS_DEFINED) {
@@ -422,7 +389,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function publishRoleDraft($roleDraftId)
     {
-        $this->logger->logCall(__METHOD__, ['role' => $roleDraftId]);
+        $this->logger->logCall(__METHOD__, array('role' => $roleDraftId));
         $userHandler = $this->persistenceHandler->userHandler();
         $roleDraft = $userHandler->loadRole($roleDraftId, Role::STATUS_DRAFT);
         $return = $userHandler->publishRoleDraft($roleDraftId);
@@ -440,7 +407,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function addPolicyByRoleDraft($roleId, Policy $policy)
     {
-        $this->logger->logCall(__METHOD__, ['role' => $roleId, 'struct' => $policy]);
+        $this->logger->logCall(__METHOD__, array('role' => $roleId, 'struct' => $policy));
 
         return $this->persistenceHandler->userHandler()->addPolicyByRoleDraft($roleId, $policy);
     }
@@ -450,7 +417,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function addPolicy($roleId, Policy $policy)
     {
-        $this->logger->logCall(__METHOD__, ['role' => $roleId, 'struct' => $policy]);
+        $this->logger->logCall(__METHOD__, array('role' => $roleId, 'struct' => $policy));
         $return = $this->persistenceHandler->userHandler()->addPolicy($roleId, $policy);
 
         $this->cache->invalidateTags(['role-' . $roleId]);
@@ -463,7 +430,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function updatePolicy(Policy $policy)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $policy]);
+        $this->logger->logCall(__METHOD__, array('struct' => $policy));
         $return = $this->persistenceHandler->userHandler()->updatePolicy($policy);
 
         $this->cache->invalidateTags(['policy-' . $policy->id, 'role-' . $policy->roleId]);
@@ -476,7 +443,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function deletePolicy($policyId, $roleId)
     {
-        $this->logger->logCall(__METHOD__, ['policy' => $policyId]);
+        $this->logger->logCall(__METHOD__, array('policy' => $policyId));
         $this->persistenceHandler->userHandler()->deletePolicy($policyId, $roleId);
 
         $this->cache->invalidateTags(['policy-' . $policyId, 'role-' . $roleId]);
@@ -487,7 +454,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function loadPoliciesByUserId($userId)
     {
-        $this->logger->logCall(__METHOD__, ['user' => $userId]);
+        $this->logger->logCall(__METHOD__, array('user' => $userId));
 
         return $this->persistenceHandler->userHandler()->loadPoliciesByUserId($userId);
     }
@@ -497,7 +464,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function assignRole($contentId, $roleId, array $limitation = null)
     {
-        $this->logger->logCall(__METHOD__, ['group' => $contentId, 'role' => $roleId, 'limitation' => $limitation]);
+        $this->logger->logCall(__METHOD__, array('group' => $contentId, 'role' => $roleId, 'limitation' => $limitation));
         $return = $this->persistenceHandler->userHandler()->assignRole($contentId, $roleId, $limitation);
 
         $tags = ['role-assignment-group-list-' . $contentId, 'role-assignment-role-list-' . $roleId];
@@ -516,7 +483,7 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function unassignRole($contentId, $roleId)
     {
-        $this->logger->logCall(__METHOD__, ['group' => $contentId, 'role' => $roleId]);
+        $this->logger->logCall(__METHOD__, array('group' => $contentId, 'role' => $roleId));
         $return = $this->persistenceHandler->userHandler()->unassignRole($contentId, $roleId);
 
         $this->cache->invalidateTags(['role-assignment-group-list-' . $contentId, 'role-assignment-role-list-' . $roleId]);
@@ -529,11 +496,28 @@ class UserHandler extends AbstractInMemoryPersistenceHandler implements UserHand
      */
     public function removeRoleAssignment($roleAssignmentId)
     {
-        $this->logger->logCall(__METHOD__, ['assignment' => $roleAssignmentId]);
+        $this->logger->logCall(__METHOD__, array('assignment' => $roleAssignmentId));
         $return = $this->persistenceHandler->userHandler()->removeRoleAssignment($roleAssignmentId);
 
         $this->cache->invalidateTags(['role-assignment-' . $roleAssignmentId]);
 
         return $return;
+    }
+
+    /**
+     * Reusable function to return relevant role assignment tags so cache can be purged reliably.
+     *
+     * @param \eZ\Publish\SPI\Persistence\User\RoleAssignment $roleAssignment
+     * @param array $tags Optional, can be used to specify other tags.
+     *
+     * @return array
+     */
+    private function getCacheTagsForRoleAssignment(RoleAssignment $roleAssignment, array $tags = [])
+    {
+        $tags[] = 'role-assignment-' . $roleAssignment->id;
+        $tags[] = 'role-assignment-group-list-' . $roleAssignment->contentId;
+        $tags[] = 'role-assignment-role-list-' . $roleAssignment->roleId;
+
+        return $tags;
     }
 }

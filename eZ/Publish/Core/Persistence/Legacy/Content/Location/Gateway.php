@@ -171,37 +171,17 @@ abstract class Gateway
     abstract public function unHideSubtree($pathString);
 
     /**
-     * @param string $pathString
-     **/
-    abstract public function setNodeWithChildrenInvisible(string $pathString): void;
-
-    /**
-     * @param string $pathString
-     **/
-    abstract public function setNodeWithChildrenVisible(string $pathString): void;
-
-    /**
-     * @param string $pathString
-     **/
-    abstract public function setNodeHidden(string $pathString): void;
-
-    /**
-     * @param string $pathString
-     **/
-    abstract public function setNodeUnhidden(string $pathString): void;
-
-    /**
      * Swaps the content object being pointed to by a location object.
      *
      * Make the location identified by $locationId1 refer to the Content
      * referred to by $locationId2 and vice versa.
      *
-     * @param int $locationId1
-     * @param int $locationId2
+     * @param mixed $locationId1
+     * @param mixed $locationId2
      *
      * @return bool
      */
-    abstract public function swap(int $locationId1, int $locationId2): bool;
+    abstract public function swap($locationId1, $locationId2);
 
     /**
      * Creates a new location in given $parentNode.

@@ -18,19 +18,20 @@ use eZ\Publish\SPI\Persistence\FieldType as SPIPersistenceFieldType;
  */
 class FieldTypeRegistryTest extends TestCase
 {
-    private const FIELD_TYPE_IDENTIFIER = 'some-type';
-
     /**
      * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::__construct
      */
-    public function testConstructor(): void
+    public function testConstructor()
     {
         $fieldType = $this->getFieldTypeMock();
-        $registry = new FieldTypeRegistry([self::FIELD_TYPE_IDENTIFIER => $fieldType]);
+        $registry = new FieldTypeRegistry(array('some-type' => $fieldType));
 
-        $this->assertInstanceOf(
-            SPIPersistenceFieldType::class,
-            $registry->getFieldType(self::FIELD_TYPE_IDENTIFIER)
+        $this->assertAttributeSame(
+            array(
+                'some-type' => $fieldType,
+            ),
+            'coreFieldTypeMap',
+            $registry
         );
     }
 
@@ -40,23 +41,48 @@ class FieldTypeRegistryTest extends TestCase
     public function testGetFieldTypeInstance()
     {
         $instance = $this->getFieldTypeMock();
-        $registry = new FieldTypeRegistry([self::FIELD_TYPE_IDENTIFIER => $instance]);
+        $registry = new FieldTypeRegistry(array('some-type' => $instance));
 
-        $result = $registry->getFieldType(self::FIELD_TYPE_IDENTIFIER);
+        $result = $registry->getFieldType('some-type');
 
         $this->assertInstanceOf(SPIPersistenceFieldType::class, $result);
+        $this->assertAttributeSame(
+            $instance,
+            'internalFieldType',
+            $result
+        );
+    }
+
+    /**
+     * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::getFieldType
+     */
+    public function testGetFieldTypeCallable()
+    {
+        $instance = $this->getFieldTypeMock();
+        $closure = function () use ($instance) {
+            return $instance;
+        };
+        $registry = new FieldTypeRegistry(array('some-type' => $closure));
+
+        $result = $registry->getFieldType('some-type');
+
+        $this->assertInstanceOf(SPIPersistenceFieldType::class, $result);
+        $this->assertAttributeSame(
+            $instance,
+            'internalFieldType',
+            $result
+        );
     }
 
     /**
      * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::getFieldType
      *
      * @since 5.3.2
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFound\FieldTypeNotFoundException
      */
     public function testGetNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\NotFound\FieldTypeNotFoundException::class);
-
-        $registry = new FieldTypeRegistry([]);
+        $registry = new FieldTypeRegistry(array());
         $registry->getFieldType('not-found');
     }
 
@@ -64,38 +90,40 @@ class FieldTypeRegistryTest extends TestCase
      * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::getFieldType
      *
      * BC with 5.0-5.3.2
+     * @expectedException \RuntimeException
      */
     public function testGetNotFoundBCException()
     {
-        $this->expectException(\RuntimeException::class);
-
-        $registry = new FieldTypeRegistry([]);
+        $registry = new FieldTypeRegistry(array());
         $registry->getFieldType('not-found');
     }
 
     /**
      * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::getFieldType
+     *
+     * @expectedException \RuntimeException
      */
-    public function testGetNotInstance()
+    public function testGetNotCallableOrInstance()
     {
-        $this->expectException(\TypeError::class);
-
-        $registry = new FieldTypeRegistry([self::FIELD_TYPE_IDENTIFIER => new \DateTime()]);
-        $registry->getFieldType(self::FIELD_TYPE_IDENTIFIER);
+        $registry = new FieldTypeRegistry(array('some-type' => new \DateTime()));
+        $registry->getFieldType('some-type');
     }
 
     /**
-     * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::registerFieldType
+     * @covers \eZ\Publish\Core\Persistence\FieldTypeRegistry::register
      */
     public function testRegister()
     {
         $fieldType = $this->getFieldTypeMock();
-        $registry = new FieldTypeRegistry([]);
-        $registry->register(self::FIELD_TYPE_IDENTIFIER, $fieldType);
+        $registry = new FieldTypeRegistry(array());
+        $registry->register('some-type', $fieldType);
 
-        $this->assertInstanceOf(
-            SPIPersistenceFieldType::class,
-            $registry->getFieldType(self::FIELD_TYPE_IDENTIFIER)
+        $this->assertAttributeSame(
+            array(
+                'some-type' => $fieldType,
+            ),
+            'coreFieldTypeMap',
+            $registry
         );
     }
 

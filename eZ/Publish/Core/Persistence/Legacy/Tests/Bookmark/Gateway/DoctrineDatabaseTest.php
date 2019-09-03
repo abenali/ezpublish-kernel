@@ -17,13 +17,13 @@ class DoctrineDatabaseTest extends TestCase
 {
     const EXISTING_BOOKMARK_ID = 1;
     const EXISTING_BOOKMARK_DATA = [
-        'id' => 1,
+        'id' => '1',
         'name' => 'Lorem ipsum dolor',
-        'node_id' => 5,
-        'user_id' => 14,
+        'node_id' => '5',
+        'user_id' => '14',
     ];
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 

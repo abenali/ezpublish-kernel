@@ -2,17 +2,18 @@
 namespace eZ\Bundle\EzPublishCoreBundle\Features\Context;
 
 use Behat\Behat\Context\Context;
-use Behat\Symfony2Extension\Context\KernelDictionary;
+use Behat\Behat\Context\SnippetAcceptingContext;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
+use EzSystems\BehatBundle\Context\EzContext;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use PHPUnit\Framework\Assert as Assertion;
 
-class ConsoleContext implements Context
+class ConsoleContext extends EzContext implements Context, SnippetAcceptingContext
 {
-    use KernelDictionary;
-
     private $scriptOutput = null;
+
+    private $nonDefaultSiteaccessName = null;
 
     /**
      * Elements referenced by 'it' in sentences.

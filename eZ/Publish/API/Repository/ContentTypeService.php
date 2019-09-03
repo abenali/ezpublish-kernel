@@ -155,12 +155,11 @@ interface ContentTypeService
      *
      * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException If the content type draft owned by the current user can not be found
      *
-     * @param int $contentTypeId
-     * @param bool $ignoreOwnership if true, method will return draft even if the owner is different than currently logged in user
+     * @param mixed $contentTypeId
      *
      * @return \eZ\Publish\API\Repository\Values\ContentType\ContentTypeDraft
      */
-    public function loadContentTypeDraft($contentTypeId, bool $ignoreOwnership = false);
+    public function loadContentTypeDraft($contentTypeId);
 
     /**
      * Bulk-load Content Type objects by ids.
@@ -389,11 +388,4 @@ interface ContentTypeService
      * @return \eZ\Publish\API\Repository\Values\ContentType\ContentTypeDraft
      */
     public function removeContentTypeTranslation(ContentTypeDraft $contentTypeDraft, string $languageCode): ContentTypeDraft;
-
-    /**
-     * Delete all content type drafs created or modified by the user.
-     *
-     * @param int $userId
-     */
-    public function deleteUserDrafts(int $userId): void;
 }

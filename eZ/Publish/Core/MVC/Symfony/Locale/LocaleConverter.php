@@ -27,7 +27,9 @@ class LocaleConverter implements LocaleConverterInterface
      */
     private $reverseConversionMap;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
     public function __construct(array $conversionMap, LoggerInterface $logger)

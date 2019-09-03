@@ -4,4 +4,4 @@ services:
         decorates: 'fos_js_routing.extractor'
         arguments:
             - '@ezpublish.js_routing.extractor.inner'
-            - '@request_stack'
+            - '@=service("request_stack").getMasterRequest()'

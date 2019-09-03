@@ -36,7 +36,9 @@ class FullTextValue extends ValueObject
      */
     public $fieldDefinitionIdentifier;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     public $languageCode;
 
     /**

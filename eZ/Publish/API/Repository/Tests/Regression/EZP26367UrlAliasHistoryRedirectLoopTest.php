@@ -44,6 +44,15 @@ class EZP26367UrlAliasHistoryRedirectLoopTest extends BaseTest
         $contentCreateStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
 
         $contentCreateStruct->setField('title', 'Article');
+        $contentCreateStruct->setField(
+            'intro',
+            <<< DOCBOOK
+<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0-variant ezpublish-1.0">
+    <para>Cache invalidation in eZ</para>
+</section>
+DOCBOOK
+        );
         $draft = $contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
         $article = $contentService->publishVersion($draft->versionInfo);
 
@@ -112,6 +121,15 @@ class EZP26367UrlAliasHistoryRedirectLoopTest extends BaseTest
         $contentCreateStruct = $contentService->newContentCreateStruct($contentType, 'eng-GB');
 
         $contentCreateStruct->setField('title', 'Article');
+        $contentCreateStruct->setField(
+            'intro',
+            <<< DOCBOOK
+<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0-variant ezpublish-1.0">
+    <para>Cache invalidation in eZ</para>
+</section>
+DOCBOOK
+        );
         $draft = $contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
         $article = $contentService->publishVersion($draft->versionInfo);
 

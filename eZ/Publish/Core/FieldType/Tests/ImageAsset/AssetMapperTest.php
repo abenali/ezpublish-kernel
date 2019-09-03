@@ -27,16 +27,24 @@ class AssetMapperTest extends TestCase
 {
     const EXAMPLE_CONTENT_ID = 487;
 
-    /** @var \eZ\Publish\API\Repository\ContentService|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentService|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $contentService;
 
-    /** @var \eZ\Publish\API\Repository\LocationService|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\LocationService|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $locationService;
 
-    /** @var \eZ\Publish\API\Repository\ContentTypeService|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentTypeService|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $contentTypeService;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $mappings = [
         'content_type_identifier' => 'image',
         'content_field_identifier' => 'image',
@@ -44,7 +52,7 @@ class AssetMapperTest extends TestCase
         'parent_location_id' => 51,
     ];
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->contentService = $this->createMock(ContentService::class);
         $this->locationService = $this->createMock(LocationService::class);
@@ -129,10 +137,11 @@ class AssetMapperTest extends TestCase
         $this->assertEquals($expectedValue, $mapper->getAssetField($content));
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testGetAssetFieldThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $content = $this->createContentWithId(self::EXAMPLE_CONTENT_ID);
 
         $mapper = $this->createPartialMapper(['isAsset']);
@@ -186,10 +195,11 @@ class AssetMapperTest extends TestCase
         $this->assertEquals($expectedValue, $mapper->getAssetValue($content));
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
     public function testGetAssetValueThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $content = $this->createContentWithId(self::EXAMPLE_CONTENT_ID);
 
         $mapper = $this->createPartialMapper(['isAsset']);

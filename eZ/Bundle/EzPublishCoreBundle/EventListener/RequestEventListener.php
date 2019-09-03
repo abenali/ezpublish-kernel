@@ -22,16 +22,24 @@ use Symfony\Component\Routing\RouterInterface;
 
 class RequestEventListener implements EventSubscriberInterface
 {
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     private $configResolver;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $defaultSiteAccess;
 
-    /** @var \Symfony\Component\Routing\RouterInterface */
+    /**
+     * @var \Symfony\Component\Routing\RouterInterface
+     */
     private $router;
 
     public function __construct(ConfigResolverInterface $configResolver, RouterInterface $router, $defaultSiteAccess, LoggerInterface $logger = null)
@@ -44,12 +52,12 @@ class RequestEventListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
-            KernelEvents::REQUEST => [
-                ['onKernelRequestForward', 10],
-                ['onKernelRequestRedirect', 0],
-            ],
-        ];
+        return array(
+            KernelEvents::REQUEST => array(
+                array('onKernelRequestForward', 10),
+                array('onKernelRequestRedirect', 0),
+            ),
+        );
     }
 
     /**
@@ -71,16 +79,10 @@ class RequestEventListener implements EventSubscriberInterface
                     $request->server->all(),
                     $request->getContent()
                 );
-
-                if ($request->attributes->has('forwardRequestHeaders')) {
-                    foreach ($request->attributes->get('forwardRequestHeaders') as $headerName => $headerValue) {
-                        $forwardRequest->headers->set($headerName, $headerValue);
-                    }
-                    $request->attributes->remove('forwardRequestHeaders');
-                }
-
                 $forwardRequest->attributes->add($request->attributes->all());
-
+                if ($request->headers->has('X-User-Hash')) {
+                    $forwardRequest->headers->set('X-User-Hash', $request->headers->get('X-User-Hash'));
+                }
                 // Not forcing HttpKernelInterface::SUB_REQUEST on purpose since we're very early here
                 // and we need to bootstrap essential stuff like sessions.
                 $event->setResponse($event->getKernel()->handle($forwardRequest));
@@ -89,7 +91,7 @@ class RequestEventListener implements EventSubscriberInterface
                 if (isset($this->logger)) {
                     $this->logger->info(
                         "URLAlias made request to be forwarded to $semanticPathinfo",
-                        ['pathinfo' => $request->getPathInfo()]
+                        array('pathinfo' => $request->getPathInfo())
                     );
                 }
             }
@@ -138,7 +140,7 @@ class RequestEventListener implements EventSubscriberInterface
                 if (isset($this->logger)) {
                     $this->logger->info(
                         "URLAlias made request to be redirected to $semanticPathinfo",
-                        ['pathinfo' => $request->getPathInfo()]
+                        array('pathinfo' => $request->getPathInfo())
                     );
                 }
             }

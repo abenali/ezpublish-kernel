@@ -9,6 +9,8 @@
 namespace eZ\Publish\Core\MVC\Symfony\Matcher\Tests;
 
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
+use eZ\Publish\Core\FieldType\Page\Parts\Block;
+use eZ\Publish\Core\MVC\Symfony\View\BlockView;
 use eZ\Publish\Core\MVC\Symfony\View\ContentView;
 use eZ\Publish\Core\Repository\Repository;
 use eZ\Publish\Core\Repository\Values\Content\Content;
@@ -49,31 +51,31 @@ abstract class AbstractMatcherFactoryTest extends TestCase
      */
     public function testMatchFailNoViewType()
     {
-        $matcherFactory = new $this->matcherFactoryClass($this->getRepositoryMock(), []);
+        $matcherFactory = new $this->matcherFactoryClass($this->getRepositoryMock(), array());
         $this->assertNull($matcherFactory->match($this->getContentView(), 'full'));
     }
 
     /**
+     * @expectedException \InvalidArgumentException
+     *
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\AbstractMatcherFactory::__construct
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\AbstractMatcherFactory::match
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\AbstractMatcherFactory::getMatcher
      */
     public function testMatchInvalidMatcher()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $matcherFactory = new $this->matcherFactoryClass(
             $this->getRepositoryMock(),
-            [
-                'full' => [
-                    'test' => [
+            array(
+                'full' => array(
+                    'test' => array(
                         'template' => 'foo.html.twig',
-                        'match' => [
+                        'match' => array(
                             'NonExistingMatcher' => true,
-                        ],
-                    ],
-                ],
-            ]
+                        ),
+                    ),
+                ),
+            )
         );
         $matcherFactory->match($this->getMatchableValueObject(), 'full');
     }
@@ -85,25 +87,25 @@ abstract class AbstractMatcherFactoryTest extends TestCase
      */
     public function testMatch()
     {
-        $expectedConfigHash = [
+        $expectedConfigHash = array(
             'template' => 'foo.html.twig',
-            'match' => [
+            'match' => array(
                 $this->getMatcherClass() => 456,
-            ],
-        ];
+            ),
+        );
         $matcherFactory = new $this->matcherFactoryClass(
             $this->getRepositoryMock(),
-            [
-                'full' => [
-                    'not_matching' => [
+            array(
+                'full' => array(
+                    'not_matching' => array(
                         'template' => 'bar.html.twig',
-                        'match' => [
+                        'match' => array(
                             $this->getMatcherClass() => 123,
-                        ],
-                    ],
+                        ),
+                    ),
                     'test' => $expectedConfigHash,
-                ],
-            ]
+                ),
+            )
         );
         $configHash = $matcherFactory->match($this->getMatchableValueObject());
         $this->assertArrayHasKey('matcher', $configHash);
@@ -133,22 +135,22 @@ abstract class AbstractMatcherFactoryTest extends TestCase
     {
         $matcherFactory = new $this->matcherFactoryClass(
             $this->getRepositoryMock(),
-            [
-                'full' => [
-                    'not_matching' => [
+            array(
+                'full' => array(
+                    'not_matching' => array(
                         'template' => 'bar.html.twig',
-                        'match' => [
+                        'match' => array(
                             $this->getMatcherClass() => 123,
-                        ],
-                    ],
-                    'test' => [
+                        ),
+                    ),
+                    'test' => array(
                         'template' => 'foo.html.twig',
-                        'match' => [
+                        'match' => array(
                             $this->getMatcherClass() => 456,
-                        ],
-                    ],
-                ],
-            ]
+                        ),
+                    ),
+                ),
+            )
         );
         $this->assertNull(
             $matcherFactory->match(
@@ -186,6 +188,20 @@ abstract class AbstractMatcherFactoryTest extends TestCase
             )
         );
         $view->setLocation(new Location($locationProperties));
+
+        return $view;
+    }
+
+    /**
+     * @param array $blockProperties
+     *
+     * @return \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\MVC\Symfony\View\BlockView
+     */
+    protected function getBlockView(array $blockProperties = array())
+    {
+        $view = new BlockView();
+        $view->setViewType('full');
+        $view->setBlock(new Block($blockProperties));
 
         return $view;
     }

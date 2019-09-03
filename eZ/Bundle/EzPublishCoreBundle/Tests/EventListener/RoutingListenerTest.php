@@ -22,16 +22,22 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RoutingListenerTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $configResolver;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $urlAliasRouter;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $urlAliasGenerator;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->container = $this->createMock(ContainerInterface::class);
@@ -44,9 +50,9 @@ class RoutingListenerTest extends TestCase
     {
         $listener = new RoutingListener($this->configResolver, $this->urlAliasRouter, $this->urlAliasGenerator);
         $this->assertSame(
-            [
-                MVCEvents::SITEACCESS => ['onSiteAccessMatch', 200],
-            ],
+            array(
+                MVCEvents::SITEACCESS => array('onSiteAccessMatch', 200),
+            ),
             $listener->getSubscribedEvents()
         );
     }
@@ -54,16 +60,16 @@ class RoutingListenerTest extends TestCase
     public function testOnSiteAccessMatch()
     {
         $rootLocationId = 123;
-        $excludedUriPrefixes = ['/foo/bar', '/baz'];
+        $excludedUriPrefixes = array('/foo/bar', '/baz');
         $this->configResolver
             ->expects($this->any())
             ->method('getParameter')
             ->will(
                 $this->returnValueMap(
-                    [
-                        ['content.tree_root.location_id', null, null, $rootLocationId],
-                        ['content.tree_root.excluded_uri_prefixes', null, null, $excludedUriPrefixes],
-                    ]
+                    array(
+                        array('content.tree_root.location_id', null, null, $rootLocationId),
+                        array('content.tree_root.excluded_uri_prefixes', null, null, $excludedUriPrefixes),
+                    )
                 )
             );
 

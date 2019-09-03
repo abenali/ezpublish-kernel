@@ -41,7 +41,7 @@ class LocationLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new LocationLimitation(
-                ['limitationValues' => [$parentLocationId]]
+                array('limitationValues' => array($parentLocationId))
             )
         );
 
@@ -64,11 +64,10 @@ class LocationLimitationTest extends BaseLimitationTest
      * Tests a LocationLimitation.
      *
      * @see eZ\Publish\API\Repository\Values\User\Limitation\LocationLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testLocationLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $parentLocationId = $this->generateId('location', 61);
@@ -82,7 +81,7 @@ class LocationLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new LocationLimitation(
-                ['limitationValues' => [$parentLocationId]]
+                array('limitationValues' => array($parentLocationId))
             )
         );
 

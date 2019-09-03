@@ -20,7 +20,9 @@ use PDO;
 
 class RelationListConverter implements Converter
 {
-    /** @var \eZ\Publish\Core\Persistence\Database\DatabaseHandler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Database\DatabaseHandler
+     */
     private $db;
 
     /**
@@ -86,12 +88,12 @@ class RelationListConverter implements Converter
      */
     public function toFieldValue(StorageFieldValue $value, FieldValue $fieldValue)
     {
-        $fieldValue->data = ['destinationContentIds' => []];
+        $fieldValue->data = array('destinationContentIds' => array());
         if ($value->dataText === null) {
             return;
         }
 
-        $priorityByContentId = [];
+        $priorityByContentId = array();
 
         $dom = new DOMDocument('1.0', 'utf-8');
         if ($dom->loadXML($value->dataText) === true) {
@@ -213,7 +215,7 @@ class RelationListConverter implements Converter
 
         // default value
         $fieldDef->defaultValue = new FieldValue();
-        $fieldDef->defaultValue->data = ['destinationContentIds' => []];
+        $fieldDef->defaultValue->data = array('destinationContentIds' => array());
 
         if ($storageDef->dataText5 === null) {
             return;
@@ -282,7 +284,7 @@ class RelationListConverter implements Converter
     protected function getRelationXmlHashFromDB(array $destinationContentIds)
     {
         if (empty($destinationContentIds)) {
-            return [];
+            return array();
         }
 
         $q = $this->db->createSelectQuery();
@@ -340,7 +342,7 @@ class RelationListConverter implements Converter
      */
     private static function dbAttributeMap()
     {
-        return [
+        return array(
             // 'identifier' => 'identifier',// not used
             'priority' => 'priority',
             // 'in-trash' => 'in_trash',// false by default and implies
@@ -352,6 +354,6 @@ class RelationListConverter implements Converter
             'contentclass-identifier' => 'ezcontentclass_identifier',
             // 'is-modified' => 'is_modified',// deprecated and not used
             'contentobject-remote-id' => 'ezcontentobject_remote_id',
-        ];
+        );
     }
 }

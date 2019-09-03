@@ -33,10 +33,14 @@ use Exception;
  */
 class ViewController extends Controller
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\View\ViewManagerInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\View\ViewManagerInterface
+     */
     protected $viewManager;
 
-    /** @var \Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface */
+    /**
+     * @var \Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface
+     */
     private $authorizationChecker;
 
     public function __construct(ViewManagerInterface $viewManager, AuthorizationCheckerInterface $authorizationChecker)
@@ -103,11 +107,11 @@ class ViewController extends Controller
                 );
             }
 
-            // Make the response vary against X-User-Context-Hash header ensures that an HTTP
+            // Make the response vary against X-User-Hash header ensures that an HTTP
             // reverse proxy caches the different possible variations of the
             // response as it can depend on user role for instance.
-            if ($request->headers->has('X-User-Context-Hash')) {
-                $response->setVary('X-User-Context-Hash');
+            if ($request->headers->has('X-User-Hash')) {
+                $response->setVary('X-User-Hash');
             }
 
             if ($lastModified != null) {
@@ -135,7 +139,7 @@ class ViewController extends Controller
      *
      * @deprecated Since 6.0.0. Viewing locations is now done with ViewContent.
      */
-    public function viewLocation($locationId, $viewType, $layout = false, array $params = [])
+    public function viewLocation($locationId, $viewType, $layout = false, array $params = array())
     {
         @trigger_error(
             "ViewController::viewLocation() is deprecated since kernel 6.0.0, and will be removed in the future.\n" .
@@ -195,7 +199,7 @@ class ViewController extends Controller
      *
      * @deprecated Since 6.0.0. Viewing locations is now done with ViewContent.
      */
-    public function embedLocation($locationId, $viewType, $layout = false, array $params = [])
+    public function embedLocation($locationId, $viewType, $layout = false, array $params = array())
     {
         @trigger_error(
             "ViewController::embedLocation() is deprecated since kernel 6.0.0, and will be removed in the future.\n" .
@@ -224,14 +228,14 @@ class ViewController extends Controller
                     new AuthorizationAttribute(
                         'content',
                         'read',
-                        ['valueObject' => $location->contentInfo, 'targets' => $location]
+                        array('valueObject' => $location->contentInfo, 'targets' => $location)
                     )
                 )
                 && !$this->authorizationChecker->isGranted(
                     new AuthorizationAttribute(
                         'content',
                         'view_embed',
-                        ['valueObject' => $location->contentInfo, 'targets' => $location]
+                        array('valueObject' => $location->contentInfo, 'targets' => $location)
                     )
                 )
             ) {
@@ -279,7 +283,7 @@ class ViewController extends Controller
      *
      * @deprecated Since 6.0.0. Viewing content is now done with ViewAction.
      */
-    public function viewContent($contentId, $viewType, $layout = false, array $params = [])
+    public function viewContent($contentId, $viewType, $layout = false, array $params = array())
     {
         @trigger_error(
             "ViewController::viewContent() is deprecated since kernel 6.0.0, and will be removed in the future.\n" .
@@ -336,7 +340,7 @@ class ViewController extends Controller
      *
      * @deprecated Since 6.0.0. Embedding content is now done with EmbedAction.
      */
-    public function embedContent($contentId, $viewType, $layout = false, array $params = [])
+    public function embedContent($contentId, $viewType, $layout = false, array $params = array())
     {
         @trigger_error(
             "ViewController::embedContent() is deprecated since kernel 6.0.0, and will be removed in the future.\n" .
@@ -358,10 +362,10 @@ class ViewController extends Controller
             // Check both 'content/read' and 'content/view_embed'.
             if (
                 !$this->authorizationChecker->isGranted(
-                    new AuthorizationAttribute('content', 'read', ['valueObject' => $content])
+                    new AuthorizationAttribute('content', 'read', array('valueObject' => $content))
                 )
                 && !$this->authorizationChecker->isGranted(
-                    new AuthorizationAttribute('content', 'view_embed', ['valueObject' => $content])
+                    new AuthorizationAttribute('content', 'view_embed', array('valueObject' => $content))
                 )
             ) {
                 throw new AccessDeniedException();
@@ -371,7 +375,7 @@ class ViewController extends Controller
             if (
                 !$content->getVersionInfo()->isPublished()
                 && !$this->authorizationChecker->isGranted(
-                    new AuthorizationAttribute('content', 'versionread', ['valueObject' => $content])
+                    new AuthorizationAttribute('content', 'versionread', array('valueObject' => $content))
                 )
             ) {
                 throw new AccessDeniedException();
@@ -399,11 +403,11 @@ class ViewController extends Controller
     {
         $event = new APIContentExceptionEvent(
             $e,
-            [
+            array(
                 'contentId' => $contentId,
                 'locationId' => $locationId,
                 'viewType' => $viewType,
-            ]
+            )
         );
         $this->getEventDispatcher()->dispatch(MVCEvents::API_CONTENT_EXCEPTION, $event);
         if ($event->hasContentView()) {
@@ -430,9 +434,9 @@ class ViewController extends Controller
      *
      * @return string
      */
-    protected function renderLocation(Location $location, $viewType, $layout = false, array $params = [])
+    protected function renderLocation(Location $location, $viewType, $layout = false, array $params = array())
     {
-        return $this->viewManager->renderLocation($location, $viewType, $params + ['no_layout' => !$layout]);
+        return $this->viewManager->renderLocation($location, $viewType, $params + array('noLayout' => !$layout));
     }
 
     /**
@@ -445,9 +449,9 @@ class ViewController extends Controller
      *
      * @return string
      */
-    protected function renderContent(Content $content, $viewType, $layout = false, array $params = [])
+    protected function renderContent(Content $content, $viewType, $layout = false, array $params = array())
     {
-        return $this->viewManager->renderContent($content, $viewType, $params + ['no_layout' => !$layout]);
+        return $this->viewManager->renderContent($content, $viewType, $params + array('noLayout' => !$layout));
     }
 
     /**

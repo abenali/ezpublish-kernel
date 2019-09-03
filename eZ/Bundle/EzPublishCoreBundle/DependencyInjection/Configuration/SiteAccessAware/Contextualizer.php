@@ -13,10 +13,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Contextualizer implements ContextualizerInterface
 {
-    /** @var \Symfony\Component\DependencyInjection\ContainerInterface */
+    /**
+     * @var \Symfony\Component\DependencyInjection\ContainerInterface
+     */
     private $container;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $namespace;
 
     /**
@@ -26,10 +30,14 @@ class Contextualizer implements ContextualizerInterface
      */
     private $siteAccessNodeName;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $availableSiteAccesses;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $groupsBySiteAccess;
 
     public function __construct(
@@ -66,18 +74,18 @@ class Contextualizer implements ContextualizerInterface
         $this->mapReservedScopeArray($id, $config, ConfigResolver::SCOPE_GLOBAL);
         $defaultSettings = $this->getContainerParameter(
             $this->namespace . '.' . ConfigResolver::SCOPE_DEFAULT . '.' . $id,
-            []
+            array()
         );
         $globalSettings = $this->getContainerParameter(
             $this->namespace . '.' . ConfigResolver::SCOPE_GLOBAL . '.' . $id,
-            []
+            array()
         );
 
         foreach ($this->availableSiteAccesses as $scope) {
             // for a siteaccess, we have to merge the default value,
             // the group value(s), the siteaccess value and the global
             // value of the settings.
-            $groupsSettings = [];
+            $groupsSettings = array();
             if (isset($this->groupsBySiteAccess[$scope]) && is_array($this->groupsBySiteAccess[$scope])) {
                 $groupsSettings = $this->groupsArraySetting(
                     $this->groupsBySiteAccess[$scope],
@@ -87,7 +95,7 @@ class Contextualizer implements ContextualizerInterface
                 );
             }
 
-            $scopeSettings = [];
+            $scopeSettings = array();
             if (isset($config[$this->siteAccessNodeName][$scope][$id])) {
                 $scopeSettings = $config[$this->siteAccessNodeName][$scope][$id];
             }
@@ -107,7 +115,7 @@ class Contextualizer implements ContextualizerInterface
                         array_keys($globalSettings)
                     )
                 );
-                $mergedSettings = [];
+                $mergedSettings = array();
                 foreach ($keys1 as $key) {
                     // Only merge if actual setting is an array.
                     // We assume default setting to be a clear reference for this.
@@ -128,10 +136,10 @@ class Contextualizer implements ContextualizerInterface
                         }
                     } else {
                         $mergedSettings[$key] = array_merge(
-                            isset($defaultSettings[$key]) ? $defaultSettings[$key] : [],
-                            isset($groupsSettings[$key]) ? $groupsSettings[$key] : [],
-                            isset($scopeSettings[$key]) ? $scopeSettings[$key] : [],
-                            isset($globalSettings[$key]) ? $globalSettings[$key] : []
+                            isset($defaultSettings[$key]) ? $defaultSettings[$key] : array(),
+                            isset($groupsSettings[$key]) ? $groupsSettings[$key] : array(),
+                            isset($scopeSettings[$key]) ? $scopeSettings[$key] : array(),
+                            isset($globalSettings[$key]) ? $globalSettings[$key] : array()
                         );
                     }
                 }
@@ -184,7 +192,7 @@ class Contextualizer implements ContextualizerInterface
      */
     private function groupsArraySetting(array $groups, $id, array $config, $options = 0)
     {
-        $groupsSettings = [];
+        $groupsSettings = array();
         sort($groups);
         foreach ($groups as $group) {
             if (isset($config[$this->siteAccessNodeName][$group][$id])) {

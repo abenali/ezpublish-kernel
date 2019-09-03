@@ -24,7 +24,9 @@ class Location extends APILocation
      */
     protected $contentInfo;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $path;
 
     /**
@@ -48,7 +50,7 @@ class Location extends APILocation
      *
      * @return array
      */
-    protected function getProperties($dynamicProperties = ['contentId'])
+    protected function getProperties($dynamicProperties = array('contentId'))
     {
         return parent::getProperties($dynamicProperties);
     }
@@ -73,7 +75,7 @@ class Location extends APILocation
                     return $this->path = explode('/', trim($this->pathString, '/'));
                 }
 
-                return $this->path = [];
+                return $this->path = array();
         }
 
         return parent::__get($property);

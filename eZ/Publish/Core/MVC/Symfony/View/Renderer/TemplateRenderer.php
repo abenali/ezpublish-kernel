@@ -16,10 +16,14 @@ use Closure;
 
 class TemplateRenderer implements Renderer
 {
-    /** @var \Symfony\Component\Templating\EngineInterface */
+    /**
+     * @var \Symfony\Component\Templating\EngineInterface
+     */
     protected $templateEngine;
 
-    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+     */
     protected $eventDispatcher;
 
     public function __construct(TemplateEngine $templateEngine, EventDispatcherInterface $eventDispatcher)
@@ -37,7 +41,10 @@ class TemplateRenderer implements Renderer
      */
     public function render(View $view)
     {
-        $this->eventDispatcher->dispatch(new PreContentViewEvent($view), MVCEvents::PRE_CONTENT_VIEW);
+        $this->eventDispatcher->dispatch(
+            MVCEvents::PRE_CONTENT_VIEW,
+            new PreContentViewEvent($view)
+        );
 
         $templateIdentifier = $view->getTemplateIdentifier();
         if ($templateIdentifier instanceof Closure) {

@@ -37,10 +37,10 @@ class LegacyStorage extends BaseLegacyStorage
     protected function getPropertyMapping()
     {
         $propertyMap = parent::getPropertyMapping();
-        $propertyMap['download_count'] = [
+        $propertyMap['download_count'] = array(
             'name' => 'downloadCount',
             'cast' => 'intval',
-        ];
+        );
 
         return $propertyMap;
     }

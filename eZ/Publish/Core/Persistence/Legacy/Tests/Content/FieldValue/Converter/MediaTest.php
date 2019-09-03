@@ -23,7 +23,7 @@ class MediaTest extends TestCase
 {
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->converter = new MediaConverter();
     }
@@ -38,28 +38,28 @@ class MediaTest extends TestCase
         $storageFieldDef = new StorageFieldDefinition();
 
         $fieldTypeConstraints = new FieldTypeConstraints();
-        $fieldTypeConstraints->validators = [
+        $fieldTypeConstraints->validators = array(
             // Setting max file size to 1MB (1.048.576 bytes)
-            'FileSizeValidator' => ['maxFileSize' => 1048576],
-        ];
+            'FileSizeValidator' => array('maxFileSize' => 1048576),
+        );
         $fieldTypeConstraints->fieldSettings = new FieldSettings(
-            [
+            array(
                 'mediaType' => MediaType::TYPE_HTML5_VIDEO,
-            ]
+            )
         );
 
         $fieldDef = new PersistenceFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => $fieldTypeConstraints,
                 'defaultValue' => null,
-            ]
+            )
         );
 
         $this->converter->toStorageFieldDefinition($fieldDef, $storageFieldDef);
 
         self::assertSame(
             $fieldDef->fieldTypeConstraints->validators['FileSizeValidator'],
-            ['maxFileSize' => $storageFieldDef->dataInt1]
+            array('maxFileSize' => $storageFieldDef->dataInt1)
         );
         self::assertSame(
             $fieldDef->fieldTypeConstraints->fieldSettings['mediaType'],
@@ -76,22 +76,22 @@ class MediaTest extends TestCase
     {
         $fieldDef = new PersistenceFieldDefinition();
         $storageDef = new StorageFieldDefinition(
-            [
+            array(
                 'dataInt1' => 1048576,
                 'dataText1' => MediaType::TYPE_HTML5_VIDEO,
-            ]
+            )
         );
 
         $this->converter->toFieldDefinition($storageDef, $fieldDef);
         self::assertSame(
-            [
-                'FileSizeValidator' => ['maxFileSize' => $storageDef->dataInt1],
-            ],
+            array(
+                'FileSizeValidator' => array('maxFileSize' => $storageDef->dataInt1),
+            ),
             $fieldDef->fieldTypeConstraints->validators
         );
         self::assertInstanceOf('eZ\\Publish\\Core\\FieldType\\FieldSettings', $fieldDef->fieldTypeConstraints->fieldSettings);
         self::assertSame(
-            ['mediaType' => MediaType::TYPE_HTML5_VIDEO],
+            array('mediaType' => MediaType::TYPE_HTML5_VIDEO),
             $fieldDef->fieldTypeConstraints->fieldSettings->getArrayCopy()
         );
     }

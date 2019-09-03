@@ -40,7 +40,7 @@ class NewSectionLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('section', 'assign');
         $policyCreate->addLimitation(
             new NewSectionLimitation(
-                ['limitationValues' => [$sectionId]]
+                array('limitationValues' => array($sectionId))
             )
         );
 
@@ -77,11 +77,10 @@ class NewSectionLimitationTest extends BaseLimitationTest
      * Tests the NewSectionLimitation.
      *
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\NewSectionLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testNewSectionLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $contentId = $this->generateId('content', 58);
@@ -95,7 +94,7 @@ class NewSectionLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('section', 'assign');
         $policyCreate->addLimitation(
             new NewSectionLimitation(
-                ['limitationValues' => [$sectionId]]
+                array('limitationValues' => array($sectionId))
             )
         );
 

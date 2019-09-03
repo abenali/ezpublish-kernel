@@ -32,14 +32,14 @@ class Value extends BaseValue
      *
      * @var array[]
      */
-    public $countries = [];
+    public $countries = array();
 
     /**
      * Construct a new Value object and initialize it with given $data.
      *
      * @param array[] $countries
      */
-    public function __construct(array $countries = [])
+    public function __construct(array $countries = array())
     {
         $this->countries = $countries;
     }

@@ -51,9 +51,9 @@ class FileSizeValidatorTest extends TestCase
      */
     public function testConstraintsInitializeGet()
     {
-        $constraints = [
+        $constraints = array(
             'maxFileSize' => 4096,
-        ];
+        );
         $validator = new FileSizeValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -68,12 +68,12 @@ class FileSizeValidatorTest extends TestCase
      */
     public function testGetConstraintsSchema()
     {
-        $constraintsSchema = [
-            'maxFileSize' => [
+        $constraintsSchema = array(
+            'maxFileSize' => array(
                 'type' => 'int',
                 'default' => false,
-            ],
-        ];
+            ),
+        );
         $validator = new FileSizeValidator();
         $this->assertSame($constraintsSchema, $validator->getConstraintsSchema());
     }
@@ -86,9 +86,9 @@ class FileSizeValidatorTest extends TestCase
      */
     public function testConstraintsSetGet()
     {
-        $constraints = [
+        $constraints = array(
             'maxFileSize' => 4096,
-        ];
+        );
         $validator = new FileSizeValidator();
         $validator->maxFileSize = $constraints['maxFileSize'];
         $this->assertSame($constraints['maxFileSize'], $validator->maxFileSize);
@@ -98,14 +98,13 @@ class FileSizeValidatorTest extends TestCase
      * Tests initializing with a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::initializeWithConstraints
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testInitializeBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
-        $constraints = [
+        $constraints = array(
             'unexisting' => 0,
-        ];
+        );
         $validator = new FileSizeValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -116,11 +115,10 @@ class FileSizeValidatorTest extends TestCase
      * Tests setting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__set
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testSetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new FileSizeValidator();
         $validator->unexisting = 0;
     }
@@ -129,11 +127,10 @@ class FileSizeValidatorTest extends TestCase
      * Tests getting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__get
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testGetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new FileSizeValidator();
         $null = $validator->unexisting;
     }
@@ -153,7 +150,7 @@ class FileSizeValidatorTest extends TestCase
         $validator = new FileSizeValidator();
         $validator->maxFileSize = 4096;
         $this->assertTrue($validator->validate($this->getBinaryFileValue($size)));
-        $this->assertSame([], $validator->getMessage());
+        $this->assertSame(array(), $validator->getMessage());
     }
 
     /**
@@ -165,18 +162,18 @@ class FileSizeValidatorTest extends TestCase
     {
         $this->markTestSkipped('BinaryFile field type does not use this validator anymore.');
         $value = new BinaryFileValue($this->createMock(IOServiceInterface::class));
-        $value->file = new BinaryFile(['size' => $size]);
+        $value->file = new BinaryFile(array('size' => $size));
 
         return $value;
     }
 
     public function providerForValidateOK()
     {
-        return [
-            [0],
-            [512],
-            [4096],
-        ];
+        return array(
+            array(0),
+            array(512),
+            array(4096),
+        );
     }
 
     /**
@@ -217,16 +214,16 @@ class FileSizeValidatorTest extends TestCase
 
     public function providerForValidateKO()
     {
-        return [
-            [
+        return array(
+            array(
                 8192,
-                [
+                array(
                     'The file size cannot exceed %size% byte.',
                     'The file size cannot exceed %size% bytes.',
-                ],
-                ['%size%' => $this->getMaxFileSize()],
-            ],
-        ];
+                ),
+                array('%size%' => $this->getMaxFileSize()),
+            ),
+        );
     }
 
     /**
@@ -246,15 +243,15 @@ class FileSizeValidatorTest extends TestCase
 
     public function providerForValidateConstraintsOK()
     {
-        return [
-            [
-                [],
-                ['maxFileSize' => false],
-                ['maxFileSize' => 0],
-                ['maxFileSize' => -5],
-                ['maxFileSize' => 4096],
-            ],
-        ];
+        return array(
+            array(
+                array(),
+                array('maxFileSize' => false),
+                array('maxFileSize' => 0),
+                array('maxFileSize' => -5),
+                array('maxFileSize' => 4096),
+            ),
+        );
     }
 
     /**
@@ -284,27 +281,27 @@ class FileSizeValidatorTest extends TestCase
 
     public function providerForValidateConstraintsKO()
     {
-        return [
-            [
-                ['maxFileSize' => true],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                ['%parameter%' => 'maxFileSize'],
-            ],
-            [
-                ['maxFileSize' => 'five thousand bytes'],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                ['%parameter%' => 'maxFileSize'],
-            ],
-            [
-                ['maxFileSize' => new \DateTime()],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                ['%parameter%' => 'maxFileSize'],
-            ],
-            [
-                ['brljix' => 12345],
-                ["Validator parameter '%parameter%' is unknown"],
-                ['%parameter%' => 'brljix'],
-            ],
-        ];
+        return array(
+            array(
+                array('maxFileSize' => true),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array('%parameter%' => 'maxFileSize'),
+            ),
+            array(
+                array('maxFileSize' => 'five thousand bytes'),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array('%parameter%' => 'maxFileSize'),
+            ),
+            array(
+                array('maxFileSize' => new \DateTime()),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array('%parameter%' => 'maxFileSize'),
+            ),
+            array(
+                array('brljix' => 12345),
+                array("Validator parameter '%parameter%' is unknown"),
+                array('%parameter%' => 'brljix'),
+            ),
+        );
     }
 }

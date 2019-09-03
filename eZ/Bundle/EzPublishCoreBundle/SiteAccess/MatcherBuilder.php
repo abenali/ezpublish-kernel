@@ -9,24 +9,28 @@
 namespace eZ\Bundle\EzPublishCoreBundle\SiteAccess;
 
 use eZ\Publish\Core\MVC\Symfony\SiteAccess\MatcherBuilder as BaseMatcherBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest;
+use RuntimeException;
 
 /**
  * Siteaccess matcher builder based on services.
  */
-final class MatcherBuilder extends BaseMatcherBuilder
+class MatcherBuilder extends BaseMatcherBuilder
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\SiteAccess\SiteAccessMatcherRegistry */
-    protected $siteAccessMatcherRegistry;
+    /**
+     * @var \Symfony\Component\DependencyInjection\ContainerInterface
+     */
+    protected $container;
 
-    public function __construct(SiteAccessMatcherRegistry $siteAccessMatcherRegistry)
+    public function __construct(ContainerInterface $container)
     {
-        $this->siteAccessMatcherRegistry = $siteAccessMatcherRegistry;
+        $this->container = $container;
     }
 
     /**
      * Builds siteaccess matcher.
-     * If $matchingClass begins with "@", it will be considered as a service identifier.
+     * If $matchingClass begins with "@", it will be considered as a service identifier and loaded with the service container.
      *
      * @param $matchingClass
      * @param $matchingConfiguration
@@ -34,12 +38,16 @@ final class MatcherBuilder extends BaseMatcherBuilder
      *
      * @return \eZ\Bundle\EzPublishCoreBundle\SiteAccess\Matcher
      *
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     * @throws \RuntimeException
      */
     public function buildMatcher($matchingClass, $matchingConfiguration, SimplifiedRequest $request)
     {
-        if (strpos($matchingClass, '@') === 0) {
-            $matcher = $this->siteAccessMatcherRegistry->getMatcher(substr($matchingClass, 1));
+        if ($matchingClass[0] === '@') {
+            /** @var $matcher \eZ\Bundle\EzPublishCoreBundle\SiteAccess\Matcher */
+            $matcher = $this->container->get(substr($matchingClass, 1));
+            if (!$matcher instanceof Matcher) {
+                throw new RuntimeException('A service based siteaccess matcher MUST implement ' . __NAMESPACE__ . '\\Matcher interface.');
+            }
 
             $matcher->setMatchingConfiguration($matchingConfiguration);
             $matcher->setRequest($request);

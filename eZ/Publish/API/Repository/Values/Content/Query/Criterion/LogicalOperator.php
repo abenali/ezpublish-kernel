@@ -23,7 +23,7 @@ abstract class LogicalOperator extends Criterion
      *
      * @var Criterion[]
      */
-    public $criteria = [];
+    public $criteria = array();
 
     /**
      * Creates a Logic operation with the given criteria.

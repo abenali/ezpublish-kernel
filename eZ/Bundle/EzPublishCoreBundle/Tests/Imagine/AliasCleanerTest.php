@@ -14,13 +14,17 @@ use PHPUnit\Framework\TestCase;
 
 class AliasCleanerTest extends TestCase
 {
-    /** @var AliasCleaner */
+    /**
+     * @var AliasCleaner
+     */
     private $aliasCleaner;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $resolver;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->resolver = $this->createMock(ResolverInterface::class);
@@ -33,7 +37,7 @@ class AliasCleanerTest extends TestCase
         $this->resolver
             ->expects($this->once())
             ->method('remove')
-            ->with([$originalPath], []);
+            ->with(array($originalPath), array());
 
         $this->aliasCleaner->removeAliases($originalPath);
     }

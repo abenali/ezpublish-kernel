@@ -17,7 +17,7 @@ use Imagine\Exception\InvalidArgumentException;
  */
 class ScaleHeightDownOnlyFilterLoader extends FilterLoaderWrapped
 {
-    public function load(ImageInterface $image, array $options = [])
+    public function load(ImageInterface $image, array $options = array())
     {
         if (empty($options)) {
             throw new InvalidArgumentException('Missing height option');
@@ -25,10 +25,10 @@ class ScaleHeightDownOnlyFilterLoader extends FilterLoaderWrapped
 
         return $this->innerLoader->load(
             $image,
-            [
-                'size' => [null, $options[0]],
+            array(
+                'size' => array(null, $options[0]),
                 'mode' => ImageInterface::THUMBNAIL_INSET,
-            ]
+            )
         );
     }
 }

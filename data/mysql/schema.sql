@@ -620,7 +620,6 @@ CREATE TABLE `ezcontentobject` (
   `remote_id` varchar(100) DEFAULT NULL,
   `section_id` int(11) NOT NULL DEFAULT '0',
   `status` int(11) DEFAULT '0',
-  `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `ezcontentobject_remote_id` (`remote_id`),
   KEY `ezcontentobject_classid` (`contentclass_id`),
@@ -770,7 +769,7 @@ CREATE TABLE `ezcontentobject_tree` (
   KEY `ezcontentobject_tree_path` (`path_string` (191)),
   KEY `ezcontentobject_tree_path_ident` (`path_identification_string`(50)),
   KEY `modified_subnode` (`modified_subnode`),
-  KEY `ezcontentobject_tree_contentobject_id_path_string` (`path_string` (191), `contentobject_id`)
+  KEY `ezcontentobject_tree_contentobject_id_path_string` (`path_string`, `contentobject_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2568,33 +2567,11 @@ CREATE TABLE `eznotification` (
   `is_pending` tinyint(1) NOT NULL DEFAULT '1',
   `type` varchar(128) NOT NULL DEFAULT '',
   `created` int(11) NOT NULL DEFAULT 0,
-  `data` text,
+  `data` blob,
   PRIMARY KEY (`id`),
   KEY `eznotification_owner` (`owner_id`),
   KEY `eznotification_owner_is_pending` (`owner_id`, `is_pending`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `ezcontentclass_attribute_ml`
---
-DROP TABLE IF EXISTS `ezcontentclass_attribute_ml`;
-CREATE TABLE `ezcontentclass_attribute_ml` (
-  `contentclass_attribute_id` INT NOT NULL,
-  `version` INT NOT NULL,
-  `language_id` BIGINT NOT NULL,
-  `name` VARCHAR(255) NOT NULL,
-  `description` TEXT NULL,
-  `data_text` TEXT NULL,
-  `data_json` TEXT NULL,
-  PRIMARY KEY (`contentclass_attribute_id`, `version`, `language_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `ezcontentclass_attribute_ml`
-ADD CONSTRAINT `ezcontentclass_attribute_ml_lang_fk`
-  FOREIGN KEY (`language_id`)
-  REFERENCES `ezcontent_language` (`id`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
 
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

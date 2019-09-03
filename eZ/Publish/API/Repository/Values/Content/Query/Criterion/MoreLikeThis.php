@@ -45,9 +45,9 @@ class MoreLikeThis extends Criterion
 
     public function getSpecifications()
     {
-        return [
+        return array(
             new Specifications(Operator::EQ, Specifications::FORMAT_SINGLE),
-        ];
+        );
     }
 
     /**

@@ -87,7 +87,7 @@ class TextLineConverter implements Converter
      */
     public function toFieldDefinition(StorageFieldDefinition $storageDef, FieldDefinition $fieldDef)
     {
-        $validatorConstraints = [];
+        $validatorConstraints = array();
 
         if (isset($storageDef->dataInt1)) {
             $validatorConstraints[self::STRING_LENGTH_VALIDATOR_IDENTIFIER]['maxStringLength'] =

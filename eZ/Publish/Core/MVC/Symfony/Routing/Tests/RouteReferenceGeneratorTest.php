@@ -20,10 +20,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class RouteReferenceGeneratorTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $dispatcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
@@ -32,7 +34,7 @@ class RouteReferenceGeneratorTest extends TestCase
     public function testGenerateNullResource()
     {
         $currentRouteName = 'my_route';
-        $currentRouteParams = ['foo' => 'bar'];
+        $currentRouteParams = array('foo' => 'bar');
 
         $request = new Request();
         $request->attributes->set('_route', $currentRouteName);
@@ -44,7 +46,7 @@ class RouteReferenceGeneratorTest extends TestCase
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($event), MVCEvents::ROUTE_REFERENCE_GENERATION);
+            ->with(MVCEvents::ROUTE_REFERENCE_GENERATION, $this->equalTo($event));
 
         $generator = new RouteReferenceGenerator($this->dispatcher);
         $generator->setRequestStack($requestStack);
@@ -57,8 +59,8 @@ class RouteReferenceGeneratorTest extends TestCase
     public function testGenerateNullResourceAndPassedParams()
     {
         $currentRouteName = 'my_route';
-        $currentRouteParams = ['foo' => 'bar'];
-        $passedParams = ['hello' => 'world', 'isIt' => true];
+        $currentRouteParams = array('foo' => 'bar');
+        $passedParams = array('hello' => 'world', 'isIt' => true);
         $expectedParams = $passedParams + $currentRouteParams;
 
         $request = new Request();
@@ -71,7 +73,7 @@ class RouteReferenceGeneratorTest extends TestCase
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($event), MVCEvents::ROUTE_REFERENCE_GENERATION);
+            ->with(MVCEvents::ROUTE_REFERENCE_GENERATION, $this->equalTo($event));
 
         $generator = new RouteReferenceGenerator($this->dispatcher);
         $generator->setRequestStack($requestStack);
@@ -87,7 +89,7 @@ class RouteReferenceGeneratorTest extends TestCase
     public function testGenerate($resource, array $params)
     {
         $currentRouteName = 'my_route';
-        $currentRouteParams = ['foo' => 'bar'];
+        $currentRouteParams = array('foo' => 'bar');
 
         $request = new Request();
         $request->attributes->set('_route', $currentRouteName);
@@ -99,7 +101,7 @@ class RouteReferenceGeneratorTest extends TestCase
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($event), MVCEvents::ROUTE_REFERENCE_GENERATION);
+            ->with(MVCEvents::ROUTE_REFERENCE_GENERATION, $this->equalTo($event));
 
         $generator = new RouteReferenceGenerator($this->dispatcher);
         $generator->setRequestStack($requestStack);
@@ -112,17 +114,17 @@ class RouteReferenceGeneratorTest extends TestCase
     public function testGenerateNullResourceWithoutRoute()
     {
         $currentRouteName = 'my_route';
-        $currentRouteParams = ['foo' => 'bar'];
+        $currentRouteParams = array('foo' => 'bar');
 
         $request = new Request();
         $requestStack = new RequestStack();
         $requestStack->push($request);
 
-        $event = new RouteReferenceGenerationEvent(new RouteReference(null, []), $request);
+        $event = new RouteReferenceGenerationEvent(new RouteReference(null, array()), $request);
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
-            ->with($this->equalTo($event), MVCEvents::ROUTE_REFERENCE_GENERATION);
+            ->with(MVCEvents::ROUTE_REFERENCE_GENERATION, $this->equalTo($event));
 
         $generator = new RouteReferenceGenerator($this->dispatcher);
         $generator->setRequestStack($requestStack);
@@ -132,11 +134,11 @@ class RouteReferenceGeneratorTest extends TestCase
 
     public function generateGenerator()
     {
-        return [
-            ['my_route', ['hello' => 'world', 'isIt' => true]],
-            ['foobar', ['foo' => 'bar', 'object' => new \stdClass()]],
-            [new Location(), ['switchLanguage' => 'fre-FR']],
-            [new Location(), []],
-        ];
+        return array(
+            array('my_route', array('hello' => 'world', 'isIt' => true)),
+            array('foobar', array('foo' => 'bar', 'object' => new \stdClass())),
+            array(new Location(), array('switchLanguage' => 'fre-FR')),
+            array(new Location(), array()),
+        );
     }
 }

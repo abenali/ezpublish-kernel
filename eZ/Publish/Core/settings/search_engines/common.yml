@@ -29,7 +29,7 @@ parameters:
     ezpublish.search.common.indexer.class: eZ\Publish\Core\Search\Common\Indexer
 
 services:
-    # Note: services tagged with 'ezplatform.field_type.indexable'
+    # Note: services tagged with 'ezpublish.fieldType.indexable'
     # are registered to this one using compilation pass
     ezpublish.search.common.field_registry:
         class: "%ezpublish.search.common.field_registry.class%"
@@ -51,13 +51,3 @@ services:
     # are registered to this one using compilation pass
     ezpublish.search.common.field_value_mapper.aggregate:
         class: "%ezpublish.search.common.field_value_mapper.aggregate.class%"
-
-    eZ\Publish\Core\Search\Common\EventSubscriber\:
-        resource: '../../Search/Common/EventSubscriber/*'
-        exclude: '../../Search/Common/EventSubscriber/{AbstractSearchEventSubscriber.php}'
-        autoconfigure: true
-        autowire: true
-        public: false
-        arguments:
-            $searchHandler: '@ezpublish.spi.search'
-            $persistenceHandler: '@ezpublish.api.persistence_handler'

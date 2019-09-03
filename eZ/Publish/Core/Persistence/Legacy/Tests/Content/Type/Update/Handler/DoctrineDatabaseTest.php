@@ -51,13 +51,13 @@ class DoctrineDatabaseTest extends TestCase
                 $this->isInstanceOf(
                     Type::class
                 )
-            )->will($this->returnValue([]));
+            )->will($this->returnValue(array()));
 
         $updaterMock->expects($this->once())
             ->method('applyUpdates')
             ->with(
                 $this->equalTo(23),
-                $this->equalTo([])
+                $this->equalTo(array())
             );
 
         $types = $this->getTypeFixtures();
@@ -112,7 +112,7 @@ class DoctrineDatabaseTest extends TestCase
      */
     protected function getTypeFixtures()
     {
-        $types = [];
+        $types = array();
 
         $types['from'] = new Type();
         $types['from']->id = 23;

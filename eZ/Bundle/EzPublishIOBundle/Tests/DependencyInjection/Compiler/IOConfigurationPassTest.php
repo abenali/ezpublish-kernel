@@ -24,17 +24,17 @@ class IOConfigurationPassTest extends AbstractCompilerPassTestCase
     /** @var ConfigurationFactory|MockObject */
     protected $binarydataConfigurationFactoryMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
-        $this->container->setParameter('ez_io.metadata_handlers', []);
-        $this->container->setParameter('ez_io.binarydata_handlers', []);
+        $this->container->setParameter('ez_io.metadata_handlers', array());
+        $this->container->setParameter('ez_io.binarydata_handlers', array());
 
-        $this->container->setDefinition('ezpublish.core.io.binarydata_handler.registry', new Definition());
-        $this->container->setDefinition('ezpublish.core.io.metadata_handler.registry', new Definition());
+        $this->container->setDefinition('ezpublish.core.io.binarydata_handler.factory', new Definition());
+        $this->container->setDefinition('ezpublish.core.io.metadata_handler.factory', new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $this->metadataConfigurationFactoryMock = $this->createMock(ConfigurationFactory::class);
         $this->binarydataConfigurationFactoryMock = $this->createMock(ConfigurationFactory::class);
@@ -42,10 +42,10 @@ class IOConfigurationPassTest extends AbstractCompilerPassTestCase
         $container->addCompilerPass(
             new IOConfigurationPass(
                 new ArrayObject(
-                    ['test_handler' => $this->metadataConfigurationFactoryMock]
+                    array('test_handler' => $this->metadataConfigurationFactoryMock)
                 ),
                 new ArrayObject(
-                    ['test_handler' => $this->binarydataConfigurationFactoryMock]
+                    array('test_handler' => $this->binarydataConfigurationFactoryMock)
                 )
             )
         );
@@ -59,15 +59,15 @@ class IOConfigurationPassTest extends AbstractCompilerPassTestCase
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.core.io.binarydata_handler.registry',
+            'ezpublish.core.io.binarydata_handler.factory',
             'setHandlersMap',
-            [['default' => 'ezpublish.core.io.binarydata_handler.flysystem.default']]
+            array(array('default' => 'ezpublish.core.io.binarydata_handler.flysystem.default'))
         );
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'ezpublish.core.io.metadata_handler.registry',
+            'ezpublish.core.io.metadata_handler.factory',
             'setHandlersMap',
-            [['default' => 'ezpublish.core.io.metadata_handler.flysystem.default']]
+            array(array('default' => 'ezpublish.core.io.metadata_handler.flysystem.default'))
         );
     }
 
@@ -75,7 +75,7 @@ class IOConfigurationPassTest extends AbstractCompilerPassTestCase
     {
         $this->container->setParameter(
             'ez_io.binarydata_handlers',
-            ['my_handler' => ['name' => 'my_handler', 'type' => 'test_handler']]
+            array('my_handler' => array('name' => 'my_handler', 'type' => 'test_handler'))
         );
 
         $this->binarydataConfigurationFactoryMock
@@ -95,7 +95,7 @@ class IOConfigurationPassTest extends AbstractCompilerPassTestCase
     {
         $this->container->setParameter(
             'ez_io.metadata_handlers',
-            ['my_handler' => ['name' => 'my_handler', 'type' => 'test_handler']]
+            array('my_handler' => array('name' => 'my_handler', 'type' => 'test_handler'))
         );
 
         $this->metadataConfigurationFactoryMock
@@ -111,27 +111,29 @@ class IOConfigurationPassTest extends AbstractCompilerPassTestCase
         );
     }
 
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Unknown handler
+     */
     public function testUnknownMetadataHandler()
     {
-        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
-        $this->expectExceptionMessage('Unknown handler');
-
         $this->container->setParameter(
             'ez_io.metadata_handlers',
-            ['test' => ['type' => 'unknown']]
+            array('test' => array('type' => 'unknown'))
         );
 
         $this->compile();
     }
 
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     * @expectedExceptionMessage Unknown handler
+     */
     public function testUnknownBinarydataHandler()
     {
-        $this->expectException(\Symfony\Component\Config\Definition\Exception\InvalidConfigurationException::class);
-        $this->expectExceptionMessage('Unknown handler');
-
         $this->container->setParameter(
             'ez_io.binarydata_handlers',
-            ['test' => ['type' => 'unknown']]
+            array('test' => array('type' => 'unknown'))
         );
 
         $this->compile();

@@ -16,7 +16,7 @@ class ComplexSettingParserTest extends TestCase
     /** @var ComplexSettingParser */
     private $parser;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->parser = new ComplexSettingParser();
     }
@@ -40,43 +40,43 @@ class ComplexSettingParserTest extends TestCase
     public function provideSettings()
     {
         // array( setting, array( isDynamicSetting, containsDynamicSettings ) )
-        return [
-            [
+        return array(
+            array(
                 '%container_var%',
-                [false, []],
-            ],
-            [
+                array(false, array()),
+            ),
+            array(
                 '$somestring',
-                [false, []],
-            ],
-            [
+                array(false, array()),
+            ),
+            array(
                 '$setting$',
-                [true, ['$setting$']],
-            ],
-            [
+                array(true, array('$setting$')),
+            ),
+            array(
                 '$setting;scope$',
-                [true, ['$setting;scope$']],
-            ],
-            [
+                array(true, array('$setting;scope$')),
+            ),
+            array(
                 '$setting;namespace;scope$',
-                [true, ['$setting;namespace;scope$']],
-            ],
-            [
+                array(true, array('$setting;namespace;scope$')),
+            ),
+            array(
                 'a_string_before$setting;namespace;scope$',
-                [true, ['$setting;namespace;scope$']],
-            ],
-            [
+                array(true, array('$setting;namespace;scope$')),
+            ),
+            array(
                 '$setting;namespace;scope$a_string_after',
-                [true, ['$setting;namespace;scope$']],
-            ],
-            [
+                array(true, array('$setting;namespace;scope$')),
+            ),
+            array(
                 'a_string_before$setting;namespace;scope$a_string_after',
-                [true, ['$setting;namespace;scope$']],
-            ],
-            [
+                array(true, array('$setting;namespace;scope$')),
+            ),
+            array(
                 '$setting;one$somethingelse$setting;two$',
-                [true, ['$setting;one$', '$setting;two$']],
-            ],
-        ];
+                array(true, array('$setting;one$', '$setting;two$')),
+            ),
+        );
     }
 }

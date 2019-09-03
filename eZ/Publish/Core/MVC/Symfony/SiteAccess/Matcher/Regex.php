@@ -34,10 +34,14 @@ abstract class Regex implements Matcher
      */
     protected $itemNumber;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest
+     */
     protected $request;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $matchedSiteAccess;
 
     /**
@@ -54,7 +58,7 @@ abstract class Regex implements Matcher
 
     public function __sleep()
     {
-        return ['regex', 'itemNumber', 'matchedSiteAccess'];
+        return array('regex', 'itemNumber', 'matchedSiteAccess');
     }
 
     public function match()

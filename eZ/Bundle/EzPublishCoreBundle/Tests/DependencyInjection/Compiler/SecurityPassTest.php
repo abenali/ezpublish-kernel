@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class SecurityPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('security.authentication.provider.dao', new Definition());
@@ -26,7 +26,7 @@ class SecurityPassTest extends AbstractCompilerPassTestCase
         $this->setDefinition('security.authentication.success_handler', new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new SecurityPass());
     }
@@ -37,27 +37,27 @@ class SecurityPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'security.authentication.provider.dao',
             'setRepository',
-            [new Reference('ezpublish.api.repository')]
+            array(new Reference('ezpublish.api.repository'))
         );
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'security.authentication.provider.rememberme',
             'setRepository',
-            [new Reference('ezpublish.api.repository')]
+            array(new Reference('ezpublish.api.repository'))
         );
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'security.authentication.provider.anonymous',
             'setRepository',
-            [new Reference('ezpublish.api.repository')]
+            array(new Reference('ezpublish.api.repository'))
         );
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'security.http_utils',
             'setSiteAccess',
-            [new Reference('ezpublish.siteaccess')]
+            array(new Reference('ezpublish.siteaccess'))
         );
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'security.authentication.success_handler',
             'setConfigResolver',
-            [new Reference('ezpublish.config.resolver')]
+            array(new Reference('ezpublish.config.resolver'))
         );
     }
 }

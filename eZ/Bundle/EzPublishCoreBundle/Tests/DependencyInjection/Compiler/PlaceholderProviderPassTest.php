@@ -19,14 +19,14 @@ class PlaceholderProviderPassTest extends AbstractCompilerPassTestCase
     const PROVIDER_ID = 'provider.id';
     const PROVIDER_TYPE = 'provider.test';
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
         $this->setDefinition(PlaceholderProviderPass::REGISTRY_DEFINITION_ID, new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new PlaceholderProviderPass());
     }
@@ -46,10 +46,11 @@ class PlaceholderProviderPassTest extends AbstractCompilerPassTestCase
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testAddProviderWithoutType()
     {
-        $this->expectException(\LogicException::class);
-
         $definition = new Definition();
         $definition->addTag(PlaceholderProviderPass::TAG_NAME);
 

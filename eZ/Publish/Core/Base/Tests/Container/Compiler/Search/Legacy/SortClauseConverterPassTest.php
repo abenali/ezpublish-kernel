@@ -22,7 +22,7 @@ class SortClauseConverterPassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new SortClauseConverterPass());
     }
@@ -44,7 +44,7 @@ class SortClauseConverterPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.legacy.gateway.sort_clause_converter.content',
             'addHandler',
-            [new Reference($serviceId)]
+            array(new Reference($serviceId))
         );
     }
 
@@ -65,7 +65,7 @@ class SortClauseConverterPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.legacy.gateway.sort_clause_converter.location',
             'addHandler',
-            [new Reference($serviceId)]
+            array(new Reference($serviceId))
         );
     }
 
@@ -91,13 +91,13 @@ class SortClauseConverterPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.legacy.gateway.sort_clause_converter.content',
             'addHandler',
-            [new Reference($commonServiceId)]
+            array(new Reference($commonServiceId))
         );
 
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.search.legacy.gateway.sort_clause_converter.location',
             'addHandler',
-            [new Reference($commonServiceId)]
+            array(new Reference($commonServiceId))
         );
     }
 }

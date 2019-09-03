@@ -9,7 +9,6 @@
 namespace eZ\Publish\Core\Repository\SiteAccessAware;
 
 use eZ\Publish\API\Repository\SectionService as SectionServiceInterface;
-use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\SectionCreateStruct;
 use eZ\Publish\API\Repository\Values\Content\SectionUpdateStruct;
 use eZ\Publish\API\Repository\Values\Content\Section;
@@ -74,11 +73,6 @@ class SectionService implements SectionServiceInterface
     public function assignSection(ContentInfo $contentInfo, Section $section)
     {
         return $this->service->assignSection($contentInfo, $section);
-    }
-
-    public function assignSectionToSubtree(Location $location, Section $section): void
-    {
-        $this->service->assignSectionToSubtree($location, $section);
     }
 
     public function deleteSection(Section $section)

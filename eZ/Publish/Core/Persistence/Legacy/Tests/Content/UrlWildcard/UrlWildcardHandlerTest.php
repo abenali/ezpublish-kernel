@@ -20,6 +20,27 @@ use eZ\Publish\SPI\Persistence\Content\UrlWildcard;
 class UrlWildcardHandlerTest extends TestCase
 {
     /**
+     * Test for the __construct() method.
+     *
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Handler::__construct
+     */
+    public function testConstructor()
+    {
+        $handler = $this->getHandler();
+
+        self::assertAttributeSame(
+            $this->gateway,
+            'gateway',
+            $handler
+        );
+        self::assertAttributeSame(
+            $this->mapper,
+            'mapper',
+            $handler
+        );
+    }
+
+    /**
      * Test for the load() method.
      *
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Handler::load
@@ -33,12 +54,12 @@ class UrlWildcardHandlerTest extends TestCase
 
         self::assertEquals(
             new UrlWildcard(
-                [
+                array(
                     'id' => 1,
                     'sourceUrl' => '/developer/*',
                     'destinationUrl' => '/dev/{1}',
                     'forward' => false,
-                ]
+                )
             ),
             $urlWildcard
         );
@@ -48,11 +69,10 @@ class UrlWildcardHandlerTest extends TestCase
      * Test for the load() method.
      *
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Handler::load
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLoadThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $this->insertDatabaseFixture(__DIR__ . '/Gateway/_fixtures/urlwildcards.php');
         $handler = $this->getHandler();
 
@@ -78,12 +98,12 @@ class UrlWildcardHandlerTest extends TestCase
 
         self::assertEquals(
             new UrlWildcard(
-                [
+                array(
                     'id' => 4,
                     'sourceUrl' => '/amber',
                     'destinationUrl' => '/pattern',
                     'forward' => true,
-                ]
+                )
             ),
             $urlWildcard
         );
@@ -98,12 +118,11 @@ class UrlWildcardHandlerTest extends TestCase
      * Test for the remove() method.
      *
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Handler::remove
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends testLoad
      */
     public function testRemove()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $this->insertDatabaseFixture(__DIR__ . '/Gateway/_fixtures/urlwildcards.php');
         $handler = $this->getHandler();
 
@@ -124,11 +143,11 @@ class UrlWildcardHandlerTest extends TestCase
         $urlWildcards = $handler->loadAll();
 
         self::assertEquals(
-            [
+            array(
                 new UrlWildcard($this->fixtureData[0]),
                 new UrlWildcard($this->fixtureData[1]),
                 new UrlWildcard($this->fixtureData[2]),
-            ],
+            ),
             $urlWildcards
         );
     }
@@ -146,9 +165,9 @@ class UrlWildcardHandlerTest extends TestCase
         $urlWildcards = $handler->loadAll(2);
 
         self::assertEquals(
-            [
+            array(
                 new UrlWildcard($this->fixtureData[2]),
-            ],
+            ),
             $urlWildcards
         );
     }
@@ -166,41 +185,47 @@ class UrlWildcardHandlerTest extends TestCase
         $urlWildcards = $handler->loadAll(1, 1);
 
         self::assertEquals(
-            [
+            array(
                 new UrlWildcard($this->fixtureData[1]),
-            ],
+            ),
             $urlWildcards
         );
     }
 
-    protected $fixtureData = [
-        [
+    protected $fixtureData = array(
+        array(
             'id' => 1,
             'sourceUrl' => '/developer/*',
             'destinationUrl' => '/dev/{1}',
             'forward' => false,
-        ],
-        [
+        ),
+        array(
             'id' => 2,
             'sourceUrl' => '/repository/*',
             'destinationUrl' => '/repo/{1}',
             'forward' => false,
-        ],
-        [
+        ),
+        array(
             'id' => 3,
             'sourceUrl' => '/information/*',
             'destinationUrl' => '/info/{1}',
             'forward' => false,
-        ],
-    ];
+        ),
+    );
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Gateway\DoctrineDatabase */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Gateway\DoctrineDatabase
+     */
     protected $gateway;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Mapper
+     */
     protected $mapper;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Handler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlWildcard\Handler
+     */
     protected $urlWildcardHandler;
 
     /**

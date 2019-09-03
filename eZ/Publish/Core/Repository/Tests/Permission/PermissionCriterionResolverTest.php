@@ -12,7 +12,6 @@ use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Values\User\Limitation;
 use eZ\Publish\API\Repository\Values\User\User;
 use eZ\Publish\API\Repository\PermissionResolver;
-use eZ\Publish\Core\Limitation\TargetOnlyLimitationType;
 use eZ\Publish\Core\Repository\Permission\PermissionCriterionResolver;
 use eZ\Publish\Core\Repository\Values\User\Policy;
 use eZ\Publish\Core\Repository\Helper\LimitationService;
@@ -24,6 +23,27 @@ use PHPUnit\Framework\TestCase;
  */
 class PermissionCriterionResolverTest extends TestCase
 {
+    /**
+     * Test for the __construct() method.
+     */
+    public function testConstructor()
+    {
+        $permissionResolverMock = $this->getPermissionResolverMock();
+        $limitationServiceMock = $this->getLimitationServiceMock();
+        $criterionResolver = $this->getPermissionCriterionResolverMock();
+
+        $this->assertAttributeSame(
+            $permissionResolverMock,
+            'permissionResolver',
+            $criterionResolver
+        );
+        $this->assertAttributeSame(
+            $limitationServiceMock,
+            'limitationService',
+            $criterionResolver
+        );
+    }
+
     public function providerForTestGetPermissionsCriterion()
     {
         $criterionMock = $this
@@ -38,15 +58,8 @@ class PermissionCriterionResolverTest extends TestCase
             ->method('getIdentifier')
             ->will($this->returnValue('limitationIdentifier'));
 
-        $targetOnlyLimitationMock = $this->createMock(Limitation::class);
-        $targetOnlyLimitationMock
-            ->expects($this->any())
-            ->method('getIdentifier')
-            ->willReturn('targetOnlyLimitationIdentifier');
-
         $policy1 = new Policy(['limitations' => [$limitationMock]]);
         $policy2 = new Policy(['limitations' => [$limitationMock, $limitationMock]]);
-        $policy3 = new Policy(['limitations' => [$limitationMock, $targetOnlyLimitationMock]]);
 
         return [
             [
@@ -227,26 +240,14 @@ class PermissionCriterionResolverTest extends TestCase
                 ],
                 new Criterion\LogicalOr([$criterionMock, $criterionMock]),
             ],
-            [
-                $criterionMock,
-                2,
-                [
-                    [
-                        'limitation' => null,
-                        'policies' => [$policy3],
-                    ],
-                ],
-                new Criterion\LogicalAnd([$criterionMock, $criterionMock]),
-            ],
         ];
     }
 
     protected function mockServices($criterionMock, $limitationCount, $permissionSets)
     {
         $userMock = $this->getMockBuilder(User::class)->getMockForAbstractClass();
-        $limitationServiceMock = $this->getLimitationServiceMock(['getLimitationType']);
         $limitationTypeMock = $this->getMockBuilder(Type::class)->getMockForAbstractClass();
-        $targetOnlyLimitationTypeMock = $this->createMock(TargetOnlyLimitationType::class);
+        $limitationServiceMock = $this->getLimitationServiceMock(['getLimitationType']);
         $permissionResolverMock = $this->getPermissionResolverMock(
             [
                 'hasAccess',
@@ -263,27 +264,11 @@ class PermissionCriterionResolverTest extends TestCase
             )
             ->will($this->returnValue($criterionMock));
 
-        $targetOnlyLimitationTypeMock
-            ->expects($this->never())
-            ->method('getCriterion');
-
-        $targetOnlyLimitationTypeMock
-            ->expects($this->any())
-            ->method('getCriterionByTarget')
-            ->with(
-                $this->isInstanceOf(Limitation::class),
-                $this->equalTo($userMock),
-                $this->anything()
-            )
-            ->willReturn($criterionMock);
-
         $limitationServiceMock
             ->expects($this->exactly($limitationCount))
             ->method('getLimitationType')
-            ->willReturnMap([
-                ['limitationIdentifier', $limitationTypeMock],
-                ['targetOnlyLimitationIdentifier', $targetOnlyLimitationTypeMock],
-            ]);
+            ->with($this->equalTo('limitationIdentifier'))
+            ->will($this->returnValue($limitationTypeMock));
 
         $permissionResolverMock
             ->expects($this->once())
@@ -311,7 +296,7 @@ class PermissionCriterionResolverTest extends TestCase
         $this->mockServices($criterionMock, $limitationCount, $permissionSets);
         $criterionResolver = $this->getPermissionCriterionResolverMock(null);
 
-        $permissionsCriterion = $criterionResolver->getPermissionsCriterion('content', 'read', []);
+        $permissionsCriterion = $criterionResolver->getPermissionsCriterion();
 
         $this->assertEquals($expectedCriterion, $permissionsCriterion);
     }

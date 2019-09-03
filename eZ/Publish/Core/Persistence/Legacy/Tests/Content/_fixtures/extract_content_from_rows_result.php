@@ -4,15 +4,16 @@ use eZ\Publish\SPI\Persistence\Content;
 use eZ\Publish\SPI\Persistence\Content\ContentInfo;
 use eZ\Publish\SPI\Persistence\Content\Field;
 use eZ\Publish\SPI\Persistence\Content\FieldValue;
+use eZ\Publish\SPI\Persistence\Content\Location;
 use eZ\Publish\SPI\Persistence\Content\VersionInfo;
 
 $content = new Content();
 
-$content->fields = [];
+$content->fields = array();
 
 $versionInfo = new VersionInfo();
 $versionInfo->id = 676;
-$versionInfo->names = ['eng-US' => 'Something', 'eng-GB' => 'Something'];
+$versionInfo->names = array( 'eng-US' => 'Something', 'eng-GB' => 'Something' );
 $versionInfo->versionNo = 2;
 $versionInfo->modificationDate = 1313061404;
 $versionInfo->creatorId = 14;
@@ -80,6 +81,26 @@ $field->versionNo = 2;
 $content->fields[] = $field;
 
 $field = new Field();
+$field->id = 1335;
+$field->fieldDefinitionId = 186;
+$field->type = 'ezrichtext';
+$field->value = new FieldValue();
+$field->languageCode = 'eng-US';
+$field->versionNo = 2;
+
+$content->fields[] = $field;
+
+$field = new Field();
+$field->id = 1336;
+$field->fieldDefinitionId = 187;
+$field->type = 'ezrichtext';
+$field->value = new FieldValue();
+$field->languageCode = 'eng-US';
+$field->versionNo = 2;
+
+$content->fields[] = $field;
+
+$field = new Field();
 $field->id = 1337;
 $field->fieldDefinitionId = 188;
 $field->type = 'ezboolean';
@@ -93,6 +114,16 @@ $field = new Field();
 $field->id = 1338;
 $field->fieldDefinitionId = 189;
 $field->type = 'ezimage';
+$field->value = new FieldValue();
+$field->languageCode = 'eng-US';
+$field->versionNo = 2;
+
+$content->fields[] = $field;
+
+$field = new Field();
+$field->id = 1339;
+$field->fieldDefinitionId = 190;
+$field->type = 'ezrichtext';
 $field->value = new FieldValue();
 $field->languageCode = 'eng-US';
 $field->versionNo = 2;

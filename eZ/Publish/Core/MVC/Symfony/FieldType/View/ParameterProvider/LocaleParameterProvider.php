@@ -21,7 +21,9 @@ class LocaleParameterProvider implements ParameterProviderInterface
 {
     use RequestStackAware;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\Locale\LocaleConverterInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Locale\LocaleConverterInterface
+     */
     protected $localeConverter;
 
     public function __construct(LocaleConverterInterface $localeConverter)
@@ -41,7 +43,7 @@ class LocaleParameterProvider implements ParameterProviderInterface
      */
     public function getViewParameters(Field $field)
     {
-        $parameters = [];
+        $parameters = array();
 
         $request = $this->getCurrentRequest();
         if ($request && $request->attributes->has('_locale')) {

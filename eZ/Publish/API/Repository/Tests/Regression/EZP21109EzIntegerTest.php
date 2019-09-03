@@ -22,10 +22,12 @@ class EZP21109EzIntegerTest extends BaseTest
      */
     protected $classShortName;
 
-    /** @var ContentType */
+    /**
+     * @var ContentType
+     */
     protected $contentType;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -35,7 +37,7 @@ class EZP21109EzIntegerTest extends BaseTest
         $this->contentType = $this->createTestContentType();
     }
 
-    protected function tearDown(): void
+    protected function tearDown()
     {
         $this->deleteTestContentType();
         parent::tearDown();
@@ -57,7 +59,7 @@ class EZP21109EzIntegerTest extends BaseTest
 
         $location = $locationService->newLocationCreateStruct(2);
 
-        $draft = $contentService->createContent($contentCreateStruct, [$location]);
+        $draft = $contentService->createContent($contentCreateStruct, array($location));
 
         $contentService->publishVersion($draft->versionInfo);
 
@@ -75,13 +77,13 @@ class EZP21109EzIntegerTest extends BaseTest
 
     public function validIntegerValues()
     {
-        return [
-            [0],
-            [1],
-            [-1],
-            [2147483647],
-            [-2147483647],
-        ];
+        return array(
+            array(0),
+            array(1),
+            array(-1),
+            array(2147483647),
+            array(-2147483647),
+        );
     }
 
     /**
@@ -100,9 +102,9 @@ class EZP21109EzIntegerTest extends BaseTest
         $contentType = $contentTypeService->newContentTypeCreateStruct($this->classShortName);
         $contentType->creatorId = $repository->getCurrentUser()->id;
         $contentType->mainLanguageCode = 'eng-GB';
-        $contentType->names = [
+        $contentType->names = array(
             'eng-GB' => $this->classShortName,
-        ];
+        );
         $contentType->nameSchema = '<test>';
         $contentType->urlAliasSchema = '<test>';
         $contentType->isContainer = false;
@@ -110,13 +112,13 @@ class EZP21109EzIntegerTest extends BaseTest
 
         // Field: IntegerTest
         $field = $contentTypeService->newFieldDefinitionCreateStruct('test', 'ezinteger');
-        $field->names = [
+        $field->names = array(
             'eng-GB' => 'Test',
-        ];
+        );
         $field->position = 10;
         $contentType->addFieldDefinition($field);
 
-        $draft = $contentTypeService->createContentType($contentType, [$typeGroup]);
+        $draft = $contentTypeService->createContentType($contentType, array($typeGroup));
 
         $contentTypeService->publishContentTypeDraft($draft);
 

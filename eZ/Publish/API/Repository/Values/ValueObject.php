@@ -29,7 +29,7 @@ abstract class ValueObject
      *
      * @param array $properties
      */
-    public function __construct(array $properties = [])
+    public function __construct(array $properties = array())
     {
         foreach ($properties as $property => $value) {
             $this->$property = $value;
@@ -49,7 +49,7 @@ abstract class ValueObject
      *
      * @return array
      */
-    protected function getProperties($dynamicProperties = [])
+    protected function getProperties($dynamicProperties = array())
     {
         $properties = $dynamicProperties;
         foreach (get_object_vars($this) as $property => $propertyValue) {

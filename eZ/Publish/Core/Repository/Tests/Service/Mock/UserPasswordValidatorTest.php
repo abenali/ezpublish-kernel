@@ -23,7 +23,7 @@ class UserPasswordValidatorTest extends TestCase
     {
         $validator = new UserPasswordValidator($constraints);
 
-        $this->assertEqualsCanonicalizing($expectedErrors, $validator->validate($password), '');
+        $this->assertEquals($expectedErrors, $validator->validate($password), '', 0.0, 10, true);
     }
 
     public function dateProviderForValidate(): array

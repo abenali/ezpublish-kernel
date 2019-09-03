@@ -15,68 +15,9 @@ use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
-use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
-use eZ\Publish\SPI\Persistence\Content\VersionInfo;
 
 class RelationListTest extends FieldTypeTest
 {
-    private const DESTINATION_CONTENT_ID_14 = 14;
-    private const DESTINATION_CONTENT_ID_22 = 22;
-
-    /** @var \eZ\Publish\SPI\Persistence\Content\Handler */
-    private $contentHandler;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $versionInfo14 = new VersionInfo([
-            'versionNo' => 1,
-            'names' => [
-                'en_GB' => 'name_14_en_GB',
-                'de_DE' => 'Name_14_de_DE',
-            ],
-        ]);
-        $versionInfo22 = new VersionInfo([
-            'versionNo' => 1,
-            'names' => [
-                'en_GB' => 'name_22_en_GB',
-                'de_DE' => 'Name_22_de_DE',
-            ],
-        ]);
-        $currentVersionNoFor14 = 44;
-        $destinationContentInfo14 = $this->createMock(ContentInfo::class);
-        $destinationContentInfo14
-            ->method('__get')
-            ->willReturnMap([
-                ['currentVersionNo', $currentVersionNoFor14],
-                ['mainLanguageCode', 'en_GB'],
-            ]);
-        $currentVersionNoFor22 = 22;
-        $destinationContentInfo22 = $this->createMock(ContentInfo::class);
-        $destinationContentInfo22
-            ->method('__get')
-            ->willReturnMap([
-                ['currentVersionNo', $currentVersionNoFor22],
-                ['mainLanguageCode', 'en_GB'],
-            ]);
-
-        $this->contentHandler = $this->createMock(SPIContentHandler::class);
-        $this->contentHandler
-            ->method('loadContentInfo')
-            ->willReturnMap([
-                [self::DESTINATION_CONTENT_ID_14, $destinationContentInfo14],
-                [self::DESTINATION_CONTENT_ID_22, $destinationContentInfo22],
-            ]);
-
-        $this->contentHandler
-            ->method('loadVersionInfo')
-            ->willReturnMap([
-                [self::DESTINATION_CONTENT_ID_14, $currentVersionNoFor14, $versionInfo14],
-                [self::DESTINATION_CONTENT_ID_22, $currentVersionNoFor22, $versionInfo22],
-            ]);
-    }
-
     /**
      * Returns the field type under test.
      *
@@ -90,7 +31,7 @@ class RelationListTest extends FieldTypeTest
      */
     protected function createFieldTypeUnderTest()
     {
-        $fieldType = new RelationList($this->contentHandler);
+        $fieldType = new RelationList();
         $fieldType->setTransformationProcessor($this->getTransformationProcessorMock());
 
         return $fieldType;
@@ -103,14 +44,14 @@ class RelationListTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [
-            'RelationListValueValidator' => [
-                'selectionLimit' => [
+        return array(
+            'RelationListValueValidator' => array(
+                'selectionLimit' => array(
                     'type' => 'int',
                     'default' => 0,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -120,20 +61,20 @@ class RelationListTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [
-            'selectionMethod' => [
+        return array(
+            'selectionMethod' => array(
                 'type' => 'int',
                 'default' => RelationList::SELECTION_BROWSE,
-            ],
-            'selectionDefaultLocation' => [
+            ),
+            'selectionDefaultLocation' => array(
                 'type' => 'string',
                 'default' => null,
-            ],
-            'selectionContentTypes' => [
+            ),
+            'selectionContentTypes' => array(
                 'type' => 'array',
-                'default' => [],
-            ],
-        ];
+                'default' => array(),
+            ),
+        );
     }
 
     /**
@@ -172,12 +113,12 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 true,
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -211,24 +152,24 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 new Value(),
                 new Value(),
-            ],
-            [
+            ),
+            array(
                 23,
-                new Value([23]),
-            ],
-            [
-                new ContentInfo(['id' => 23]),
-                new Value([23]),
-            ],
-            [
-                [23, 42],
-                new Value([23, 42]),
-            ],
-        ];
+                new Value(array(23)),
+            ),
+            array(
+                new ContentInfo(array('id' => 23)),
+                new Value(array(23)),
+            ),
+            array(
+                array(23, 42),
+                new Value(array(23, 42)),
+            ),
+        );
     }
 
     /**
@@ -268,16 +209,16 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
-                new Value([23, 42]),
-                ['destinationContentIds' => [23, 42]],
-            ],
-            [
+        return array(
+            array(
+                new Value(array(23, 42)),
+                array('destinationContentIds' => array(23, 42)),
+            ),
+            array(
                 new Value(),
-                ['destinationContentIds' => []],
-            ],
-        ];
+                array('destinationContentIds' => array()),
+            ),
+        );
     }
 
     /**
@@ -317,16 +258,16 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
-                ['destinationContentIds' => [23, 42]],
-                new Value([23, 42]),
-            ],
-            [
-                ['destinationContentIds' => []],
+        return array(
+            array(
+                array('destinationContentIds' => array(23, 42)),
+                new Value(array(23, 42)),
+            ),
+            array(
+                array('destinationContentIds' => array()),
                 new Value(),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -353,62 +294,62 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideValidFieldSettings()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_BROWSE,
                     'selectionDefaultLocation' => 23,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_DROPDOWN,
                     'selectionDefaultLocation' => 'foo',
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_DROPDOWN,
                     'selectionDefaultLocation' => 'foo',
-                    'selectionContentTypes' => [1, 2, 3],
-                ],
-            ],
-            [
-                [
+                    'selectionContentTypes' => array(1, 2, 3),
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_LIST_WITH_RADIO_BUTTONS,
                     'selectionDefaultLocation' => 'foo',
-                    'selectionContentTypes' => [1, 2, 3],
-                ],
-            ],
-            [
-                [
+                    'selectionContentTypes' => array(1, 2, 3),
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_LIST_WITH_CHECKBOXES,
                     'selectionDefaultLocation' => 'foo',
-                    'selectionContentTypes' => [1, 2, 3],
-                ],
-            ],
-            [
-                [
+                    'selectionContentTypes' => array(1, 2, 3),
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_MULTIPLE_SELECTION_LIST,
                     'selectionDefaultLocation' => 'foo',
-                    'selectionContentTypes' => [1, 2, 3],
-                ],
-            ],
-            [
-                [
+                    'selectionContentTypes' => array(1, 2, 3),
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_TEMPLATE_BASED_MULTIPLE,
                     'selectionDefaultLocation' => 'foo',
-                    'selectionContentTypes' => [1, 2, 3],
-                ],
-            ],
-            [
-                [
+                    'selectionContentTypes' => array(1, 2, 3),
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationList::SELECTION_TEMPLATE_BASED_SINGLE,
                     'selectionDefaultLocation' => 'foo',
-                    'selectionContentTypes' => [1, 2, 3],
-                ],
-            ],
-        ];
+                    'selectionContentTypes' => array(1, 2, 3),
+                ),
+            ),
+        );
     }
 
     /**
@@ -439,38 +380,38 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideInValidFieldSettings()
     {
-        return [
-            [
+        return array(
+            array(
                 // Invalid value for 'selectionMethod'
-                [
+                array(
                     'selectionMethod' => true,
                     'selectionDefaultLocation' => 23,
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 // Invalid value for 'selectionDefaultLocation'
-                [
+                array(
                     'selectionMethod' => RelationList::SELECTION_DROPDOWN,
-                    'selectionDefaultLocation' => [],
-                ],
-            ],
-            [
+                    'selectionDefaultLocation' => array(),
+                ),
+            ),
+            array(
                 // Invalid value for 'selectionContentTypes'
-                [
+                array(
                     'selectionMethod' => RelationList::SELECTION_DROPDOWN,
                     'selectionDefaultLocation' => 23,
                     'selectionContentTypes' => true,
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 // Invalid value for 'selectionMethod'
-                [
+                array(
                     'selectionMethod' => 9,
                     'selectionDefaultLocation' => 23,
                     'selectionContentTypes' => true,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -503,25 +444,25 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideValidValidatorConfiguration()
     {
-        return [
-            [
-                [],
-            ],
-            [
-                [
-                    'RelationListValueValidator' => [
+        return array(
+            array(
+                array(),
+            ),
+            array(
+                array(
+                    'RelationListValueValidator' => array(
                         'selectionLimit' => 0,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'RelationListValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'RelationListValueValidator' => array(
                         'selectionLimit' => 14,
-                    ],
-                ],
-            ],
-        ];
+                    ),
+                ),
+            ),
+        );
     }
 
     /**
@@ -568,34 +509,34 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideInvalidValidatorConfiguration()
     {
-        return [
-            [
-                [
-                    'NonExistentValidator' => [],
-                ],
-            ],
-            [
-                [
-                    'RelationListValueValidator' => [
+        return array(
+            array(
+                array(
+                    'NonExistentValidator' => array(),
+                ),
+            ),
+            array(
+                array(
+                    'RelationListValueValidator' => array(
                         'nonExistentValue' => 14,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'RelationListValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'RelationListValueValidator' => array(
                         'selectionLimit' => 'foo',
-                    ],
-                ],
-            ],
-            [
-                [
-                    'RelationListValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'RelationListValueValidator' => array(
                         'selectionLimit' => -10,
-                    ],
-                ],
-            ],
-        ];
+                    ),
+                ),
+            ),
+        );
     }
 
     /**
@@ -645,48 +586,48 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideValidDataForValidate()
     {
-        return [
-            [
-                [
-                    'validatorConfiguration' => [
-                        'RelationListValueValidator' => [
+        return array(
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'RelationListValueValidator' => array(
                             'selectionLimit' => 0,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new Value([5, 6, 7]),
-            ],
-            [
-                [
-                    'validatorConfiguration' => [
-                        'RelationListValueValidator' => [
+            ),
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'RelationListValueValidator' => array(
                             'selectionLimit' => 1,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new Value([5]),
-            ],
-            [
-                [
-                    'validatorConfiguration' => [
-                        'RelationListValueValidator' => [
+            ),
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'RelationListValueValidator' => array(
                             'selectionLimit' => 3,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new Value([5, 6]),
-            ],
-            [
-                [
-                    'validatorConfiguration' => [
-                        'RelationListValueValidator' => [
+            ),
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'RelationListValueValidator' => array(
                             'selectionLimit' => 3,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new Value([]),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -755,28 +696,28 @@ class RelationListTest extends FieldTypeTest
      */
     public function provideInvalidDataForValidate()
     {
-        return [
-            [
-                [
-                    'validatorConfiguration' => [
-                        'RelationListValueValidator' => [
+        return array(
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'RelationListValueValidator' => array(
                             'selectionLimit' => 3,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new Value([1, 2, 3, 4]),
-                [
+                array(
                     new ValidationError(
                         'The selected content items number cannot be higher than %limit%.',
                         null,
-                        [
+                        array(
                             '%limit%' => 3,
-                        ],
+                        ),
                         'destinationContentIds'
                     ),
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -786,10 +727,10 @@ class RelationListTest extends FieldTypeTest
     {
         $ft = $this->createFieldTypeUnderTest();
         $this->assertEquals(
-            [
-                Relation::FIELD => [70, 72],
-            ],
-            $ft->getRelations($ft->acceptValue([70, 72]))
+            array(
+                Relation::FIELD => array(70, 72),
+            ),
+            $ft->getRelations($ft->acceptValue(array(70, 72)))
         );
     }
 
@@ -800,22 +741,17 @@ class RelationListTest extends FieldTypeTest
 
     /**
      * @dataProvider provideDataForGetName
+     * @expectedException \RuntimeException
      */
-    public function testGetName(SPIValue $value, array $fieldSettings = [], string $languageCode = 'en_GB', $expected)
+    public function testGetName(SPIValue $value, $expected)
     {
-        $fieldDefinitionMock = $this->getFieldDefinitionMock($fieldSettings);
-
-        $name = $this->getFieldTypeUnderTest()->getName($value, $fieldDefinitionMock, $languageCode);
-
-        self::assertSame($expected, $name);
+        $this->getFieldTypeUnderTest()->getName($value);
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new Value([self::DESTINATION_CONTENT_ID_14, self::DESTINATION_CONTENT_ID_22]), [], 'en_GB', 'name_14_en_GB name_22_en_GB'],
-            [new Value([self::DESTINATION_CONTENT_ID_14, self::DESTINATION_CONTENT_ID_22]), [], 'de_DE', 'Name_14_de_DE Name_22_de_DE'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+        );
     }
 }

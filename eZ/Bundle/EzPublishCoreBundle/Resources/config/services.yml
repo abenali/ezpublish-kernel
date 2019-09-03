@@ -15,6 +15,7 @@ parameters:
     ezpublish.controller.content.preview.class: eZ\Publish\Core\MVC\Symfony\Controller\Content\PreviewController
     ezpublish.controller.content.download.class: eZ\Publish\Core\MVC\Symfony\Controller\Content\DownloadController
     ezpublish.controller.content.download_redirection.class: eZ\Publish\Core\MVC\Symfony\Controller\Content\DownloadRedirectionController
+    ezpublish.controller.page.view.class: eZ\Bundle\EzPublishCoreBundle\Controller\PageController
 
     # Param converters
     ezpublish.param_converter.content.class: eZ\Bundle\EzPublishCoreBundle\Converter\ContentParamConverter
@@ -39,9 +40,8 @@ services:
         arguments: ["%ezpublish.siteaccess.default.name%", 'uninitialized']
 
     ezpublish.config.resolver.core:
-        public: true # @todo should be private
         class: "%ezpublish.config.resolver.dynamic.class%"
-        arguments: ["@?logger", "%ezpublish.siteaccess.groups_by_siteaccess%", "%ezpublish.config.default_scope%"]
+        arguments: ["%ezpublish.siteaccess.groups_by_siteaccess%", "%ezpublish.config.default_scope%"]
         calls:
             - [setSiteAccess, ["@ezpublish.siteaccess"]]
             - [setContainer, ["@service_container"]]
@@ -50,11 +50,9 @@ services:
             - { name: ezpublish.config.resolver, priority: 200 }
 
     ezpublish.config.resolver.chain:
-        public: true # @todo should be private
         class: "%ezpublish.config.resolver.chain.class%"
 
     ezpublish.config.resolver:
-        public: true # @todo should be private
         alias: ezpublish.config.resolver.chain
 
     ezpublish.config.dynamic_setting.parser:
@@ -87,8 +85,6 @@ services:
             - "@ezpublish.view_manager"
             - "@security.authorization_checker"
         parent: ezpublish.controller.base
-        tags:
-            - { name: controller.service_arguments }
 
     ezpublish.controller.content.preview.core:
         class: "%ezpublish.controller.content.preview.class%"
@@ -99,12 +95,9 @@ services:
             - "@security.authorization_checker"
             - "@ezpublish.content_preview.location_provider"
             - "@ezpublish.view.custom_location_controller_checker"
-        tags:
-            - { name: controller.service_arguments }
 
     ezpublish.controller.content.preview:
         alias: ezpublish.controller.content.preview.core
-        public: true
 
     ezpublish.controller.content.download:
         class: "%ezpublish.controller.content.download.class%"
@@ -115,8 +108,6 @@ services:
             - "@router"
             - "@ezpublish.route_reference.generator"
         parent: ezpublish.controller.base
-        tags:
-              - { name: controller.service_arguments }
 
     ezpublish.controller.content.download_redirection:
         class: "%ezpublish.controller.content.download_redirection.class%"
@@ -125,14 +116,21 @@ services:
             - "@router"
             - "@ezpublish.route_reference.generator"
         parent: ezpublish.controller.base
-        tags:
-              - { name: controller.service_arguments }
+
+    ezpublish.controller.page.view:
+        class: "%ezpublish.controller.page.view.class%"
+        arguments: ["@ezpublish.view_manager", "@ezpublish.fieldType.ezpage.pageService"]
+        parent: ezpublish.controller.base
 
     # This alias allows easier management for subrequests
     # {{ render( controller( "ez_content:viewLocation", {"locationId": 123, "viewType": "line"} ) ) }
     ez_content:
-        public: true
         alias: ezpublish.controller.content.view
+
+    # Same as above for the page controller
+    # {{ render( controller( "ez_page:viewAction", {'block': myBlock} ) ) }}
+    ez_page:
+        alias: ezpublish.controller.page.view
 
     ezpublish.view_controller_listener:
         class: "%ezpublish.view_controller_listener.class%"
@@ -203,12 +201,9 @@ services:
         arguments:
             - "@ezpublish.query_type_content_view_mapper"
             - "@ezpublish.api.service.search"
-        tags:
-            - { name: controller.service_arguments }
 
     ez_query:
         alias: ezpublish.controller.query
-        public: true
 
     ezplatform.core.jms_translation.catalog_mapper_file_writer:
         class: eZ\Publish\Core\MVC\Symfony\Translation\CatalogueMapperFileWriter
@@ -221,7 +216,7 @@ services:
     ezplatform.core.translation.extractor.fieldtypes:
         class: eZ\Publish\Core\MVC\Symfony\Translation\FieldTypesTranslationExtractor
         arguments:
-            - '@eZ\Publish\Core\FieldType\FieldTypeRegistry'
+            - "@ezpublish.field_type_collection.factory"
         tags:
             - { name: jms_translation.extractor, alias: ez_fieldtypes }
 
@@ -253,16 +248,16 @@ services:
         arguments:
             - '@ezpublish.api.repository'
         tags:
-            - { name: console.command, command: ezplatform:delete-content-translation }
+            - { name: console.command }
 
     ezplatform.core.command.cleanup_versions:
         class: eZ\Bundle\EzPublishCoreBundle\Command\CleanupVersionsCommand
         arguments:
-            - '@eZ\Publish\Core\Event\Repository'
+            - "@ezpublish.signalslot.repository"
             - "@ezpublish.api.repository_configuration_provider"
             - "@ezpublish.persistence.connection"
         tags:
-            - { name: console.command, command: ezplatform:content:cleanup-versions }
+            - { name: console.command }
 
     ezplatform.core.session.handler.native_redis:
         class: eZ\Bundle\EzPublishCoreBundle\Session\Handler\NativeSessionHandler
@@ -274,14 +269,6 @@ services:
         class: eZ\Bundle\EzPublishCoreBundle\Command\CopySubtreeCommand
         autowire: true
         autoconfigure: true
-        arguments:
-            $locationService: '@ezpublish.api.service.location'
-            $permissionResolver: "@=service('ezpublish.api.repository').getPermissionResolver()"
-            $userService: '@ezpublish.api.service.user'
-            $contentTypeService: '@ezpublish.api.service.content_type'
-            $searchService: '@ezpublish.api.service.search'
-        tags:
-            - { name: console.command, command: ezplatform:copy-subtree }
 
     ezplatform.core.command.resize_original_images:
         class: eZ\Bundle\EzPublishCoreBundle\Command\ResizeOriginalImagesCommand
@@ -290,22 +277,3 @@ services:
         arguments:
             $ioService: '@ezpublish.fieldType.ezimage.io_service.published'
             $imagine: '@liip_imagine'
-            $filterManager: '@liip_imagine.filter.manager'
-            $permissionResolver: "@=service('ezpublish.api.repository').getPermissionResolver()"
-            $userService: '@ezpublish.api.service.user'
-            $extensionGuesser: '@liip_imagine.extension_guesser'
-        tags:
-            - { name: console.command, command: ezplatform:images:resize-original }
-
-    ezplatform.core.command.reindex:
-        class: eZ\Bundle\EzPublishCoreBundle\Command\ReindexCommand
-        arguments:
-            $searchIndexer: '@ezpublish.spi.search.indexer'
-            $connection: '@ezpublish.api.storage_engine.legacy.connection'
-            $locationHandler: '@ezpublish.spi.persistence.location_handler'
-            $logger: '@logger'
-            $siteaccess: '@ezpublish.siteaccess'
-            $env: '%kernel.environment%'
-            $isDebug: '%kernel.debug%'
-        tags:
-            - { name: console.command, command: ezplatform:reindex }

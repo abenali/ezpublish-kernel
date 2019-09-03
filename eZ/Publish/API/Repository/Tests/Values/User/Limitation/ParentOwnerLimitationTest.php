@@ -41,7 +41,7 @@ class ParentOwnerLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentOwnerLimitation(
-                ['limitationValues' => [1]]
+                array('limitationValues' => array(1))
             )
         );
 
@@ -74,11 +74,10 @@ class ParentOwnerLimitationTest extends BaseLimitationTest
      * Tests the ParentOwnerLimitation.
      *
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ParentOwnerLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testParentOwnerLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -91,7 +90,7 @@ class ParentOwnerLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentOwnerLimitation(
-                ['limitationValues' => [1]]
+                array('limitationValues' => array(1))
             )
         );
 

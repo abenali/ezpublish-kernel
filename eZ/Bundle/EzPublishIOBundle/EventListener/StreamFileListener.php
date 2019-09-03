@@ -37,9 +37,9 @@ class StreamFileListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
-            KernelEvents::REQUEST => ['onKernelRequest', 42],
-        ];
+        return array(
+            KernelEvents::REQUEST => array('onKernelRequest', 42),
+        );
     }
 
     /**

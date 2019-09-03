@@ -16,13 +16,13 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class DataCollectorPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish_debug.data_collector', new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new DataCollectorPass());
     }
@@ -44,7 +44,7 @@ class DataCollectorPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish_debug.data_collector',
             'addCollector',
-            [new Reference($serviceId), $panelTemplate, $toolbarTemplate]
+            array(new Reference($serviceId), $panelTemplate, $toolbarTemplate)
         );
     }
 }

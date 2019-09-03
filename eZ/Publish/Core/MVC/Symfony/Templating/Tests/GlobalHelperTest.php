@@ -23,25 +23,37 @@ use Symfony\Component\Routing\RouterInterface;
 
 class GlobalHelperTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Templating\GlobalHelper */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Templating\GlobalHelper
+     */
     protected $helper;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $container;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $locationService;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $configResolver;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $router;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $translationHelper;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -68,11 +80,11 @@ class GlobalHelperTest extends TestCase
     public function testGetViewParameters()
     {
         $request = Request::create('/foo');
-        $viewParameters = [
+        $viewParameters = array(
             'foo' => 'bar',
             'toto' => 'tata',
             'somethingelse' => 'héhé-høhø',
-        ];
+        );
         $request->attributes->set('viewParameters', $viewParameters);
         $requestStack = new RequestStack();
         $requestStack->push($request);
@@ -132,7 +144,7 @@ class GlobalHelperTest extends TestCase
         $this->router
             ->expects($this->once())
             ->method('generate')
-            ->with('_ezpublishLocation', ['locationId' => $locationId, 'viewType' => $viewType])
+            ->with('_ezpublishLocation', array('locationId' => $locationId, 'viewType' => $viewType))
             ->will($this->returnValue($expectedSystemUriString));
 
         $this->helper->setRequestStack($requestStack);
@@ -156,7 +168,7 @@ class GlobalHelperTest extends TestCase
 
         $rootLocation = $this
             ->getMockBuilder(Location::class)
-            ->setConstructorArgs([['id' => $rootLocationId]]);
+            ->setConstructorArgs(array(array('id' => $rootLocationId)));
         $this->locationService
             ->expects($this->once())
             ->method('loadLocation')
@@ -181,7 +193,7 @@ class GlobalHelperTest extends TestCase
 
     public function testGetAvailableLanguages()
     {
-        $languages = ['fre-FR', 'eng-GB', 'esl-ES'];
+        $languages = array('fre-FR', 'eng-GB', 'esl-ES');
         $this->translationHelper
             ->expects($this->once())
             ->method('getAvailableLanguages')

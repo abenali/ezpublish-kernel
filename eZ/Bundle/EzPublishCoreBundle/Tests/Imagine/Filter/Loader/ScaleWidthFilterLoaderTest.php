@@ -15,13 +15,17 @@ use PHPUnit\Framework\TestCase;
 
 class ScaleWidthFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $innerLoader;
 
-    /** @var ScaleWidthFilterLoader */
+    /**
+     * @var ScaleWidthFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerLoader = $this->createMock(LoaderInterface::class);
@@ -29,11 +33,12 @@ class ScaleWidthFilterLoaderTest extends TestCase
         $this->loader->setInnerLoader($this->innerLoader);
     }
 
+    /**
+     * @expectedException \Imagine\Exception\InvalidArgumentException
+     */
     public function testLoadFail()
     {
-        $this->expectException(\Imagine\Exception\InvalidArgumentException::class);
-
-        $this->loader->load($this->createMock(ImageInterface::class, []));
+        $this->loader->load($this->createMock(ImageInterface::class, array()));
     }
 
     public function testLoad()
@@ -43,9 +48,9 @@ class ScaleWidthFilterLoaderTest extends TestCase
         $this->innerLoader
             ->expects($this->once())
             ->method('load')
-            ->with($image, $this->equalTo(['widen' => $width]))
+            ->with($image, $this->equalTo(array('widen' => $width)))
             ->will($this->returnValue($image));
 
-        $this->assertSame($image, $this->loader->load($image, [$width]));
+        $this->assertSame($image, $this->loader->load($image, array($width)));
     }
 }

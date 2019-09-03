@@ -29,7 +29,9 @@ class FieldHandler
      */
     protected $contentGateway;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Language\Handler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Language\Handler
+     */
     protected $languageHandler;
 
     /**
@@ -91,8 +93,8 @@ class FieldHandler
      */
     public function createNewFields(Content $content, Type $contentType)
     {
-        $fieldsToCopy = [];
-        $languageCodes = [];
+        $fieldsToCopy = array();
+        $languageCodes = array();
         $fields = $this->getFieldMap($content->fields, $languageCodes);
         $languageCodes[$content->versionInfo->contentInfo->mainLanguageCode] = true;
 
@@ -136,12 +138,12 @@ class FieldHandler
         $fieldType = $this->fieldTypeRegistry->getFieldType($fieldDefinition->fieldType);
 
         return new Field(
-            [
+            array(
                 'fieldDefinitionId' => $fieldDefinition->id,
                 'type' => $fieldDefinition->fieldType,
                 'value' => $fieldType->getEmptyValue(),
                 'languageCode' => $languageCode,
-            ]
+            )
         );
     }
 
@@ -315,9 +317,9 @@ class FieldHandler
      */
     public function updateFields(Content $content, UpdateStruct $updateStruct, Type $contentType)
     {
-        $updatedFields = [];
-        $fieldsToCopy = [];
-        $nonTranslatableCopiesUpdateSet = [];
+        $updatedFields = array();
+        $fieldsToCopy = array();
+        $nonTranslatableCopiesUpdateSet = array();
         $mainLanguageCode = $content->versionInfo->contentInfo->mainLanguageCode;
         $languageCodes = $existingLanguageCodes = array_fill_keys($content->versionInfo->languageCodes, true);
         $contentFieldMap = $this->getFieldMap($content->fields);
@@ -330,7 +332,7 @@ class FieldHandler
                 if (isset($updateFieldMap[$fieldDefinition->id][$languageCode])) {
                     $field = clone $updateFieldMap[$fieldDefinition->id][$languageCode];
                     $field->versionNo = $content->versionInfo->versionNo;
-                    if (isset($field->id) && array_key_exists($field->languageCode, $existingLanguageCodes)) {
+                    if (isset($field->id)) {
                         $this->updateField($field, $content);
                         $updatedFields[$fieldDefinition->id][$languageCode] = $field;
                     } else {
@@ -419,7 +421,7 @@ class FieldHandler
      */
     protected function getFieldMap(array $fields, &$languageCodes = null)
     {
-        $fieldMap = [];
+        $fieldMap = array();
         foreach ($fields as $field) {
             if (isset($languageCodes)) {
                 $languageCodes[$field->languageCode] = true;

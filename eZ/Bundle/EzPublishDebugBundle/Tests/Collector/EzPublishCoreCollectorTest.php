@@ -17,10 +17,12 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 
 class EzPublishCoreCollectorTest extends TestCase
 {
-    /** @var EzPublishCoreCollector */
+    /**
+     * @var EzPublishCoreCollector
+     */
     private $mainCollector;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->mainCollector = new EzPublishCoreCollector();
@@ -39,10 +41,11 @@ class EzPublishCoreCollectorTest extends TestCase
         $this->assertSame($collector, $this->mainCollector->getCollector($name));
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testGetInvalidCollector()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $collector = $this->getDataCollectorMock();
         $this->mainCollector->addCollector($collector);
         $this->assertSame($collector, $this->mainCollector->getCollector('foo'));
@@ -151,7 +154,9 @@ class EzPublishCoreCollectorTest extends TestCase
         $response = new Response();
         $exception = new Exception();
 
-        /** @var \PHPUnit\Framework\MockObject\MockObject */
+        /**
+         * @var \PHPUnit\Framework\MockObject\MockObject
+         */
         foreach ($allCollectors as $name => $collector) {
             $this->mainCollector->addCollector($collector);
             $collector

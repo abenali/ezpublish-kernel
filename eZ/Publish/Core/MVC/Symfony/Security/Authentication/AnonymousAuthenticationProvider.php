@@ -16,10 +16,14 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class AnonymousAuthenticationProvider extends BaseAnonymousProvider
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     private $configResolver;
 
     public function setRepository(Repository $repository)

@@ -6,6 +6,7 @@
 namespace eZ\Bundle\EzPublishCoreBundle\Features\Context;
 
 use Behat\Behat\Context\Context;
+use EzSystems\PlatformBehatBundle\Context\RepositoryContext;
 use eZ\Publish\API\Repository\ContentTypeService;
 use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\Repository;
@@ -15,6 +16,8 @@ use eZ\Publish\API\Repository\Repository;
  */
 class BasicContentContext implements Context
 {
+    use RepositoryContext;
+
     /**
      * Default language.
      */
@@ -23,16 +26,17 @@ class BasicContentContext implements Context
     /**
      * Content path mapping.
      */
-    private $contentPaths = [];
+    private $contentPaths = array();
 
-    /** @var eZ\Publish\API\Repository\ContentTypeService */
+    /**
+     * @var eZ\Publish\API\Repository\ContentTypeService
+     */
     private $contentTypeService;
 
-    /** @var eZ\Publish\API\Repository\ContentService */
+    /**
+     * @var eZ\Publish\API\Repository\ContentService
+     */
     private $contentService;
-
-    /** @var eZ\Publish\API\Repository\Repository */
-    private $repository;
 
     /**
      * @injectService $repository @ezpublish.api.repository
@@ -44,7 +48,7 @@ class BasicContentContext implements Context
         ContentTypeService $contentTypeService,
         ContentService $contentService
     ) {
-        $this->$repository = $repository;
+        $this->setRepository($repository);
         $this->contentTypeService = $contentTypeService;
         $this->contentService = $contentService;
     }
@@ -60,6 +64,7 @@ class BasicContentContext implements Context
      */
     public function createContent($contentType, $fields, $parentLocationId)
     {
+        $repository = $this->getRepository();
         $languageCode = self::DEFAULT_LANGUAGE;
         $content = $this->createContentDraft($parentLocationId, $contentType, $fields, $languageCode);
         $content = $this->contentService->publishVersion($content->versionInfo);
@@ -90,14 +95,15 @@ class BasicContentContext implements Context
     public function createContentDraft($parentLocationId, $contentTypeIdentifier, $fields, $languageCode = null)
     {
         $languageCode = $languageCode ?: self::DEFAULT_LANGUAGE;
-        $locationCreateStruct = $this->repository->getLocationService()->newLocationCreateStruct($parentLocationId);
+        $repository = $this->getRepository();
+        $locationCreateStruct = $repository->getLocationService()->newLocationCreateStruct($parentLocationId);
         $contentTypeIdentifier = $this->contentTypeService->loadContentTypeByIdentifier($contentTypeIdentifier);
         $contentCreateStruct = $this->contentService->newContentCreateStruct($contentTypeIdentifier, $languageCode);
         foreach (array_keys($fields) as $key) {
             $contentCreateStruct->setField($key, $fields[$key]);
         }
 
-        return $this->contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
+        return $this->contentService->createContent($contentCreateStruct, array($locationCreateStruct));
     }
 
     /**
@@ -152,7 +158,7 @@ class BasicContentContext implements Context
      */
     public function createBasicFolder($path)
     {
-        $fields = ['name' => $this->getTitleFromPath($path)];
+        $fields = array('name' => $this->getTitleFromPath($path));
 
         return $this->createContentwithPath($path, $fields, 'folder');
     }
@@ -162,10 +168,10 @@ class BasicContentContext implements Context
      */
     public function createBasicArticle($path)
     {
-        $fields = [
+        $fields = array(
             'title' => $this->getTitleFromPath($path),
             'intro' => $this->getDummyXmlText(),
-        ];
+        );
 
         return $this->createContentwithPath($path, $fields, 'article');
     }
@@ -175,10 +181,10 @@ class BasicContentContext implements Context
      */
     public function createArticleDraft($path)
     {
-        $fields = [
+        $fields = array(
             'title' => $this->getTitleFromPath($path),
             'intro' => $this->getDummyXmlText(),
-        ];
+        );
 
         return $this->createContentDraft(2, 'article', $fields);
     }

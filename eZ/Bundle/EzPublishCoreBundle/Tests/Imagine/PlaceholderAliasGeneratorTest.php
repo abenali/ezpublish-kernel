@@ -27,25 +27,37 @@ use PHPUnit\Framework\TestCase;
 
 class PlaceholderAliasGeneratorTest extends TestCase
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\Imagine\PlaceholderAliasGenerator */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\Imagine\PlaceholderAliasGenerator
+     */
     private $aliasGenerator;
 
-    /** @var \eZ\Publish\SPI\Variation\VariationHandler|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Variation\VariationHandler|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $innerAliasGenerator;
 
-    /** @var \eZ\Publish\Core\IO\IOServiceInterface|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Publish\Core\IO\IOServiceInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $ioService;
 
-    /** @var \eZ\Bundle\EzPublishCoreBundle\Imagine\IORepositoryResolver|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\Imagine\IORepositoryResolver|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $ioResolver;
 
-    /** @var \eZ\Bundle\EzPublishCoreBundle\Imagine\PlaceholderProvider|\PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\Imagine\PlaceholderProvider|\PHPUnit_Framework_MockObject_MockObject
+     */
     private $placeholderProvider;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $placeholderOptions;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->innerAliasGenerator = $this->createMock(VariationHandler::class);
         $this->ioService = $this->createMock(IOServiceInterface::class);
@@ -63,10 +75,11 @@ class PlaceholderAliasGeneratorTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testGetVariationWrongValue()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $field = new Field([
             'value' => $this->createMock(FieldTypeValue::class),
         ]);

@@ -40,26 +40,26 @@ class SecurityPass implements CompilerPassInterface
         $daoAuthenticationProviderDef->setClass(RepositoryAuthenticationProvider::class);
         $daoAuthenticationProviderDef->addMethodCall(
             'setRepository',
-            [$repositoryReference]
+            array($repositoryReference)
         );
 
         $rememberMeAuthenticationProviderDef = $container->findDefinition('security.authentication.provider.rememberme');
         $rememberMeAuthenticationProviderDef->setClass(RememberMeRepositoryAuthenticationProvider::class);
         $rememberMeAuthenticationProviderDef->addMethodCall(
             'setRepository',
-            [$repositoryReference]
+            array($repositoryReference)
         );
 
         $anonymousAuthenticationProviderDef = $container->findDefinition('security.authentication.provider.anonymous');
         $anonymousAuthenticationProviderDef->setClass(AnonymousAuthenticationProvider::class);
         $anonymousAuthenticationProviderDef->addMethodCall(
             'setRepository',
-            [$repositoryReference]
+            array($repositoryReference)
         );
 
         $anonymousAuthenticationProviderDef->addMethodCall(
             'setConfigResolver',
-            [$configResolverRef]
+            array($configResolverRef)
         );
 
         if (!$container->hasDefinition('security.http_utils')) {
@@ -70,7 +70,7 @@ class SecurityPass implements CompilerPassInterface
         $httpUtilsDef->setClass(HttpUtils::class);
         $httpUtilsDef->addMethodCall(
             'setSiteAccess',
-            [new Reference('ezpublish.siteaccess')]
+            array(new Reference('ezpublish.siteaccess'))
         );
 
         if (!$container->hasDefinition('security.authentication.success_handler')) {
@@ -81,7 +81,7 @@ class SecurityPass implements CompilerPassInterface
         $successHandlerDef->setClass(DefaultAuthenticationSuccessHandler::class);
         $successHandlerDef->addMethodCall(
             'setConfigResolver',
-            [$configResolverRef]
+            array($configResolverRef)
         );
     }
 }

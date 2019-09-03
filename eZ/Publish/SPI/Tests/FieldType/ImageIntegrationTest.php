@@ -43,7 +43,9 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
 {
     private $deprecationWarnerMock;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $aliasCleanerMock;
 
     /**
@@ -125,13 +127,13 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
     public function getTypeConstraints()
     {
         return new Content\FieldTypeConstraints(
-            [
-                'validators' => [
-                    'FileSizeValidator' => [
+            array(
+                'validators' => array(
+                    'FileSizeValidator' => array(
                         'maxFileSize' => 2 * 1024 * 1024, // 2 MB
-                    ],
-                ],
-            ]
+                    ),
+                ),
+            )
         );
     }
 
@@ -144,23 +146,23 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        return [
+        return array(
             // The ezint field type does not have any special field definition
             // properties
-            ['fieldType', 'ezimage'],
-            [
+            array('fieldType', 'ezimage'),
+            array(
                 'fieldTypeConstraints',
                 new Content\FieldTypeConstraints(
-                    [
-                        'validators' => [
-                            'FileSizeValidator' => [
+                    array(
+                        'validators' => array(
+                            'FileSizeValidator' => array(
                                 'maxFileSize' => 2 * 1024 * 1024, // 2 MB
-                            ],
-                        ],
-                    ]
+                            ),
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -171,15 +173,15 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
-                'externalData' => [
+                'externalData' => array(
                     'inputUri' => __DIR__ . '/_fixtures/image.jpg',
                     'fileName' => 'Ice-Flower.jpg',
                     'alternativeText' => 'An icy flower.',
-                ],
+                ),
                 'sortKey' => '',
-            ]
+            )
         );
     }
 
@@ -212,17 +214,17 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
-                'externalData' => [
+                'externalData' => array(
                     // should be ignored
                     'id' => 'some/value',
                     'inputUri' => __DIR__ . '/_fixtures/image.png',
                     'fileName' => 'Blueish-Blue.jpg',
                     'alternativeText' => 'This blue is so blueish.',
-                ],
+                ),
                 'sortKey' => '',
-            ]
+            )
         );
     }
 
@@ -278,10 +280,11 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
         }*/
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\InvalidBinaryFileIdException
+     */
     public function testCreateContentUsingIdPropertyThrowsWarning()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\InvalidBinaryFileIdException::class);
-
         $this->testCreateContentType();
         $contentType = $this->testLoadContentTypeField();
         $this->getDeprecationWarnerMock()
@@ -299,15 +302,15 @@ class ImageIntegrationTest extends FileBaseIntegrationTest
     public function getDeprecatedIdPropertyValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
-                'externalData' => [
+                'externalData' => array(
                     'id' => __DIR__ . '/_fixtures/image.jpg',
                     'fileName' => 'Ice-Flower.jpg',
                     'alternativeText' => 'An icy flower.',
-                ],
+                ),
                 'sortKey' => '',
-            ]
+            )
         );
     }
 

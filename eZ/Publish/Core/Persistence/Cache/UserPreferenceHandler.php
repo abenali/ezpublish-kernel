@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace eZ\Publish\Core\Persistence\Cache;
 
-use eZ\Publish\API\Repository\Exceptions\NotFoundException as APINotFoundException;
-use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use eZ\Publish\SPI\Persistence\UserPreference\UserPreferenceSetStruct;
 use eZ\Publish\SPI\Persistence\UserPreference\Handler;
 use eZ\Publish\SPI\Persistence\UserPreference\UserPreference;
@@ -19,13 +17,8 @@ use eZ\Publish\SPI\Persistence\UserPreference\UserPreference;
  *
  * @see \eZ\Publish\SPI\Persistence\UserPreference\Handler
  */
-class UserPreferenceHandler extends AbstractInMemoryPersistenceHandler implements Handler
+class UserPreferenceHandler extends AbstractHandler implements Handler
 {
-    /**
-     * Constant used for storing not found results for getUserPreferenceByUserIdAndName().
-     */
-    private const NOT_FOUND = 'NotFoundException';
-
     /**
      * {@inheritdoc}
      */
@@ -35,7 +28,10 @@ class UserPreferenceHandler extends AbstractInMemoryPersistenceHandler implement
             'setStruct' => $setStruct,
         ]);
 
-        $this->cache->deleteItems(['ez-user-preference-' . $setStruct->userId . '-' . $setStruct->name]);
+        $this->cache->invalidateTags([
+            'user-preference-count-' . $setStruct->userId,
+            'user-preference-' . $setStruct->userId . '-' . $setStruct->name,
+        ]);
 
         return $this->persistenceHandler->userPreferenceHandler()->setUserPreference($setStruct);
     }
@@ -45,45 +41,49 @@ class UserPreferenceHandler extends AbstractInMemoryPersistenceHandler implement
      */
     public function countUserPreferences(int $userId): int
     {
+        $cacheItem = $this->cache->getItem('ez-user-preference-count-' . $userId);
+
+        $count = $cacheItem->get();
+        if ($cacheItem->isHit()) {
+            return $count;
+        }
+
         $this->logger->logCall(__METHOD__, [
             'userId' => $userId,
         ]);
 
-        return $this->persistenceHandler->userPreferenceHandler()->countUserPreferences($userId);
+        $count = $this->persistenceHandler->userPreferenceHandler()->countUserPreferences($userId);
+        $cacheItem->set($count);
+        $cacheItem->tag(['user-preference-count-' . $userId]);
+        $this->cache->save($cacheItem);
+
+        return $count;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * Needs to store NotFoundExceptions as UserPreference feature heavily uses this in valid lookups.
      */
     public function getUserPreferenceByUserIdAndName(int $userId, string $name): UserPreference
     {
-        $userPreference = $this->getCacheValue(
-            $userId,
-            'ez-user-preference-',
-            function ($userId) use ($name) {
-                try {
-                    return $this->persistenceHandler->userPreferenceHandler()->getUserPreferenceByUserIdAndName(
-                        $userId,
-                        $name
-                    );
-                } catch (APINotFoundException $e) {
-                    return self::NOT_FOUND;
-                }
-            },
-            static function () use ($userId) {
-                return ['user-preference-' . $userId];
-            },
-            static function () use ($userId, $name) {
-                return ['ez-user-preference-' . $userId . '-' . $name];
-            },
-            '-' . $name
-        );
+        $cacheItem = $this->cache->getItem('ez-user-preference-' . $userId . '-' . $name);
 
-        if ($userPreference === self::NOT_FOUND) {
-            throw new NotFoundException('User Preference', $userId . ',' . $name);
+        $userPreference = $cacheItem->get();
+        if ($cacheItem->isHit()) {
+            return $userPreference;
         }
+
+        $this->logger->logCall(__METHOD__, [
+            'userId' => $userId,
+            'name' => $name,
+        ]);
+
+        $userPreference = $this->persistenceHandler->userPreferenceHandler()->getUserPreferenceByUserIdAndName($userId, $name);
+
+        $cacheItem->set($userPreference);
+        $cacheItem->tag([
+            'user-preference-' . $userId . '-' . $name,
+        ]);
+        $this->cache->save($cacheItem);
 
         return $userPreference;
     }

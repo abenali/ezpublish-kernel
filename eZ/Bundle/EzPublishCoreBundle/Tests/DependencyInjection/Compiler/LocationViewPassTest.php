@@ -21,7 +21,7 @@ class LocationViewPassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new LocationViewPass());
     }

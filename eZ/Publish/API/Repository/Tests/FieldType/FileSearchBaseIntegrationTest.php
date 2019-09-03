@@ -86,7 +86,7 @@ abstract class FileSearchBaseIntegrationTest extends SearchBaseIntegrationTest
     /**
      * Perform storage directory setup on first execution.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
@@ -104,7 +104,7 @@ abstract class FileSearchBaseIntegrationTest extends SearchBaseIntegrationTest
      *
      * Cleans up the storage directory, if it was used
      */
-    public static function tearDownAfterClass(): void
+    public static function tearDownAfterClass()
     {
         parent::tearDownAfterClass();
         self::cleanupStorageDir();
@@ -199,7 +199,7 @@ abstract class FileSearchBaseIntegrationTest extends SearchBaseIntegrationTest
         $type = $this->createContentType(
             $this->getValidFieldSettings(),
             $this->getValidValidatorConfiguration(),
-            []
+            array()
         );
 
         $repository = $this->getRepository();

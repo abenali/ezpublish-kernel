@@ -19,10 +19,12 @@ use PHPUnit\Framework\TestCase;
  */
 class ISBNTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\ISBNConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\ISBNConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->converter = new ISBNConverter();
     }

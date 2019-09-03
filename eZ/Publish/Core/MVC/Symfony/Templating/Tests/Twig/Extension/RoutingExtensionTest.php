@@ -13,15 +13,15 @@ use eZ\Publish\Core\MVC\Symfony\Templating\Twig\Extension\RoutingExtension;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Twig\Test\IntegrationTestCase;
+use Twig_Test_IntegrationTestCase;
 
-class RoutingExtensionTest extends IntegrationTestCase
+class RoutingExtensionTest extends Twig_Test_IntegrationTestCase
 {
     protected function getExtensions()
     {
-        return [
+        return array(
             new RoutingExtension($this->getRouteReferenceGenerator()),
-        ];
+        );
     }
 
     protected function getFixturesDir()

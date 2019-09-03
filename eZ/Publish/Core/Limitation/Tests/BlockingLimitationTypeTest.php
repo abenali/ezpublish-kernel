@@ -36,10 +36,10 @@ class BlockingLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValue()
     {
-        return [
-            [new BlockingLimitation('Test', [])],
-            [new BlockingLimitation('FunctionList', [])],
-        ];
+        return array(
+            array(new BlockingLimitation('Test', array())),
+            array(new BlockingLimitation('FunctionList', array())),
+        );
     }
 
     /**
@@ -59,22 +59,21 @@ class BlockingLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValueException()
     {
-        return [
-            [new ObjectStateLimitation()],
-        ];
+        return array(
+            array(new ObjectStateLimitation()),
+        );
     }
 
     /**
      * @dataProvider providerForTestAcceptValueException
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\BlockingLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, BlockingLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -83,10 +82,10 @@ class BlockingLimitationTypeTest extends Base
      */
     public function providerForTestValidatePass()
     {
-        return [
-            [new BlockingLimitation('Test', ['limitationValues' => ['ezjscore::call']])],
-            [new BlockingLimitation('Test', ['limitationValues' => ['ezjscore::call', 'my::call']])],
-        ];
+        return array(
+            array(new BlockingLimitation('Test', array('limitationValues' => array('ezjscore::call')))),
+            array(new BlockingLimitation('Test', array('limitationValues' => array('ezjscore::call', 'my::call')))),
+        );
     }
 
     /**
@@ -108,11 +107,11 @@ class BlockingLimitationTypeTest extends Base
      */
     public function providerForTestValidateError()
     {
-        return [
-            [new BlockingLimitation('Test', []), 1],
-            [new BlockingLimitation('Test', ['limitationValues' => [0]]), 0],
-            [new BlockingLimitation('Test', ['limitationValues' => [0, PHP_INT_MAX]]), 0],
-        ];
+        return array(
+            array(new BlockingLimitation('Test', array()), 1),
+            array(new BlockingLimitation('Test', array('limitationValues' => array(0))), 0),
+            array(new BlockingLimitation('Test', array('limitationValues' => array(0, PHP_INT_MAX))), 0),
+        );
     }
 
     /**
@@ -141,11 +140,11 @@ class BlockingLimitationTypeTest extends Base
      */
     public function testBuildValue(BlockingLimitationType $limitationType)
     {
-        $expected = ['test', 'test' => 9];
+        $expected = array('test', 'test' => 9);
         $value = $limitationType->buildValue($expected);
 
         self::assertInstanceOf(BlockingLimitation::class, $value);
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -154,38 +153,38 @@ class BlockingLimitationTypeTest extends Base
      */
     public function providerForTestEvaluate()
     {
-        return [
+        return array(
             // ContentInfo, no access
-            [
-                'limitation' => new BlockingLimitation('Test', []),
+            array(
+                'limitation' => new BlockingLimitation('Test', array()),
                 'object' => new ContentInfo(),
-                'targets' => [],
-            ],
+                'targets' => array(),
+            ),
             // ContentInfo, no access
-            [
-                'limitation' => new BlockingLimitation('Test', ['limitationValues' => [2]]),
+            array(
+                'limitation' => new BlockingLimitation('Test', array('limitationValues' => array(2))),
                 'object' => new ContentInfo(),
-                'targets' => [],
-            ],
+                'targets' => array(),
+            ),
             // ContentInfo, with access
-            [
-                'limitation' => new BlockingLimitation('Test', ['limitationValues' => [66]]),
-                'object' => new ContentInfo(['contentTypeId' => 66]),
-                'targets' => [],
-            ],
+            array(
+                'limitation' => new BlockingLimitation('Test', array('limitationValues' => array(66))),
+                'object' => new ContentInfo(array('contentTypeId' => 66)),
+                'targets' => array(),
+            ),
             // ContentCreateStruct, no access
-            [
-                'limitation' => new BlockingLimitation('Test', ['limitationValues' => [2]]),
-                'object' => new ContentCreateStruct(['contentType' => ((object)['id' => 22])]),
-                'targets' => [],
-            ],
+            array(
+                'limitation' => new BlockingLimitation('Test', array('limitationValues' => array(2))),
+                'object' => new ContentCreateStruct(array('contentType' => ((object)array('id' => 22)))),
+                'targets' => array(),
+            ),
             // ContentCreateStruct, with access
-            [
-                'limitation' => new BlockingLimitation('Test', ['limitationValues' => [2, 43]]),
-                'object' => new ContentCreateStruct(['contentType' => ((object)['id' => 43])]),
-                'targets' => [],
-            ],
-        ];
+            array(
+                'limitation' => new BlockingLimitation('Test', array('limitationValues' => array(2, 43))),
+                'object' => new ContentCreateStruct(array('contentType' => ((object)array('id' => 43)))),
+                'targets' => array(),
+            ),
+        );
     }
 
     /**
@@ -224,26 +223,25 @@ class BlockingLimitationTypeTest extends Base
      */
     public function providerForTestEvaluateInvalidArgument()
     {
-        return [
+        return array(
             // invalid limitation
-            [
+            array(
                 'limitation' => new ObjectStateLimitation(),
                 'object' => new ContentInfo(),
-                'targets' => [new Location()],
-            ],
-        ];
+                'targets' => array(new Location()),
+            ),
+        );
     }
 
     /**
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(
         Limitation $limitation,
         ValueObject $object,
         array $targets
     ) {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         // Need to create inline instead of depending on testConstruct() to get correct mock instance
         $limitationType = $this->testConstruct();
 
@@ -274,26 +272,25 @@ class BlockingLimitationTypeTest extends Base
     public function testGetCriterion(BlockingLimitationType $limitationType)
     {
         $criterion = $limitationType->getCriterion(
-            new BlockingLimitation('Test', []),
+            new BlockingLimitation('Test', array()),
             $this->getUserMock()
         );
 
         self::assertInstanceOf(MatchNone::class, $criterion);
-        self::assertNull($criterion->value);
-        self::assertNull($criterion->operator);
+        self::assertInternalType('null', $criterion->value);
+        self::assertInternalType('null', $criterion->operator);
     }
 
     /**
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotImplementedException
      *
      * @param \eZ\Publish\Core\Limitation\BlockingLimitationType $limitationType
      */
     public function testValueSchema(BlockingLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotImplementedException::class);
-
         self::assertEquals(
-            [],
+            array(),
             $limitationType->valueSchema()
         );
     }

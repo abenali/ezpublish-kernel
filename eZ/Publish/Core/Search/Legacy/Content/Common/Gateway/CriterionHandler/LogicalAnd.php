@@ -48,7 +48,7 @@ class LogicalAnd extends CriterionHandler
         Criterion $criterion,
         array $languageSettings
     ) {
-        $subexpressions = [];
+        $subexpressions = array();
         foreach ($criterion->criteria as $subCriterion) {
             $subexpressions[] = $converter->convertCriteria(
                 $query,

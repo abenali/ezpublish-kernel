@@ -18,7 +18,7 @@ class OptionsProvider
 
     protected $publishedImagesDir;
 
-    public function __construct(array $values = [])
+    public function __construct(array $values = array())
     {
         $this->varDir = isset($values['var_dir']) ? $values['var_dir'] : null;
         $this->storageDir = isset($values['storage_dir']) ? $values['storage_dir'] : null;

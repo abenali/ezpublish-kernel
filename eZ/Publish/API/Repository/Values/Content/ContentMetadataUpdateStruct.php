@@ -69,11 +69,4 @@ class ContentMetadataUpdateStruct extends ValueObject
      * @var mixed|null
      */
     public $mainLocationId;
-
-    /**
-     * If set, will change the content's "always-available" name.
-     *
-     * @var string
-     */
-    public $name;
 }

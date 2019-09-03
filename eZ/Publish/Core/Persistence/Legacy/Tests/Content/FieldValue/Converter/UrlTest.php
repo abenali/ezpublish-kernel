@@ -20,10 +20,12 @@ use PHPUnit\Framework\TestCase;
  */
 class UrlTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\UrlConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\UrlConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->converter = new UrlConverter();
@@ -38,7 +40,7 @@ class UrlTest extends TestCase
     {
         $value = new FieldValue();
         $text = 'eZ Systems';
-        $value->data = ['text' => $text];
+        $value->data = array('text' => $text);
         $value->externalData = 'http://ez.no/';
         $value->sortKey = false;
         $storageFieldValue = new StorageFieldValue();
@@ -64,7 +66,7 @@ class UrlTest extends TestCase
         $fieldValue = new FieldValue();
 
         $this->converter->toFieldValue($storageFieldValue, $fieldValue);
-        self::assertIsArray($fieldValue->data);
+        self::assertInternalType('array', $fieldValue->data);
         self::assertFalse($fieldValue->sortKey);
         self::assertSame($text, $fieldValue->data['text']);
         self::assertEquals($urlId, $fieldValue->data['urlId']);

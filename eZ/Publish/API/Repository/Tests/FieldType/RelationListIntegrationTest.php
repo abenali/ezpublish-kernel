@@ -53,24 +53,24 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
     {
         $contentService = $this->getRepository()->getContentService();
 
-        return [
+        return array(
             new Relation(
-                [
+                array(
                     'sourceFieldDefinitionIdentifier' => 'data',
                     'type' => Relation::FIELD,
                     'sourceContentInfo' => $content->contentInfo,
                     'destinationContentInfo' => $contentService->loadContentInfo(4),
-                ]
+                )
             ),
             new Relation(
-                [
+                array(
                     'sourceFieldDefinitionIdentifier' => 'data',
                     'type' => Relation::FIELD,
                     'sourceContentInfo' => $content->contentInfo,
                     'destinationContentInfo' => $contentService->loadContentInfo(49),
-                ]
+                )
             ),
-        ];
+        );
     }
 
     /**
@@ -82,34 +82,34 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
     {
         $contentService = $this->getRepository()->getContentService();
 
-        return [
+        return array(
             new Relation(
-                [
+                array(
                     'id' => null,
                     'sourceFieldDefinitionIdentifier' => 'data',
                     'type' => Relation::FIELD,
                     'sourceContentInfo' => $content->contentInfo,
                     'destinationContentInfo' => $contentService->loadContentInfo(4),
-                ]
+                )
             ),
             new Relation(
-                [
+                array(
                     'sourceFieldDefinitionIdentifier' => 'data',
                     'type' => Relation::FIELD,
                     'sourceContentInfo' => $content->contentInfo,
                     'destinationContentInfo' => $contentService->loadContentInfo(49),
-                ]
+                )
             ),
             new Relation(
-                [
+                array(
                     'id' => null,
                     'sourceFieldDefinitionIdentifier' => 'data',
                     'type' => Relation::FIELD,
                     'sourceContentInfo' => $content->contentInfo,
                     'destinationContentInfo' => $contentService->loadContentInfo(54),
-                ]
+                )
             ),
-        ];
+        );
     }
 
     /**
@@ -117,20 +117,20 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getSettingsSchema()
     {
-        return [
-            'selectionMethod' => [
+        return array(
+            'selectionMethod' => array(
                 'type' => 'int',
                 'default' => RelationListType::SELECTION_BROWSE,
-            ],
-            'selectionDefaultLocation' => [
+            ),
+            'selectionDefaultLocation' => array(
                 'type' => 'string',
                 'default' => null,
-            ],
-            'selectionContentTypes' => [
+            ),
+            'selectionContentTypes' => array(
                 'type' => 'array',
-                'default' => [],
-            ],
-        ];
+                'default' => array(),
+            ),
+        );
     }
 
     /**
@@ -138,14 +138,14 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getValidatorSchema()
     {
-        return [
-            'RelationListValueValidator' => [
-                'selectionLimit' => [
+        return array(
+            'RelationListValueValidator' => array(
+                'selectionLimit' => array(
                     'type' => 'int',
                     'default' => 0,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -157,11 +157,11 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getValidFieldSettings()
     {
-        return [
+        return array(
             'selectionMethod' => 1,
             'selectionDefaultLocation' => '2',
-            'selectionContentTypes' => ['blog_post'],
-        ];
+            'selectionContentTypes' => array('blog_post'),
+        );
     }
 
     /**
@@ -173,11 +173,11 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getValidValidatorConfiguration()
     {
-        return [
-            'RelationListValueValidator' => [
+        return array(
+            'RelationListValueValidator' => array(
                 'selectionLimit' => 0,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -189,7 +189,7 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getInvalidFieldSettings()
     {
-        return ['selectionMethod' => 'a', 'selectionDefaultLocation' => true, 'unknownSetting' => false];
+        return array('selectionMethod' => 'a', 'selectionDefaultLocation' => true, 'unknownSetting' => false);
     }
 
     /**
@@ -201,7 +201,7 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getInvalidValidatorConfiguration()
     {
-        return ['noValidator' => true];
+        return array('noValidator' => true);
     }
 
     /**
@@ -211,11 +211,11 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getValidCreationFieldData()
     {
-        return new RelationListValue([4, 49]);
+        return new RelationListValue(array(4, 49));
     }
 
     /**
-     * Get name generated by the given field type (via fieldType->getName()).
+     * Get name generated by the given field type (either via Nameable or fieldType->getName()).
      *
      * @return string
      */
@@ -239,9 +239,9 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
             $field->value
         );
 
-        $expectedData = [
-            'destinationContentIds' => [4, 49],
-        ];
+        $expectedData = array(
+            'destinationContentIds' => array(4, 49),
+        );
         $this->assertPropertiesCorrectUnsorted(
             $expectedData,
             $field->value
@@ -271,12 +271,12 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function provideInvalidCreationFieldData()
     {
-        return [
-            [
-                new RelationListValue([null]),
+        return array(
+            array(
+                new RelationListValue(array(null)),
                 'eZ\\Publish\\Core\\Base\\Exceptions\\InvalidArgumentType',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -286,7 +286,7 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function getValidUpdateFieldData()
     {
-        return new RelationListValue([49, 54, 4]);
+        return new RelationListValue(array(49, 54, 4));
     }
 
     /**
@@ -303,9 +303,9 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
             $field->value
         );
 
-        $expectedData = [
-            'destinationContentIds' => [49, 54, 4],
-        ];
+        $expectedData = array(
+            'destinationContentIds' => array(49, 54, 4),
+        );
         $this->assertPropertiesCorrectUnsorted(
             $expectedData,
             $field->value
@@ -353,9 +353,9 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
             $field->value
         );
 
-        $expectedData = [
-            'destinationContentIds' => [4, 49],
-        ];
+        $expectedData = array(
+            'destinationContentIds' => array(4, 49),
+        );
         $this->assertPropertiesCorrectUnsorted(
             $expectedData,
             $field->value
@@ -384,14 +384,14 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function provideToHashData()
     {
-        return [
-            [
-                new RelationListValue([4, 49]),
-                [
-                    'destinationContentIds' => [4, 49],
-                ],
-            ],
-        ];
+        return array(
+            array(
+                new RelationListValue(array(4, 49)),
+                array(
+                    'destinationContentIds' => array(4, 49),
+                ),
+            ),
+        );
     }
 
     /**
@@ -403,39 +403,39 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
      */
     public function provideFromHashData()
     {
-        return [
-            [
-                ['destinationContentIds' => [4, 49]],
-                new RelationListValue([4, 49]),
-            ],
-        ];
+        return array(
+            array(
+                array('destinationContentIds' => array(4, 49)),
+                new RelationListValue(array(4, 49)),
+            ),
+        );
     }
 
     public function providerForTestIsEmptyValue()
     {
-        return [
-            [new RelationListValue()],
-            [new RelationListValue([])],
-        ];
+        return array(
+            array(new RelationListValue()),
+            array(new RelationListValue(array())),
+        );
     }
 
     public function providerForTestIsNotEmptyValue()
     {
-        return [
-            [
+        return array(
+            array(
                 $this->getValidCreationFieldData(),
-            ],
-        ];
+            ),
+        );
     }
 
     protected function getValidSearchValueOne()
     {
-        return [11];
+        return array(11);
     }
 
     protected function getValidSearchValueTwo()
     {
-        return [12];
+        return array(12);
     }
 
     protected function getSearchTargetValueOne()
@@ -450,11 +450,11 @@ class RelationListIntegrationTest extends SearchMultivaluedBaseIntegrationTest
 
     protected function getValidMultivaluedSearchValuesOne()
     {
-        return [11, 12];
+        return array(11, 12);
     }
 
     protected function getValidMultivaluedSearchValuesTwo()
     {
-        return [13, 14];
+        return array(13, 14);
     }
 }

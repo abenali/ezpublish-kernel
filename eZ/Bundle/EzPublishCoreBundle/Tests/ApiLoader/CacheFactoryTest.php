@@ -17,13 +17,17 @@ use PHPUnit\Framework\TestCase;
 
 class CacheFactoryTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $configResolver;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $container;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->configResolver = $this->createMock(ConfigResolverInterface::class);
@@ -35,11 +39,11 @@ class CacheFactoryTest extends TestCase
      */
     public function providerGetService()
     {
-        return [
-            ['default', 'default'],
-            ['ez_site1', 'ez_site1'],
-            ['xyZ', 'xyZ'],
-        ];
+        return array(
+            array('default', 'default'),
+            array('ez_site1', 'ez_site1'),
+            array('xyZ', 'xyZ'),
+        );
     }
 
     /**

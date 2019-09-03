@@ -26,5 +26,5 @@ class RoleCreateStruct extends ValueObject
      *
      * @var mixed[]
      */
-    public $policies = [];
+    public $policies = array();
 }

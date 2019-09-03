@@ -3,6 +3,8 @@
 namespace eZ\Publish\Core\MVC\Symfony\FieldType\RelationList;
 
 use eZ\Publish\API\Repository\ContentService;
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
+use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use eZ\Publish\API\Repository\Values\Content\Field;
 use eZ\Publish\Core\MVC\Symfony\FieldType\View\ParameterProviderInterface;
 
@@ -32,18 +34,18 @@ class ParameterProvider implements ParameterProviderInterface
      */
     public function getViewParameters(Field $field)
     {
-        $ids = $field->value->destinationContentIds;
-        $list = $this->contentService->loadContentInfoList($ids);
+        $available = [];
 
-        // Start by setting missing ids as false on $available
-        $available = array_fill_keys(
-            array_diff($ids, array_keys($list)),
-            false
-        );
+        foreach ($field->value->destinationContentIds as $contentId) {
+            try {
+                $contentInfo = $this->contentService->loadContentInfo($contentId);
 
-        // Check if loaded items are in trash or not, for availability
-        foreach ($list as $contentId => $contentInfo) {
-            $available[$contentId] = !$contentInfo->isTrashed();
+                $available[$contentId] = !$contentInfo->isTrashed();
+            } catch (NotFoundException $exception) {
+                $available[$contentId] = false;
+            } catch (UnauthorizedException $exception) {
+                $available[$contentId] = false;
+            }
         }
 
         return [

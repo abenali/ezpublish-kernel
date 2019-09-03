@@ -8,18 +8,17 @@
  */
 namespace eZ\Publish\Core\Repository\Tests\Service\Mock;
 
-use eZ\Publish\API\Repository\Exceptions\InvalidArgumentException;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException as ApiNotFoundException;
 use eZ\Publish\Core\Repository\Helper\NameSchemaService;
 use eZ\Publish\Core\Repository\LanguageService;
 use eZ\Publish\Core\Repository\LocationService;
 use eZ\Publish\Core\Repository\URLAliasService;
 use eZ\Publish\Core\Repository\Tests\Service\Mock\Base as BaseServiceMockTest;
 use eZ\Publish\SPI\Persistence\Content\UrlAlias as SPIUrlAlias;
-use eZ\Publish\API\Repository\Values\Content\URLAlias;
+use eZ\Publish\API\Repository\Values\Content\UrlAlias;
 use eZ\Publish\Core\Repository\Values\Content\Location;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use eZ\Publish\Core\Base\Exceptions\ForbiddenException;
+use eZ\Publish\API\Repository\PermissionResolver;
 use Exception;
 
 /**
@@ -27,19 +26,6 @@ use Exception;
  */
 class UrlAliasTest extends BaseServiceMockTest
 {
-    /** @var \eZ\Publish\API\Repository\PermissionResolver|\PHPUnit\Framework\MockObject\MockObject */
-    private $permissionResolver;
-
-    /** @var \eZ\Publish\SPI\Persistence\Content\UrlAlias\Handler|\PHPUnit\Framework\MockObject\MockObject */
-    private $urlAliasHandler;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
-        $this->permissionResolver = $this->getPermissionResolverMock();
-    }
-
     /**
      * Test for the __construct() method.
      */
@@ -47,21 +33,47 @@ class UrlAliasTest extends BaseServiceMockTest
     {
         $repositoryMock = $this->getRepositoryMock();
         $languageServiceMock = $this->createMock(LanguageService::class);
+        /** @var \eZ\Publish\SPI\Persistence\Content\UrlAlias\Handler $urlAliasHandler */
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $settings = array('settings');
+
         $languageServiceMock
             ->expects($this->once())
             ->method('getPrioritizedLanguageCodeList')
-            ->will($this->returnValue(['prioritizedLanguageList']));
+            ->will($this->returnValue(array('prioritizedLanguageList')));
 
         $repositoryMock
             ->expects($this->once())
             ->method('getContentLanguageService')
             ->will($this->returnValue($languageServiceMock));
 
-        new UrlALiasService(
+        $service = new UrlALiasService(
             $repositoryMock,
-            $this->urlAliasHandler,
+            $urlAliasHandler,
             $this->getNameSchemaServiceMock(),
-            $this->permissionResolver
+            $settings
+        );
+
+        $this->assertAttributeSame(
+            $repositoryMock,
+            'repository',
+            $service
+        );
+
+        $this->assertAttributeSame(
+            $urlAliasHandler,
+            'urlAliasHandler',
+            $service
+        );
+
+        $this->assertAttributeSame(
+            array(
+                'settings',
+                'showAllTranslations' => false,
+                'prioritizedLanguageList' => array('prioritizedLanguageList'),
+            ),
+            'settings',
+            $service
         );
     }
 
@@ -70,7 +82,7 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testLoad()
     {
-        $mockedService = $this->getPartlyMockedURLAliasServiceService(['extractPath']);
+        $mockedService = $this->getPartlyMockedURLAliasServiceService(array('extractPath'));
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
 
@@ -93,10 +105,12 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the load() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLoadThrowsNotFoundException()
     {
-        $mockedService = $this->getPartlyMockedURLAliasServiceService(['extractPath']);
+        $mockedService = $this->getPartlyMockedURLAliasServiceService(array('extractPath'));
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
 
@@ -106,84 +120,92 @@ class UrlAliasTest extends BaseServiceMockTest
             ->with(42)
             ->will($this->throwException(new NotFoundException('UrlAlias', 42)));
 
-        $this->expectException(ApiNotFoundException::class);
         $mockedService->load(42);
     }
 
     protected function getSpiUrlAlias()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
+            ),
+        );
 
         return new SPIUrlAlias(
-            [
+            array(
                 'id' => '3',
-                'pathData' => [$pathElement1, $pathElement2, $pathElement3],
-                'languageCodes' => ['ger-DE'],
+                'pathData' => array($pathElement1, $pathElement2, $pathElement3),
+                'languageCodes' => array('ger-DE'),
                 'alwaysAvailable' => false,
-            ]
+            )
         );
     }
 
     /**
      * Test for the load() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLoadThrowsNotFoundExceptionPath()
     {
         $spiUrlAlias = $this->getSpiUrlAlias();
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => ['fre-FR'],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array('fre-FR'),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
 
-        $this->urlAliasHandler
+        $urlAliasHandlerMock = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+
+        $urlAliasHandlerMock
             ->expects($this->once())
             ->method('loadUrlAlias')
             ->with(42)
             ->will($this->returnValue($spiUrlAlias));
-
-        $this->expectException(ApiNotFoundException::class);
 
         $urlAliasService->load(42);
     }
 
     /**
      * Test for the removeAliases() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testRemoveAliasesThrowsInvalidArgumentException()
     {
-        $aliasList = [new URLAlias(['isCustom' => false])];
+        $aliasList = array(new UrlAlias(array('isCustom' => false)));
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
             ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(true));
+            )->will($this->returnValue(true));
 
-        $this->expectException(InvalidArgumentException::class);
+        $repositoryMock = $this->getRepositoryMock();
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $mockedService->removeAliases($aliasList);
     }
@@ -193,9 +215,10 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testRemoveAliases()
     {
-        $aliasList = [new URLAlias(['isCustom' => true])];
-        $spiAliasList = [new SPIUrlAlias(['isCustom' => true])];
-        $this->permissionResolver
+        $aliasList = array(new UrlAlias(array('isCustom' => true)));
+        $spiAliasList = array(new SPIUrlAlias(array('isCustom' => true)));
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
             ->method('hasAccess')->with(
                 $this->equalTo('content'),
@@ -204,6 +227,10 @@ class UrlAliasTest extends BaseServiceMockTest
 
         $repositoryMock = $this->getRepositoryMock();
 
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
@@ -225,12 +252,16 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the removeAliases() method.
+     *
+     * @expectedException \Exception
+     * @expectedExceptionMessage Handler threw an exception
      */
     public function testRemoveAliasesWithRollback()
     {
-        $aliasList = [new URLAlias(['isCustom' => true])];
-        $spiAliasList = [new SPIUrlAlias(['isCustom' => true])];
-        $this->permissionResolver
+        $aliasList = array(new UrlAlias(array('isCustom' => true)));
+        $spiAliasList = array(new SPIUrlAlias(array('isCustom' => true)));
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
             ->method('hasAccess')->with(
                 $this->equalTo('content'),
@@ -239,6 +270,10 @@ class UrlAliasTest extends BaseServiceMockTest
 
         $repositoryMock = $this->getRepositoryMock();
 
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
@@ -256,377 +291,374 @@ class UrlAliasTest extends BaseServiceMockTest
             ->with($spiAliasList)
             ->will($this->throwException(new Exception('Handler threw an exception')));
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Handler threw an exception');
-
         $mockedService->removeAliases($aliasList);
     }
 
     public function providerForTestListAutogeneratedLocationAliasesPath()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
-        $pathData1 = [$pathElement1];
-        $pathData2 = [$pathElement1, $pathElement2];
-        $pathData3 = [$pathElement1, $pathElement2, $pathElement3];
-        $spiUrlAliases1 = [
+            ),
+        );
+        $pathData1 = array($pathElement1);
+        $pathData2 = array($pathElement1, $pathElement2);
+        $pathData3 = array($pathElement1, $pathElement2, $pathElement3);
+        $spiUrlAliases1 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'id' => '1',
                     'pathData' => $pathData1,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => true,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases2 = [
+        );
+        $spiUrlAliases2 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'id' => '1',
                     'pathData' => $pathData2,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'id' => '2',
                     'pathData' => $pathData2,
-                    'languageCodes' => ['eng-GB'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases3 = [
+        );
+        $spiUrlAliases3 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'id' => '1',
                     'pathData' => $pathData3,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'id' => '2',
                     'pathData' => $pathData3,
-                    'languageCodes' => ['eng-GB'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'id' => '3',
                     'pathData' => $pathData3,
-                    'languageCodes' => ['ger-DE'],
+                    'languageCodes' => array('ger-DE'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases1,
-                ['cro-HR'],
-                [
+                array('cro-HR'),
+                array(
                     'cro-HR' => '/jedan',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases1,
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     'cro-HR' => '/jedan',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases1,
-                ['ger-DE'],
-                [
+                array('ger-DE'),
+                array(
                     'cro-HR' => '/jedan',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases1,
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-                [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+                array(
                     'cro-HR' => '/jedan',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['cro-HR'],
-                [
+                array('cro-HR'),
+                array(
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['cro-HR', 'eng-GB'],
-                [
+                array('cro-HR', 'eng-GB'),
+                array(
                     'cro-HR' => '/jedan/dva',
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['eng-GB', 'cro-HR'],
-                [
+                array('eng-GB', 'cro-HR'),
+                array(
                     'eng-GB' => '/jedan/two',
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['eng-GB', 'ger-DE'],
-                [
+                array('eng-GB', 'ger-DE'),
+                array(
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['ger-DE', 'eng-GB'],
-                [
+                array('ger-DE', 'eng-GB'),
+                array(
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-                [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+                array(
                     'cro-HR' => '/jedan/dva',
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['cro-HR', 'ger-DE', 'eng-GB'],
-                [
+                array('cro-HR', 'ger-DE', 'eng-GB'),
+                array(
                     'cro-HR' => '/jedan/dva',
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['eng-GB', 'cro-HR', 'ger-DE'],
-                [
+                array('eng-GB', 'cro-HR', 'ger-DE'),
+                array(
                     'eng-GB' => '/jedan/two',
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     'eng-GB' => '/jedan/two',
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['ger-DE', 'cro-HR', 'eng-GB'],
-                [
+                array('ger-DE', 'cro-HR', 'eng-GB'),
+                array(
                     'cro-HR' => '/jedan/dva',
                     'eng-GB' => '/jedan/two',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases2,
-                ['ger-DE', 'eng-GB', 'cro-HR'],
-                [
+                array('ger-DE', 'eng-GB', 'cro-HR'),
+                array(
                     'eng-GB' => '/jedan/two',
                     'cro-HR' => '/jedan/dva',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['cro-HR'],
-                [
+                array('cro-HR'),
+                array(
                     'cro-HR' => '/jedan/dva/tri',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     'eng-GB' => '/jedan/two/three',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['cro-HR', 'eng-GB'],
-                [
+                array('cro-HR', 'eng-GB'),
+                array(
                     'cro-HR' => '/jedan/dva/tri',
                     'eng-GB' => '/jedan/dva/three',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     'cro-HR' => '/jedan/dva/tri',
                     'ger-DE' => '/jedan/dva/drei',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['eng-GB', 'cro-HR'],
-                [
+                array('eng-GB', 'cro-HR'),
+                array(
                     'eng-GB' => '/jedan/two/three',
                     'cro-HR' => '/jedan/two/tri',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['eng-GB', 'ger-DE'],
-                [
+                array('eng-GB', 'ger-DE'),
+                array(
                     'eng-GB' => '/jedan/two/three',
                     'ger-DE' => '/jedan/two/drei',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['ger-DE', 'eng-GB'],
-                [
+                array('ger-DE', 'eng-GB'),
+                array(
                     'ger-DE' => '/jedan/two/drei',
                     'eng-GB' => '/jedan/two/three',
-                ],
+                ),
                 'ger-DE',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     'ger-DE' => '/jedan/dva/drei',
                     'cro-HR' => '/jedan/dva/tri',
-                ],
+                ),
                 'ger-DE',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-                [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+                array(
                     'cro-HR' => '/jedan/dva/tri',
                     'eng-GB' => '/jedan/dva/three',
                     'ger-DE' => '/jedan/dva/drei',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['cro-HR', 'ger-DE', 'eng-GB'],
-                [
+                array('cro-HR', 'ger-DE', 'eng-GB'),
+                array(
                     'cro-HR' => '/jedan/dva/tri',
                     'ger-DE' => '/jedan/dva/drei',
                     'eng-GB' => '/jedan/dva/three',
-                ],
+                ),
                 'cro-HR',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['eng-GB', 'cro-HR', 'ger-DE'],
-                [
+                array('eng-GB', 'cro-HR', 'ger-DE'),
+                array(
                     'eng-GB' => '/jedan/two/three',
                     'cro-HR' => '/jedan/two/tri',
                     'ger-DE' => '/jedan/two/drei',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     'eng-GB' => '/jedan/two/three',
                     'ger-DE' => '/jedan/two/drei',
                     'cro-HR' => '/jedan/two/tri',
-                ],
+                ),
                 'eng-GB',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['ger-DE', 'cro-HR', 'eng-GB'],
-                [
+                array('ger-DE', 'cro-HR', 'eng-GB'),
+                array(
                     'ger-DE' => '/jedan/dva/drei',
                     'cro-HR' => '/jedan/dva/tri',
                     'eng-GB' => '/jedan/dva/three',
-                ],
+                ),
                 'ger-DE',
-            ],
-            [
+            ),
+            array(
                 $spiUrlAliases3,
-                ['ger-DE', 'eng-GB', 'cro-HR'],
-                [
+                array('ger-DE', 'eng-GB', 'cro-HR'),
+                array(
                     'ger-DE' => '/jedan/two/drei',
                     'eng-GB' => '/jedan/two/three',
                     'cro-HR' => '/jedan/two/tri',
-                ],
+                ),
                 'ger-DE',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -636,13 +668,24 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListAutogeneratedLocationAliasesPath($spiUrlAliases, $prioritizedLanguageCodes, $paths)
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, null);
@@ -659,7 +702,7 @@ class UrlAliasTest extends BaseServiceMockTest
                 $urlAlias->path
             );
             self::assertEquals(
-                [$pathKeys[$index]],
+                array($pathKeys[$index]),
                 $urlAlias->languageCodes
             );
         }
@@ -675,13 +718,24 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -704,7 +758,7 @@ class UrlAliasTest extends BaseServiceMockTest
                 $urlAlias->path
             );
             self::assertEquals(
-                [$pathKeys[$index]],
+                array($pathKeys[$index]),
                 $urlAlias->languageCodes
             );
         }
@@ -715,50 +769,54 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListLocationAliasesWithShowAllTranslations()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
-        $spiUrlAlias = new SPIUrlAlias(
-            [
-                'id' => '3',
-                'pathData' => [$pathElement1, $pathElement2, $pathElement3],
-                'languageCodes' => ['ger-DE'],
-                'alwaysAvailable' => false,
-            ]
+            ),
         );
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => ['fre-FR'],
+        $spiUrlAlias = new SPIUrlAlias(
+            array(
+                'id' => '3',
+                'pathData' => array($pathElement1, $pathElement2, $pathElement3),
+                'languageCodes' => array('ger-DE'),
+                'alwaysAvailable' => false,
+            )
+        );
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array('fre-FR'),
             'showAllTranslations' => true,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
 
-        $this->urlAliasHandler
-            ->expects($this->once())
-            ->method('listURLAliasesForLocation')
-            ->with(
-                $this->equalTo(42),
-                $this->equalTo(false)
-            )
-            ->will($this->returnValue([$spiUrlAlias]));
+        $urlAliasHandlerMock = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+
+        $urlAliasHandlerMock->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue(array($spiUrlAlias))
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, null);
@@ -773,50 +831,54 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListLocationAliasesWithShowAllTranslationsCustomConfiguration()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
-        $spiUrlAlias = new SPIUrlAlias(
-            [
-                'id' => '3',
-                'pathData' => [$pathElement1, $pathElement2, $pathElement3],
-                'languageCodes' => ['ger-DE'],
-                'alwaysAvailable' => false,
-            ]
+            ),
         );
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $spiUrlAlias = new SPIUrlAlias(
+            array(
+                'id' => '3',
+                'pathData' => array($pathElement1, $pathElement2, $pathElement3),
+                'languageCodes' => array('ger-DE'),
+                'alwaysAvailable' => false,
+            )
+        );
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
 
-        $this->urlAliasHandler
-            ->expects($this->once())
-            ->method('listURLAliasesForLocation')
-            ->with(
-                $this->equalTo(42),
-                $this->equalTo(false)
-            )
-            ->will($this->returnValue([$spiUrlAlias]));
+        $urlAliasHandlerMock = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+
+        $urlAliasHandlerMock->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue(array($spiUrlAlias))
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -824,7 +886,7 @@ class UrlAliasTest extends BaseServiceMockTest
             false,
             null,
             true,
-            ['fre-FR']
+            array('fre-FR')
         );
 
         self::assertCount(1, $urlAliases);
@@ -834,79 +896,79 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesEmpty()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => '/jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
-        $pathData2 = [$pathElement1, $pathElement2];
-        $pathData3 = [$pathElement1, $pathElement2, $pathElement3];
-        $spiUrlAliases2 = [
+            ),
+        );
+        $pathData2 = array($pathElement1, $pathElement2);
+        $pathData3 = array($pathElement1, $pathElement2, $pathElement3);
+        $spiUrlAliases2 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData2,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData2,
-                    'languageCodes' => ['eng-GB'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases3 = [
+        );
+        $spiUrlAliases3 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData3,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
-            ),
-            new SPIUrlAlias(
-                [
-                    'pathData' => $pathData3,
-                    'languageCodes' => ['eng-GB'],
-                    'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData3,
-                    'languageCodes' => ['ger-DE'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+            new SPIUrlAlias(
+                array(
+                    'pathData' => $pathData3,
+                    'languageCodes' => array('ger-DE'),
+                    'alwaysAvailable' => false,
+                )
+            ),
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases2,
-                ['ger-DE'],
-            ],
-            [
+                array('ger-DE'),
+            ),
+            array(
                 $spiUrlAliases3,
-                ['ger-DE'],
-            ],
-        ];
+                array('ger-DE'),
+            ),
+        );
     }
 
     /**
@@ -916,13 +978,23 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListAutogeneratedLocationAliasesEmpty($spiUrlAliases, $prioritizedLanguageCodes)
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, null);
@@ -939,13 +1011,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $spiUrlAliases,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -961,321 +1043,321 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesWithLanguageCodePath()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
-        $pathData1 = [$pathElement1];
-        $pathData2 = [$pathElement1, $pathElement2];
-        $pathData3 = [$pathElement1, $pathElement2, $pathElement3];
-        $spiUrlAliases1 = [
+            ),
+        );
+        $pathData1 = array($pathElement1);
+        $pathData2 = array($pathElement1, $pathElement2);
+        $pathData3 = array($pathElement1, $pathElement2, $pathElement3);
+        $spiUrlAliases1 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData1,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => true,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases2 = [
+        );
+        $spiUrlAliases2 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData2,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData2,
-                    'languageCodes' => ['eng-GB'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases3 = [
+        );
+        $spiUrlAliases3 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData3,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
-            ),
-            new SPIUrlAlias(
-                [
-                    'pathData' => $pathData3,
-                    'languageCodes' => ['eng-GB'],
-                    'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData3,
-                    'languageCodes' => ['ger-DE'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+            new SPIUrlAlias(
+                array(
+                    'pathData' => $pathData3,
+                    'languageCodes' => array('ger-DE'),
+                    'alwaysAvailable' => false,
+                )
+            ),
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases1,
                 'cro-HR',
-                ['cro-HR'],
-                [
+                array('cro-HR'),
+                array(
                     '/jedan',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases1,
                 'cro-HR',
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     '/jedan',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['cro-HR'],
-                [
+                array('cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'eng-GB',
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     '/jedan/two',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'eng-GB',
-                ['cro-HR', 'eng-GB'],
-                [
+                array('cro-HR', 'eng-GB'),
+                array(
                     '/jedan/two',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['eng-GB', 'cro-HR'],
-                [
+                array('eng-GB', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'eng-GB',
-                ['eng-GB', 'ger-DE'],
-                [
+                array('eng-GB', 'ger-DE'),
+                array(
                     '/jedan/two',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'eng-GB',
-                ['ger-DE', 'eng-GB'],
-                [
+                array('ger-DE', 'eng-GB'),
+                array(
                     '/jedan/two',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-                [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'eng-GB',
-                ['cro-HR', 'ger-DE', 'eng-GB'],
-                [
+                array('cro-HR', 'ger-DE', 'eng-GB'),
+                array(
                     '/jedan/two',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['eng-GB', 'cro-HR', 'ger-DE'],
-                [
+                array('eng-GB', 'cro-HR', 'ger-DE'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['ger-DE', 'cro-HR', 'eng-GB'],
-                [
+                array('ger-DE', 'cro-HR', 'eng-GB'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases2,
                 'cro-HR',
-                ['ger-DE', 'eng-GB', 'cro-HR'],
-                [
+                array('ger-DE', 'eng-GB', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'cro-HR',
-                ['cro-HR'],
-                [
+                array('cro-HR'),
+                array(
                     '/jedan/dva/tri',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'eng-GB',
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     '/jedan/two/three',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'eng-GB',
-                ['cro-HR', 'eng-GB'],
-                [
+                array('cro-HR', 'eng-GB'),
+                array(
                     '/jedan/dva/three',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     '/jedan/dva/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'cro-HR',
-                ['eng-GB', 'cro-HR'],
-                [
+                array('eng-GB', 'cro-HR'),
+                array(
                     '/jedan/two/tri',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['eng-GB', 'ger-DE'],
-                [
+                array('eng-GB', 'ger-DE'),
+                array(
                     '/jedan/two/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'eng-GB',
-                ['ger-DE', 'eng-GB'],
-                [
+                array('ger-DE', 'eng-GB'),
+                array(
                     '/jedan/two/three',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-                [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+                array(
                     '/jedan/dva/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['cro-HR', 'ger-DE', 'eng-GB'],
-                [
+                array('cro-HR', 'ger-DE', 'eng-GB'),
+                array(
                     '/jedan/dva/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['eng-GB', 'cro-HR', 'ger-DE'],
-                [
+                array('eng-GB', 'cro-HR', 'ger-DE'),
+                array(
                     '/jedan/two/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     '/jedan/two/drei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'eng-GB',
-                ['ger-DE', 'cro-HR', 'eng-GB'],
-                [
+                array('ger-DE', 'cro-HR', 'eng-GB'),
+                array(
                     '/jedan/dva/three',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases3,
                 'cro-HR',
-                ['ger-DE', 'eng-GB', 'cro-HR'],
-                [
+                array('ger-DE', 'eng-GB', 'cro-HR'),
+                array(
                     '/jedan/two/tri',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -1289,13 +1371,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, $languageCode);
@@ -1324,13 +1416,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -1356,191 +1458,191 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesWithLanguageCodeEmpty()
     {
-        $pathElement1 = [
+        $pathElement1 = array(
             'always-available' => true,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => '/jedan',
-            ],
-        ];
-        $pathElement2 = [
+            ),
+        );
+        $pathElement2 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'dva',
                 'eng-GB' => 'two',
-            ],
-        ];
-        $pathElement3 = [
+            ),
+        );
+        $pathElement3 = array(
             'always-available' => false,
-            'translations' => [
+            'translations' => array(
                 'cro-HR' => 'tri',
                 'eng-GB' => 'three',
                 'ger-DE' => 'drei',
-            ],
-        ];
-        $pathData1 = [$pathElement1];
-        $pathData2 = [$pathElement1, $pathElement2];
-        $pathData3 = [$pathElement1, $pathElement2, $pathElement3];
-        $spiUrlAliases1 = [
+            ),
+        );
+        $pathData1 = array($pathElement1);
+        $pathData2 = array($pathElement1, $pathElement2);
+        $pathData3 = array($pathElement1, $pathElement2, $pathElement3);
+        $spiUrlAliases1 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData1,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => true,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases2 = [
+        );
+        $spiUrlAliases2 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData2,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData2,
-                    'languageCodes' => ['eng-GB'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
-        $spiUrlAliases3 = [
+        );
+        $spiUrlAliases3 = array(
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData3,
-                    'languageCodes' => ['cro-HR'],
+                    'languageCodes' => array('cro-HR'),
                     'alwaysAvailable' => false,
-                ]
-            ),
-            new SPIUrlAlias(
-                [
-                    'pathData' => $pathData3,
-                    'languageCodes' => ['eng-GB'],
-                    'alwaysAvailable' => false,
-                ]
+                )
             ),
             new SPIUrlAlias(
-                [
+                array(
                     'pathData' => $pathData3,
-                    'languageCodes' => ['ger-DE'],
+                    'languageCodes' => array('eng-GB'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+            new SPIUrlAlias(
+                array(
+                    'pathData' => $pathData3,
+                    'languageCodes' => array('ger-DE'),
+                    'alwaysAvailable' => false,
+                )
+            ),
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases1,
                 'eng-GB',
-                ['ger-DE'],
-            ],
-            [
+                array('ger-DE'),
+            ),
+            array(
                 $spiUrlAliases1,
                 'ger-DE',
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-            ],
-            [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'eng-GB',
-                ['cro-HR'],
-            ],
-            [
+                array('cro-HR'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['cro-HR', 'eng-GB'],
-            ],
-            [
+                array('cro-HR', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['cro-HR', 'ger-DE'],
-            ],
-            [
+                array('cro-HR', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['eng-GB', 'ger-DE'],
-            ],
-            [
+                array('eng-GB', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['ger-DE', 'cro-HR'],
-            ],
-            [
+                array('ger-DE', 'cro-HR'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['ger-DE', 'eng-GB'],
-            ],
-            [
+                array('ger-DE', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-            ],
-            [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['cro-HR', 'ger-DE', 'eng-GB'],
-            ],
-            [
+                array('cro-HR', 'ger-DE', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['eng-GB', 'cro-HR', 'ger-DE'],
-            ],
-            [
+                array('eng-GB', 'cro-HR', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-            ],
-            [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['ger-DE', 'cro-HR', 'eng-GB'],
-            ],
-            [
+                array('ger-DE', 'cro-HR', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases2,
                 'ger-DE',
-                ['ger-DE', 'eng-GB', 'cro-HR'],
-            ],
-            [
+                array('ger-DE', 'eng-GB', 'cro-HR'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['cro-HR'],
-            ],
-            [
+                array('cro-HR'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'cro-HR',
-                ['eng-GB'],
-            ],
-            [
+                array('eng-GB'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['cro-HR', 'eng-GB'],
-            ],
-            [
+                array('cro-HR', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'eng-GB',
-                ['cro-HR', 'ger-DE'],
-            ],
-            [
+                array('cro-HR', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'ger-DE',
-                ['eng-GB', 'cro-HR'],
-            ],
-            [
+                array('eng-GB', 'cro-HR'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'cro-HR',
-                ['eng-GB', 'ger-DE'],
-            ],
-            [
+                array('eng-GB', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'cro-HR',
-                ['ger-DE', 'eng-GB'],
-            ],
-            [
+                array('ger-DE', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases3,
                 'eng-GB',
-                ['ger-DE', 'cro-HR'],
-            ],
-        ];
+                array('ger-DE', 'cro-HR'),
+            ),
+        );
     }
 
     /**
@@ -1553,13 +1655,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $languageCode,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, $languageCode);
@@ -1577,13 +1689,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $languageCode,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -1599,61 +1721,61 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesMultipleLanguagesPath()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => 'jedan',
                                 'eng-GB' => 'jedan',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'eng-GB' => 'dva',
                                 'ger-DE' => 'dva',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['eng-GB', 'ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('eng-GB', 'ger-DE'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -1663,13 +1785,23 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListAutogeneratedLocationAliasesMultipleLanguagesPath($spiUrlAliases, $prioritizedLanguageCodes, $paths)
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, null);
@@ -1697,13 +1829,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -1729,41 +1871,41 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesMultipleLanguagesEmpty()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => '/jedan',
                                 'eng-GB' => '/jedan',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'eng-GB' => 'dva',
                                 'ger-DE' => 'dva',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['eng-GB', 'ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('eng-GB', 'ger-DE'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
-                ['cro-HR'],
-            ],
-            [
+                array('cro-HR'),
+            ),
+            array(
                 $spiUrlAliases,
-                ['ger-DE'],
-            ],
-        ];
+                array('ger-DE'),
+            ),
+        );
     }
 
     /**
@@ -1773,13 +1915,23 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListAutogeneratedLocationAliasesMultipleLanguagesEmpty($spiUrlAliases, $prioritizedLanguageCodes)
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, null);
@@ -1796,13 +1948,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $spiUrlAliases,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -1818,65 +1980,65 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesWithLanguageCodeMultipleLanguagesPath()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => 'jedan',
                                 'eng-GB' => 'jedan',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'eng-GB' => 'dva',
                                 'ger-DE' => 'dva',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['eng-GB', 'ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('eng-GB', 'ger-DE'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
                 'ger-DE',
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
                 'ger-DE',
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
                 'eng-GB',
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
                 'eng-GB',
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     '/jedan/dva',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -1890,13 +2052,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, $languageCode);
@@ -1925,13 +2097,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -1957,53 +2139,53 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesWithLanguageCodeMultipleLanguagesEmpty()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => '/jedan',
                                 'eng-GB' => '/jedan',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'eng-GB' => 'dva',
                                 'ger-DE' => 'dva',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['eng-GB', 'ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('eng-GB', 'ger-DE'),
                     'alwaysAvailable' => false,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
                 'cro-HR',
-                ['cro-HR'],
-            ],
-            [
+                array('cro-HR'),
+            ),
+            array(
                 $spiUrlAliases,
                 'cro-HR',
-                ['cro-HR', 'eng-GB'],
-            ],
-            [
+                array('cro-HR', 'eng-GB'),
+            ),
+            array(
                 $spiUrlAliases,
                 'cro-HR',
-                ['ger-DE'],
-            ],
-            [
+                array('ger-DE'),
+            ),
+            array(
                 $spiUrlAliases,
                 'cro-HR',
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-            ],
-        ];
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+            ),
+        );
     }
 
     /**
@@ -2016,13 +2198,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $languageCode,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, $languageCode);
@@ -2040,13 +2232,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $languageCode,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -2062,67 +2264,67 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesAlwaysAvailablePath()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => 'jedan',
                                 'eng-GB' => 'one',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => true,
-                            'translations' => [
+                            'translations' => array(
                                 'ger-DE' => 'zwei',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('ger-DE'),
                     'alwaysAvailable' => true,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     '/jedan/zwei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     '/jedan/zwei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['eng-GB'],
-                [
+                array('eng-GB'),
+                array(
                     '/one/zwei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-                [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+                array(
                     '/jedan/zwei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-                [
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+                array(
                     '/one/zwei',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -2135,13 +2337,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, null);
@@ -2169,13 +2381,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -2201,48 +2423,48 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesWithLanguageCodeAlwaysAvailablePath()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => 'jedan',
                                 'eng-GB' => 'one',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => true,
-                            'translations' => [
+                            'translations' => array(
                                 'ger-DE' => 'zwei',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('ger-DE'),
                     'alwaysAvailable' => true,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
                 'ger-DE',
-                ['cro-HR', 'ger-DE'],
-                [
+                array('cro-HR', 'ger-DE'),
+                array(
                     '/jedan/zwei',
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 $spiUrlAliases,
                 'ger-DE',
-                ['ger-DE', 'cro-HR'],
-                [
+                array('ger-DE', 'cro-HR'),
+                array(
                     '/jedan/zwei',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -2256,13 +2478,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, $languageCode);
@@ -2291,13 +2523,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -2323,47 +2565,47 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestListAutogeneratedLocationAliasesWithLanguageCodeAlwaysAvailableEmpty()
     {
-        $spiUrlAliases = [
+        $spiUrlAliases = array(
             new SPIUrlAlias(
-                [
-                    'pathData' => [
-                        [
+                array(
+                    'pathData' => array(
+                        array(
                             'always-available' => false,
-                            'translations' => [
+                            'translations' => array(
                                 'cro-HR' => 'jedan',
                                 'eng-GB' => 'one',
-                            ],
-                        ],
-                        [
+                            ),
+                        ),
+                        array(
                             'always-available' => true,
-                            'translations' => [
+                            'translations' => array(
                                 'ger-DE' => 'zwei',
-                            ],
-                        ],
-                    ],
-                    'languageCodes' => ['ger-DE'],
+                            ),
+                        ),
+                    ),
+                    'languageCodes' => array('ger-DE'),
                     'alwaysAvailable' => true,
-                ]
+                )
             ),
-        ];
+        );
 
-        return [
-            [
+        return array(
+            array(
                 $spiUrlAliases,
                 'eng-GB',
-                ['eng-GB'],
-            ],
-            [
+                array('eng-GB'),
+            ),
+            array(
                 $spiUrlAliases,
                 'eng-GB',
-                ['cro-HR', 'eng-GB', 'ger-DE'],
-            ],
-            [
+                array('cro-HR', 'eng-GB', 'ger-DE'),
+            ),
+            array(
                 $spiUrlAliases,
                 'eng-GB',
-                ['eng-GB', 'ger-DE', 'cro-HR'],
-            ],
-        ];
+                array('eng-GB', 'ger-DE', 'cro-HR'),
+            ),
+        );
     }
 
     /**
@@ -2376,13 +2618,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $languageCode,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases($location, false, $languageCode);
@@ -2400,13 +2652,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $languageCode,
         $prioritizedLanguageCodes
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => [],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array(),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAliases = $urlAliasService->listLocationAliases(
@@ -2425,14 +2687,15 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListGlobalAliases()
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => ['ger-DE'],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array('ger-DE'),
             'showAllTranslations' => true,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'listGlobalURLAliases'
@@ -2442,22 +2705,22 @@ class UrlAliasTest extends BaseServiceMockTest
             $this->equalTo(-1)
         )->will(
             $this->returnValue(
-                [
+                array(
                     new SPIUrlAlias(
-                        [
-                            'pathData' => [
-                                [
+                        array(
+                            'pathData' => array(
+                                array(
                                     'always-available' => true,
-                                    'translations' => [
+                                    'translations' => array(
                                         'ger-DE' => 'squirrel',
-                                    ],
-                                ],
-                            ],
-                            'languageCodes' => ['ger-DE'],
+                                    ),
+                                ),
+                            ),
+                            'languageCodes' => array('ger-DE'),
                             'alwaysAvailable' => true,
-                        ]
+                        )
                     ),
-                ]
+                )
             )
         );
 
@@ -2472,14 +2735,15 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListGlobalAliasesEmpty()
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => ['eng-GB'],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array('eng-GB'),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'listGlobalURLAliases'
@@ -2489,22 +2753,22 @@ class UrlAliasTest extends BaseServiceMockTest
             $this->equalTo(-1)
         )->will(
             $this->returnValue(
-                [
+                array(
                     new SPIUrlAlias(
-                        [
-                            'pathData' => [
-                                [
+                        array(
+                            'pathData' => array(
+                                array(
                                     'always-available' => false,
-                                    'translations' => [
+                                    'translations' => array(
                                         'ger-DE' => 'squirrel',
-                                    ],
-                                ],
-                            ],
-                            'languageCodes' => ['ger-DE'],
+                                    ),
+                                ),
+                            ),
+                            'languageCodes' => array('ger-DE'),
                             'alwaysAvailable' => false,
-                        ]
+                        )
                     ),
-                ]
+                )
             )
         );
 
@@ -2518,9 +2782,10 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testListGlobalAliasesWithParameters()
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'listGlobalURLAliases'
@@ -2529,7 +2794,7 @@ class UrlAliasTest extends BaseServiceMockTest
             $this->equalTo('offset'),
             $this->equalTo('limit')
         )->will(
-            $this->returnValue([])
+            $this->returnValue(array())
         );
 
         $urlAliases = $urlAliasService->listGlobalAliases('languageCode', 'offset', 'limit');
@@ -2539,14 +2804,15 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the lookup() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLookupThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'lookup'
@@ -2561,35 +2827,35 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestLookupThrowsNotFoundExceptionPath()
     {
-        return [
+        return array(
             // alias does not exist in requested language
-            ['ein/dva', ['cro-HR', 'ger-DE'], 'ger-DE'],
+            array('ein/dva', array('cro-HR', 'ger-DE'), 'ger-DE'),
             // alias exists in requested language but the language is not in prioritized languages list
-            ['ein/dva', ['ger-DE'], 'eng-GB'],
+            array('ein/dva', array('ger-DE'), 'eng-GB'),
             // alias path is not matched
-            ['jedan/dva', ['cro-HR', 'ger-DE'], 'cro-HR'],
+            array('jedan/dva', array('cro-HR', 'ger-DE'), 'cro-HR'),
             // path is not loadable for prioritized languages list
-            ['ein/dva', ['cro-HR'], 'cro-HR'],
-        ];
+            array('ein/dva', array('cro-HR'), 'cro-HR'),
+        );
     }
 
     /**
      * Test for the lookup() method.
      *
      * @dataProvider providerForTestLookupThrowsNotFoundExceptionPath
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testLookupThrowsNotFoundExceptionPathNotMatchedOrNotLoadable($url, $prioritizedLanguageList, $languageCode)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageList,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'lookup'
@@ -2598,23 +2864,23 @@ class UrlAliasTest extends BaseServiceMockTest
         )->will(
             $this->returnValue(
                 new SPIUrlAlias(
-                    [
-                        'pathData' => [
-                            [
+                    array(
+                        'pathData' => array(
+                            array(
                                 'always-available' => false,
-                                'translations' => ['ger-DE' => 'ein'],
-                            ],
-                            [
+                                'translations' => array('ger-DE' => 'ein'),
+                            ),
+                            array(
                                 'always-available' => false,
-                                'translations' => [
+                                'translations' => array(
                                     'cro-HR' => 'dva',
                                     'eng-GB' => 'two',
-                                ],
-                            ],
-                        ],
-                        'languageCodes' => ['eng-GB', 'cro-HR'],
+                                ),
+                            ),
+                        ),
+                        'languageCodes' => array('eng-GB', 'cro-HR'),
                         'alwaysAvailable' => false,
-                    ]
+                    )
                 )
             )
         );
@@ -2624,14 +2890,14 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestLookup()
     {
-        return [
+        return array(
             // showAllTranslations setting is true
-            [['ger-DE'], true, false, null],
+            array(array('ger-DE'), true, false, null),
             // alias is always available
-            [['ger-DE'], false, true, null],
+            array(array('ger-DE'), false, true, null),
             // works with available language code
-            [['cro-HR'], false, false, 'eng-GB'],
-        ];
+            array(array('cro-HR'), false, false, 'eng-GB'),
+        );
     }
 
     /**
@@ -2641,14 +2907,15 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testLookup($prioritizedLanguageList, $showAllTranslations, $alwaysAvailable, $languageCode)
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageList,
             'showAllTranslations' => $showAllTranslations,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'lookup'
@@ -2657,23 +2924,23 @@ class UrlAliasTest extends BaseServiceMockTest
         )->will(
             $this->returnValue(
                 new SPIUrlAlias(
-                    [
-                        'pathData' => [
-                            [
+                    array(
+                        'pathData' => array(
+                            array(
                                 'always-available' => $alwaysAvailable,
-                                'translations' => ['cro-HR' => 'jedan'],
-                            ],
-                            [
+                                'translations' => array('cro-HR' => 'jedan'),
+                            ),
+                            array(
                                 'always-available' => $alwaysAvailable,
-                                'translations' => [
+                                'translations' => array(
                                     'cro-HR' => 'dva',
                                     'eng-GB' => 'two',
-                                ],
-                            ],
-                        ],
-                        'languageCodes' => ['eng-GB', 'cro-HR'],
+                                ),
+                            ),
+                        ),
+                        'languageCodes' => array('eng-GB', 'cro-HR'),
                         'alwaysAvailable' => $alwaysAvailable,
-                    ]
+                    )
                 )
             )
         );
@@ -2688,23 +2955,23 @@ class UrlAliasTest extends BaseServiceMockTest
 
     public function providerForTestLookupWithSharedTranslation()
     {
-        return [
+        return array(
             // showAllTranslations setting is true
-            [['ger-DE'], true, false, null],
+            array(array('ger-DE'), true, false, null),
             // alias is always available
-            [['ger-DE'], false, true, null],
+            array(array('ger-DE'), false, true, null),
             // works with available language codes
-            [['cro-HR'], false, false, 'eng-GB'],
-            [['eng-GB'], false, false, 'cro-HR'],
+            array(array('cro-HR'), false, false, 'eng-GB'),
+            array(array('eng-GB'), false, false, 'cro-HR'),
             // works with cro-HR only
-            [['cro-HR'], false, false, null],
+            array(array('cro-HR'), false, false, null),
             // works with eng-GB only
-            [['eng-GB'], false, false, null],
+            array(array('eng-GB'), false, false, null),
             // works with cro-HR first
-            [['cro-HR', 'eng-GB'], false, false, null],
+            array(array('cro-HR', 'eng-GB'), false, false, null),
             // works with eng-GB first
-            [['eng-GB', 'cro-HR'], false, false, null],
-        ];
+            array(array('eng-GB', 'cro-HR'), false, false, null),
+        );
     }
 
     /**
@@ -2718,14 +2985,15 @@ class UrlAliasTest extends BaseServiceMockTest
         $alwaysAvailable,
         $languageCode
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageList,
             'showAllTranslations' => $showAllTranslations,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
 
-        $this->urlAliasHandler->expects(
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'lookup'
@@ -2734,26 +3002,26 @@ class UrlAliasTest extends BaseServiceMockTest
         )->will(
             $this->returnValue(
                 new SPIUrlAlias(
-                    [
-                        'pathData' => [
-                            [
+                    array(
+                        'pathData' => array(
+                            array(
                                 'always-available' => $alwaysAvailable,
-                                'translations' => [
+                                'translations' => array(
                                     'cro-HR' => 'jedan',
                                     'eng-GB' => 'jedan',
-                                ],
-                            ],
-                            [
+                                ),
+                            ),
+                            array(
                                 'always-available' => $alwaysAvailable,
-                                'translations' => [
+                                'translations' => array(
                                     'cro-HR' => 'two',
                                     'eng-GB' => 'two',
-                                ],
-                            ],
-                        ],
-                        'languageCodes' => ['eng-GB', 'cro-HR'],
+                                ),
+                            ),
+                        ),
+                        'languageCodes' => array('eng-GB', 'cro-HR'),
                         'alwaysAvailable' => $alwaysAvailable,
-                    ]
+                    )
                 )
             )
         );
@@ -2765,12 +3033,12 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the reverseLookup() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testReverseLookupCustomConfiguration()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
-        $mockedService = $this->getPartlyMockedURLAliasServiceService(['listLocationAliases']);
+        $mockedService = $this->getPartlyMockedURLAliasServiceService(array('listLocationAliases'));
         $location = $this->getLocationStub();
         $mockedService->expects(
             $this->once()
@@ -2781,9 +3049,9 @@ class UrlAliasTest extends BaseServiceMockTest
             $this->equalTo(false),
             $this->equalTo(null),
             $this->equalTo($showAllTranslations = true),
-            $this->equalTo($prioritizedLanguageList = ['LANGUAGES!'])
+            $this->equalTo($prioritizedLanguageList = array('LANGUAGES!'))
         )->will(
-            $this->returnValue([])
+            $this->returnValue(array())
         );
 
         $mockedService->reverseLookup($location, null, $showAllTranslations, $prioritizedLanguageList);
@@ -2791,16 +3059,16 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the reverseLookup() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testReverseLookupThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
-        $mockedService = $this->getPartlyMockedURLAliasServiceService(['listLocationAliases']);
-        $configuration = [
-            'prioritizedLanguageList' => ['ger-DE'],
+        $mockedService = $this->getPartlyMockedURLAliasServiceService(array('listLocationAliases'));
+        $configuration = array(
+            'prioritizedLanguageList' => array('ger-DE'),
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($mockedService, $configuration);
 
         $languageCode = 'eng-GB';
@@ -2816,14 +3084,14 @@ class UrlAliasTest extends BaseServiceMockTest
             $this->equalTo($languageCode)
         )->will(
             $this->returnValue(
-                [
+                array(
                     new UrlAlias(
-                        [
-                            'languageCodes' => ['eng-GB'],
+                        array(
+                            'languageCodes' => array('eng-GB'),
                             'alwaysAvailable' => false,
-                        ]
+                        )
                     ),
-                ]
+                )
             )
         );
 
@@ -2842,19 +3110,29 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testReverseLookupPath($spiUrlAliases, $prioritizedLanguageCodes, $paths, $reverseLookupLanguageCode)
     {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAlias = $urlAliasService->reverseLookup($location);
 
         self::assertEquals(
-            [$reverseLookupLanguageCode],
+            array($reverseLookupLanguageCode),
             $urlAlias->languageCodes
         );
         self::assertEquals(
@@ -2878,13 +3156,23 @@ class UrlAliasTest extends BaseServiceMockTest
         $prioritizedLanguageCodes,
         $paths
     ) {
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
             'prioritizedLanguageList' => $prioritizedLanguageCodes,
             'showAllTranslations' => false,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation($spiUrlAliases);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue($spiUrlAliases)
+        );
 
         $location = $this->getLocationStub();
         $urlAlias = $urlAliasService->reverseLookup($location);
@@ -2901,13 +3189,23 @@ class UrlAliasTest extends BaseServiceMockTest
     public function testReverseLookupWithShowAllTranslations()
     {
         $spiUrlAlias = $this->getSpiUrlAlias();
-        $urlAliasService = $this->getPartlyMockedURLAliasServiceService();
-        $configuration = [
-            'prioritizedLanguageList' => ['fre-FR'],
+        $urlAliasService = $this->getRepository()->getURLAliasService();
+        $configuration = array(
+            'prioritizedLanguageList' => array('fre-FR'),
             'showAllTranslations' => true,
-        ];
+        );
         $this->setConfiguration($urlAliasService, $configuration);
-        $this->configureListURLAliasesForLocation([$spiUrlAlias]);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+        $urlAliasHandler->expects(
+            $this->once()
+        )->method(
+            'listURLAliasesForLocation'
+        )->with(
+            $this->equalTo(42),
+            $this->equalTo(false)
+        )->will(
+            $this->returnValue(array($spiUrlAlias))
+        );
 
         $location = $this->getLocationStub();
         $urlAlias = $urlAliasService->reverseLookup($location);
@@ -2920,21 +3218,25 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     public function testCreateUrlAlias()
     {
-        $location = $this->getLocationStub();
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('canUser')->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
-                $this->equalTo('urltranslator'),
-                $this->equalTo($location)
-            )
-            ->will($this->returnValue(true));
+                $this->equalTo('urltranslator')
+            )->will($this->returnValue(true));
 
         $repositoryMock = $this->getRepositoryMock();
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
+        $location = $this->getLocationStub();
 
         $repositoryMock
             ->expects($this->once())
@@ -2970,29 +3272,31 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the createUrlAlias() method.
+     *
+     * @expectedException \Exception
+     * @expectedExceptionMessage Handler threw an exception
      */
     public function testCreateUrlAliasWithRollback()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Handler threw an exception');
-
-        $location = $this->getLocationStub();
-
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('canUser')
-            ->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
-                $this->equalTo('urltranslator'),
-                $this->equalTo($location)
-            )
-            ->will($this->returnValue(true));
+                $this->equalTo('urltranslator')
+            )->will($this->returnValue(true));
 
         $repositoryMock = $this->getRepositoryMock();
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
+        $location = $this->getLocationStub();
 
         $repositoryMock
             ->expects($this->once())
@@ -3026,26 +3330,30 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the createUrlAlias() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateUrlAliasThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $location = $this->getLocationStub();
 
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $handlerMock */
         $handlerMock = $this->getPersistenceMock()->urlAliasHandler();
-
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('canUser')
-            ->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
-                $this->equalTo('urltranslator'),
-                $this->equalTo($location)
-            )
-            ->will($this->returnValue(true));
+                $this->equalTo('urltranslator')
+            )->will($this->returnValue(true));
+
+        $repositoryMock = $this->getRepositoryMock();
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $handlerMock->expects(
             $this->once()
@@ -3076,18 +3384,20 @@ class UrlAliasTest extends BaseServiceMockTest
     public function testCreateGlobalUrlAlias()
     {
         $resource = 'module:content/search';
-
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('hasAccess')
-            ->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(true));
+            )->will($this->returnValue(true));
 
         $repositoryMock = $this->getRepositoryMock();
 
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
@@ -3126,25 +3436,27 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the createGlobalUrlAlias() method.
+     *
+     * @expectedException \Exception
+     * @expectedExceptionMessage Handler threw an exception
      */
     public function testCreateGlobalUrlAliasWithRollback()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Handler threw an exception');
-
         $resource = 'module:content/search';
-
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('hasAccess')
-            ->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(true));
+            )->will($this->returnValue(true));
 
         $repositoryMock = $this->getRepositoryMock();
 
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
         /** @var \PHPUnit\Framework\MockObject\MockObject $urlAliasHandlerMock */
         $urlAliasHandlerMock = $this->getPersistenceMock()->urlAliasHandler();
@@ -3181,19 +3493,26 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the createGlobalUrlAlias() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateGlobalUrlAliasThrowsInvalidArgumentExceptionResource()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
             ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(true));
+            )->will($this->returnValue(true));
+
+        $repositoryMock = $this->getRepositoryMock();
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $mockedService->createGlobalUrlAlias(
             'invalid/resource',
@@ -3206,24 +3525,30 @@ class UrlAliasTest extends BaseServiceMockTest
 
     /**
      * Test for the createGlobalUrlAlias() method.
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateGlobalUrlAliasThrowsInvalidArgumentExceptionPath()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $resource = 'module:content/search';
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
-
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('hasAccess')
-            ->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(true));
+            )->will($this->returnValue(true));
 
-        $this->urlAliasHandler->expects(
+        $repositoryMock = $this->getRepositoryMock();
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
+        $urlAliasHandler = $this->getPersistenceMockHandler('Content\\UrlAlias\\Handler');
+
+        $urlAliasHandler->expects(
             $this->once()
         )->method(
             'createGlobalUrlAlias'
@@ -3256,7 +3581,7 @@ class UrlAliasTest extends BaseServiceMockTest
     public function testCreateGlobalUrlAliasForLocation()
     {
         $repositoryMock = $this->getRepositoryMock();
-        $mockedService = $this->getPartlyMockedURLAliasServiceService(['createUrlAlias']);
+        $mockedService = $this->getPartlyMockedURLAliasServiceService(array('createUrlAlias'));
         $location = $this->getLocationStub();
         $locationServiceMock = $this->createMock(LocationService::class);
 
@@ -3278,14 +3603,18 @@ class UrlAliasTest extends BaseServiceMockTest
             $this->returnValue($locationServiceMock)
         );
 
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->exactly(2))
-            ->method('canUser')->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
-                $this->equalTo('urltranslator'),
-                $this->equalTo($location)
-            )
-            ->will($this->returnValue(true));
+                $this->equalTo('urltranslator')
+            )->will($this->returnValue(true));
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $mockedService->expects(
             $this->exactly(2)
@@ -3322,7 +3651,7 @@ class UrlAliasTest extends BaseServiceMockTest
      */
     protected function getLocationStub($id = 42)
     {
-        return new Location(['id' => $id]);
+        return new Location(array('id' => $id));
     }
 
     /**
@@ -3358,7 +3687,7 @@ class UrlAliasTest extends BaseServiceMockTest
         )->method(
             'getPrioritizedLanguageCodeList'
         )->will(
-            $this->returnValue(['eng-GB'])
+            $this->returnValue(array('eng-GB'))
         );
 
         $this->getRepositoryMock()->expects(
@@ -3372,12 +3701,11 @@ class UrlAliasTest extends BaseServiceMockTest
         return $this->getMockBuilder(URLAliasService::class)
             ->setMethods($methods)
             ->setConstructorArgs(
-                [
+                array(
                     $this->getRepositoryMock(),
                     $this->getPersistenceMock()->urlAliasHandler(),
                     $this->getNameSchemaServiceMock(),
-                    $this->permissionResolver,
-                ]
+                )
             )
             ->getMock();
     }
@@ -3385,22 +3713,27 @@ class UrlAliasTest extends BaseServiceMockTest
     /**
      * Test for the createUrlAlias() method.
      *
+     * @depends testConstructor
      * @covers \eZ\Publish\Core\Repository\URLAliasService::createUrlAlias
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testCreateUrlAliasThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
+        $repositoryMock = $this->getRepositoryMock();
         $location = $this->getLocationStub();
-        $this->permissionResolver
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
-            ->method('canUser')->with(
+            ->method('hasAccess')->with(
                 $this->equalTo('content'),
-                $this->equalTo('urltranslator'),
-                $this->equalTo($location)
-            )
-            ->will($this->returnValue(false));
+                $this->equalTo('urltranslator')
+            )->will($this->returnValue(false));
+
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
 
         $mockedService->createUrlAlias(
             $location,
@@ -3413,21 +3746,26 @@ class UrlAliasTest extends BaseServiceMockTest
     /**
      * Test for the createGlobalUrlAlias() method.
      *
+     * @depends testConstructor
      * @covers \eZ\Publish\Core\Repository\URLAliasService::createGlobalUrlAlias
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testCreateGlobalUrlAliasThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
-        $this->permissionResolver
+        $repositoryMock = $this->getRepositoryMock();
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
             ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(false));
+            )->will($this->returnValue(false));
 
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
         $mockedService->createGlobalUrlAlias(
             'eznode:42',
             'path',
@@ -3440,22 +3778,27 @@ class UrlAliasTest extends BaseServiceMockTest
     /**
      * Test for the removeAliases() method.
      *
+     * @depends testConstructor
      * @covers \eZ\Publish\Core\Repository\URLAliasService::removeAliases
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testRemoveAliasesThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
-        $aliasList = [new URLAlias(['isCustom' => true])];
+        $aliasList = array(new UrlAlias(array('isCustom' => true)));
         $mockedService = $this->getPartlyMockedURLAliasServiceService();
-        $this->permissionResolver
+        $repositoryMock = $this->getRepositoryMock();
+        $permissionResolverMock = $this->createMock(PermissionResolver::class);
+        $permissionResolverMock
             ->expects($this->once())
             ->method('hasAccess')->with(
                 $this->equalTo('content'),
                 $this->equalTo('urltranslator')
-            )
-            ->will($this->returnValue(false));
+            )->will($this->returnValue(false));
 
+        $repositoryMock
+            ->expects($this->atLeastOnce())
+            ->method('getPermissionResolver')
+            ->willReturn($permissionResolverMock);
         $mockedService->removeAliases($aliasList);
     }
 
@@ -3465,20 +3808,5 @@ class UrlAliasTest extends BaseServiceMockTest
     protected function getNameSchemaServiceMock()
     {
         return $this->createMock(NameSchemaService::class);
-    }
-
-    /**
-     * @param SPIUrlAlias[] $spiUrlAliases
-     */
-    private function configureListURLAliasesForLocation(array $spiUrlAliases): void
-    {
-        $this->urlAliasHandler
-            ->expects($this->once())
-            ->method('listURLAliasesForLocation')
-            ->with(
-                $this->equalTo(42),
-                $this->equalTo(false)
-            )
-            ->will($this->returnValue($spiUrlAliases));
     }
 }

@@ -16,77 +16,49 @@ use eZ\Publish\SPI\Persistence\Content\Location;
 /**
  * @see \eZ\Publish\SPI\Persistence\Content\Location\Handler
  */
-class LocationHandler extends AbstractInMemoryPersistenceHandler implements LocationHandlerInterface
+class LocationHandler extends AbstractHandler implements LocationHandlerInterface
 {
-    /** @var callable */
-    private $getLocationTags;
-
-    /** @var callable */
-    private $getLocationKeys;
-
-    protected function init(): void
-    {
-        $this->getLocationTags = static function (Location $location) {
-            $tags = [
-                 'content-' . $location->contentId,
-                 'location-' . $location->id,
-                 'location-data-' . $location->id,
-             ];
-            foreach (\explode('/', \trim($location->pathString, '/')) as $pathId) {
-                $tags[] = 'location-path-' . $pathId;
-                $tags[] = 'location-path-data-' . $pathId;
-            }
-
-            return $tags;
-        };
-        $this->getLocationKeys = function (Location $location, $keySuffix = '-1') {
-            return [
-                 'ez-location-' . $location->id . $keySuffix,
-                 'ez-location-remoteid-' . $this->escapeForCacheKey($location->remoteId) . $keySuffix,
-             ];
-        };
-    }
-
     /**
      * {@inheritdoc}
      */
     public function load($locationId, array $translations = null, bool $useAlwaysAvailable = true)
     {
-        $keySuffix = '-' . $this->getCacheTranslationKey($translations, $useAlwaysAvailable);
-        $getLocationKeysFn = $this->getLocationKeys;
+        $translationsKey = $this->getCacheTranslationKey($translations, $useAlwaysAvailable);
+        $cacheItem = $this->cache->getItem("ez-location-${locationId}-${translationsKey}");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
 
-        return $this->getCacheValue(
-            (int) $locationId,
-            'ez-location-',
-            function ($id) use ($translations, $useAlwaysAvailable) {
-                return $this->persistenceHandler->locationHandler()->load($id, $translations, $useAlwaysAvailable);
-            },
-            $this->getLocationTags,
-            static function (Location $location) use ($keySuffix, $getLocationKeysFn) {
-                return $getLocationKeysFn($location, $keySuffix);
-            },
-            $keySuffix,
-            ['location' => $locationId, 'translations' => $translations, 'alwaysAvailable' => $useAlwaysAvailable]
+        $this->logger->logCall(
+            __METHOD__,
+            ['location' => $locationId, 'translations' => $translations, 'always-available' => $useAlwaysAvailable]
         );
+        $location = $this->persistenceHandler->locationHandler()->load($locationId, $translations, $useAlwaysAvailable);
+
+        $cacheItem->set($location);
+        $cacheItem->tag($this->getCacheTags($location));
+        $this->cache->save($cacheItem);
+
+        return $location;
     }
 
     public function loadList(array $locationIds, array $translations = null, bool $useAlwaysAvailable = true): iterable
     {
-        $keySuffix = '-' . $this->getCacheTranslationKey($translations, $useAlwaysAvailable);
-        $getLocationKeysFn = $this->getLocationKeys;
-
-        return $this->getMultipleCacheValues(
+        return $this->getMultipleCacheItems(
             $locationIds,
             'ez-location-',
-            function (array $ids) use ($translations, $useAlwaysAvailable) {
-                return $this->persistenceHandler->locationHandler()->loadList($ids, $translations, $useAlwaysAvailable);
+            function (array $cacheMissIds) use ($translations, $useAlwaysAvailable) {
+                $this->logger->logCall(
+                    __CLASS__ . '::loadList',
+                    ['location' => $cacheMissIds, 'translations' => $translations, 'always-available' => $useAlwaysAvailable]
+                );
+
+                return $this->persistenceHandler->locationHandler()->loadList($cacheMissIds, $translations, $useAlwaysAvailable);
             },
-            $this->getLocationTags,
-            static function (Location $location) use ($keySuffix, $getLocationKeysFn) {
-                return $getLocationKeysFn($location, $keySuffix);
+            function (Location $location) {
+                return $this->getCacheTags($location);
             },
-            $keySuffix,
-            ['location' => $locationIds, 'translations' => $translations, 'alwaysAvailable' => $useAlwaysAvailable]
+            array_fill_keys($locationIds, '-' . $this->getCacheTranslationKey($translations, $useAlwaysAvailable))
         );
     }
 
@@ -97,12 +69,10 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
     {
         $cacheItem = $this->cache->getItem("ez-location-subtree-${locationId}");
         if ($cacheItem->isHit()) {
-            $this->logger->logCacheHit(['location' => $locationId]);
-
             return $cacheItem->get();
         }
 
-        $this->logger->logCacheMiss(['location' => $locationId]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId));
         $locationIds = $this->persistenceHandler->locationHandler()->loadSubtreeIds($locationId);
 
         $cacheItem->set($locationIds);
@@ -131,12 +101,10 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
         }
 
         if ($cacheItem->isHit()) {
-            $this->logger->logCacheHit(['content' => $contentId, 'root' => $rootLocationId]);
-
             return $cacheItem->get();
         }
 
-        $this->logger->logCacheMiss(['content' => $contentId, 'root' => $rootLocationId]);
+        $this->logger->logCall(__METHOD__, array('content' => $contentId, 'root' => $rootLocationId));
         $locations = $this->persistenceHandler->locationHandler()->loadLocationsByContent($contentId, $rootLocationId);
 
         $cacheItem->set($locations);
@@ -156,12 +124,10 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
     {
         $cacheItem = $this->cache->getItem("ez-content-locations-${contentId}-parentForDraft");
         if ($cacheItem->isHit()) {
-            $this->logger->logCacheHit(['content' => $contentId]);
-
             return $cacheItem->get();
         }
 
-        $this->logger->logCacheMiss(['content' => $contentId]);
+        $this->logger->logCall(__METHOD__, array('content' => $contentId));
         $locations = $this->persistenceHandler->locationHandler()->loadParentLocationsForDraftContent($contentId);
 
         $cacheItem->set($locations);
@@ -180,22 +146,23 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function loadByRemoteId($remoteId, array $translations = null, bool $useAlwaysAvailable = true)
     {
-        $keySuffix = '-' . $this->getCacheTranslationKey($translations, $useAlwaysAvailable);
-        $getLocationKeysFn = $this->getLocationKeys;
+        $translationsKey = $this->getCacheTranslationKey($translations, $useAlwaysAvailable);
+        $cacheItem = $this->cache->getItem("ez-location-remoteid-${remoteId}-${translationsKey}");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
 
-        return $this->getCacheValue(
-            $this->escapeForCacheKey($remoteId),
-            'ez-location-remoteid-',
-            function () use ($remoteId, $translations, $useAlwaysAvailable) {
-                return $this->persistenceHandler->locationHandler()->loadByRemoteId($remoteId, $translations, $useAlwaysAvailable);
-            },
-            $this->getLocationTags,
-            static function (Location $location) use ($keySuffix, $getLocationKeysFn) {
-                return $getLocationKeysFn($location, $keySuffix);
-            },
-            $keySuffix,
-            ['location' => $remoteId, 'translations' => $translations, 'alwaysAvailable' => $useAlwaysAvailable]
+        $this->logger->logCall(
+            __METHOD__,
+            ['location' => $remoteId, 'translations' => $translations, 'always-available' => $useAlwaysAvailable]
         );
+        $location = $this->persistenceHandler->locationHandler()->loadByRemoteId($remoteId, $translations, $useAlwaysAvailable);
+
+        $cacheItem->set($location);
+        $cacheItem->tag($this->getCacheTags($location));
+        $this->cache->save($cacheItem);
+
+        return $location;
     }
 
     /**
@@ -203,11 +170,11 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function copySubtree($sourceId, $destinationParentId, $newOwnerId = null)
     {
-        $this->logger->logCall(__METHOD__, [
+        $this->logger->logCall(__METHOD__, array(
             'source' => $sourceId,
             'destination' => $destinationParentId,
             'newOwner' => $newOwnerId,
-        ]);
+        ));
 
         return $this->persistenceHandler->locationHandler()->copySubtree($sourceId, $destinationParentId, $newOwnerId);
     }
@@ -217,7 +184,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function move($sourceId, $destinationParentId)
     {
-        $this->logger->logCall(__METHOD__, ['source' => $sourceId, 'destination' => $destinationParentId]);
+        $this->logger->logCall(__METHOD__, array('source' => $sourceId, 'destination' => $destinationParentId));
         $return = $this->persistenceHandler->locationHandler()->move($sourceId, $destinationParentId);
 
         $this->cache->invalidateTags(['location-path-' . $sourceId]);
@@ -230,7 +197,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function markSubtreeModified($locationId, $timestamp = null)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId, 'time' => $timestamp]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId, 'time' => $timestamp));
         $this->persistenceHandler->locationHandler()->markSubtreeModified($locationId, $timestamp);
     }
 
@@ -239,7 +206,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function hide($locationId)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId));
         $return = $this->persistenceHandler->locationHandler()->hide($locationId);
 
         $this->cache->invalidateTags(['location-path-data-' . $locationId]);
@@ -252,7 +219,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function unHide($locationId)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId));
         $return = $this->persistenceHandler->locationHandler()->unHide($locationId);
 
         $this->cache->invalidateTags(['location-path-data-' . $locationId]);
@@ -261,37 +228,11 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
     }
 
     /**
-     * Sets a location + all children to invisible.
-     *
-     * @param int $id Location ID
-     */
-    public function setInvisible(int $id): void
-    {
-        $this->logger->logCall(__METHOD__, ['location' => $id]);
-        $this->persistenceHandler->locationHandler()->setInvisible($id);
-
-        $this->cache->invalidateTags(['location-path-data-' . $id]);
-    }
-
-    /**
-     * Sets a location + all children to visible.
-     *
-     * @param int $id Location ID
-     */
-    public function setVisible(int $id): void
-    {
-        $this->logger->logCall(__METHOD__, ['location' => $id]);
-        $this->persistenceHandler->locationHandler()->setVisible($id);
-
-        $this->cache->invalidateTags(['location-path-data-' . $id]);
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function swap($locationId1, $locationId2)
     {
-        $this->logger->logCall(__METHOD__, ['location1' => $locationId1, 'location2' => $locationId2]);
+        $this->logger->logCall(__METHOD__, array('location1' => $locationId1, 'location2' => $locationId2));
         $locationHandler = $this->persistenceHandler->locationHandler();
 
         $return = $locationHandler->swap($locationId1, $locationId2);
@@ -311,7 +252,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function update(UpdateStruct $struct, $locationId)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId, 'struct' => $struct]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId, 'struct' => $struct));
         $this->persistenceHandler->locationHandler()->update($struct, $locationId);
 
         $this->cache->invalidateTags(['location-data-' . $locationId]);
@@ -322,7 +263,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function create(CreateStruct $locationStruct)
     {
-        $this->logger->logCall(__METHOD__, ['struct' => $locationStruct]);
+        $this->logger->logCall(__METHOD__, array('struct' => $locationStruct));
         $location = $this->persistenceHandler->locationHandler()->create($locationStruct);
 
         // need to clear loadLocationsByContent and similar collections involving locations data
@@ -337,7 +278,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function removeSubtree($locationId)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId));
         $return = $this->persistenceHandler->locationHandler()->removeSubtree($locationId);
 
         $this->cache->invalidateTags(['location-path-' . $locationId]);
@@ -350,7 +291,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function setSectionForSubtree($locationId, $sectionId)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId, 'section' => $sectionId]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId, 'section' => $sectionId));
         $this->persistenceHandler->locationHandler()->setSectionForSubtree($locationId, $sectionId);
 
         $this->cache->invalidateTags(['location-path-' . $locationId]);
@@ -361,7 +302,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function changeMainLocation($contentId, $locationId)
     {
-        $this->logger->logCall(__METHOD__, ['location' => $locationId, 'content' => $contentId]);
+        $this->logger->logCall(__METHOD__, array('location' => $locationId, 'content' => $contentId));
         $this->persistenceHandler->locationHandler()->changeMainLocation($contentId, $locationId);
 
         $this->cache->invalidateTags(['content-' . $contentId]);
@@ -389,7 +330,7 @@ class LocationHandler extends AbstractInMemoryPersistenceHandler implements Loca
      */
     public function loadAllLocations($offset, $limit)
     {
-        $this->logger->logCall(__METHOD__, ['offset' => $offset, 'limit' => $limit]);
+        $this->logger->logCall(__METHOD__, array('offset' => $offset, 'limit' => $limit));
 
         return $this->persistenceHandler->locationHandler()->loadAllLocations($offset, $limit);
     }

@@ -33,7 +33,7 @@ class InstallPlatformCommand extends Command
     private $environment;
 
     /** @var \EzSystems\PlatformInstallerBundle\Installer\Installer[] */
-    private $installers = [];
+    private $installers = array();
 
     const EXIT_GENERAL_DATABASE_ERROR = 4;
     const EXIT_PARAMETERS_NOT_FOUND = 5;
@@ -91,8 +91,7 @@ class InstallPlatformCommand extends Command
 
     private function checkPermissions()
     {
-        // @todo should take var-dir etc. from composer config or fallback to flex directory scheme
-        if (!is_writable('public') && !is_writable('public/var')) {
+        if (!is_writable('web') && !is_writable('web/var')) {
             $this->output->writeln('[web/ | web/var] is not writable');
             exit(self::EXIT_MISSING_PERMISSIONS);
         }
@@ -100,8 +99,6 @@ class InstallPlatformCommand extends Command
 
     private function checkParameters()
     {
-        // @todo doesn't make sense to check for parameters.yml in sf4 and flex
-        return;
         $parametersFile = 'app/config/parameters.yml';
         if (!is_file($parametersFile)) {
             $this->output->writeln("Required configuration file '$parametersFile' not found");
@@ -124,9 +121,8 @@ class InstallPlatformCommand extends Command
         } catch (\RuntimeException $exception) {
             $this->output->writeln(
                 sprintf(
-                    "<error>The configured database '%s' does not exist or cannot be created (%s).</error>",
-                    $this->db->getDatabase(),
-                    $exception->getMessage()
+                    "<error>The configured database '%s' does not exist or cannot be created.</error>",
+                    $this->db->getDatabase()
                 )
             );
             $this->output->writeln("Please check the database configuration in 'app/config/parameters.yml'");

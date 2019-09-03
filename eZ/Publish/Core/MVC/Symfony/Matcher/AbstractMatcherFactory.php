@@ -24,13 +24,19 @@ use InvalidArgumentException;
  */
 abstract class AbstractMatcherFactory implements MatcherFactoryInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     protected $repository;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $matchConfig;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\MatcherInterface[] */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\MatcherInterface[]
+     */
     protected $matchers;
 
     /**
@@ -51,15 +57,15 @@ abstract class AbstractMatcherFactory implements MatcherFactoryInterface
     public function __construct(Repository $repository, array $matchConfig = [])
     {
         @trigger_error(
-            "AbstractMatcherFactory is deprecated, and will be removed in ezpublish-kernel 6.1.\n" .
+            "BlockMatcherFactory is deprecated, and will be removed in ezpublish-kernel 6.1.\n" .
             'Use the ServiceAwareMatcherFactory with the relative namespace as a constructor argument instead.',
             E_USER_DEPRECATED
         );
 
         $this->repository = $repository;
         $this->matchConfig = $matchConfig;
-        $this->matchers = [];
-        $this->alreadyMatched = [];
+        $this->matchers = array();
+        $this->alreadyMatched = array();
     }
 
     /**
@@ -135,7 +141,7 @@ abstract class AbstractMatcherFactory implements MatcherFactoryInterface
             }
 
             if ($hasMatched) {
-                return $this->alreadyMatched[$viewType][$view] = $configHash + ['matcher' => $matcher];
+                return $this->alreadyMatched[$viewType][$view] = $configHash + array('matcher' => $matcher);
             }
         }
 

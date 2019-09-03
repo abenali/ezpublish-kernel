@@ -48,12 +48,11 @@ class RelationIntegrationTest extends BaseIntegrationTest
     /**
      * Get handler with required custom field types registered.
      *
-     * @return \eZ\Publish\SPI\Persistence\Handler
+     * @return Handler
      */
     public function getCustomHandler()
     {
-        $contentHandler = $this->createMock(Content\Handler::class);
-        $fieldType = new FieldType\Relation\Type($contentHandler);
+        $fieldType = new FieldType\Relation\Type();
         $fieldType->setTransformationProcessor($this->getTransformationProcessor());
 
         return $this->getHandler(
@@ -73,13 +72,13 @@ class RelationIntegrationTest extends BaseIntegrationTest
     public function getTypeConstraints()
     {
         return new Content\FieldTypeConstraints(
-            [
-                'fieldSettings' => [
+            array(
+                'fieldSettings' => array(
                     'selectionMethod' => 0,
                     'selectionRoot' => null,
-                    'selectionContentTypes' => [],
-                ],
-            ]
+                    'selectionContentTypes' => array(),
+                ),
+            )
         );
     }
 
@@ -92,16 +91,16 @@ class RelationIntegrationTest extends BaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        $fieldSettings = [
+        $fieldSettings = array(
             'selectionMethod' => 0,
             'selectionRoot' => null,
-            'selectionContentTypes' => [],
-        ];
+            'selectionContentTypes' => array(),
+        );
 
-        return [
-            ['fieldType', 'ezobjectrelation'],
-            ['fieldTypeConstraints', new Content\FieldTypeConstraints(['fieldSettings' => $fieldSettings])],
-        ];
+        return array(
+            array('fieldType', 'ezobjectrelation'),
+            array('fieldTypeConstraints', new Content\FieldTypeConstraints(array('fieldSettings' => $fieldSettings))),
+        );
     }
 
     /**
@@ -112,11 +111,11 @@ class RelationIntegrationTest extends BaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
-                'data' => ['destinationContentId' => 1],
+            array(
+                'data' => array('destinationContentId' => 1),
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 
@@ -156,11 +155,11 @@ class RelationIntegrationTest extends BaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
-                'data' => ['destinationContentId' => 2],
+            array(
+                'data' => array('destinationContentId' => 2),
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 

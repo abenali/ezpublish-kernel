@@ -17,7 +17,7 @@ use Imagine\Exception\InvalidArgumentException;
  */
 class ScaleWidthDownOnlyFilterLoader extends FilterLoaderWrapped
 {
-    public function load(ImageInterface $image, array $options = [])
+    public function load(ImageInterface $image, array $options = array())
     {
         if (empty($options)) {
             throw new InvalidArgumentException('Missing width option');
@@ -25,10 +25,10 @@ class ScaleWidthDownOnlyFilterLoader extends FilterLoaderWrapped
 
         return $this->innerLoader->load(
             $image,
-            [
-                'size' => [$options[0], null],
+            array(
+                'size' => array($options[0], null),
                 'mode' => ImageInterface::THUMBNAIL_INSET,
-            ]
+            )
         );
     }
 }

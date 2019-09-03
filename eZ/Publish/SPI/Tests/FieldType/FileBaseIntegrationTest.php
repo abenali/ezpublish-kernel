@@ -2,7 +2,6 @@
 
 namespace eZ\Publish\SPI\Tests\FieldType;
 
-use eZ\Publish\API\Repository\Tests\Container\Compiler\SetAllServicesPublicPass;
 use eZ\Publish\Core\IO\IOServiceInterface;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
@@ -63,7 +62,7 @@ abstract class FileBaseIntegrationTest extends BaseIntegrationTest
     /**
      * Sets up a temporary directory and stores its path in self::$tmpDir.
      */
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         $calledClass = get_called_class();
 
@@ -92,7 +91,7 @@ abstract class FileBaseIntegrationTest extends BaseIntegrationTest
     /**
      * Removes the temp dir.
      */
-    public static function tearDownAfterClass(): void
+    public static function tearDownAfterClass()
     {
         self::removeRecursive(self::$tmpDir);
         parent::tearDownAfterClass();
@@ -137,9 +136,8 @@ abstract class FileBaseIntegrationTest extends BaseIntegrationTest
         $loader->load('io.yml');
         $loader->load('repository.yml');
         $loader->load('repository/inner.yml');
-        $loader->load('repository/event.yml');
+        $loader->load('repository/signalslot.yml');
         $loader->load('repository/siteaccessaware.yml');
-        $loader->load('repository/autowire.yml');
         $loader->load('fieldtype_external_storages.yml');
         $loader->load('storage_engines/common.yml');
         $loader->load('storage_engines/shortcuts.yml');
@@ -151,7 +149,6 @@ abstract class FileBaseIntegrationTest extends BaseIntegrationTest
         $loader->load('utils.yml');
         $loader->load('tests/common.yml');
         $loader->load('policies.yml');
-        $loader->load('events.yml');
 
         $containerBuilder->setParameter('ezpublish.kernel.root_dir', $installDir);
 
@@ -163,8 +160,6 @@ abstract class FileBaseIntegrationTest extends BaseIntegrationTest
             'io_root_dir',
             self::$tmpDir . '/var/ezdemo_site/storage'
         );
-
-        $containerBuilder->addCompilerPass(new SetAllServicesPublicPass());
 
         $containerBuilder->compile();
 

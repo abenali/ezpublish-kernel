@@ -17,7 +17,7 @@ class IOTest extends AbstractParserTestCase
 {
     private $minimalConfig;
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
         $this->container->setParameter('ezsettings.default.var_dir', 'var'); // PS: Does not seem to take effect
@@ -25,30 +25,30 @@ class IOTest extends AbstractParserTestCase
         $this->container->setParameter('ezsettings.ezdemo_site.var_dir', 'var/ezdemo_site');
     }
 
-    protected function getContainerExtensions(): array
+    protected function getContainerExtensions()
     {
-        return [
-            new EzPublishCoreExtension([new IO(new ComplexSettingParser())]),
-        ];
+        return array(
+            new EzPublishCoreExtension(array(new IO(new ComplexSettingParser()))),
+        );
     }
 
-    protected function getMinimalConfiguration(): array
+    protected function getMinimalConfiguration()
     {
         return $this->minimalConfig = Yaml::parse(file_get_contents(__DIR__ . '/../../Fixtures/ezpublish_minimal.yml'));
     }
 
     public function testHandlersConfig()
     {
-        $config = [
-            'system' => [
-                'ezdemo_site' => [
-                    'io' => [
+        $config = array(
+            'system' => array(
+                'ezdemo_site' => array(
+                    'io' => array(
                         'binarydata_handler' => 'cluster',
                         'metadata_handler' => 'cluster',
-                    ],
-                ],
-            ],
-        ];
+                    ),
+                ),
+            ),
+        );
 
         $this->load($config);
 

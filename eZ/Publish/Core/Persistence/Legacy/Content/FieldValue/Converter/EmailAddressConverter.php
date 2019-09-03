@@ -75,7 +75,7 @@ class EmailAddressConverter implements Converter
      */
     public function toFieldDefinition(StorageFieldDefinition $storageDef, FieldDefinition $fieldDef)
     {
-        $validatorConstraints = [self::VALIDATOR_IDENTIFIER => []];
+        $validatorConstraints = array(self::VALIDATOR_IDENTIFIER => array());
         $fieldDef->fieldTypeConstraints->validators = $validatorConstraints;
         $fieldDef->defaultValue->data = isset($storageDef->dataText1) ? $storageDef->dataText1 : '';
         $fieldDef->defaultValue->sortKey = $fieldDef->defaultValue->data;

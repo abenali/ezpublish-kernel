@@ -8,9 +8,11 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
+use eZ\Publish\API\Repository\Tests\SetupFactory\LegacyElasticsearch as LegacyElasticsearchSetupFactory;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\SearchService;
+use eZ\Publish\API\Repository\Tests\SetupFactory\LegacyElasticsearch;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query;
 use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
@@ -60,6 +62,13 @@ class SearchEngineIndexingTest extends BaseTest
      */
     public function testFindLocationsFullTextIsSearchable(ContentInfo $contentInfo)
     {
+        $setupFactory = $this->getSetupFactory();
+        if ($setupFactory instanceof LegacyElasticsearchSetupFactory) {
+            $this->markTestSkipped(
+                'Elasticsearch Search Engine is missing full text Location search implementation'
+            );
+        }
+
         $searchTerm = 'pamplemousse';
 
         $repository = $this->getRepository(false);
@@ -182,7 +191,7 @@ class SearchEngineIndexingTest extends BaseTest
     }
 
     /**
-     * EZP-26186: Make sure index is NOT deleted on removal of version draft (affected Solr).
+     * EZP-26186: Make sure index is NOT deleted on removal of version draft (affected Solr & content index on Elastic).
      */
     public function testDeleteVersion()
     {
@@ -200,7 +209,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Found
         $criterion = new Criterion\LocationId($contentInfo->mainLocationId);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContentInfo($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -210,7 +219,7 @@ class SearchEngineIndexingTest extends BaseTest
     }
 
     /**
-     * EZP-26186: Make sure affected child locations are deleted on content deletion (affected Solr).
+     * EZP-26186: Make sure affected child locations are deleted on content deletion (affected Solr & Elastic).
      */
     public function testDeleteContent()
     {
@@ -227,13 +236,13 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Should not be found
         $criterion = new Criterion\ParentLocationId($contentInfo->mainLocationId);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(0, $result->totalCount);
     }
 
     /**
-     * EZP-26186: Make sure index is deleted on removal of Users  (affected Solr).
+     * EZP-26186: Make sure index is deleted on removal of Users  (affected Solr & Elastic).
      */
     public function testDeleteUser()
     {
@@ -250,13 +259,13 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Should not be found
         $criterion = new Criterion\ContentId($user->id);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContentInfo($query);
         $this->assertEquals(0, $result->totalCount);
     }
 
     /**
-     * EZP-26186: Make sure index is deleted on removal of UserGroups  (affected Solr).
+     * EZP-26186: Make sure index is deleted on removal of UserGroups  (affected Solr & Elastic).
      */
     public function testDeleteUserGroup()
     {
@@ -273,7 +282,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Should not be found
         $criterion = new Criterion\ContentId($userGroup->id);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContentInfo($query);
         $this->assertEquals(0, $result->totalCount);
     }
@@ -303,13 +312,13 @@ class SearchEngineIndexingTest extends BaseTest
         $group = $userService->loadUserGroup($editorsGroupId);
 
         // Create a new user instance.
-        $user = $userService->createUser($userCreate, [$group]);
+        $user = $userService->createUser($userCreate, array($group));
 
         $this->refreshSearch($repository);
 
         // Should be found
         $criterion = new Criterion\ContentId($user->id);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContentInfo($query);
         $this->assertEquals(1, $result->totalCount);
     }
@@ -371,7 +380,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Should be found
         $criterion = new Criterion\ContentId($userGroup->id);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContentInfo($query);
         $this->assertEquals(1, $result->totalCount);
     }
@@ -389,7 +398,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Found
         $criterion = new Criterion\LocationId($membersLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -415,7 +424,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Check if parent location is hidden
         $criterion = new Criterion\LocationId($locationId);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertTrue($result->searchHits[0]->valueObject->hidden);
@@ -443,7 +452,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Check if parent location is not hidden
         $criterion = new Criterion\LocationId($locationId);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertFalse($result->searchHits[0]->valueObject->hidden);
@@ -483,7 +492,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Found under Members
         $criterion = new Criterion\ParentLocationId($membersLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -493,7 +502,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Found under Editors
         $criterion = new Criterion\ParentLocationId($editorsLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -532,13 +541,13 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Not found under Editors
         $criterion = new Criterion\ParentLocationId($editorsLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(0, $result->totalCount);
 
         // Found under Members
         $criterion = new Criterion\ParentLocationId($membersLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -551,7 +560,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Found under Editors
         $criterion = new Criterion\ParentLocationId($editorsLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -561,7 +570,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Not found under Members
         $criterion = new Criterion\ParentLocationId($membersLocation->id);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         $this->assertEquals(0, $result->totalCount);
     }
@@ -579,7 +588,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         $createStruct = $contentTypeService->newContentTypeCreateStruct('test-type');
         $createStruct->mainLanguageCode = 'eng-GB';
-        $createStruct->names = ['eng-GB' => 'Test type'];
+        $createStruct->names = array('eng-GB' => 'Test type');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new DateTime();
 
@@ -587,7 +596,7 @@ class SearchEngineIndexingTest extends BaseTest
             'integer',
             'ezinteger'
         );
-        $translatableFieldCreate->names = ['eng-GB' => 'Simple translatable integer field'];
+        $translatableFieldCreate->names = array('eng-GB' => 'Simple translatable integer field');
         $translatableFieldCreate->fieldGroup = 'main';
         $translatableFieldCreate->position = 1;
         $translatableFieldCreate->isTranslatable = true;
@@ -598,7 +607,7 @@ class SearchEngineIndexingTest extends BaseTest
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
         $contentTypeDraft = $contentTypeService->createContentType(
             $createStruct,
-            [$contentGroup]
+            array($contentGroup)
         );
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
@@ -614,7 +623,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Found
         $criterion = new Criterion\ContentId($content->id);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContent($query);
         $this->assertEquals(1, $result->totalCount);
         $this->assertEquals(
@@ -640,7 +649,7 @@ class SearchEngineIndexingTest extends BaseTest
             new Criterion\Location\Priority(Criterion\Operator::GT, 0),
         ]);
 
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
 
         $this->assertEquals(0, $result->totalCount);
@@ -716,7 +725,7 @@ class SearchEngineIndexingTest extends BaseTest
 
         // Searching for children of locationId=2 should also hit this content
         $criterion = new Criterion\ParentLocationId(2);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
 
         foreach ($result->searchHits as $searchHit) {
@@ -817,8 +826,17 @@ class SearchEngineIndexingTest extends BaseTest
      * @param array $ignoreForSetupFactories list of SetupFactories to be ignored
      * @dataProvider getSpecialFullTextCases
      */
-    public function testIndexingSpecialFullTextCases($text, $searchForText)
+    public function testIndexingSpecialFullTextCases($text, $searchForText, array $ignoreForSetupFactories = [])
     {
+        // check if provided data should be ignored for the current Search Engine (via SetupFactory)
+        if (!empty($ignoreForSetupFactories) && in_array(get_class($this->getSetupFactory()), $ignoreForSetupFactories)) {
+            $this->markTestIncomplete(sprintf(
+                'Handling FullText Searching for the phrase {%s} is incomplete for %s',
+                $searchForText,
+                get_class($this->getSetupFactory())
+            ));
+        }
+
         $repository = $this->getRepository();
         $searchService = $repository->getSearchService();
 
@@ -855,7 +873,8 @@ class SearchEngineIndexingTest extends BaseTest
             ['with boundary.', 'with boundary'],
             ['Folder1.', 'Folder1.'],
             ['whitespaces', "     whitespaces  \n \t "],
-            ["it's", "it's"],
+            // @todo: Remove as soon as elastic is updated to later version not affected
+            ["it's", "it's", [LegacyElasticsearch::class]],
             ['with_underscore', 'with_underscore'],
         ];
     }
@@ -925,7 +944,7 @@ class SearchEngineIndexingTest extends BaseTest
     private function assertSubtreeInvisibleProperty(SearchService $searchService, $parentLocationId, $expected)
     {
         $criterion = new Criterion\ParentLocationId($parentLocationId);
-        $query = new LocationQuery(['filter' => $criterion]);
+        $query = new LocationQuery(array('filter' => $criterion));
         $result = $searchService->findLocations($query);
         foreach ($result->searchHits as $searchHit) {
             $this->assertEquals($expected, $searchHit->valueObject->invisible, sprintf('Location %s is not hidden', $searchHit->valueObject->id));
@@ -1101,14 +1120,16 @@ class SearchEngineIndexingTest extends BaseTest
         $result = $searchService->findContent($query);
         self::assertEquals(0, $result->totalCount);
 
-        // Test Location Search returns Content without removed Translation
-        $query = new LocationQuery(
-            [
-                'query' => new Criterion\FullText('BrE'),
-            ]
-        );
-        $result = $searchService->findLocations($query);
-        self::assertEquals(0, $result->totalCount);
+        if (!$this->getSetupFactory() instanceof LegacyElasticsearchSetupFactory) {
+            // Test Location Search returns Content without removed Translation
+            $query = new LocationQuery(
+                [
+                    'query' => new Criterion\FullText('BrE'),
+                ]
+            );
+            $result = $searchService->findLocations($query);
+            self::assertEquals(0, $result->totalCount);
+        }
     }
 
     /**
@@ -1158,7 +1179,7 @@ class SearchEngineIndexingTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\Content\Content
      */
-    protected function createContentWithName($contentName, array $parentLocationIdList = [])
+    protected function createContentWithName($contentName, array $parentLocationIdList = array())
     {
         $contentService = $this->getRepository()->getContentService();
         $locationService = $this->getRepository()->getLocationService();
@@ -1263,7 +1284,7 @@ class SearchEngineIndexingTest extends BaseTest
         $searchService = $this->getRepository()->getSearchService();
 
         $criterion = new Criterion\ContentId($contentId);
-        $query = new Query(['filter' => $criterion]);
+        $query = new Query(array('filter' => $criterion));
         $result = $searchService->findContent($query);
 
         $this->assertEquals($expectedCount, $result->totalCount);

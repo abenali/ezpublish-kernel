@@ -45,12 +45,12 @@ class ParentContentTypeLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentContentTypeLimitation(
-                ['limitationValues' => [$parentContentTypeId]]
+                array('limitationValues' => array($parentContentTypeId))
             )
         );
         $policyCreate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 
@@ -75,11 +75,10 @@ class ParentContentTypeLimitationTest extends BaseLimitationTest
      *
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ContentTypeLimitation
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ParentContentTypeLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testParentContentTypeLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $parentContentTypeId = $this->generateId('contentType', 20);
@@ -94,12 +93,12 @@ class ParentContentTypeLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentContentTypeLimitation(
-                ['limitationValues' => [$parentContentTypeId]]
+                array('limitationValues' => array($parentContentTypeId))
             )
         );
         $policyCreate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 

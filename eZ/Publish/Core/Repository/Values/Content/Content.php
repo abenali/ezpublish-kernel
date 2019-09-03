@@ -24,17 +24,25 @@ use eZ\Publish\API\Repository\Values\ContentType\ContentType;
  */
 class Content extends APIContent
 {
-    /** @var mixed[][] An array of array of field values like[$fieldDefIdentifier][$languageCode] */
+    /**
+     * @var mixed[][] An array of array of field values like[$fieldDefIdentifier][$languageCode]
+     */
     protected $fields;
 
-    /** @var \eZ\Publish\API\Repository\Values\Content\VersionInfo */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\VersionInfo
+     */
     protected $versionInfo;
 
-    /** @var \eZ\Publish\API\Repository\Values\ContentType\ContentType */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\ContentType\ContentType
+     */
     protected $contentType;
 
-    /** @var \eZ\Publish\API\Repository\Values\Content\Field[] An array of {@link Field} */
-    private $internalFields = [];
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\Field[] An array of {@link Field}
+     */
+    private $internalFields = array();
 
     /**
      * The first matched field language among user provided prioritized languages.
@@ -47,7 +55,7 @@ class Content extends APIContent
      */
     protected $prioritizedFieldLanguageCode;
 
-    public function __construct(array $data = [])
+    public function __construct(array $data = array())
     {
         foreach ($data as $propertyName => $propertyValue) {
             $this->$propertyName = $propertyValue;
@@ -102,7 +110,7 @@ class Content extends APIContent
      */
     public function getFieldsByLanguage($languageCode = null)
     {
-        $fields = [];
+        $fields = array();
 
         if (null === $languageCode) {
             $languageCode = $this->prioritizedFieldLanguageCode ?: $this->versionInfo->contentInfo->mainLanguageCode;
@@ -140,7 +148,7 @@ class Content extends APIContent
     /**
      * {@inheritdoc}
      */
-    protected function getProperties($dynamicProperties = ['id', 'contentInfo'])
+    protected function getProperties($dynamicProperties = array('id', 'contentInfo'))
     {
         return parent::getProperties($dynamicProperties);
     }

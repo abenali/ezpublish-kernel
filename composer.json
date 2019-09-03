@@ -7,7 +7,7 @@
         "php-64bit": "For support of more than 30 languages, a 64bit php installation on all involved prod/dev machines is required"
     },
     "require": {
-        "php": "^7.3",
+        "php": "^7.1",
         "ext-ctype": "*",
         "ext-fileinfo": "*",
         "ext-intl": "*",
@@ -17,49 +17,33 @@
         "ext-SPL": "*",
         "ext-xsl": "*",
         "ext-curl": "*",
-        "ext-dom": "*",
-        "symfony/cache": "^4.3",
-        "symfony/http-foundation": "^4.3",
-        "symfony/framework-bundle": "^4.3",
-        "symfony/process": "^4.3",
-        "symfony/dependency-injection": "^4.3",
-        "symfony/event-dispatcher": "^4.3",
-        "symfony/translation": "^4.3",
-        "symfony/yaml": "^4.3",
-        "symfony/security": "^4.3",
-        "symfony/serializer": "^4.3",
-        "symfony/http-kernel": "^4.3",
-        "symfony/console": "^4.3",
-        "symfony/expression-language": "^4.3",
-        "symfony/validator": "^4.3",
-        "ezsystems/doctrine-dbal-schema": "^1.0@dev",
+        "symfony/symfony": "^3.4.17",
         "symfony-cmf/routing": "^2.1",
-        "kriswallsmith/buzz": "^1.0",
+        "kriswallsmith/buzz": "^0.17.2",
+        "sensio/distribution-bundle": "^5.0.22",
         "nelmio/cors-bundle": "^1.5.0",
         "hautelook/templated-uri-bundle": "^2.1",
         "pagerfanta/pagerfanta": "^2.0",
         "ocramius/proxy-manager": "^2.1",
-        "doctrine/doctrine-bundle": "^1.11",
+        "doctrine/doctrine-bundle": "~1.6",
         "liip/imagine-bundle": "^2.1",
         "oneup/flysystem-bundle": "^3.0",
         "friendsofsymfony/http-cache-bundle": "^1.3.13 | ^2.5.1",
         "sensio/framework-extra-bundle": "^5.2",
         "jms/translation-bundle": "^1.4",
-        "twig/twig": "^2.10",
-        "twig/extensions": "^1.5.4",
-        "friendsofsymfony/jsrouting-bundle": "^2.3.0",
-        "psr/event-dispatcher": "^1.0"
+        "twig/twig": "^2.5"
     },
     "require-dev": {
-        "brianium/paratest": "^3.0",
-        "friendsofphp/php-cs-fixer": "~2.15.1",
-        "phpunit/phpunit": "^8.2",
-        "matthiasnoback/symfony-dependency-injection-test": "^4.0",
-        "ezsystems/behatbundle": "^7.0@dev"
+        "friendsofphp/php-cs-fixer": "~2.7.5",
+        "phpunit/phpunit": "^7.0",
+        "matthiasnoback/symfony-dependency-injection-test": "~3.0",
+        "symfony/assetic-bundle": "~2.8.2",
+        "ezsystems/behatbundle": "^6.4"
     },
     "conflict": {
+        "symfony/symfony": "3.4.7",
         "doctrine/dbal": "2.7.0",
-        "ezsystems/ezpublish-legacy": "<2019.03"
+        "ezsystems/ezpublish-legacy": "<2018.06"
     },
     "replace": {
         "ezsystems/ezpublish": "*",
@@ -68,35 +52,29 @@
     },
     "autoload": {
         "psr-4": {
-            "EzSystems\\PlatformInstallerBundle\\": "eZ/Bundle/PlatformInstallerBundle/src"
+            "EzSystems\\PlatformInstallerBundle\\": "eZ/Bundle/PlatformInstallerBundle/src",
+            "EzSystems\\PlatformBehatBundle\\": "eZ/Bundle/PlatformBehatBundle"
         },
         "psr-0": {
             "eZ": ""
         }
     },
     "config": {
-        "process-timeout": 3000
+        "process-timeout": 3000,
+        "platform": {
+            "php": "7.1"
+        }
     },
     "scripts": {
-        "fix-cs": "php-cs-fixer fix -v --show-progress=estimating",
-        "unit": "paratest -p half -c phpunit.xml --runner=WrapperRunner",
-        "integration": "paratest -p half -c phpunit-integration-legacy.xml --runner=WrapperRunner",
-        "test": [
-            "@unit",
-            "@integration"
-        ]
-    },
-    "scripts-descriptions": {
-        "fix-cs": "Fix Coding standard issues in current checkout.",
-        "test": "Run all tests (unit & integration, not functional), might not work on Windows."
+        "fix-cs": "@php ./vendor/bin/php-cs-fixer fix -v --show-progress=estimating"
     },
     "extra": {
         "_ci_branch-comment_": "Keep ci branch up-to-date with master or branch if on stable. ci is never on github but convention used for ci behat testing!",
         "_ezplatform_branch_for_behat_tests_comment_": "ezplatform branch to use to run Behat tests",
-        "_ezplatform_branch_for_behat_tests": "master",
+        "_ezplatform_branch_for_behat_tests": "2.4",
         "branch-alias": {
-            "dev-master": "8.0.x-dev",
-            "dev-tmp_ci_branch": "8.0.x-dev"
+            "dev-master": "7.4.x-dev",
+            "dev-tmp_ci_branch": "7.4.x-dev"
         },
         "thanks": {
             "name": "ezsystems/ezplatform",

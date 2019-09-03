@@ -13,7 +13,9 @@ use eZ\Publish\Core\MVC\Symfony\SiteAccess\VersatileMatcher;
 
 class HostElement implements VersatileMatcher
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Routing\SimplifiedRequest
+     */
     private $request;
 
     /**
@@ -47,7 +49,7 @@ class HostElement implements VersatileMatcher
 
     public function __sleep()
     {
-        return ['elementNumber', 'hostElements'];
+        return array('elementNumber', 'hostElements');
     }
 
     /**
@@ -104,7 +106,7 @@ class HostElement implements VersatileMatcher
         if (isset($this->hostElements)) {
             return $this->hostElements;
         } elseif (!isset($this->request)) {
-            return [];
+            return array();
         }
 
         $elements = explode('.', $this->request->host);

@@ -19,7 +19,6 @@ use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\Content\Trash\SearchResult;
 use eZ\Publish\API\Repository\Values\Content\TrashItem as APITrashItem;
-use eZ\Publish\API\Repository\Values\User\Limitation\SubtreeLimitation;
 use eZ\Publish\Core\Repository\Values\Content\TrashItem;
 use eZ\Publish\Core\Repository\Values\Content\Location;
 use DateTime;
@@ -67,7 +66,7 @@ class TrashServiceTest extends BaseTrashServiceTest
         $location = $repository->getLocationService()
             ->loadLocationByRemoteId($mediaRemoteId);
 
-        $expected = [
+        $expected = array(
             'id' => $location->id,
             'depth' => $location->depth,
             'hidden' => $location->hidden,
@@ -78,7 +77,7 @@ class TrashServiceTest extends BaseTrashServiceTest
             'remoteId' => $location->remoteId,
             'sortField' => $location->sortField,
             'sortOrder' => $location->sortOrder,
-        ];
+        );
 
         $trashItem = $this->createTrashItem();
 
@@ -89,12 +88,11 @@ class TrashServiceTest extends BaseTrashServiceTest
      * Test for the trash() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::trash()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testTrash
      */
     public function testTrashRemovesLocationFromMainStorage()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $mediaRemoteId = '75c715a51699d2d309a924eca6a95145';
@@ -286,12 +284,11 @@ class TrashServiceTest extends BaseTrashServiceTest
      * Test for the loadTrashItem() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::loadTrashItem()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testLoadTrashItem
      */
     public function testLoadTrashItemThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $nonExistingTrashId = $this->generateId('trash', 2342);
@@ -352,11 +349,10 @@ class TrashServiceTest extends BaseTrashServiceTest
      * Test recovering a non existing trash item results in a NotFoundException.
      *
      * @covers \eZ\Publish\API\Repository\TrashService::recover
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testRecoverThrowsNotFoundExceptionForNonExistingTrashItem()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
 
@@ -374,11 +370,11 @@ class TrashServiceTest extends BaseTrashServiceTest
      *
      * @see \eZ\Publish\API\Repository\TrashService::recover()
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testTrash
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testNotFoundAliasAfterRemoveIt()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $mediaRemoteId = '75c715a51699d2d309a924eca6a95145';
 
         $repository = $this->getRepository();
@@ -518,7 +514,7 @@ class TrashServiceTest extends BaseTrashServiceTest
         /* END: Use Case */
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'remoteId' => $trashItem->remoteId,
                 'parentLocationId' => $homeLocationId,
                 // Not the full sub tree is restored
@@ -529,7 +525,7 @@ class TrashServiceTest extends BaseTrashServiceTest
                 'priority' => 0,
                 'sortField' => APILocation::SORT_FIELD_NAME,
                 'sortOrder' => APILocation::SORT_ORDER_ASC,
-            ],
+            ),
             $location
         );
 
@@ -631,11 +627,10 @@ class TrashServiceTest extends BaseTrashServiceTest
      * Test recovering a location from trash to non existing location.
      *
      * @covers \eZ\Publish\API\Repository\TrashService::recover
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testRecoverToNonExistingLocation()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
         $locationService = $repository->getLocationService();
@@ -644,10 +639,10 @@ class TrashServiceTest extends BaseTrashServiceTest
         $trashItem = $trashService->trash($location);
 
         $newParentLocation = new Location(
-            [
+            array(
                 'id' => 123456,
                 'parentLocationId' => 123455,
-            ]
+            )
         );
         $trashService->recover($trashItem, $newParentLocation);
     }
@@ -669,9 +664,9 @@ class TrashServiceTest extends BaseTrashServiceTest
         // Create a search query for all trashed items
         $query = new Query();
         $query->filter = new Criterion\LogicalAnd(
-            [
+            array(
                 new Criterion\Field('title', Criterion\Operator::LIKE, '*'),
-            ]
+            )
         );
 
         // Load all trashed locations
@@ -705,9 +700,9 @@ class TrashServiceTest extends BaseTrashServiceTest
         // Create a search query for all trashed items
         $query = new Query();
         $query->filter = new Criterion\LogicalAnd(
-            [
+            array(
                 new Criterion\Field('title', Criterion\Operator::LIKE, '*'),
-            ]
+            )
         );
 
         // Create a user in the Editor user group.
@@ -739,10 +734,9 @@ class TrashServiceTest extends BaseTrashServiceTest
     {
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
-        $contentService = $repository->getContentService();
 
         /* BEGIN: Use Case */
-        $trashItem = $this->createTrashItem();
+        $this->createTrashItem();
 
         // Empty the trash
         $trashService->emptyTrash();
@@ -750,68 +744,16 @@ class TrashServiceTest extends BaseTrashServiceTest
         // Create a search query for all trashed items
         $query = new Query();
         $query->filter = new Criterion\LogicalAnd(
-            [
+            array(
                 new Criterion\Field('title', Criterion\Operator::LIKE, '*'),
-            ]
+            )
         );
+
         // Load all trashed locations, search result should be empty
         $searchResult = $trashService->findTrashItems($query);
         /* END: Use Case */
 
         $this->assertEquals(0, $searchResult->count);
-
-        // Try to load content
-        $this->expectException(NotFoundException::class);
-        $contentService->loadContent($trashItem->contentId);
-    }
-
-    /**
-     * Test for the emptyTrash() method with user which has subtree limitations.
-     *
-     * @see \eZ\Publish\API\Repository\TrashService::emptyTrash()
-     * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testFindTrashItems
-     */
-    public function testEmptyTrashForUserWithSubtreeLimitation()
-    {
-        $repository = $this->getRepository();
-        $trashService = $repository->getTrashService();
-        $contentService = $repository->getContentService();
-
-        /* BEGIN: Use Case */
-        $trashItem = $this->createTrashItem();
-
-        $this->createRoleWithPolicies('roleTrashCleaner', [
-            ['module' => 'content', 'function' => 'cleantrash'],
-            ['module' => 'content', 'function' => 'read'],
-        ]);
-        $user = $this->createCustomUserWithLogin(
-            'user',
-            'user@example.com',
-            'roleTrashCleaners',
-            'roleTrashCleaner',
-            new SubtreeLimitation(['limitationValues' => ['/1/2/']])
-        );
-        $repository->getPermissionResolver()->setCurrentUserReference($user);
-
-        // Empty the trash
-        $trashService->emptyTrash();
-
-        // Create a search query for all trashed items
-        $query = new Query();
-        $query->filter = new Criterion\LogicalAnd(
-            [
-                new Criterion\Field('title', Criterion\Operator::LIKE, '*'),
-            ]
-        );
-        // Load all trashed locations, search result should be empty
-        $searchResult = $trashService->findTrashItems($query);
-        /* END: Use Case */
-
-        $this->assertEquals(0, $searchResult->totalCount);
-
-        // Try to load content
-        $this->expectException(NotFoundException::class);
-        $contentService->loadContent($trashItem->contentId);
     }
 
     /**
@@ -825,7 +767,6 @@ class TrashServiceTest extends BaseTrashServiceTest
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
         $locationService = $repository->getLocationService();
-        $contentService = $repository->getContentService();
 
         $demoDesignLocationId = $this->generateId('location', 56);
         /* BEGIN: Use Case */
@@ -845,9 +786,9 @@ class TrashServiceTest extends BaseTrashServiceTest
         // Create a search query for all trashed items
         $query = new Query();
         $query->filter = new Criterion\LogicalAnd(
-            [
+            array(
                 new Criterion\Field('title', Criterion\Operator::LIKE, '*'),
-            ]
+            )
         );
 
         // Load all trashed locations, should only contain the Demo Design location
@@ -865,21 +806,16 @@ class TrashServiceTest extends BaseTrashServiceTest
         $this->assertTrue(
             in_array($demoDesignLocationId, $foundIds)
         );
-
-        // Try to load Content
-        $this->expectException(NotFoundException::class);
-        $contentService->loadContent($trashItem->contentId);
     }
 
     /**
      * Test deleting a non existing trash item.
      *
      * @covers \eZ\Publish\API\Repository\TrashService::deleteTrashItem
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testDeleteThrowsNotFoundExceptionForNonExistingTrashItem()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
 
@@ -908,7 +844,7 @@ class TrashServiceTest extends BaseTrashServiceTest
         // Load the location service
         $locationService = $repository->getLocationService();
 
-        $remoteIds = [];
+        $remoteIds = array();
         $children = $locationService->loadLocationChildren($locationService->loadLocationByRemoteId($mediaRemoteId));
         foreach ($children->locations as $child) {
             $remoteIds[] = $child->remoteId;

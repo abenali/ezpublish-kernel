@@ -4,7 +4,7 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\View\Event;
 
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,7 +13,9 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class FilterViewBuilderParametersEvent extends Event
 {
-    /** @var \Symfony\Component\HttpFoundation\Request */
+    /**
+     * @var \Symfony\Component\HttpFoundation\Request
+     */
     private $request;
 
     /**

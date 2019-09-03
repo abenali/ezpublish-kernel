@@ -56,13 +56,12 @@ class UserGroupLimitationTest extends BaseLimitationTest
      * Tests a UserGroupLimitation.
      *
      * @see eZ\Publish\API\Repository\Values\User\Limitation\UserGroupLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      *
      * @throws \ErrorException if a mandatory test fixture not exists.
      */
     public function testUserGroupLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $userService = $repository->getUserService();
@@ -145,9 +144,9 @@ class UserGroupLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new UserGroupLimitation(
-                [
-                    'limitationValues' => [true],
-                ]
+                array(
+                    'limitationValues' => array(true),
+                )
             )
         );
         $roleService->updatePolicy($editPolicy, $policyUpdate);

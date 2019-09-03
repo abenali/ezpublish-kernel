@@ -15,22 +15,28 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\Core\MVC\Symfony\FieldType\View\ParameterProviderRegistryInterface;
 use eZ\Publish\Core\MVC\Symfony\Templating\FieldBlockRendererInterface;
-use Twig\Environment;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFunction;
+use Twig_Environment;
+use Twig_Extension;
+use Twig_SimpleFunction;
 
 /**
  * Twig extension for content fields/fieldDefinitions rendering (view and edit).
  */
-class FieldRenderingExtension extends AbstractExtension
+class FieldRenderingExtension extends Twig_Extension
 {
-    /** @var FieldBlockRendererInterface|\eZ\Publish\Core\MVC\Symfony\Templating\Twig\FieldBlockRenderer */
+    /**
+     * @var FieldBlockRendererInterface|\eZ\Publish\Core\MVC\Symfony\Templating\Twig\FieldBlockRenderer
+     */
     private $fieldBlockRenderer;
 
-    /** @var ParameterProviderRegistryInterface */
+    /**
+     * @var ParameterProviderRegistryInterface
+     */
     private $parameterProviderRegistry;
 
-    /** @var TranslationHelper */
+    /**
+     * @var TranslationHelper
+     */
     private $translationHelper;
 
     /**
@@ -57,26 +63,26 @@ class FieldRenderingExtension extends AbstractExtension
 
     public function getFunctions()
     {
-        return [
-            new TwigFunction(
+        return array(
+            new Twig_SimpleFunction(
                 'ez_render_field',
-                function (Environment $environment, Content $content, $fieldIdentifier, array $params = []) {
+                function (Twig_Environment $environment, Content $content, $fieldIdentifier, array $params = []) {
                     $this->fieldBlockRenderer->setTwig($environment);
 
                     return $this->renderField($content, $fieldIdentifier, $params);
                 },
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
-            new TwigFunction(
-                'ez_render_field_definition_settings',
-                function (Environment $environment, FieldDefinition $fieldDefinition, array $params = []) {
+            new Twig_SimpleFunction(
+                'ez_render_fielddefinition_settings',
+                function (Twig_Environment $environment, FieldDefinition $fieldDefinition, array $params = []) {
                     $this->fieldBlockRenderer->setTwig($environment);
 
                     return $this->renderFieldDefinitionSettings($fieldDefinition, $params);
                 },
                 ['is_safe' => ['html'], 'needs_environment' => true]
             ),
-        ];
+        );
     }
 
     /**

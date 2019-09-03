@@ -13,7 +13,9 @@ use Liip\ImagineBundle\Imagine\Cache\Resolver\ResolverInterface;
 
 class AliasCleaner implements AliasCleanerInterface
 {
-    /** @var ResolverInterface */
+    /**
+     * @var ResolverInterface
+     */
     private $aliasResolver;
 
     public function __construct(ResolverInterface $aliasResolver)
@@ -23,6 +25,6 @@ class AliasCleaner implements AliasCleanerInterface
 
     public function removeAliases($originalPath)
     {
-        $this->aliasResolver->remove([$originalPath], []);
+        $this->aliasResolver->remove(array($originalPath), array());
     }
 }

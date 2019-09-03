@@ -31,16 +31,22 @@ namespace eZ\Publish\Core\MVC\Symfony\Security\Authorization;
  */
 class Attribute
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     public $module;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     public $function;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     public $limitations;
 
-    public function __construct($module = null, $function = null, array $limitations = [])
+    public function __construct($module = null, $function = null, array $limitations = array())
     {
         $this->module = $module;
         $this->function = $function;

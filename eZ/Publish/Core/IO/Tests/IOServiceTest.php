@@ -37,7 +37,7 @@ class IOServiceTest extends TestCase
     /** @var MimeTypeDetector|\PHPUnit\Framework\MockObject\MockObject */
     protected $mimeTypeDetectorMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
@@ -49,7 +49,7 @@ class IOServiceTest extends TestCase
             $this->metadataHandlerMock,
             $this->binarydataHandlerMock,
             $this->mimeTypeDetectorMock,
-            ['prefix' => self::PREFIX]
+            array('prefix' => self::PREFIX)
         );
     }
 
@@ -107,7 +107,7 @@ class IOServiceTest extends TestCase
 
         self::assertInstanceOf(BinaryFileCreateStruct::class, $binaryCreateStruct);
         self::assertNull($binaryCreateStruct->id);
-        self::assertIsResource($binaryCreateStruct->inputStream);
+        self::assertTrue(is_resource($binaryCreateStruct->inputStream));
         self::assertEquals(filesize(__FILE__), $binaryCreateStruct->size);
         self::assertEquals('text/x-php', $binaryCreateStruct->mimeType);
 
@@ -210,7 +210,7 @@ class IOServiceTest extends TestCase
 
         $binaryFile = $this->getIOService()->loadBinaryFile($id);
 
-        $expectedBinaryFile = new BinaryFile(['id' => $id, 'size' => 12345, 'uri' => "/$spiId"]);
+        $expectedBinaryFile = new BinaryFile(array('id' => $id, 'size' => 12345, 'uri' => "/$spiId"));
 
         self::assertEquals($expectedBinaryFile, $binaryFile);
 
@@ -219,14 +219,21 @@ class IOServiceTest extends TestCase
 
     /**
      * @covers \eZ\Publish\Core\IO\IOService::loadBinaryFile
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFoundException
      *
      * @return mixed Whatever loadBinaryFile returns
      */
     public function testLoadBinaryFileNotFound()
     {
-        $this->expectException(BinaryFileNotFoundException::class);
+        $id = 'id.ext';
+        $prefixedUri = $this->getPrefixedUri($id);
+        $this->metadataHandlerMock
+            ->expects($this->once())
+            ->method('load')
+            ->with($prefixedUri)
+            ->will($this->throwException(new BinaryFileNotFoundException($prefixedUri)));
 
-        return $this->loadBinaryFileNotFound();
+        return $this->getIOService()->loadBinaryFile($id);
     }
 
     public function testLoadBinaryFileByUri()
@@ -259,12 +266,26 @@ class IOServiceTest extends TestCase
 
     /**
      * @return mixed Whatever loadBinaryFileByUri returns
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFoundException
      */
     public function testLoadBinaryFileByUriNotFound()
     {
-        $this->expectException(BinaryFileNotFoundException::class);
+        $id = 'my/path.png';
+        $spiId = $this->getPrefixedUri($id);
 
-        return $this->loadBinaryFileByUriNotFound();
+        $this->binarydataHandlerMock
+            ->expects($this->once())
+            ->method('getIdFromUri')
+            ->with($spiId)
+            ->will($this->returnValue($spiId));
+
+        $this->metadataHandlerMock
+            ->expects($this->once())
+            ->method('load')
+            ->with($spiId)
+            ->will($this->throwException(new BinaryFileNotFoundException($spiId)));
+
+        return $this->getIOService()->loadBinaryFileByUri($spiId);
     }
 
     /**
@@ -395,14 +416,24 @@ class IOServiceTest extends TestCase
 
     /**
      * @covers \eZ\Publish\Core\IO\IOService::deleteBinaryFile
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\NotFoundException
      *
      * @return mixed Whatever deleteBinaryFile returned
      */
     public function testDeleteBinaryFileNotFound()
     {
-        $this->expectException(BinaryFileNotFoundException::class);
+        $binaryFile = new BinaryFile(
+            array('id' => __METHOD__)
+        );
 
-        $this->deleteBinaryFileNotFound();
+        $prefixedId = $this->getPrefixedUri($binaryFile->id);
+        $this->metadataHandlerMock
+            ->expects($this->once())
+            ->method('delete')
+            ->with($this->equalTo($prefixedId))
+            ->will($this->throwException(new BinaryFileNotFoundException($prefixedId)));
+
+        $this->getIOService()->deleteBinaryFile($binaryFile);
     }
 
     public function getPrefixedUri($uri)
@@ -434,66 +465,5 @@ class IOServiceTest extends TestCase
 
             return $subject->id == $spiId;
         };
-    }
-
-    /**
-     * @return bool|\eZ\Publish\Core\IO\Values\BinaryFile
-     *
-     * @throws \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
-     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException
-     */
-    protected function loadBinaryFileNotFound()
-    {
-        $id = 'id.ext';
-        $prefixedUri = $this->getPrefixedUri($id);
-        $this->metadataHandlerMock
-            ->expects($this->once())
-            ->method('load')
-            ->with($prefixedUri)
-            ->will($this->throwException(new BinaryFileNotFoundException($prefixedUri)));
-
-        return $this->getIOService()->loadBinaryFile($id);
-    }
-
-    protected function deleteBinaryFileNotFound(): void
-    {
-        $binaryFile = new BinaryFile(
-            ['id' => __METHOD__]
-        );
-
-        $prefixedId = $this->getPrefixedUri($binaryFile->id);
-        $this->metadataHandlerMock
-            ->expects($this->once())
-            ->method('delete')
-            ->with($this->equalTo($prefixedId))
-            ->will($this->throwException(new BinaryFileNotFoundException($prefixedId)));
-
-        $this->getIOService()->deleteBinaryFile($binaryFile);
-    }
-
-    /**
-     * @return bool|\eZ\Publish\Core\IO\Values\BinaryFile
-     *
-     * @throws \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
-     * @throws \eZ\Publish\Core\Base\Exceptions\NotFoundException
-     */
-    protected function loadBinaryFileByUriNotFound()
-    {
-        $id = 'my/path.png';
-        $spiId = $this->getPrefixedUri($id);
-
-        $this->binarydataHandlerMock
-            ->expects($this->once())
-            ->method('getIdFromUri')
-            ->with($spiId)
-            ->will($this->returnValue($spiId));
-
-        $this->metadataHandlerMock
-            ->expects($this->once())
-            ->method('load')
-            ->with($spiId)
-            ->will($this->throwException(new BinaryFileNotFoundException($spiId)));
-
-        return $this->getIOService()->loadBinaryFileByUri($spiId);
     }
 }

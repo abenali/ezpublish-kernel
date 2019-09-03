@@ -8,12 +8,6 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
-use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
-use eZ\Publish\API\Repository\Values\Content\Location;
-use eZ\Publish\API\Repository\Values\User\Limitation\ObjectStateLimitation;
-use eZ\Publish\Core\Repository\Repository;
-use eZ\Publish\Core\Repository\TrashService;
-
 /**
  * Test case for operations in the TrashService using in memory storage.
  *
@@ -27,13 +21,12 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
      * Test for the loadTrashItem() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::loadTrashItem()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testLoadTrashItem
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadAnonymousUser
      */
     public function testLoadTrashItemThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
 
@@ -57,12 +50,12 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
      * Test for the trash() method without proper permissions.
      *
      * @covers \eZ\Publish\API\Repository\TrashService::trash
+     *
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UnauthorizedException
+     * @expectedExceptionMessage User does not have access to 'remove' 'content'
      */
     public function testTrashThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UnauthorizedException::class);
-        $this->expectExceptionMessage('User does not have access to \'remove\' \'content\'');
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
         $locationService = $repository->getLocationService();
@@ -112,13 +105,12 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
      * Test for the recover() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::recover()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testRecover
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadAnonymousUser
      */
     public function testRecoverThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
 
@@ -142,13 +134,12 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
      * Test for the recover() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::recover($trashItem, $newParentLocation)
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testRecover
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadAnonymousUser
      */
     public function testRecoverThrowsUnauthorizedExceptionWithNewParentLocationParameter()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
         $locationService = $repository->getLocationService();
@@ -180,13 +171,12 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
      * Test for the emptyTrash() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::emptyTrash()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testEmptyTrash
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadAnonymousUser
      */
     public function testEmptyTrashThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
 
@@ -210,13 +200,12 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
      * Test for the deleteTrashItem() method.
      *
      * @see \eZ\Publish\API\Repository\TrashService::deleteTrashItem()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\TrashServiceTest::testDeleteTrashItem
      * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadAnonymousUser
      */
     public function testDeleteTrashItemThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $trashService = $repository->getTrashService();
 
@@ -234,44 +223,5 @@ class TrashServiceAuthorizationTest extends BaseTrashServiceTest
         // This call will fail with an "UnauthorizedException"
         $trashService->deleteTrashItem($trashItem);
         /* END: Use Case */
-    }
-
-    public function testTrashRequiresPremissionsToRemoveAllSubitems()
-    {
-        $this->createRoleWithPolicies('Publisher', [
-            ['module' => 'content', 'function' => 'read'],
-            ['module' => 'content', 'function' => 'create'],
-            ['module' => 'content', 'function' => 'publish'],
-            ['module' => 'state', 'function' => 'assign'],
-            ['module' => 'content', 'function' => 'remove', 'limitations' => [
-                new ObjectStateLimitation(['limitationValues' => [
-                    $this->generateId('objectstate', 2),
-                ]]),
-            ]],
-        ]);
-        $publisherUser = $this->createCustomUserWithLogin(
-            'publisher',
-            'publisher@example.com',
-            'Publishers',
-            'Publisher'
-        );
-        /** @var Repository $repository */
-        $repository = $this->getRepository();
-        $repository->getPermissionResolver()->setCurrentUserReference($publisherUser);
-        $trashService = $repository->getTrashService();
-        $locationService = $repository->getLocationService();
-        $objectStateService = $repository->getObjectStateService();
-        $parentContent = $this->createFolder(['eng-US' => 'Parent Folder'], 2);
-        $objectStateService->setContentState(
-            $parentContent->contentInfo,
-            $objectStateService->loadObjectStateGroup(2),
-            $objectStateService->loadObjectState(2)
-        );
-        $parentLocation = $locationService->loadLocations($parentContent->contentInfo)[0];
-        $childContent = $this->createFolder(['eng-US' => 'Child Folder'], $parentLocation->id);
-
-        $this->refreshSearch($repository);
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UnauthorizedException::class);
-        $trashService->trash($parentLocation);
     }
 }

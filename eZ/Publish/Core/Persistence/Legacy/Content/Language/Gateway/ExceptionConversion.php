@@ -71,12 +71,16 @@ class ExceptionConversion extends Gateway
     }
 
     /**
-     * {@inheritdoc}
+     * Loads data for the Language with $id.
+     *
+     * @param int $id
+     *
+     * @return string[][]
      */
-    public function loadLanguageListData(array $ids): iterable
+    public function loadLanguageData($id)
     {
         try {
-            return $this->innerGateway->loadLanguageListData($ids);
+            return $this->innerGateway->loadLanguageData($id);
         } catch (DBALException $e) {
             throw new RuntimeException('Database error', 0, $e);
         } catch (PDOException $e) {
@@ -85,12 +89,16 @@ class ExceptionConversion extends Gateway
     }
 
     /**
-     * {@inheritdoc}
+     * Loads data for the Language with Language Code (eg: eng-GB).
+     *
+     * @param string $languageCode
+     *
+     * @return string[][]
      */
-    public function loadLanguageListDataByLanguageCode(array $languageCodes): iterable
+    public function loadLanguageDataByLanguageCode($languageCode)
     {
         try {
-            return $this->innerGateway->loadLanguageListDataByLanguageCode($languageCodes);
+            return $this->innerGateway->loadLanguageDataByLanguageCode($languageCode);
         } catch (DBALException $e) {
             throw new RuntimeException('Database error', 0, $e);
         } catch (PDOException $e) {

@@ -56,7 +56,7 @@ class ExceptionConversion extends Gateway
         $offset = 0,
         $limit = null,
         array $sort = null,
-        array $languageFilter = [],
+        array $languageFilter = array(),
         $doCount = true
     ) {
         try {

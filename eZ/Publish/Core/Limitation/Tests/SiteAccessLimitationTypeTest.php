@@ -35,32 +35,32 @@ class SiteAccessLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValue()
     {
-        return [
-            [new SiteAccessLimitation()],
-            [new SiteAccessLimitation([])],
-            [
+        return array(
+            array(new SiteAccessLimitation()),
+            array(new SiteAccessLimitation(array())),
+            array(
                 new SiteAccessLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             sprintf('%u', crc32('ezdemo_site')),
                             sprintf('%u', crc32('eng')),
                             sprintf('%u', crc32('fre')),
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-            [
+            ),
+            array(
                 new SiteAccessLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             crc32('ezdemo_site'),
                             crc32('eng'),
                             crc32('fre'),
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -80,23 +80,22 @@ class SiteAccessLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValueException()
     {
-        return [
-            [new ObjectStateLimitation()],
-            [new SiteAccessLimitation(['limitationValues' => [true]])],
-        ];
+        return array(
+            array(new ObjectStateLimitation()),
+            array(new SiteAccessLimitation(array('limitationValues' => array(true)))),
+        );
     }
 
     /**
      * @depends testConstruct
      * @dataProvider providerForTestAcceptValueException
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\SiteAccessLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, SiteAccessLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -105,42 +104,42 @@ class SiteAccessLimitationTypeTest extends Base
      */
     public function providerForTestValidateError()
     {
-        return [
-            [new SiteAccessLimitation(), 0],
-            [new SiteAccessLimitation([]), 0],
-            [
+        return array(
+            array(new SiteAccessLimitation(), 0),
+            array(new SiteAccessLimitation(array()), 0),
+            array(
                 new SiteAccessLimitation(
-                    [
-                        'limitationValues' => ['2339567439'],
-                    ]
+                    array(
+                        'limitationValues' => array('2339567439'),
+                    )
                 ),
                 1,
-            ],
-            [new SiteAccessLimitation(['limitationValues' => [true]]), 1],
-            [
+            ),
+            array(new SiteAccessLimitation(array('limitationValues' => array(true))), 1),
+            array(
                 new SiteAccessLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             '2339567439',
                             false,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
                 2,
-            ],
-            [
+            ),
+            array(
                 new SiteAccessLimitation(
-                    [
-                        'limitationValues' => [
+                    array(
+                        'limitationValues' => array(
                             sprintf('%u', crc32('ezdemo_site')),
                             sprintf('%u', crc32('eng')),
                             sprintf('%u', crc32('fre')),
-                        ],
-                    ]
+                        ),
+                    )
                 ),
                 0,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -164,11 +163,11 @@ class SiteAccessLimitationTypeTest extends Base
      */
     public function testBuildValue(SiteAccessLimitationType $limitationType)
     {
-        $expected = ['test', 'test' => 9];
+        $expected = array('test', 'test' => 9);
         $value = $limitationType->buildValue($expected);
 
         self::assertInstanceOf('\eZ\Publish\API\Repository\Values\User\Limitation\SiteAccessLimitation', $value);
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -177,26 +176,26 @@ class SiteAccessLimitationTypeTest extends Base
      */
     public function providerForTestEvaluate()
     {
-        return [
+        return array(
             // SiteAccess, no access
-            [
+            array(
                 'limitation' => new SiteAccessLimitation(),
                 'object' => new SiteAccess('behat_site'),
                 'expected' => false,
-            ],
+            ),
             // SiteAccess, no access
-            [
-                'limitation' => new SiteAccessLimitation(['limitationValues' => ['2339567439']]),
+            array(
+                'limitation' => new SiteAccessLimitation(array('limitationValues' => array('2339567439'))),
                 'object' => new SiteAccess('behat_site'),
                 'expected' => false,
-            ],
+            ),
             // SiteAccess, with access
-            [
-                'limitation' => new SiteAccessLimitation(['limitationValues' => ['1817462202']]),
+            array(
+                'limitation' => new SiteAccessLimitation(array('limitationValues' => array('1817462202'))),
                 'object' => new SiteAccess('behat_site'),
                 'expected' => true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -218,7 +217,7 @@ class SiteAccessLimitationTypeTest extends Base
             $object
         );
 
-        self::assertIsBool($value);
+        self::assertInternalType('boolean', $value);
         self::assertEquals($expected, $value);
     }
 
@@ -227,31 +226,30 @@ class SiteAccessLimitationTypeTest extends Base
      */
     public function providerForTestEvaluateInvalidArgument()
     {
-        return [
+        return array(
             // invalid limitation
-            [
+            array(
                 'limitation' => new ObjectStateLimitation(),
                 'object' => new SiteAccess(),
-            ],
+            ),
             // invalid object
-            [
+            array(
                 'limitation' => new SiteAccessLimitation(),
                 'object' => new ObjectStateLimitation(),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
      * @depends testConstruct
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(
         Limitation $limitation,
         ValueObject $object,
         SiteAccessLimitationType $limitationType
     ) {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $userMock = $this->getUserMock();
         $userMock->expects($this->never())->method($this->anything());
 
@@ -264,13 +262,12 @@ class SiteAccessLimitationTypeTest extends Base
 
     /**
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotImplementedException
      *
      * @param \eZ\Publish\Core\Limitation\SiteAccessLimitationType $limitationType
      */
     public function testGetCriterion(SiteAccessLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotImplementedException::class);
-
         $limitationType->getCriterion(new SiteAccessLimitation(), $this->getUserMock());
     }
 

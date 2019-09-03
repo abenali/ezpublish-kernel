@@ -16,7 +16,7 @@ class FileInfoTest extends TestCase
     /** @var MimeTypeDetector */
     protected $mimeTypeDetector;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->mimeTypeDetector = new MimeTypeDetector();
     }

@@ -32,7 +32,7 @@ class StreamFileListenerTest extends TestCase
     /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface|\PHPUnit\Framework\MockObject\MockObject */
     private $configResolverMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->ioServiceMock = $this->createMock(IOServiceInterface::class);
 
@@ -79,7 +79,7 @@ class StreamFileListenerTest extends TestCase
 
         $event = $this->createEvent($request);
 
-        $binaryFile = new BinaryFile(['mtime' => new DateTime()]);
+        $binaryFile = new BinaryFile(array('mtime' => new DateTime()));
 
         $this->ioServiceMock
             ->expects($this->once())
@@ -111,7 +111,7 @@ class StreamFileListenerTest extends TestCase
 
         $event = $this->createEvent($request);
 
-        $binaryFile = new BinaryFile(['mtime' => new DateTime()]);
+        $binaryFile = new BinaryFile(array('mtime' => new DateTime()));
 
         $this->ioServiceMock
             ->expects($this->once())

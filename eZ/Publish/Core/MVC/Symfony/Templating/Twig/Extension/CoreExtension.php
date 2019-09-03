@@ -8,13 +8,15 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\Templating\Twig\Extension;
 
-use Twig\Extension\AbstractExtension;
+use Twig_Extension;
 use eZ\Publish\Core\MVC\Symfony\Templating\GlobalHelper;
-use Twig\Extension\GlobalsInterface;
+use Twig_Extension_GlobalsInterface;
 
-class CoreExtension extends AbstractExtension implements GlobalsInterface
+class CoreExtension extends Twig_Extension implements Twig_Extension_GlobalsInterface
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Templating\GlobalHelper */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Templating\GlobalHelper
+     */
     private $globalHelper;
 
     public function __construct(GlobalHelper $globalHelper)
@@ -37,6 +39,6 @@ class CoreExtension extends AbstractExtension implements GlobalsInterface
      */
     public function getGlobals()
     {
-        return ['ezplatform' => $this->globalHelper];
+        return array('ezpublish' => $this->globalHelper);
     }
 }

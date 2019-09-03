@@ -23,7 +23,7 @@ class RouterMapURITest extends TestCase
      */
     public function testSetGetRequest($config, $pathinfo, $expectedMapKey)
     {
-        $request = new SimplifiedRequest(['pathinfo' => $pathinfo]);
+        $request = new SimplifiedRequest(array('pathinfo' => $pathinfo));
         $matcher = new URIMapMatcher($config);
         $matcher->setRequest($request);
         $this->assertSame($request, $matcher->getRequest());
@@ -38,9 +38,9 @@ class RouterMapURITest extends TestCase
      */
     public function testAnalyseURI($uri, $expectedFixedUpURI)
     {
-        $matcher = new URIMapMatcher([]);
+        $matcher = new URIMapMatcher(array());
         $matcher->setRequest(
-            new SimplifiedRequest(['pathinfo' => $uri])
+            new SimplifiedRequest(array('pathinfo' => $uri))
         );
         $this->assertSame($expectedFixedUpURI, $matcher->analyseURI($uri));
         // Unserialized matcher should have the same behavior
@@ -56,9 +56,9 @@ class RouterMapURITest extends TestCase
      */
     public function testAnalyseLink($fullUri, $linkUri)
     {
-        $matcher = new URIMapMatcher([]);
+        $matcher = new URIMapMatcher(array());
         $matcher->setRequest(
-            new SimplifiedRequest(['pathinfo' => $fullUri])
+            new SimplifiedRequest(array('pathinfo' => $fullUri))
         );
         $this->assertSame($fullUri, $matcher->analyseLink($linkUri));
         // Unserialized matcher should have the same behavior
@@ -68,40 +68,40 @@ class RouterMapURITest extends TestCase
 
     public function setRequestProvider()
     {
-        return [
-            [['foo' => 'bar'], '/bar/baz', 'bar'],
-            [['foo' => 'Äpfel'], '/%C3%84pfel/foo', 'Äpfel'],
-        ];
+        return array(
+            array(array('foo' => 'bar'), '/bar/baz', 'bar'),
+            array(array('foo' => 'Äpfel'), '/%C3%84pfel/foo', 'Äpfel'),
+        );
     }
 
     public function fixupURIProvider()
     {
-        return [
-            ['/foo', '/'],
-            ['/Äpfel', '/'],
-            ['/my_siteaccess/foo/bar', '/foo/bar'],
-            ['/foo/foo/bar', '/foo/bar'],
-            ['/foo/foo/bar?something=foo&bar=toto', '/foo/bar?something=foo&bar=toto'],
-            ['/vive/le/sucre', '/le/sucre'],
-            ['/ezdemo_site/some/thing?foo=ezdemo_site&bar=toto', '/some/thing?foo=ezdemo_site&bar=toto'],
-        ];
+        return array(
+            array('/foo', '/'),
+            array('/Äpfel', '/'),
+            array('/my_siteaccess/foo/bar', '/foo/bar'),
+            array('/foo/foo/bar', '/foo/bar'),
+            array('/foo/foo/bar?something=foo&bar=toto', '/foo/bar?something=foo&bar=toto'),
+            array('/vive/le/sucre', '/le/sucre'),
+            array('/ezdemo_site/some/thing?foo=ezdemo_site&bar=toto', '/some/thing?foo=ezdemo_site&bar=toto'),
+        );
     }
 
     public function testReverseMatchFail()
     {
-        $config = ['foo' => 'bar'];
+        $config = array('foo' => 'bar');
         $matcher = new URIMapMatcher($config);
         $this->assertNull($matcher->reverseMatch('non_existent'));
     }
 
     public function testReverseMatch()
     {
-        $config = [
+        $config = array(
             'some_uri' => 'some_siteaccess',
             'something_else' => 'another_siteaccess',
             'toutouyoutou' => 'ezdemo_site',
-        ];
-        $request = new SimplifiedRequest(['pathinfo' => '/foo']);
+        );
+        $request = new SimplifiedRequest(array('pathinfo' => '/foo'));
         $matcher = new URIMapMatcher($config);
         $matcher->setRequest($request);
 

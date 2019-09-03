@@ -13,7 +13,9 @@ namespace eZ\Bundle\EzPublishCoreBundle\Translation;
  */
 class GlobCollector implements Collector
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $tranlationPattern;
 
     /**

@@ -36,7 +36,7 @@ class Type extends BaseType
     /**
      * Type constants for validation.
      */
-    private static $availableTypes = [
+    private static $availableTypes = array(
         self::TYPE_FLASH,
         self::TYPE_QUICKTIME,
         self::TYPE_REALPLAYER,
@@ -44,15 +44,17 @@ class Type extends BaseType
         self::TYPE_WINDOWSMEDIA,
         self::TYPE_HTML5_VIDEO,
         self::TYPE_HTML5_AUDIO,
-    ];
+    );
 
-    /** @var array */
-    protected $settingsSchema = [
-        'mediaType' => [
+    /**
+     * @var array
+     */
+    protected $settingsSchema = array(
+        'mediaType' => array(
             'type' => 'choice',
             'default' => self::TYPE_HTML5_VIDEO,
-        ],
-    ];
+        ),
+    );
 
     /**
      * Returns the field type identifier for this field type.
@@ -84,7 +86,7 @@ class Type extends BaseType
      */
     public function validateFieldSettings($fieldSettings)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($fieldSettings as $name => $value) {
             if (isset($this->settingsSchema[$name])) {
@@ -94,9 +96,9 @@ class Type extends BaseType
                             $validationErrors[] = new ValidationError(
                                 "Setting '%setting%' is of unknown type",
                                 null,
-                                [
+                                array(
                                     '%setting%' => $name,
-                                ],
+                                ),
                                 "[$name]"
                             );
                         }
@@ -106,9 +108,9 @@ class Type extends BaseType
                 $validationErrors[] = new ValidationError(
                     "Setting '%setting%' is unknown",
                     null,
-                    [
+                    array(
                         '%setting%' => $name,
-                    ],
+                    ),
                     "[$name]"
                 );
             }

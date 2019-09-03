@@ -47,19 +47,19 @@ class UserTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [
+        return array(
             'PasswordValueValidator' => [
                 'requireAtLeastOneUpperCaseCharacter' => [
                     'type' => 'int',
-                    'default' => 1,
+                    'default' => null,
                 ],
                 'requireAtLeastOneLowerCaseCharacter' => [
                     'type' => 'int',
-                    'default' => 1,
+                    'default' => null,
                 ],
                 'requireAtLeastOneNumericCharacter' => [
                     'type' => 'int',
-                    'default' => 1,
+                    'default' => null,
                 ],
                 'requireAtLeastOneNonAlphanumericCharacter' => [
                     'type' => 'int',
@@ -67,10 +67,10 @@ class UserTest extends FieldTypeTest
                 ],
                 'minLength' => [
                     'type' => 'int',
-                    'default' => 10,
+                    'default' => null,
                 ],
             ],
-        ];
+        );
     }
 
     /**
@@ -80,7 +80,7 @@ class UserTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -116,12 +116,12 @@ class UserTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 23,
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -155,21 +155,21 @@ class UserTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new UserValue(),
-            ],
-            [
-                [],
-                new UserValue([]),
-            ],
-            [
-                new UserValue(['login' => 'sindelfingen']),
-                new UserValue(['login' => 'sindelfingen']),
-            ],
-            [
-                $userData = [
+            ),
+            array(
+                array(),
+                new UserValue(array()),
+            ),
+            array(
+                new UserValue(array('login' => 'sindelfingen')),
+                new UserValue(array('login' => 'sindelfingen')),
+            ),
+            array(
+                $userData = array(
                     'hasStoredLogin' => true,
                     'contentId' => 23,
                     'login' => 'sindelfingen',
@@ -178,12 +178,12 @@ class UserTest extends FieldTypeTest
                     'passwordHashType' => 'md5',
                     'enabled' => true,
                     'maxLogin' => 1000,
-                ],
+                ),
                 new UserValue($userData),
-            ],
-            [
+            ),
+            array(
                 new UserValue(
-                    $userData = [
+                    $userData = array(
                         'hasStoredLogin' => true,
                         'contentId' => 23,
                         'login' => 'sindelfingen',
@@ -192,11 +192,11 @@ class UserTest extends FieldTypeTest
                         'passwordHashType' => 'md5',
                         'enabled' => true,
                         'maxLogin' => 1000,
-                    ]
+                    )
                 ),
                 new UserValue($userData),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -238,14 +238,14 @@ class UserTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new UserValue(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new UserValue(
-                    $userData = [
+                    $userData = array(
                         'hasStoredLogin' => true,
                         'contentId' => 23,
                         'login' => 'sindelfingen',
@@ -254,11 +254,11 @@ class UserTest extends FieldTypeTest
                         'passwordHashType' => 'md5',
                         'enabled' => true,
                         'maxLogin' => 1000,
-                    ]
+                    )
                 ),
                 $userData,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -300,13 +300,13 @@ class UserTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new UserValue(),
-            ],
-            [
-                $userData = [
+            ),
+            array(
+                $userData = array(
                     'hasStoredLogin' => true,
                     'contentId' => 23,
                     'login' => 'sindelfingen',
@@ -315,10 +315,10 @@ class UserTest extends FieldTypeTest
                     'passwordHashType' => 'md5',
                     'enabled' => true,
                     'maxLogin' => 1000,
-                ],
+                ),
                 new UserValue($userData),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -387,11 +387,11 @@ class UserTest extends FieldTypeTest
         return 'ezuser';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new UserValue(['login' => 'johndoe']), [], 'en_GB', 'johndoe'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new UserValue(array('login' => 'johndoe')), 'johndoe'),
+        );
     }
 }

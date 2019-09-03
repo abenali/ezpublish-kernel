@@ -20,7 +20,9 @@ use Symfony\Component\Config\Definition\Builder\NodeBuilder;
  */
 class Image extends AbstractParser implements SuggestionCollectorAwareInterface
 {
-    /** @var SuggestionCollectorInterface */
+    /**
+     * @var SuggestionCollectorInterface
+     */
     private $suggestionCollector;
 
     public function setSuggestionCollector(SuggestionCollectorInterface $suggestionCollector)
@@ -46,30 +48,30 @@ class Image extends AbstractParser implements SuggestionCollectorAwareInterface
             ->arrayNode('image_variations')
                 ->info('Configuration for your image variations (aka "image aliases")')
                 ->example(
-                    [
-                        'my_image_variation' => [
+                    array(
+                        'my_image_variation' => array(
                             'reference' => '~',
-                            'filters' => [
-                                [
+                            'filters' => array(
+                                array(
                                     'name' => 'geometry/scaledownonly',
-                                    'params' => [400, 350],
-                                ],
-                            ],
-                        ],
-                        'my_cropped_variation' => [
+                                    'params' => array(400, 350),
+                                ),
+                            ),
+                        ),
+                        'my_cropped_variation' => array(
                             'reference' => 'my_image_variation',
-                            'filters' => [
-                                [
+                            'filters' => array(
+                                array(
                                     'name' => 'geometry/scalewidthdownonly',
-                                    'params' => [300],
-                                ],
-                                [
+                                    'params' => array(300),
+                                ),
+                                array(
                                     'name' => 'geometry/crop',
-                                    'params' => [300, 300, 0, 0],
-                                ],
-                            ],
-                        ],
-                    ]
+                                    'params' => array(300, 300, 0, 0),
+                                ),
+                            ),
+                        ),
+                    )
                 )
                 ->useAttributeAsKey('variation_name')
                 ->normalizeKeys(false)
@@ -77,7 +79,7 @@ class Image extends AbstractParser implements SuggestionCollectorAwareInterface
                     ->children()
                         ->scalarNode('reference')
                             ->info('Tells the system which original variation to use as reference image. Defaults to original')
-                            ->example(['reference' => 'large'])
+                            ->example(array('reference' => 'large'))
                         ->end()
                         ->arrayNode('filters')
                             ->info('A list of filters to run, each filter must be supported by the active image converters')

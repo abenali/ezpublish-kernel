@@ -23,7 +23,7 @@ class FlysystemTest extends TestCase
     /** @var \League\Flysystem\FilesystemInterface|\PHPUnit\Framework\MockObject\MockObject */
     private $filesystem;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->filesystem = $this->createMock(FilesystemInterface::class);
         $this->handler = new Flysystem($this->filesystem);
@@ -45,7 +45,7 @@ class FlysystemTest extends TestCase
             ->with(
                 $this->equalTo($spiBinaryFileCreateStruct->id),
                 $this->equalTo($stream),
-                $this->equalTo(['mimetype' => 'image/png', 'visibility' => 'public'])
+                $this->equalTo(array('mimetype' => 'image/png', 'visibility' => 'public'))
             );
 
         $this->handler->create($spiBinaryFileCreateStruct);
@@ -67,7 +67,7 @@ class FlysystemTest extends TestCase
             ->with(
                 $this->equalTo($spiBinaryFileCreateStruct->id),
                 $this->equalTo($stream),
-                $this->equalTo(['mimetype' => 'image/png', 'visibility' => 'public'])
+                $this->equalTo(array('mimetype' => 'image/png', 'visibility' => 'public'))
             )
             ->will($this->throwException(new FileExistsException('prefix/my/file.png')));
 
@@ -77,7 +77,7 @@ class FlysystemTest extends TestCase
             ->with(
                 $this->equalTo($spiBinaryFileCreateStruct->id),
                 $this->equalTo($stream),
-                $this->equalTo(['mimetype' => 'image/png', 'visibility' => 'public'])
+                $this->equalTo(array('mimetype' => 'image/png', 'visibility' => 'public'))
             );
 
         $this->handler->create($spiBinaryFileCreateStruct);
@@ -93,10 +93,11 @@ class FlysystemTest extends TestCase
         $this->handler->delete('prefix/my/file.png');
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException
+     */
     public function testDeleteNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException::class);
-
         $this->filesystem
             ->expects($this->once())
             ->method('delete')
@@ -120,10 +121,11 @@ class FlysystemTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException
+     */
     public function testGetContentsNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException::class);
-
         $this->filesystem
             ->expects($this->once())
             ->method('read')
@@ -152,10 +154,11 @@ class FlysystemTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException
+     */
     public function testGetResourceNotFound()
     {
-        $this->expectException(\eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException::class);
-
         $this->filesystem
             ->expects($this->once())
             ->method('readStream')

@@ -12,7 +12,6 @@ use eZ\Publish\API\Repository\Values\User\User;
 use eZ\Publish\API\Repository\Values\User\UserReference as APIUserReference;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
-use eZ\Publish\Core\FieldType\FieldTypeRegistry;
 use eZ\Publish\Core\Repository\Helper\RelationProcessor;
 use eZ\Publish\Core\Repository\Permission\CachedPermissionService;
 use eZ\Publish\Core\Repository\Permission\PermissionCriterionResolver;
@@ -20,6 +19,7 @@ use eZ\Publish\Core\Repository\Values\User\UserReference;
 use eZ\Publish\Core\Search\Common\BackgroundIndexer;
 use eZ\Publish\SPI\Persistence\Handler as PersistenceHandler;
 use eZ\Publish\SPI\Search\Handler as SearchHandler;
+use Closure;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -140,8 +140,19 @@ class Repository implements RepositoryInterface
      */
     protected $fieldTypeService;
 
-    /** @var \eZ\Publish\Core\FieldType\FieldTypeRegistry */
+    /**
+     * Instance of FieldTypeRegistry.
+     *
+     * @var \eZ\Publish\Core\Repository\Helper\FieldTypeRegistry
+     */
     private $fieldTypeRegistry;
+
+    /**
+     * Instance of NameableFieldTypeRegistry.
+     *
+     * @var \eZ\Publish\Core\Repository\Helper\NameableFieldTypeRegistry
+     */
+    private $nameableFieldTypeRegistry;
 
     /**
      * Instance of name schema resolver service.
@@ -213,7 +224,9 @@ class Repository implements RepositoryInterface
      */
     protected $limitationService;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\RoleDomainMapper */
+    /**
+     * @var \eZ\Publish\Core\Repository\Helper\RoleDomainMapper
+     */
     protected $roleDomainMapper;
 
     /**
@@ -237,10 +250,14 @@ class Repository implements RepositoryInterface
      */
     protected $permissionsHandler;
 
-    /** @var \eZ\Publish\Core\Search\Common\BackgroundIndexer|null */
+    /**
+     * @var \eZ\Publish\Core\Search\Common\BackgroundIndexer|null
+     */
     protected $backgroundIndexer;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
     /**
@@ -252,7 +269,6 @@ class Repository implements RepositoryInterface
      * @param \eZ\Publish\SPI\Search\Handler $searchHandler
      * @param \eZ\Publish\Core\Search\Common\BackgroundIndexer $backgroundIndexer
      * @param \eZ\Publish\Core\Repository\Helper\RelationProcessor $relationProcessor
-     * @param \eZ\Publish\Core\FieldType\FieldTypeRegistry $fieldTypeRegistry
      * @param array $serviceSettings
      * @param \eZ\Publish\API\Repository\Values\User\UserReference|null $user
      * @param \Psr\Log\LoggerInterface|null $logger
@@ -262,8 +278,7 @@ class Repository implements RepositoryInterface
         SearchHandler $searchHandler,
         BackgroundIndexer $backgroundIndexer,
         RelationProcessor $relationProcessor,
-        FieldTypeRegistry $fieldTypeRegistry,
-        array $serviceSettings = [],
+        array $serviceSettings = array(),
         APIUserReference $user = null,
         LoggerInterface $logger = null
     ) {
@@ -271,26 +286,27 @@ class Repository implements RepositoryInterface
         $this->searchHandler = $searchHandler;
         $this->backgroundIndexer = $backgroundIndexer;
         $this->relationProcessor = $relationProcessor;
-        $this->fieldTypeRegistry = $fieldTypeRegistry;
-        $this->serviceSettings = $serviceSettings + [
-            'content' => [],
-            'contentType' => [],
-            'location' => [],
-            'section' => [],
-            'role' => [],
-            'user' => [
+        $this->serviceSettings = $serviceSettings + array(
+            'content' => array(),
+            'contentType' => array(),
+            'location' => array(),
+            'section' => array(),
+            'role' => array(),
+            'user' => array(
                 'anonymousUserID' => 10,
-            ],
-            'language' => [],
-            'trash' => [],
-            'io' => [],
-            'objectState' => [],
-            'search' => [],
-            'urlAlias' => [],
-            'urlWildcard' => [],
-            'nameSchema' => [],
-            'languages' => [],
-        ];
+            ),
+            'language' => array(),
+            'trash' => array(),
+            'io' => array(),
+            'objectState' => array(),
+            'search' => array(),
+            'fieldType' => array(),
+            'nameableFieldTypes' => array(),
+            'urlAlias' => array(),
+            'urlWildcard' => array(),
+            'nameSchema' => array(),
+            'languages' => array(),
+        );
 
         if (!empty($this->serviceSettings['languages'])) {
             $this->serviceSettings['language']['languages'] = $this->serviceSettings['languages'];
@@ -369,9 +385,29 @@ class Repository implements RepositoryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Allows API execution to be performed with full access sand-boxed.
+     *
+     * The closure sandbox will do a catch all on exceptions and rethrow after
+     * re-setting the sudo flag.
+     *
+     * Example use:
+     *     $location = $repository->sudo(
+     *         function ( Repository $repo ) use ( $locationId )
+     *         {
+     *             return $repo->getLocationService()->loadLocation( $locationId )
+     *         }
+     *     );
+     *
+     *
+     * @param \Closure $callback
+     * @param \eZ\Publish\API\Repository\Repository|null $outerRepository
+     *
+     * @throws \RuntimeException Thrown on recursive sudo() use.
+     * @throws \Exception Re throws exceptions thrown inside $callback
+     *
+     * @return mixed
      */
-    public function sudo(callable $callback, RepositoryInterface $outerRepository = null)
+    public function sudo(Closure $callback, RepositoryInterface $outerRepository = null)
     {
         return $this->getPermissionResolver()->sudo($callback, $outerRepository ?? $this);
     }
@@ -415,7 +451,7 @@ class Repository implements RepositoryInterface
     public function canUser($module, $function, ValueObject $object, $targets = null)
     {
         if ($targets instanceof ValueObject) {
-            $targets = [$targets];
+            $targets = array($targets);
         } elseif ($targets === null) {
             $targets = [];
         } elseif (!is_array($targets)) {
@@ -448,7 +484,7 @@ class Repository implements RepositoryInterface
             $this->getDomainMapper(),
             $this->getRelationProcessor(),
             $this->getNameSchemaService(),
-            $this->fieldTypeRegistry,
+            $this->getFieldTypeRegistry(),
             $this->serviceSettings['content']
         );
 
@@ -494,10 +530,9 @@ class Repository implements RepositoryInterface
         $this->contentTypeService = new ContentTypeService(
             $this,
             $this->persistenceHandler->contentTypeHandler(),
-            $this->persistenceHandler->userHandler(),
             $this->getDomainMapper(),
             $this->getContentTypeDomainMapper(),
-            $this->fieldTypeRegistry,
+            $this->getFieldTypeRegistry(),
             $this->serviceSettings['contentType']
         );
 
@@ -548,7 +583,6 @@ class Repository implements RepositoryInterface
             $this,
             $this->persistenceHandler,
             $this->getNameSchemaService(),
-            $this->getPermissionCriterionResolver(),
             $this->serviceSettings['trash']
         );
 
@@ -571,8 +605,6 @@ class Repository implements RepositoryInterface
         $this->sectionService = new SectionService(
             $this,
             $this->persistenceHandler->sectionHandler(),
-            $this->persistenceHandler->locationHandler(),
-            $this->getPermissionCriterionResolver(),
             $this->serviceSettings['section']
         );
 
@@ -595,7 +627,6 @@ class Repository implements RepositoryInterface
         $this->userService = new UserService(
             $this,
             $this->persistenceHandler->userHandler(),
-            $this->persistenceHandler->locationHandler(),
             $this->serviceSettings['user']
         );
 
@@ -617,7 +648,6 @@ class Repository implements RepositoryInterface
             $this,
             $this->persistenceHandler->urlAliasHandler(),
             $this->getNameSchemaService(),
-            $this->getPermissionResolver(),
             $this->serviceSettings['urlAlias']
         );
 
@@ -638,7 +668,6 @@ class Repository implements RepositoryInterface
         $this->urlWildcardService = new URLWildcardService(
             $this,
             $this->persistenceHandler->urlWildcardHandler(),
-            $this->getPermissionResolver(),
             $this->serviceSettings['urlWildcard']
         );
 
@@ -658,8 +687,7 @@ class Repository implements RepositoryInterface
 
         $this->urlService = new URLService(
             $this,
-            $this->persistenceHandler->urlHandler(),
-            $this->getPermissionResolver()
+            $this->persistenceHandler->urlHandler()
         );
 
         return $this->urlService;
@@ -807,7 +835,7 @@ class Repository implements RepositoryInterface
             return $this->fieldTypeService;
         }
 
-        $this->fieldTypeService = new FieldTypeService($this->fieldTypeRegistry);
+        $this->fieldTypeService = new FieldTypeService($this->getFieldTypeRegistry());
 
         return $this->fieldTypeService;
     }
@@ -820,6 +848,34 @@ class Repository implements RepositoryInterface
     public function getPermissionResolver()
     {
         return $this->getCachedPermissionsResolver();
+    }
+
+    /**
+     * @return Helper\FieldTypeRegistry
+     */
+    protected function getFieldTypeRegistry()
+    {
+        if ($this->fieldTypeRegistry !== null) {
+            return $this->fieldTypeRegistry;
+        }
+
+        $this->fieldTypeRegistry = new Helper\FieldTypeRegistry($this->serviceSettings['fieldType']);
+
+        return $this->fieldTypeRegistry;
+    }
+
+    /**
+     * @return Helper\NameableFieldTypeRegistry
+     */
+    protected function getNameableFieldTypeRegistry()
+    {
+        if ($this->nameableFieldTypeRegistry !== null) {
+            return $this->nameableFieldTypeRegistry;
+        }
+
+        $this->nameableFieldTypeRegistry = new Helper\NameableFieldTypeRegistry($this->serviceSettings['nameableFieldTypes']);
+
+        return $this->nameableFieldTypeRegistry;
     }
 
     /**
@@ -842,7 +898,7 @@ class Repository implements RepositoryInterface
         $this->nameSchemaService = new Helper\NameSchemaService(
             $this->persistenceHandler->contentTypeHandler(),
             $this->getContentTypeDomainMapper(),
-            $this->fieldTypeRegistry,
+            $this->getNameableFieldTypeRegistry(),
             $this->serviceSettings['nameSchema']
         );
 
@@ -898,7 +954,7 @@ class Repository implements RepositoryInterface
             $this->persistenceHandler->contentTypeHandler(),
             $this->getContentTypeDomainMapper(),
             $this->persistenceHandler->contentLanguageHandler(),
-            $this->fieldTypeRegistry
+            $this->getFieldTypeRegistry()
         );
 
         return $this->domainMapper;
@@ -920,7 +976,7 @@ class Repository implements RepositoryInterface
         $this->contentTypeDomainMapper = new Helper\ContentTypeDomainMapper(
             $this->persistenceHandler->contentTypeHandler(),
             $this->persistenceHandler->contentLanguageHandler(),
-            $this->fieldTypeRegistry
+            $this->getFieldTypeRegistry()
         );
 
         return $this->contentTypeDomainMapper;

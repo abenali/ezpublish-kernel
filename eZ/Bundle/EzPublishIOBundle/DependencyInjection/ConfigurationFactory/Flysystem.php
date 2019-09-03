@@ -11,11 +11,11 @@ namespace eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory;
 use eZ\Bundle\EzPublishIOBundle\DependencyInjection\ConfigurationFactory;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition as ServiceDefinition;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -69,12 +69,11 @@ abstract class Flysystem implements ConfigurationFactory, ContainerAwareInterfac
         }
 
         $filesystemId = sprintf('ezpublish.core.io.flysystem.%s_filesystem', $name);
-        $filesystemServiceDefinition = new ChildDefinition('ezpublish.core.io.flysystem.base_filesystem');
         $definition = $container->setDefinition(
             $filesystemId,
-            $filesystemServiceDefinition
+            new DefinitionDecorator('ezpublish.core.io.flysystem.base_filesystem')
         );
-        $definition->setArguments([new Reference($adapterId)]);
+        $definition->setArguments(array(new Reference($adapterId)));
 
         return $filesystemId;
     }

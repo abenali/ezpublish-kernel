@@ -54,9 +54,9 @@ class ParentUserGroupLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentUserGroupLimitation(
-                [
-                    'limitationValues' => [true],
-                ]
+                array(
+                    'limitationValues' => array(true),
+                )
             )
         );
 
@@ -87,11 +87,10 @@ class ParentUserGroupLimitationTest extends BaseLimitationTest
      * Tests a ParentUserGroupLimitation.
      *
      * @see eZ\Publish\API\Repository\Values\User\Limitation\ParentUserGroupLimitation
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testParentUserGroupLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
         $userService = $repository->getUserService();
 
@@ -117,9 +116,9 @@ class ParentUserGroupLimitationTest extends BaseLimitationTest
         $policyCreate = $roleService->newPolicyCreateStruct('content', 'create');
         $policyCreate->addLimitation(
             new ParentUserGroupLimitation(
-                [
-                    'limitationValues' => [true],
-                ]
+                array(
+                    'limitationValues' => array(true),
+                )
             )
         );
 

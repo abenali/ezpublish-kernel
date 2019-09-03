@@ -23,7 +23,9 @@ class UrlAliasGenerator extends Generator
     const INTERNAL_LOCATION_ROUTE = '_ezpublishLocation';
     const INTERNAL_CONTENT_VIEW_ROUTE = '_ez_content_view';
 
-    /** @var \eZ\Publish\Core\Repository\Repository */
+    /**
+     * @var \eZ\Publish\Core\Repository\Repository
+     */
     private $repository;
 
     /**
@@ -33,16 +35,24 @@ class UrlAliasGenerator extends Generator
      */
     private $defaultRouter;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $rootLocationId;
 
-    /** @var array */
-    private $excludedUriPrefixes = [];
+    /**
+     * @var array
+     */
+    private $excludedUriPrefixes = array();
 
-    /** @var array */
-    private $pathPrefixMap = [];
+    /**
+     * @var array
+     */
+    private $pathPrefixMap = array();
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     private $configResolver;
 
     /**
@@ -53,7 +63,7 @@ class UrlAliasGenerator extends Generator
      */
     private $unsafeCharMap;
 
-    public function __construct(Repository $repository, RouterInterface $defaultRouter, ConfigResolverInterface $configResolver, array $unsafeCharMap = [])
+    public function __construct(Repository $repository, RouterInterface $defaultRouter, ConfigResolverInterface $configResolver, array $unsafeCharMap = array())
     {
         $this->repository = $repository;
         $this->defaultRouter = $defaultRouter;
@@ -115,7 +125,7 @@ class UrlAliasGenerator extends Generator
         } else {
             $path = $this->defaultRouter->generate(
                 self::INTERNAL_CONTENT_VIEW_ROUTE,
-                ['contentId' => $location->contentId, 'locationId' => $location->id]
+                array('contentId' => $location->contentId, 'locationId' => $location->id)
             );
         }
 
@@ -159,7 +169,7 @@ class UrlAliasGenerator extends Generator
         }
 
         if (!isset($this->pathPrefixMap[$siteaccess])) {
-            $this->pathPrefixMap[$siteaccess] = [];
+            $this->pathPrefixMap[$siteaccess] = array();
         }
 
         if (!isset($this->pathPrefixMap[$siteaccess][$rootLocationId])) {

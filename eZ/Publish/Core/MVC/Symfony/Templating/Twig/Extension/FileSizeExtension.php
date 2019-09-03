@@ -10,16 +10,16 @@ namespace eZ\Publish\Core\MVC\Symfony\Templating\Twig\Extension;
 
 use Locale;
 use NumberFormatter;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
+use Twig_Extension;
+use Twig_SimpleFilter;
+use Symfony\Component\Translation\TranslatorInterface;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\Locale\LocaleConverterInterface;
 
 /**
  * Class FileSizeExtension.
  */
-class FileSizeExtension extends AbstractExtension
+class FileSizeExtension extends Twig_Extension
 {
     /**
      * @param TranslatorInterface $translator
@@ -74,9 +74,9 @@ class FileSizeExtension extends AbstractExtension
      */
     public function getFilters()
     {
-        return [
-            new TwigFilter('ez_file_size', [$this, 'sizeFilter']),
-        ];
+        return array(
+            new Twig_SimpleFilter('ez_file_size', array($this, 'sizeFilter')),
+        );
     }
 
     /**

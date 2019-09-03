@@ -25,32 +25,32 @@ Please define:
 EOT;
         $suggestion = new ConfigSuggestion($message);
         $suggestion->setMandatory(true);
-        $suggestionArray = [
-            'doctrine' => [
-                'dbal' => [
-                    'connections' => [
-                        'default' => [
+        $suggestionArray = array(
+            'doctrine' => array(
+                'dbal' => array(
+                    'connections' => array(
+                        'default' => array(
                             'driver' => 'pdo_mysql',
                             'host' => 'localhost',
                             'dbname' => 'my_database',
                             'user' => 'my_user',
                             'password' => 'some_password',
                             'charset' => 'UTF8',
-                        ],
-                    ],
-                ],
-            ],
-            'ezpublish' => [
-                'repositories' => [
-                    'my_repository' => ['engine' => 'legacy', 'connection' => 'default'],
-                ],
-                'system' => [
-                    'foo' => [
+                        ),
+                    ),
+                ),
+            ),
+            'ezpublish' => array(
+                'repositories' => array(
+                    'my_repository' => array('engine' => 'legacy', 'connection' => 'default'),
+                ),
+                'system' => array(
+                    'foo' => array(
                         'repository' => 'my_repository',
-                    ],
-                ],
-            ],
-        ];
+                    ),
+                ),
+            ),
+        );
         $suggestion->setSuggestion($suggestionArray);
 
         $expectedMessage = <<<EOT

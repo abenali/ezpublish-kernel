@@ -5,7 +5,7 @@
  */
 namespace eZ\Publish\Core\Helper\FieldsGroups;
 
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * A fields groups list implementation based on settings (scalar values) injection.
@@ -21,7 +21,7 @@ final class ArrayTranslatorFieldsGroupsList implements FieldsGroupsList
     /** @var string */
     private $defaultGroup;
 
-    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
+    /** @var \Symfony\Component\Translation\TranslatorInterface */
     private $translator;
 
     public function __construct(TranslatorInterface $translator, $defaultGroup, array $groups)

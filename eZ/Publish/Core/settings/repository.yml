@@ -1,73 +1,73 @@
 services:
     # API Aliases
     ezpublish.api.repository:
-        alias: eZ\Publish\Core\Event\Repository
+        alias: ezpublish.signalslot.repository
         public: true
 
     ezpublish.api.service.bookmark:
-        alias: eZ\Publish\Core\Event\BookmarkService
+        alias: ezpublish.signalslot.service.bookmark
         public: true
 
     ezpublish.api.service.content:
-        alias: eZ\Publish\Core\Event\ContentService
+        alias: ezpublish.signalslot.service.content
         public: true
 
     ezpublish.api.service.content_type:
-        alias: eZ\Publish\Core\Event\ContentTypeService
+        alias: ezpublish.signalslot.service.content_type
         public: true
 
     ezpublish.api.service.field_type:
-        alias: eZ\Publish\Core\Event\FieldTypeService
+        alias: ezpublish.signalslot.service.field_type
         public: true
 
     ezpublish.api.service.role:
-        alias: eZ\Publish\Core\Event\RoleService
+        alias: ezpublish.signalslot.service.role
         public: true
 
     ezpublish.api.service.object_state:
-        alias: eZ\Publish\Core\Event\ObjectStateService
+        alias: ezpublish.signalslot.service.object_state
         public: true
 
     ezpublish.api.service.url_wildcard:
-        alias: eZ\Publish\Core\Event\URLWildcardService
+        alias: ezpublish.signalslot.service.url_wildcard
         public: true
 
     ezpublish.api.service.url_alias:
-        alias: eZ\Publish\Core\Event\URLAliasService
+        alias: ezpublish.signalslot.service.url_alias
         public: true
 
     ezpublish.api.service.user:
-        alias: eZ\Publish\Core\Event\UserService
+        alias: ezpublish.signalslot.service.user
         public: true
 
     ezpublish.api.service.search:
-        alias: eZ\Publish\Core\Event\SearchService
+        alias: ezpublish.signalslot.service.search
         public: true
 
     ezpublish.api.service.section:
-        alias: eZ\Publish\Core\Event\SectionService
+        alias: ezpublish.signalslot.service.section
         public: true
 
     ezpublish.api.service.trash:
-        alias: eZ\Publish\Core\Event\TrashService
+        alias: ezpublish.signalslot.service.trash
         public: true
 
     ezpublish.api.service.location:
-        alias: eZ\Publish\Core\Event\LocationService
+        alias: ezpublish.signalslot.service.location
         public: true
 
     ezpublish.api.service.language:
-        alias: eZ\Publish\Core\Event\LanguageService
+        alias: ezpublish.signalslot.service.language
         public: true
 
     ezpublish.api.service.url:
-        alias: eZ\Publish\Core\Event\URLService
+        alias: ezpublish.signalslot.service.url
         public: true
 
     ezpublish.api.service.notification:
-        alias: eZ\Publish\Core\Event\NotificationService
+        alias: eZ\Publish\Core\SignalSlot\NotificationService
         public: true
 
     ezpublish.api.service.user_preference:
-        alias: eZ\Publish\Core\Event\UserPreferenceService
+        alias: eZ\Publish\Core\SignalSlot\UserPreferenceService
         public: true

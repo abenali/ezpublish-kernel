@@ -16,13 +16,17 @@ use PHPUnit\Framework\TestCase;
 
 class ScaleFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $innerLoader;
 
-    /** @var ScaleFilterLoader */
+    /**
+     * @var ScaleFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerLoader = $this->createMock(LoaderInterface::class);
@@ -31,22 +35,21 @@ class ScaleFilterLoaderTest extends TestCase
     }
 
     /**
+     * @expectedException \Imagine\Exception\InvalidArgumentException
      * @dataProvider loadInvalidProvider
      */
     public function testLoadInvalidOptions(array $options)
     {
-        $this->expectException(\Imagine\Exception\InvalidArgumentException::class);
-
         $this->loader->load($this->createMock(ImageInterface::class), $options);
     }
 
     public function loadInvalidProvider()
     {
-        return [
-            [[]],
-            [[123]],
-            [['foo' => 'bar']],
-        ];
+        return array(
+            array(array()),
+            array(array(123)),
+            array(array('foo' => 'bar')),
+        );
     }
 
     public function testLoadHeighten()
@@ -66,10 +69,10 @@ class ScaleFilterLoaderTest extends TestCase
         $this->innerLoader
             ->expects($this->once())
             ->method('load')
-            ->with($image, $this->equalTo(['heighten' => $height]))
+            ->with($image, $this->equalTo(array('heighten' => $height)))
             ->will($this->returnValue($image));
 
-        $this->assertSame($image, $this->loader->load($image, [$width, $height]));
+        $this->assertSame($image, $this->loader->load($image, array($width, $height)));
     }
 
     public function testLoadWiden()
@@ -89,9 +92,9 @@ class ScaleFilterLoaderTest extends TestCase
         $this->innerLoader
             ->expects($this->once())
             ->method('load')
-            ->with($image, $this->equalTo(['widen' => $width]))
+            ->with($image, $this->equalTo(array('widen' => $width)))
             ->will($this->returnValue($image));
 
-        $this->assertSame($image, $this->loader->load($image, [$width, $height]));
+        $this->assertSame($image, $this->loader->load($image, array($width, $height)));
     }
 }

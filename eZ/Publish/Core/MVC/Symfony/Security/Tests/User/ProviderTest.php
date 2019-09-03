@@ -24,16 +24,22 @@ use Symfony\Component\Security\Core\User\UserInterface as SymfonyUserInterface;
 
 class ProviderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $repository;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $userService;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\Security\User\Provider */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Security\User\Provider
+     */
     private $userProvider;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->userService = $this->createMock(UserService::class);
@@ -51,10 +57,11 @@ class ProviderTest extends TestCase
         $this->assertSame($user, $this->userProvider->loadUserByUsername($user));
     }
 
+    /**
+     * @expectedException \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     */
     public function testLoadUserByUsernameUserNotFound()
     {
-        $this->expectException(\Symfony\Component\Security\Core\Exception\UsernameNotFoundException::class);
-
         $username = 'foobar';
         $this->userService
             ->expects($this->once())
@@ -77,13 +84,14 @@ class ProviderTest extends TestCase
         $user = $this->userProvider->loadUserByUsername($username);
         $this->assertInstanceOf(UserInterface::class, $user);
         $this->assertSame($apiUser, $user->getAPIUser());
-        $this->assertSame(['ROLE_USER'], $user->getRoles());
+        $this->assertSame(array('ROLE_USER'), $user->getRoles());
     }
 
+    /**
+     * @expectedException \Symfony\Component\Security\Core\Exception\UnsupportedUserException
+     */
     public function testRefreshUserNotSupported()
     {
-        $this->expectException(\Symfony\Component\Security\Core\Exception\UnsupportedUserException::class);
-
         $user = $this->createMock(SymfonyUserInterface::class);
         $this->userProvider->refreshUser($user);
     }
@@ -92,15 +100,15 @@ class ProviderTest extends TestCase
     {
         $userId = 123;
         $apiUser = new User(
-            [
+            array(
                 'content' => new Content(
-                    [
+                    array(
                         'versionInfo' => new VersionInfo(
-                            ['contentInfo' => new ContentInfo(['id' => $userId])]
+                            array('contentInfo' => new ContentInfo(array('id' => $userId)))
                         ),
-                    ]
+                    )
                 ),
-            ]
+            )
         );
         $refreshedAPIUser = clone $apiUser;
         $user = $this->createMock(UserInterface::class);
@@ -127,21 +135,22 @@ class ProviderTest extends TestCase
         $this->assertSame($user, $this->userProvider->refreshUser($user));
     }
 
+    /**
+     * @expectedException \Symfony\Component\Security\Core\Exception\UsernameNotFoundException
+     */
     public function testRefreshUserNotFound()
     {
-        $this->expectException(\Symfony\Component\Security\Core\Exception\UsernameNotFoundException::class);
-
         $userId = 123;
         $apiUser = new User(
-            [
+            array(
                 'content' => new Content(
-                    [
+                    array(
                         'versionInfo' => new VersionInfo(
-                            ['contentInfo' => new ContentInfo(['id' => $userId])]
+                            array('contentInfo' => new ContentInfo(array('id' => $userId)))
                         ),
-                    ]
+                    )
                 ),
-            ]
+            )
         );
         $user = $this->createMock(UserInterface::class);
         $user
@@ -168,11 +177,11 @@ class ProviderTest extends TestCase
 
     public function supportsClassProvider()
     {
-        return [
-            [SymfonyUserInterface::class, false],
-            [MVCUser::class, true],
-            [get_class($this->createMock(MVCUser::class)), true],
-        ];
+        return array(
+            array(SymfonyUserInterface::class, false),
+            array(MVCUser::class, true),
+            array(get_class($this->createMock(MVCUser::class)), true),
+        );
     }
 
     public function testLoadUserByAPIUser()

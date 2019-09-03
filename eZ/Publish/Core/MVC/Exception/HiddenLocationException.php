@@ -11,7 +11,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class HiddenLocationException extends NotFoundHttpException
 {
-    /** @var \eZ\Publish\API\Repository\Values\Content\Location */
+    /**
+     * @var \eZ\Publish\API\Repository\Values\Content\Location
+     */
     private $location;
 
     public function __construct(Location $location, $message = null, \Exception $previous = null, $code = 0)

@@ -12,13 +12,12 @@ use eZ\Publish\API\Repository\ContentService as ContentServiceInterface;
 use eZ\Publish\API\Repository\Values\Content\ContentCreateStruct;
 use eZ\Publish\API\Repository\Values\Content\ContentUpdateStruct;
 use eZ\Publish\API\Repository\Values\Content\ContentMetadataUpdateStruct;
-use eZ\Publish\API\Repository\Values\Content\Language;
 use eZ\Publish\API\Repository\Values\Content\LocationCreateStruct;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\Values\User\User;
 use eZ\Publish\API\Repository\Values\Content\VersionInfo;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
-use eZ\Publish\API\Repository\LanguageResolver;
+use eZ\Publish\Core\Repository\SiteAccessAware\Language\LanguageResolver;
 
 /**
  * SiteAccess aware implementation of ContentService injecting languages where needed.
@@ -28,14 +27,14 @@ class ContentService implements ContentServiceInterface
     /** @var \eZ\Publish\API\Repository\ContentService */
     protected $service;
 
-    /** @var \eZ\Publish\API\Repository\LanguageResolver */
+    /** @var \eZ\Publish\Core\Repository\SiteAccessAware\Language\LanguageResolver */
     protected $languageResolver;
 
     /**
      * Construct service object from aggregated service and LanguageResolver.
      *
      * @param \eZ\Publish\API\Repository\ContentService $service
-     * @param \eZ\Publish\API\Repository\LanguageResolver $languageResolver
+     * @param \eZ\Publish\Core\Repository\SiteAccessAware\Language\LanguageResolver $languageResolver
      */
     public function __construct(
         ContentServiceInterface $service,
@@ -48,14 +47,6 @@ class ContentService implements ContentServiceInterface
     public function loadContentInfo($contentId)
     {
         return $this->service->loadContentInfo($contentId);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadContentInfoList(array $contentIds): iterable
-    {
-        return $this->service->loadContentInfoList($contentIds);
     }
 
     public function loadContentInfoByRemoteId($remoteId)
@@ -112,7 +103,7 @@ class ContentService implements ContentServiceInterface
         );
     }
 
-    public function createContent(ContentCreateStruct $contentCreateStruct, array $locationCreateStructs = [])
+    public function createContent(ContentCreateStruct $contentCreateStruct, array $locationCreateStructs = array())
     {
         return $this->service->createContent($contentCreateStruct, $locationCreateStructs);
     }
@@ -142,9 +133,9 @@ class ContentService implements ContentServiceInterface
         return $this->service->updateContent($versionInfo, $contentUpdateStruct);
     }
 
-    public function publishVersion(VersionInfo $versionInfo, array $translations = Language::ALL)
+    public function publishVersion(VersionInfo $versionInfo)
     {
-        return $this->service->publishVersion($versionInfo, $translations);
+        return $this->service->publishVersion($versionInfo);
     }
 
     public function deleteVersion(VersionInfo $versionInfo)
@@ -152,9 +143,9 @@ class ContentService implements ContentServiceInterface
         return $this->service->deleteVersion($versionInfo);
     }
 
-    public function loadVersions(ContentInfo $contentInfo, ?int $status = null)
+    public function loadVersions(ContentInfo $contentInfo)
     {
-        return $this->service->loadVersions($contentInfo, $status);
+        return $this->service->loadVersions($contentInfo);
     }
 
     public function copyContent(ContentInfo $contentInfo, LocationCreateStruct $destinationLocationCreateStruct, VersionInfo $versionInfo = null)
@@ -200,16 +191,6 @@ class ContentService implements ContentServiceInterface
     public function loadContentListByContentInfo(array $contentInfoList, array $languages = [], $useAlwaysAvailable = true)
     {
         return $this->service->loadContentListByContentInfo($contentInfoList, $languages, $useAlwaysAvailable);
-    }
-
-    public function hideContent(ContentInfo $contentInfo): void
-    {
-        $this->service->hideContent($contentInfo);
-    }
-
-    public function revealContent(ContentInfo $contentInfo): void
-    {
-        $this->service->revealContent($contentInfo);
     }
 
     public function newContentCreateStruct(ContentType $contentType, $mainLanguageCode)

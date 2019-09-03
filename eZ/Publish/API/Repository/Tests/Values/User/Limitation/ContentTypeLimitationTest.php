@@ -58,7 +58,7 @@ class ContentTypeLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 
@@ -92,11 +92,10 @@ class ContentTypeLimitationTest extends BaseLimitationTest
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ContentTypeLimitation
      *
      * @throws \ErrorException
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testContentTypeLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $contentService = $repository->getContentService();
@@ -125,7 +124,7 @@ class ContentTypeLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 
@@ -147,11 +146,10 @@ class ContentTypeLimitationTest extends BaseLimitationTest
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\ContentTypeLimitation
      *
      * @throws \ErrorException
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testContentTypeLimitationForbidVariant()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $contentService = $repository->getContentService();
@@ -180,7 +178,7 @@ class ContentTypeLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new ContentTypeLimitation(
-                ['limitationValues' => [$contentTypeId]]
+                array('limitationValues' => array($contentTypeId))
             )
         );
 

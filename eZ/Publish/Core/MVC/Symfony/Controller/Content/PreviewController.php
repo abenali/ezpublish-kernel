@@ -29,22 +29,31 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class PreviewController
 {
-    const PREVIEW_PARAMETER_NAME = 'isPreview';
     const INTERNAL_LOCATION_VIEW_ROUTE = '_ezpublishLocation';
 
-    /** @var \eZ\Publish\API\Repository\ContentService */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentService
+     */
     private $contentService;
 
-    /** @var \Symfony\Component\HttpKernel\HttpKernelInterface */
+    /**
+     * @var \Symfony\Component\HttpKernel\HttpKernelInterface
+     */
     private $kernel;
 
-    /** @var \eZ\Publish\Core\Helper\ContentPreviewHelper */
+    /**
+     * @var \eZ\Publish\Core\Helper\ContentPreviewHelper
+     */
     private $previewHelper;
 
-    /** @var \Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface */
+    /**
+     * @var \Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface
+     */
     private $authorizationChecker;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\View\CustomLocationControllerChecker */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\View\CustomLocationControllerChecker
+     */
     private $controllerChecker;
 
     public function __construct(
@@ -71,8 +80,8 @@ class PreviewController
         $this->previewHelper->setPreviewActive(true);
 
         try {
-            $content = $this->contentService->loadContent($contentId, [$language], $versionNo);
-            $location = $this->locationProvider->loadMainLocationByContent($content);
+            $content = $this->contentService->loadContent($contentId, array($language), $versionNo);
+            $location = $this->locationProvider->loadMainLocation($contentId);
 
             if (!$location instanceof Location) {
                 throw new NotImplementedException('Preview for content without locations');
@@ -84,7 +93,7 @@ class PreviewController
             throw new AccessDeniedException();
         }
 
-        if (!$this->authorizationChecker->isGranted(new AuthorizationAttribute('content', 'versionread', ['valueObject' => $content]))) {
+        if (!$this->authorizationChecker->isGranted(new AuthorizationAttribute('content', 'versionread', array('valueObject' => $content)))) {
             throw new AccessDeniedException();
         }
 
@@ -135,27 +144,27 @@ EOF;
      */
     protected function getForwardRequest(Location $location, Content $content, SiteAccess $previewSiteAccess, Request $request, $language)
     {
-        $forwardRequestParameters = [
+        $forwardRequestParameters = array(
             '_controller' => UrlAliasRouter::VIEW_ACTION,
             // specify a route for RouteReference generator
             '_route' => UrlAliasGenerator::INTERNAL_CONTENT_VIEW_ROUTE,
-            '_route_params' => [
+            '_route_params' => array(
                 'contentId' => $content->id,
                 'locationId' => $location->id,
-            ],
+            ),
             'location' => $location,
             'content' => $content,
             'viewType' => ViewManagerInterface::VIEW_TYPE_FULL,
             'layout' => true,
-            'params' => [
+            'params' => array(
                 'content' => $content,
                 'location' => $location,
-                self::PREVIEW_PARAMETER_NAME => true,
+                'isPreview' => true,
                 'language' => $language,
-            ],
+            ),
             'siteaccess' => $previewSiteAccess,
             'semanticPathinfo' => $request->attributes->get('semanticPathinfo'),
-        ];
+        );
 
         if ($this->controllerChecker->usesCustomController($content, $location)) {
             $forwardRequestParameters = [

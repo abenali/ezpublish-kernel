@@ -18,7 +18,7 @@ class MapperTest extends TestCase
     /** @var \eZ\Publish\Core\Persistence\Legacy\Notification\Mapper */
     private $mapper;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->mapper = new Mapper();
     }
@@ -79,11 +79,10 @@ class MapperTest extends TestCase
 
     /**
      * @covers \eZ\Publish\Core\Persistence\Legacy\Notification\Mapper::extractNotificationsFromRows
+     * @expectedException \RuntimeException
      */
     public function testExtractNotificationsFromRowsThrowsRuntimeException()
     {
-        $this->expectException(\RuntimeException::class);
-
         $rows = [
             [
                 'id' => 1,

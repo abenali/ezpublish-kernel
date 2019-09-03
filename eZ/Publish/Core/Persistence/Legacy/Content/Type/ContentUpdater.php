@@ -41,7 +41,9 @@ class ContentUpdater
      */
     protected $storageHandler;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper
+     */
     protected $contentMapper;
 
     /**
@@ -74,7 +76,7 @@ class ContentUpdater
      */
     public function determineActions(Type $fromType, Type $toType)
     {
-        $actions = [];
+        $actions = array();
         foreach ($fromType->fieldDefinitions as $fieldDef) {
             if (!$this->hasFieldDefinition($toType, $fieldDef)) {
                 $actions[] = new ContentUpdater\Action\RemoveField(

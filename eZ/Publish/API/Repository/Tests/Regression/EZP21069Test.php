@@ -29,7 +29,7 @@ use eZ\Publish\API\Repository\Values\Content\Query\Criterion\Operator;
  */
 class EZP21069Test extends BaseTest
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -50,7 +50,7 @@ class EZP21069Test extends BaseTest
         $contentService->publishVersion(
             $contentService->createContent(
                 $contentCreateStruct,
-                [$locationService->newLocationCreateStruct(2)]
+                array($locationService->newLocationCreateStruct(2))
             )->versionInfo
         );
 
@@ -102,7 +102,7 @@ class EZP21069Test extends BaseTest
         $results = $this->getRepository()->getSearchService()->findContent($query);
 
         $this->assertEquals(1, $results->totalCount);
-        $this->assertCount(1, $results->searchHits);
+        $this->assertEquals(1, count($results->searchHits));
     }
 
     public function testSearchOnDraftAttributeContentGivesNoResult()

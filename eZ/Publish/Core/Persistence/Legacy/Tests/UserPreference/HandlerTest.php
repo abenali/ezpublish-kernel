@@ -19,16 +19,22 @@ class HandlerTest extends TestCase
 {
     const USER_PREFERENCE_ID = 1;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Gateway|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Gateway|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $gateway;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Mapper|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Mapper|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $mapper;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Handler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\UserPreference\Handler
+     */
     private $handler;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->gateway = $this->createMock(Gateway::class);
         $this->mapper = $this->createMock(Mapper::class);

@@ -15,13 +15,17 @@ use PHPUnit\Framework\TestCase;
 
 class CropFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $innerLoader;
 
-    /** @var CropFilterLoader */
+    /**
+     * @var CropFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerLoader = $this->createMock(LoaderInterface::class);
@@ -30,24 +34,23 @@ class CropFilterLoaderTest extends TestCase
     }
 
     /**
+     * @expectedException \Imagine\Exception\InvalidArgumentException
      * @dataProvider loadInvalidProvider
      */
     public function testLoadInvalidOptions(array $options)
     {
-        $this->expectException(\Imagine\Exception\InvalidArgumentException::class);
-
         $this->loader->load($this->createMock(ImageInterface::class), $options);
     }
 
     public function loadInvalidProvider()
     {
-        return [
-            [[]],
-            [[123]],
-            [['foo' => 'bar']],
-            [[123, 456]],
-            [[123, 456, 789]],
-        ];
+        return array(
+            array(array()),
+            array(array(123)),
+            array(array('foo' => 'bar')),
+            array(array(123, 456)),
+            array(array(123, 456, 789)),
+        );
     }
 
     public function testLoad()
@@ -61,9 +64,9 @@ class CropFilterLoaderTest extends TestCase
         $this->innerLoader
             ->expects($this->once())
             ->method('load')
-            ->with($image, ['size' => [$width, $height], 'start' => [$offsetX, $offsetY]])
+            ->with($image, array('size' => array($width, $height), 'start' => array($offsetX, $offsetY)))
             ->will($this->returnValue($image));
 
-        $this->assertSame($image, $this->loader->load($image, [$width, $height, $offsetX, $offsetY]));
+        $this->assertSame($image, $this->loader->load($image, array($width, $height, $offsetX, $offsetY)));
     }
 }

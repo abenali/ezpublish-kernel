@@ -12,7 +12,9 @@ use Liip\ImagineBundle\Imagine\Filter\Loader\LoaderInterface;
 
 abstract class FilterLoaderWrapped implements LoaderInterface
 {
-    /** @var LoaderInterface */
+    /**
+     * @var LoaderInterface
+     */
     protected $innerLoader;
 
     /**

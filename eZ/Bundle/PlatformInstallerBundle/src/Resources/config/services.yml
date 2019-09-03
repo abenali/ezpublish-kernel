@@ -4,12 +4,6 @@ parameters:
     ezplatform.installer.install_command.class: EzSystems\PlatformInstallerBundle\Command\InstallPlatformCommand
 
 services:
-    EzSystems\PlatformInstallerBundle\Event\Subscriber\BuildSchemaSubscriber:
-        autoconfigure: true
-        public: false
-        arguments:
-            - '@=service("kernel").locateResource("@EzPublishCoreBundle/Resources/config/storage/legacy/schema.yaml")'
-
     ezplatform.installer.db_based_installer:
         abstract: true
         class:  "%ezplatform.installer.db_based_installer.class%"
@@ -17,7 +11,6 @@ services:
         lazy: true
 
     ezplatform.installer.clean_installer:
-        public: true
         class: "%ezplatform.installer.clean_installer.class%"
         parent: ezplatform.installer.db_based_installer
         tags:
@@ -31,4 +24,4 @@ services:
             - '@ezpublish.cache_pool'
             - "%kernel.environment%"
         tags:
-            - { name: console.command, command: ezplatform:install }
+            - { name: console.command }

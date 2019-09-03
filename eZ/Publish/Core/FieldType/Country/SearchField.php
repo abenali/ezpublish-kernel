@@ -18,7 +18,9 @@ use eZ\Publish\SPI\Search;
  */
 class SearchField implements Indexable
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $countriesInfo;
 
     /**
@@ -40,13 +42,13 @@ class SearchField implements Indexable
     public function getIndexData(Field $field, FieldDefinition $fieldDefinition)
     {
         if (empty($field->value->data)) {
-            return [];
+            return array();
         }
 
-        $nameList = [];
-        $IDCList = [];
-        $alpha2List = [];
-        $alpha3List = [];
+        $nameList = array();
+        $IDCList = array();
+        $alpha2List = array();
+        $alpha3List = array();
 
         foreach ($field->value->data as $alpha2) {
             if (isset($this->countriesInfo[$alpha2])) {
@@ -57,7 +59,7 @@ class SearchField implements Indexable
             }
         }
 
-        return [
+        return array(
             new Search\Field(
                 'idc',
                 $IDCList,
@@ -88,7 +90,7 @@ class SearchField implements Indexable
                 $nameList,
                 new Search\FieldType\FullTextField()
             ),
-        ];
+        );
     }
 
     /**
@@ -98,13 +100,13 @@ class SearchField implements Indexable
      */
     public function getIndexDefinition()
     {
-        return [
+        return array(
             'idc' => new Search\FieldType\MultipleIntegerField(),
             'alpha2' => new Search\FieldType\MultipleStringField(),
             'alpha3' => new Search\FieldType\MultipleStringField(),
             'name' => new Search\FieldType\MultipleStringField(),
             'sort_value' => new Search\FieldType\StringField(),
-        ];
+        );
     }
 
     /**

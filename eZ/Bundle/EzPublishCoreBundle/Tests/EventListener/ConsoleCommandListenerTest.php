@@ -10,11 +10,12 @@ namespace eZ\Bundle\EzPublishCoreBundle\Tests\EventListener;
 
 use eZ\Bundle\EzPublishCoreBundle\EventListener\ConsoleCommandListener;
 use eZ\Bundle\EzPublishCoreBundle\Tests\EventListener\Stubs\TestOutput;
-use eZ\Publish\Core\MVC\Symfony\Event\ConsoleInitEvent;
-use eZ\Publish\Core\MVC\Symfony\MVCEvents;
 use eZ\Publish\Core\MVC\Symfony\SiteAccess;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
@@ -23,25 +24,42 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ConsoleCommandListenerTest extends TestCase
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     private $siteAccessList = ['default', 'site1'];
 
-    /** @var SiteAccess */
+    /**
+     * @var SiteAccess
+     */
     private $siteAccess;
 
-    /** @var EventDispatcherInterface|MockObject */
+    /**
+     * @var EventDispatcherInterface|MockObject
+     */
     private $dispatcher;
 
-    /** @var ConsoleCommandListener */
+    /**
+     * @var ConsoleCommandListener
+     */
     private $listener;
 
-    /** @var InputDefinition; */
+    /**
+     * @var InputDefinition;
+     */
     private $inputDefinition;
 
-    /** @var TestOutput */
+    /**
+     * @var Command
+     */
+    private $command;
+
+    /**
+     * @var TestOutput
+     */
     private $testOutput;
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
         $this->siteAccess = new SiteAccess();
@@ -49,42 +67,45 @@ class ConsoleCommandListenerTest extends TestCase
         $this->listener = new ConsoleCommandListener('default', $this->siteAccessList, $this->dispatcher);
         $this->listener->setSiteAccess($this->siteAccess);
         $this->dispatcher->addSubscriber($this->listener);
-        $this->inputDefinition = new InputDefinition([new InputOption('siteaccess', null, InputOption::VALUE_OPTIONAL)]);
+        $this->command = new Command('test:siteaccess');
+        $this->inputDefinition = new InputDefinition(array(new InputOption('siteaccess', null, InputOption::VALUE_OPTIONAL)));
         $this->testOutput = new TestOutput(Output::VERBOSITY_QUIET, true);
     }
 
     public function testGetSubscribedEvents()
     {
         $this->assertSame(
-            [
-                MVCEvents::CONSOLE_INIT => [['onConsoleCommand', -1]],
-            ],
+            array(
+                ConsoleEvents::COMMAND => array(array('onConsoleCommand', -1)),
+            ),
             $this->listener->getSubscribedEvents()
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\MVC\Exception\InvalidSiteAccessException
+     * @expectedExceptionMessageRegExp /^Invalid siteaccess 'foo', matched by .+\. Valid siteaccesses are/
+     */
     public function testInvalidSiteAccessDev()
     {
-        $this->expectException(\eZ\Publish\Core\MVC\Exception\InvalidSiteAccessException::class);
-        $this->expectExceptionMessageRegExp('/^Invalid siteaccess \'foo\', matched by .+\\. Valid siteaccesses are/');
-
         $this->dispatcher->expects($this->never())
             ->method('dispatch');
-        $input = new ArrayInput(['--siteaccess' => 'foo'], $this->inputDefinition);
-        $event = new ConsoleInitEvent($input, $this->testOutput);
+        $input = new ArrayInput(array('--siteaccess' => 'foo'), $this->inputDefinition);
+        $event = new ConsoleCommandEvent($this->command, $input, $this->testOutput);
         $this->listener->setDebug(true);
         $this->listener->onConsoleCommand($event);
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\MVC\Exception\InvalidSiteAccessException
+     * @expectedExceptionMessageRegExp /^Invalid siteaccess 'foo', matched by .+\.$/
+     */
     public function testInvalidSiteAccessProd()
     {
-        $this->expectException(\eZ\Publish\Core\MVC\Exception\InvalidSiteAccessException::class);
-        $this->expectExceptionMessageRegExp('/^Invalid siteaccess \'foo\', matched by .+\\.$/');
-
         $this->dispatcher->expects($this->never())
             ->method('dispatch');
-        $input = new ArrayInput(['--siteaccess' => 'foo'], $this->inputDefinition);
-        $event = new ConsoleInitEvent($input, $this->testOutput);
+        $input = new ArrayInput(array('--siteaccess' => 'foo'), $this->inputDefinition);
+        $event = new ConsoleCommandEvent($this->command, $input, $this->testOutput);
         $this->listener->setDebug(false);
         $this->listener->onConsoleCommand($event);
     }
@@ -93,8 +114,8 @@ class ConsoleCommandListenerTest extends TestCase
     {
         $this->dispatcher->expects($this->once())
             ->method('dispatch');
-        $input = new ArrayInput(['--siteaccess' => 'site1'], $this->inputDefinition);
-        $event = new ConsoleInitEvent($input, $this->testOutput);
+        $input = new ArrayInput(array('--siteaccess' => 'site1'), $this->inputDefinition);
+        $event = new ConsoleCommandEvent($this->command, $input, $this->testOutput);
         $this->listener->onConsoleCommand($event);
         $this->assertEquals(new SiteAccess('site1', 'cli'), $this->siteAccess);
     }
@@ -103,8 +124,8 @@ class ConsoleCommandListenerTest extends TestCase
     {
         $this->dispatcher->expects($this->once())
             ->method('dispatch');
-        $input = new ArrayInput([], $this->inputDefinition);
-        $event = new ConsoleInitEvent($input, $this->testOutput);
+        $input = new ArrayInput(array(), $this->inputDefinition);
+        $event = new ConsoleCommandEvent($this->command, $input, $this->testOutput);
         $this->listener->onConsoleCommand($event);
         $this->assertEquals(new SiteAccess('default', 'cli'), $this->siteAccess);
     }

@@ -15,13 +15,17 @@ use PHPUnit\Framework\TestCase;
 
 class SwirlFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $filter;
 
-    /** @var SwirlFilterLoader */
+    /**
+     * @var SwirlFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->filter = $this->createMock(FilterInterface::class);
@@ -61,16 +65,16 @@ class SwirlFilterLoaderTest extends TestCase
             ->with($image)
             ->will($this->returnValue($image));
 
-        $this->assertSame($image, $this->loader->load($image, [$degrees]));
+        $this->assertSame($image, $this->loader->load($image, array($degrees)));
     }
 
     public function loadWithOptionProvider()
     {
-        return [
-            [10],
-            [60],
-            [60.34],
-            [180.123],
-        ];
+        return array(
+            array(10),
+            array(60),
+            array(60.34),
+            array(180.123),
+        );
     }
 }

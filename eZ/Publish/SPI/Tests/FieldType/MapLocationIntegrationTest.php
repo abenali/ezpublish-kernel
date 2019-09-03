@@ -87,12 +87,12 @@ class MapLocationIntegrationTest extends BaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        return [
+        return array(
             // The ezgmaplocation field type does not have any special field definition
             // properties
-            ['fieldType', 'ezgmaplocation'],
-            ['fieldTypeConstraints', new Content\FieldTypeConstraints()],
-        ];
+            array('fieldType', 'ezgmaplocation'),
+            array('fieldTypeConstraints', new Content\FieldTypeConstraints()),
+        );
     }
 
     /**
@@ -103,15 +103,15 @@ class MapLocationIntegrationTest extends BaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
-                'externalData' => [
+                'externalData' => array(
                     'latitude' => 51.564479,
                     'longitude' => 6.692219,
                     'address' => 'Sindelfingen',
-                ],
+                ),
                 'sortKey' => 'Sindelfingen',
-            ]
+            )
         );
     }
 
@@ -145,12 +145,12 @@ class MapLocationIntegrationTest extends BaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
+            array(
                 'data' => null,
                 // Empty value
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 

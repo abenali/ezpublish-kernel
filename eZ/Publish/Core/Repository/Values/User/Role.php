@@ -24,7 +24,7 @@ class Role extends APIRole
      *
      * @var \eZ\Publish\API\Repository\Values\User\Policy[]
      */
-    protected $policies = [];
+    protected $policies = array();
 
     /**
      * Returns the list of policies of this role.

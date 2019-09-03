@@ -49,13 +49,13 @@ class Visibility extends Criterion
 
     public function getSpecifications()
     {
-        return [
+        return array(
             new Specifications(
                 Operator::EQ,
                 Specifications::FORMAT_SINGLE,
                 Specifications::TYPE_INTEGER
             ),
-        ];
+        );
     }
 
     /**

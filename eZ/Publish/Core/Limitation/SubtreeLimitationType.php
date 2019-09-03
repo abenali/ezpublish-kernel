@@ -21,7 +21,7 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
 use eZ\Publish\API\Repository\Values\User\Limitation\SubtreeLimitation as APISubtreeLimitation;
 use eZ\Publish\API\Repository\Values\User\Limitation as APILimitationValue;
-use eZ\Publish\SPI\Limitation\Target\Version;
+use eZ\Publish\API\Repository\Values\Content\Query\Criterion;
 use eZ\Publish\SPI\Limitation\Type as SPILimitationTypeInterface;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\SPI\Persistence\Content\Location as SPILocation;
@@ -67,7 +67,7 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
      */
     public function validate(APILimitationValue $limitationValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         foreach ($limitationValue->limitationValues as $key => $path) {
             try {
                 $pathArray = explode('/', trim($path, '/'));
@@ -80,10 +80,10 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
                 $validationErrors[] = new ValidationError(
                     "limitationValues[%key%] => '%value%' does not exist in the backend",
                     null,
-                    [
+                    array(
                         'value' => $path,
                         'key' => $key,
-                    ]
+                    )
                 );
             }
         }
@@ -100,7 +100,7 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
      */
     public function buildValue(array $limitationValues)
     {
-        return new APISubtreeLimitation(['limitationValues' => $limitationValues]);
+        return new APISubtreeLimitation(array('limitationValues' => $limitationValues));
     }
 
     /**
@@ -120,8 +120,6 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
      */
     public function evaluate(APILimitationValue $value, APIUserReference $currentUser, ValueObject $object, array $targets = null)
     {
-        $targets = $targets ?? [];
-
         if (!$value instanceof APISubtreeLimitation) {
             throw new InvalidArgumentException('$value', 'Must be of type: APISubtreeLimitation');
         }
@@ -137,12 +135,8 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
             return self::ACCESS_ABSTAIN;
         }
 
-        $targets = array_filter($targets, function ($target) {
-            return !$target instanceof Version;
-        });
-
         // Load locations if no specific placement was provided
-        if (empty($targets)) {
+        if ($targets === null) {
             // Skip check if content is in trash and no location is provided to check against
             if ($object->isTrashed()) {
                 return self::ACCESS_ABSTAIN;
@@ -188,7 +182,7 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
      *
      * @return bool
      */
-    protected function evaluateForContentCreateStruct(APILimitationValue $value, array $targets)
+    protected function evaluateForContentCreateStruct(APILimitationValue $value, array $targets = null)
     {
         // If targets is empty/null return false as user does not have access
         // to content w/o location with this limitation
@@ -196,13 +190,14 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
             return false;
         }
 
-        $hasLocationCreateStruct = false;
         foreach ($targets as $target) {
             if (!$target instanceof LocationCreateStruct) {
-                continue;
+                throw new InvalidArgumentException(
+                    '$targets',
+                    'If $object is ContentCreateStruct must contain objects of type: LocationCreateStruct'
+                );
             }
 
-            $hasLocationCreateStruct = true;
             $target = $this->persistence->locationHandler()->load($target->parentLocationId);
 
             // For ContentCreateStruct all placements must match
@@ -216,13 +211,6 @@ class SubtreeLimitationType extends AbstractPersistenceLimitationType implements
             }
 
             return false;
-        }
-
-        if (false === $hasLocationCreateStruct) {
-            throw new InvalidArgumentException(
-                '$targets',
-                'If $object is ContentCreateStruct must contain objects of type: LocationCreateStruct'
-            );
         }
 
         return true;

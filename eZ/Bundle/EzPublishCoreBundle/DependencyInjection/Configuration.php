@@ -11,6 +11,7 @@ namespace eZ\Bundle\EzPublishCoreBundle\DependencyInjection;
 use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ParserInterface;
 use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\SiteAccessAware\Configuration as SiteAccessConfiguration;
 use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\Suggestion\Collector\SuggestionCollectorInterface;
+use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
@@ -18,13 +19,19 @@ class Configuration extends SiteAccessConfiguration
 {
     const CUSTOM_TAG_ATTRIBUTE_TYPES = ['number', 'string', 'boolean', 'choice'];
 
-    /** @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ParserInterface */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\ParserInterface
+     */
     private $mainConfigParser;
 
-    /** @var Configuration\Suggestion\Collector\SuggestionCollectorInterface */
+    /**
+     * @var Configuration\Suggestion\Collector\SuggestionCollectorInterface
+     */
     private $suggestionCollector;
 
-    /** @var \eZ\Bundle\EzPublishCoreBundle\SiteAccess\SiteAccessConfigurationFilter[] */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\SiteAccess\SiteAccessConfigurationFilter[]
+     */
     private $siteAccessConfigurationFilters;
 
     public function __construct(ParserInterface $mainConfigParser, SuggestionCollectorInterface $suggestionCollector)
@@ -45,18 +52,18 @@ class Configuration extends SiteAccessConfiguration
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('ezpublish');
-
-        $rootNode = $treeBuilder->getRootNode();
+        $treeBuilder = new TreeBuilder();
+        $rootNode = $treeBuilder->root('ezpublish');
 
         $this->addRepositoriesSection($rootNode);
         $this->addSiteaccessSection($rootNode);
         $this->addImageMagickSection($rootNode);
         $this->addHttpCacheSection($rootNode);
+        $this->addPageSection($rootNode);
         $this->addRouterSection($rootNode);
+        $this->addRichTextSection($rootNode);
         $this->addUrlAliasSection($rootNode);
         $this->addImagePlaceholderSection($rootNode);
-        $this->addUrlWildcardsSection($rootNode);
 
         // Delegate SiteAccess config to configuration parsers
         $this->mainConfigParser->addSemanticConfig($this->generateScopeBaseNode($rootNode));
@@ -71,14 +78,14 @@ class Configuration extends SiteAccessConfiguration
                 ->arrayNode('repositories')
                     ->info('Content repositories configuration')
                     ->example(
-                        [
-                            'main' => [
-                                'storage' => [
+                        array(
+                            'main' => array(
+                                'storage' => array(
                                     'engine' => 'legacy',
                                     'connection' => 'my_doctrine_connection_name',
-                                ],
-                            ],
-                        ]
+                                ),
+                            ),
+                        )
                     )
                     ->useAttributeAsKey('alias')
                     ->prototype('array')
@@ -114,15 +121,15 @@ class Configuration extends SiteAccessConfiguration
                                 // Setting default values
                                 function ($v) {
                                     if ($v === null) {
-                                        $v = [];
+                                        $v = array();
                                     }
 
                                     if (!isset($v['storage'])) {
-                                        $v['storage'] = [];
+                                        $v['storage'] = array();
                                     }
 
                                     if (!isset($v['search'])) {
-                                        $v['search'] = [];
+                                        $v['search'] = array();
                                     }
 
                                     if (!isset($v['fields_groups']['list'])) {
@@ -203,7 +210,7 @@ class Configuration extends SiteAccessConfiguration
                     ->children()
                         ->arrayNode('list')
                             ->info('Available SiteAccess list')
-                            ->example(['ezdemo_site', 'ezdemo_site_admin'])
+                            ->example(array('ezdemo_site', 'ezdemo_site_admin'))
                             ->isRequired()
                             ->requiresAtLeastOneElement()
                             ->prototype('scalar')->end()
@@ -211,7 +218,7 @@ class Configuration extends SiteAccessConfiguration
                         ->arrayNode('groups')
                             ->useAttributeAsKey('key')
                             ->info('SiteAccess groups. Useful to share settings between Siteaccess')
-                            ->example(['ezdemo_group' => ['ezdemo_site', 'ezdemo_site_admin']])
+                            ->example(array('ezdemo_group' => array('ezdemo_site', 'ezdemo_site_admin')))
                             ->prototype('array')
                                 ->requiresAtLeastOneElement()
                                 ->prototype('scalar')->end()
@@ -221,23 +228,23 @@ class Configuration extends SiteAccessConfiguration
                         ->arrayNode('match')
                             ->info('Siteaccess match configuration. First key is the matcher class, value is passed to the matcher. Key can be a service identifier (prepended by "@"), or a FQ class name (prepended by "\\")')
                             ->example(
-                                [
-                                    'Map\\URI' => [
+                                array(
+                                    'Map\\URI' => array(
                                         'foo' => 'ezdemo_site',
                                         'ezdemo_site' => 'ezdemo_site',
                                         'ezdemo_site_admin' => 'ezdemo_site_admin',
-                                    ],
-                                    'Map\\Host' => [
+                                    ),
+                                    'Map\\Host' => array(
                                         'ezpublish.dev' => 'ezdemo_site',
                                         'admin.ezpublish.dev' => 'ezdemo_site_admin',
-                                    ],
-                                    '\\My\\Custom\\Matcher' => [
+                                    ),
+                                    '\\My\\Custom\\Matcher' => array(
                                         'some' => 'configuration',
-                                    ],
-                                    '@my.custom.matcher' => [
+                                    ),
+                                    '@my.custom.matcher' => array(
                                         'some' => 'other_configuration',
-                                    ],
-                                ]
+                                    ),
+                                )
                             )
                             ->isRequired()
                             ->useAttributeAsKey('key')
@@ -250,13 +257,13 @@ class Configuration extends SiteAccessConfiguration
                                             // Value passed to the matcher should always be an array.
                                             // If value is not an array, we transform it to a hash, with 'value' as key.
                                             if (!is_array($v)) {
-                                                return ['value' => $v];
+                                                return array('value' => $v);
                                             }
 
                                             // If passed value is a numerically indexed array, we must convert it into a hash.
                                             // See https://jira.ez.no/browse/EZP-21876
                                             if (array_keys($v) === range(0, count($v) - 1)) {
-                                                $final = [];
+                                                $final = array();
                                                 foreach ($v as $i => $val) {
                                                     $final["i$i"] = $val;
                                                 }
@@ -287,7 +294,7 @@ class Configuration extends SiteAccessConfiguration
                 ->end()
                 ->arrayNode('locale_conversion')
                     ->info('Locale conversion map between eZ Publish format (i.e. fre-FR) to POSIX (i.e. fr_FR). The key is the eZ Publish locale. Check locale.yml in EzPublishCoreBundle to see natively supported locales.')
-                    ->example(['fre-FR' => 'fr_FR'])
+                    ->example(array('fre-FR' => 'fr_FR'))
                     ->useAttributeAsKey('key')
                     ->normalizeKeys(false)
                     ->prototype('scalar')->end()
@@ -333,7 +340,7 @@ EOT;
                         ->end()
                         ->arrayNode('filters')
                             ->info($filtersInfo)
-                            ->example(['geometry/scaledownonly' => '"-geometry {1}x{2}>"'])
+                            ->example(array('geometry/scaledownonly' => '"-geometry {1}x{2}>"'))
                             ->prototype('scalar')->end()
                         ->end()
                     ->end()
@@ -373,7 +380,7 @@ EOT;
                             ->beforeNormalization()
                                 ->ifTrue(
                                     function ($v) {
-                                        $http = ['multiple_http' => true, 'single_http' => true];
+                                        $http = array('multiple_http' => true, 'single_http' => true);
 
                                         return isset($http[$v]);
                                     }
@@ -386,6 +393,53 @@ EOT;
                             ->end()
                         ->end()
                         ->scalarNode('timeout')->info('DEPRECATED')->end()
+                    ->end()
+                ->end()
+            ->end();
+    }
+
+    private function addPageSection(ArrayNodeDefinition $rootNode)
+    {
+        $pageInfo = <<<EOT
+List of globally registered layouts and blocks used by the Page fieldtype
+EOT;
+
+        $rootNode
+            ->children()
+                ->arrayNode('ezpage')
+                    ->info($pageInfo)
+                    ->children()
+                        ->arrayNode('layouts')
+                            ->info('List of registered layouts, the key is the identifier of the layout')
+                            ->useAttributeAsKey('key')
+                            ->normalizeKeys(false)
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('name')->isRequired()->info('Name of the layout')->end()
+                                    ->scalarNode('template')->isRequired()->info('Template to use to render this layout')->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('blocks')
+                            ->info('List of registered blocks, the key is the identifier of the block')
+                            ->useAttributeAsKey('key')
+                            ->normalizeKeys(false)
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('name')->isRequired()->info('Name of the block')->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('enabledBlocks')
+                            ->prototype('scalar')
+                            ->end()
+                            ->info('List of enabled blocks by default')
+                        ->end()
+                        ->arrayNode('enabledLayouts')
+                            ->prototype('scalar')
+                            ->end()
+                            ->info('List of enabled layouts by default')
+                        ->end()
                     ->end()
                 ->end()
             ->end();
@@ -408,7 +462,7 @@ EOT;
                                 ->arrayNode('non_siteaccess_aware_routes')
                                     ->prototype('scalar')->end()
                                     ->info($nonSAAwareInfo)
-                                    ->example(['my_route_name', 'some_prefix_'])
+                                    ->example(array('my_route_name', 'some_prefix_'))
                                 ->end()
                             ->end()
                         ->end()
@@ -416,6 +470,140 @@ EOT;
                     ->info('Router related settings')
                 ->end()
             ->end();
+    }
+
+    /**
+     * Define global Semantic Configuration for RichText.
+     *
+     * @param \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $rootNode
+     */
+    private function addRichTextSection(ArrayNodeDefinition $rootNode)
+    {
+        $ezRichTextNode = $rootNode->children()->arrayNode('ezrichtext')->children();
+        $this->addCustomTagsSection($ezRichTextNode);
+        $this->addCustomStylesSection($ezRichTextNode);
+        $ezRichTextNode->end()->end()->end();
+    }
+
+    /**
+     * Define RichText Custom Tags Semantic Configuration.
+     *
+     * The configuration is available at:
+     * <code>
+     * ezpublish:
+     *     ezrichtext:
+     *         custom_tags:
+     * </code>
+     *
+     * @param \Symfony\Component\Config\Definition\Builder\NodeBuilder $ezRichTextNode
+     *
+     * @return \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition
+     */
+    private function addCustomTagsSection(NodeBuilder $ezRichTextNode)
+    {
+        return $ezRichTextNode
+                ->arrayNode('custom_tags')
+                // workaround: take into account Custom Tag names when merging configs
+                ->useAttributeAsKey('tag')
+                ->arrayPrototype()
+                    ->children()
+                        ->scalarNode('template')
+                            ->isRequired()
+                        ->end()
+                        ->scalarNode('icon')
+                            ->defaultNull()
+                        ->end()
+                        ->arrayNode('attributes')
+                            ->useAttributeAsKey('attribute')
+                            ->isRequired()
+                            ->arrayPrototype()
+                                ->beforeNormalization()
+                                    ->always(
+                                        function ($v) {
+                                            // Workaround: set empty value to be able to unset it later on (see validation for "choices")
+                                            if (!isset($v['choices'])) {
+                                                $v['choices'] = [];
+                                            }
+
+                                            return $v;
+                                        }
+                                    )
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(
+                                        function ($v) {
+                                            return $v['type'] === 'choice' && !empty($v['required']) && empty($v['choices']);
+                                        }
+                                    )
+                                    ->thenInvalid('List of choices for required choice type attribute has to be non-empty')
+                                ->end()
+                                ->validate()
+                                    ->ifTrue(
+                                        function ($v) {
+                                            return !empty($v['choices']) && $v['type'] !== 'choice';
+                                        }
+                                    )
+                                    ->thenInvalid('List of choices is supported by choices type only.')
+                                ->end()
+                                ->children()
+                                    ->enumNode('type')
+                                        ->isRequired()
+                                        ->values(static::CUSTOM_TAG_ATTRIBUTE_TYPES)
+                                    ->end()
+                                    ->booleanNode('required')
+                                        ->defaultFalse()
+                                    ->end()
+                                    ->scalarNode('default_value')
+                                        ->defaultNull()
+                                    ->end()
+                                    ->arrayNode('choices')
+                                        ->scalarPrototype()->end()
+                                        ->performNoDeepMerging()
+                                        ->validate()
+                                            ->ifEmpty()->thenUnset()
+                                        ->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+    }
+
+    /**
+     * Define RichText Custom Styles Semantic Configuration.
+     *
+     * The configuration is available at:
+     * <code>
+     * ezpublish:
+     *     ezrichtext:
+     *         custom_styles:
+     * </code>
+     *
+     * @param \Symfony\Component\Config\Definition\Builder\NodeBuilder $ezRichTextNode
+     *
+     * @return \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition
+     */
+    private function addCustomStylesSection(NodeBuilder $ezRichTextNode)
+    {
+        return $ezRichTextNode
+                ->arrayNode('custom_styles')
+                // workaround: take into account Custom Styles names when merging configs
+                ->useAttributeAsKey('style')
+                ->arrayPrototype()
+                    ->children()
+                        ->scalarNode('template')
+                            ->defaultNull()
+                        ->end()
+                        ->scalarNode('inline')
+                            ->defaultFalse()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
     }
 
     /**
@@ -484,35 +672,6 @@ EOT;
                                     ->end()
                                 ->end()
                             ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end();
-    }
-
-    /**
-     * Defines configuration for Url Wildcards.
-     *
-     * The configuration is available at:
-     * <code>
-     * ezpublish:
-     *     url_wildcards:
-     *         enabled: true
-     * </code>
-     *
-     * @param \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $rootNode
-     *
-     * @return \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition
-     */
-    private function addUrlWildcardsSection($rootNode): ArrayNodeDefinition
-    {
-        return $rootNode
-            ->children()
-                ->arrayNode('url_wildcards')
-                    ->children()
-                        ->booleanNode('enabled')
-                            ->info('Enable UrlWildcards support')
-                            ->defaultFalse()
                         ->end()
                     ->end()
                 ->end()

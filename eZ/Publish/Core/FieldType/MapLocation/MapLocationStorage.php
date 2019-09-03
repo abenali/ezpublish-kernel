@@ -17,7 +17,9 @@ use eZ\Publish\SPI\Persistence\Content\Field;
  */
 class MapLocationStorage extends GatewayBasedStorage
 {
-    /** @var \eZ\Publish\Core\FieldType\MapLocation\MapLocationStorage\Gateway */
+    /**
+     * @var \eZ\Publish\Core\FieldType\MapLocation\MapLocationStorage\Gateway
+     */
     protected $gateway;
 
     /**

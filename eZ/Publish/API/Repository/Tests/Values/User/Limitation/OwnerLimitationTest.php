@@ -27,11 +27,11 @@ class OwnerLimitationTest extends BaseLimitationTest
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\OwnerLimitation
      *
      * @throws \ErrorException
+     *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      */
     public function testOwnerLimitationAllow()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $contentService = $repository->getContentService();
@@ -60,7 +60,7 @@ class OwnerLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new OwnerLimitation(
-                ['limitationValues' => [1]]
+                array('limitationValues' => array(1))
             )
         );
         $roleService->updatePolicy($removePolicy, $policyUpdate);
@@ -93,11 +93,10 @@ class OwnerLimitationTest extends BaseLimitationTest
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\OwnerLimitation
      *
      * @throws \ErrorException
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testOwnerLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $contentService = $repository->getContentService();
@@ -126,7 +125,7 @@ class OwnerLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new OwnerLimitation(
-                ['limitationValues' => [1]]
+                array('limitationValues' => array(1))
             )
         );
         $roleService->updatePolicy($removePolicy, $policyUpdate);

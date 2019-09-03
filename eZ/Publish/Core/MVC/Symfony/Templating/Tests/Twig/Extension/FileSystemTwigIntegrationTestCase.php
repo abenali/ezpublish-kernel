@@ -8,22 +8,22 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\Templating\Tests\Twig\Extension;
 
-use PHPUnit\Framework\Constraint\Exception as PHPUnitException;
-use Twig\Environment;
-use Twig\Error\Error;
-use Twig\Error\SyntaxError;
-use Twig\Loader\ArrayLoader;
-use Twig\Loader\ChainLoader;
-use Twig\Loader\FilesystemLoader;
-use Twig\Test\IntegrationTestCase;
+use Twig_Loader_Chain;
+use Twig_Loader_Array;
+use Twig_Loader_Filesystem;
+use Twig_Environment;
 use Exception;
+use Twig_Error_Syntax;
+use Twig_Error;
+use Twig_Test_IntegrationTestCase;
+use PHPUnit_Framework_Constraint_Exception;
 
 /**
  * Class FileSystemTwigIntegrationTestCase
  * This class adds a custom version of the doIntegrationTest from Twig_Test_IntegrationTestCase to
  * allow loading (custom) templates located in the FixturesDir.
  */
-abstract class FileSystemTwigIntegrationTestCase extends IntegrationTestCase
+abstract class FileSystemTwigIntegrationTestCase extends Twig_Test_IntegrationTestCase
 {
     /**
      * Overrides the default implementation to use the chain loader so that
@@ -39,23 +39,23 @@ abstract class FileSystemTwigIntegrationTestCase extends IntegrationTestCase
         }
 
         // changes from the original is here, Twig_Loader_Filesystem has been added
-        $loader = new ChainLoader(
-            [
-                new ArrayLoader($templates),
-                new FilesystemLoader($this->getFixturesDir()),
-            ]
+        $loader = new Twig_Loader_Chain(
+            array(
+                new Twig_Loader_Array($templates),
+                new Twig_Loader_Filesystem($this->getFixturesDir()),
+            )
         );
         // end changes
 
         foreach ($outputs as $match) {
             $config = array_merge(
-                [
+                array(
                     'cache' => false,
                     'strict_variables' => true,
-                ],
-                $match[2] ? eval($match[2] . ';') : []
+                ),
+                $match[2] ? eval($match[2] . ';') : array()
             );
-            $twig = new Environment($loader, $config);
+            $twig = new Twig_Environment($loader, $config);
             $twig->addGlobal('global', 'global');
             foreach ($this->getExtensions() as $extension) {
                 $twig->addExtension($extension);
@@ -75,20 +75,20 @@ abstract class FileSystemTwigIntegrationTestCase extends IntegrationTestCase
                     return;
                 }
 
-                if ($e instanceof SyntaxError) {
+                if ($e instanceof Twig_Error_Syntax) {
                     $e->setTemplateFile($file);
 
                     throw $e;
                 }
 
-                throw new Error(sprintf('%s: %s', get_class($e), $e->getMessage()), -1, $file, $e);
+                throw new Twig_Error(sprintf('%s: %s', get_class($e), $e->getMessage()), -1, $file, $e);
             }
 
             try {
                 $output = trim($template->render(eval($match[1] . ';')), "\n ");
             } catch (Exception $e) {
                 if (false !== $exception) {
-                    $this->assertStringContainsString(
+                    $this->assertEquals(
                         trim($exception),
                         trim(
                             sprintf('%s: %s', get_class($e), $e->getMessage())
@@ -98,10 +98,10 @@ abstract class FileSystemTwigIntegrationTestCase extends IntegrationTestCase
                     return;
                 }
 
-                if ($e instanceof SyntaxError) {
+                if ($e instanceof Twig_Error_Syntax) {
                     $e->setTemplateFile($file);
                 } else {
-                    $e = new Error(sprintf('%s: %s', get_class($e), $e->getMessage()), -1, $file, $e);
+                    $e = new Twig_Error(sprintf('%s: %s', get_class($e), $e->getMessage()), -1, $file, $e);
                 }
 
                 $output = trim(
@@ -113,7 +113,7 @@ abstract class FileSystemTwigIntegrationTestCase extends IntegrationTestCase
                 list($class) = explode(':', $exception);
                 $this->assertThat(
                     null,
-                    new PHPUnitException($class)
+                    new PHPUnit_Framework_Constraint_Exception($class)
                 );
             }
 

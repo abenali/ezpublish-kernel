@@ -34,7 +34,9 @@ class RemoveFieldTest extends TestCase
      */
     protected $contentStorageHandlerMock;
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Mapper
+     */
     protected $contentMapperMock;
 
     /**
@@ -45,14 +47,33 @@ class RemoveFieldTest extends TestCase
     protected $removeFieldAction;
 
     /**
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Type\ContentUpdater::__construct
+     */
+    public function testCtor()
+    {
+        $action = $this->getRemoveFieldAction();
+
+        $this->assertAttributeSame(
+            $this->getContentGatewayMock(),
+            'contentGateway',
+            $action
+        );
+        $this->assertAttributeEquals(
+            $this->getFieldDefinitionFixture(),
+            'fieldDefinition',
+            $action
+        );
+    }
+
+    /**
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Type\ContentUpdater\Action\RemoveField::apply
      */
     public function testApplySingleVersionSingleTranslation()
     {
         $contentId = 42;
-        $versionNumbers = [1];
+        $versionNumbers = array(1);
         $action = $this->getRemoveFieldAction();
-        $content = $this->getContentFixture(1, ['cro-HR']);
+        $content = $this->getContentFixture(1, array('cro-HR'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -63,20 +84,20 @@ class RemoveFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->once())
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content)));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -88,7 +109,7 @@ class RemoveFieldTest extends TestCase
             ->with(
                 $this->equalTo('ezstring'),
                 $content->versionInfo,
-                $this->equalTo(['3-cro-HR'])
+                $this->equalTo(array('3-cro-HR'))
             );
 
         $action->apply($contentId);
@@ -100,10 +121,10 @@ class RemoveFieldTest extends TestCase
     public function testApplyMultipleVersionsSingleTranslation()
     {
         $contentId = 42;
-        $versionNumbers = [1, 2];
+        $versionNumbers = array(1, 2);
         $action = $this->getRemoveFieldAction();
-        $content1 = $this->getContentFixture(1, ['cro-HR']);
-        $content2 = $this->getContentFixture(2, ['cro-HR']);
+        $content1 = $this->getContentFixture(1, array('cro-HR'));
+        $content2 = $this->getContentFixture(2, array('cro-HR'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -114,32 +135,32 @@ class RemoveFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1], ['id' => $contentId, 'version' => 2]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1), array('id' => $contentId, 'version' => 2))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(0))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content1]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content1)));
 
         $this->getContentGatewayMock()
             ->expects($this->at(3))
             ->method('load')
             ->with($contentId, 2)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(1))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content2]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content2)));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -152,7 +173,7 @@ class RemoveFieldTest extends TestCase
             ->with(
                 $this->equalTo('ezstring'),
                 $content1->versionInfo,
-                $this->equalTo(['3-cro-HR'])
+                $this->equalTo(array('3-cro-HR'))
             );
 
         $this->getContentStorageHandlerMock()
@@ -161,7 +182,7 @@ class RemoveFieldTest extends TestCase
             ->with(
                 $this->equalTo('ezstring'),
                 $content2->versionInfo,
-                $this->equalTo(['3-cro-HR'])
+                $this->equalTo(array('3-cro-HR'))
             );
 
         $action->apply($contentId);
@@ -173,10 +194,10 @@ class RemoveFieldTest extends TestCase
     public function testApplyMultipleVersionsMultipleTranslations()
     {
         $contentId = 42;
-        $versionNumbers = [1, 2];
+        $versionNumbers = array(1, 2);
         $action = $this->getRemoveFieldAction();
-        $content1 = $this->getContentFixture(1, ['cro-HR', 'hun-HU']);
-        $content2 = $this->getContentFixture(2, ['cro-HR', 'hun-HU']);
+        $content1 = $this->getContentFixture(1, array('cro-HR', 'hun-HU'));
+        $content2 = $this->getContentFixture(2, array('cro-HR', 'hun-HU'));
 
         $this->getContentGatewayMock()
             ->expects($this->once())
@@ -187,32 +208,32 @@ class RemoveFieldTest extends TestCase
         $this->getContentGatewayMock()
             ->expects($this->once())
             ->method('loadVersionedNameData')
-            ->with($this->equalTo([['id' => $contentId, 'version' => 1], ['id' => $contentId, 'version' => 2]]))
-            ->will($this->returnValue([]));
+            ->with($this->equalTo(array(array('id' => $contentId, 'version' => 1), array('id' => $contentId, 'version' => 2))))
+            ->will($this->returnValue(array()));
 
         $this->getContentGatewayMock()
             ->expects($this->at(2))
             ->method('load')
             ->with($contentId, 1)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(0))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content1]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content1)));
 
         $this->getContentGatewayMock()
             ->expects($this->at(3))
             ->method('load')
             ->with($contentId, 2)
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
 
         $this->getContentMapperMock()
             ->expects($this->at(1))
             ->method('extractContentFromRows')
-            ->with([], [])
-            ->will($this->returnValue([$content2]));
+            ->with(array(), array())
+            ->will($this->returnValue(array($content2)));
 
         $this->getContentGatewayMock()
             ->expects($this->at(4))
@@ -230,7 +251,7 @@ class RemoveFieldTest extends TestCase
             ->with(
                 $this->equalTo('ezstring'),
                 $content1->versionInfo,
-                $this->equalTo(['3-cro-HR', '3-hun-HU'])
+                $this->equalTo(array('3-cro-HR', '3-hun-HU'))
             );
 
         $this->getContentStorageHandlerMock()
@@ -239,7 +260,7 @@ class RemoveFieldTest extends TestCase
             ->with(
                 $this->equalTo('ezstring'),
                 $content2->versionInfo,
-                $this->equalTo(['3-cro-HR', '3-hun-HU'])
+                $this->equalTo(array('3-cro-HR', '3-hun-HU'))
             );
 
         $action->apply($contentId);
@@ -252,7 +273,7 @@ class RemoveFieldTest extends TestCase
      */
     protected function getContentFixture($versionNo, $languageCodes)
     {
-        $fields = [];
+        $fields = array();
 
         foreach ($languageCodes as $index => $languageCode) {
             $fieldNoRemove = new Content\Field();

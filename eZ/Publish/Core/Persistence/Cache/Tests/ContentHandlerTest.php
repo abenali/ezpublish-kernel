@@ -23,7 +23,7 @@ use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
 /**
  * Test case for Persistence\Cache\ContentHandler.
  */
-class ContentHandlerTest extends AbstractInMemoryCacheHandlerTest
+class ContentHandlerTest extends AbstractCacheHandlerTest
 {
     public function getHandlerMethodName(): string
     {
@@ -81,8 +81,8 @@ class ContentHandlerTest extends AbstractInMemoryCacheHandlerTest
             ['loadContentInfoList', [[2]], 'ez-content-info-2', [2 => $info], true],
             ['loadContentInfoByRemoteId', ['3d8jrj'], 'ez-content-info-byRemoteId-3d8jrj', $info],
             ['loadVersionInfo', [2, 1], 'ez-content-version-info-2-1', $version],
-            ['listVersions', [2], 'ez-content-2-version-list-limit--1', [$version]],
-            ['listVersions', [2, 1], 'ez-content-2-version-list-byStatus-1-limit--1', [$version]],
+            ['listVersions', [2], 'ez-content-2-version-list', [$version]],
+            ['listVersions', [2, 1], 'ez-content-2-version-list-byStatus-1', [$version]],
         ];
     }
 
@@ -105,9 +105,9 @@ class ContentHandlerTest extends AbstractInMemoryCacheHandlerTest
             ->with(2, APIRelation::FIELD | APIRelation::ASSET)
             ->will(
                 $this->returnValue(
-                    [
-                        new SPIRelation(['sourceContentId' => 42]),
-                    ]
+                    array(
+                        new SPIRelation(array('sourceContentId' => 42)),
+                    )
                 )
             );
 
@@ -122,9 +122,14 @@ class ContentHandlerTest extends AbstractInMemoryCacheHandlerTest
             ->method('deleteItem');
 
         $this->cacheMock
-            ->expects($this->once())
+            ->expects($this->at(0))
             ->method('invalidateTags')
-            ->with(['content-fields-42', 'content-2']);
+            ->with(['content-2']);
+
+        $this->cacheMock
+            ->expects($this->at(1))
+            ->method('invalidateTags')
+            ->with(['content-fields-42']);
 
         $handler = $this->persistenceCacheHandler->contentHandler();
         $handler->deleteContent(2);

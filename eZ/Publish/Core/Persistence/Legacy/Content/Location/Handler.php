@@ -178,7 +178,7 @@ class Handler implements BaseLocationHandler
      */
     protected function getDefaultContentStates()
     {
-        $defaultObjectStatesMap = [];
+        $defaultObjectStatesMap = array();
 
         foreach ($this->objectStateHandler->loadAllGroups() as $objectStateGroup) {
             foreach ($this->objectStateHandler->loadObjectStates($objectStateGroup->id) as $objectState) {
@@ -229,24 +229,24 @@ class Handler implements BaseLocationHandler
         $children = $this->locationGateway->getSubtreeContent($sourceId);
         $destinationParentData = $this->locationGateway->getBasicNodeData($destinationParentId);
         $defaultObjectStates = $this->getDefaultContentStates();
-        $contentMap = [];
-        $locationMap = [
-            $children[0]['parent_node_id'] => [
+        $contentMap = array();
+        $locationMap = array(
+            $children[0]['parent_node_id'] => array(
                 'id' => $destinationParentId,
                 'hidden' => (bool)$destinationParentData['is_hidden'],
                 'invisible' => (bool)$destinationParentData['is_invisible'],
                 'path_identification_string' => $destinationParentData['path_identification_string'],
-            ],
-        ];
+            ),
+        );
 
-        $locations = [];
+        $locations = array();
         foreach ($children as $child) {
             $locations[$child['contentobject_id']][$child['node_id']] = true;
         }
 
         $time = time();
-        $mainLocations = [];
-        $mainLocationsUpdate = [];
+        $mainLocations = array();
+        $mainLocationsUpdate = array();
         foreach ($children as $index => $child) {
             // Copy content
             if (!isset($contentMap[$child['contentobject_id']])) {
@@ -262,10 +262,10 @@ class Handler implements BaseLocationHandler
                     $content->versionInfo->contentInfo->id,
                     $content->versionInfo->contentInfo->currentVersionNo,
                     new MetadataUpdateStruct(
-                        [
+                        array(
                             'publicationDate' => $time,
                             'modificationDate' => $time,
-                        ]
+                        )
                     )
                 );
 
@@ -302,12 +302,12 @@ class Handler implements BaseLocationHandler
 
             $newLocation = $this->create($createStruct);
 
-            $locationMap[$child['node_id']] = [
+            $locationMap[$child['node_id']] = array(
                 'id' => $newLocation->id,
                 'hidden' => $newLocation->hidden,
                 'invisible' => $newLocation->invisible,
                 'path_identification_string' => $newLocation->pathIdentificationString,
-            ];
+            );
             if ($index === 0) {
                 $copiedSubtreeRootLocation = $newLocation;
             }
@@ -442,30 +442,6 @@ class Handler implements BaseLocationHandler
         $sourceNodeData = $this->locationGateway->getBasicNodeData($id);
 
         $this->locationGateway->unhideSubtree($sourceNodeData['path_string']);
-    }
-
-    /**
-     * Sets a location + all children to invisible.
-     *
-     * @param int $id Location ID
-     */
-    public function setInvisible(int $id): void
-    {
-        $sourceNodeData = $this->locationGateway->getBasicNodeData($id);
-
-        $this->locationGateway->setNodeWithChildrenInvisible($sourceNodeData['path_string']);
-    }
-
-    /**
-     * Sets a location + all children to visible.
-     *
-     * @param int $id Location ID
-     */
-    public function setVisible(int $id): void
-    {
-        $sourceNodeData = $this->locationGateway->getBasicNodeData($id);
-
-        $this->locationGateway->setNodeWithChildrenVisible($sourceNodeData['path_string']);
     }
 
     /**

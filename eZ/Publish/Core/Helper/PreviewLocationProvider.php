@@ -10,8 +10,6 @@ namespace eZ\Publish\Core\Helper;
 
 use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\LocationService;
-use eZ\Publish\API\Repository\Values\Content\Content as APIContent;
-use eZ\Publish\API\Repository\Values\Content\Location as APILocation;
 use eZ\Publish\Core\Repository\Values\Content\Location;
 use eZ\Publish\SPI\Persistence\Content\Location\Handler as PersistenceLocationHandler;
 
@@ -52,39 +50,14 @@ class PreviewLocationProvider
      *
      * If the content doesn't have a location nor a location draft, null is returned.
      *
-     * @deprecated Since 7.5.4, rather use loadMainLocationByContent.
-     * @see loadMainLocationByContent
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @param mixed $contentId
      *
      * @return \eZ\Publish\API\Repository\Values\Content\Location|null
      */
     public function loadMainLocation($contentId)
     {
-        return $this->loadMainLocationByContent(
-            $this->contentService->loadContent($contentId)
-        );
-    }
-
-    /**
-     * Loads the main location for $content.
-     *
-     * If the content does not have a location (yet), but has a Location draft, it is returned instead.
-     * Location drafts do not have an id (it is set to null), and can be tested using the isDraft() method.
-     *
-     * If the content doesn't have a location nor a location draft, null is returned.
-     *
-     * @param \eZ\Publish\API\Repository\Values\Content\Content $content
-     *
-     * @return \eZ\Publish\API\Repository\Values\Content\Location|null
-     */
-    public function loadMainLocationByContent(APIContent $content): ?APILocation
-    {
         $location = null;
-        $contentInfo = $content
-            ->getVersionInfo()
-            ->getContentInfo();
+        $contentInfo = $this->contentService->loadContentInfo($contentId);
 
         // mainLocationId already exists, content has been published at least once.
         if ($contentInfo->mainLocationId) {
@@ -97,16 +70,14 @@ class PreviewLocationProvider
                 return null;
             }
 
-            // NOTE: Once Repository adds support for draft locations (and draft  location ops), then this can be removed
             $location = new Location(
-                [
-                    'content' => $content,
+                array(
                     'contentInfo' => $contentInfo,
                     'status' => Location::STATUS_DRAFT,
                     'parentLocationId' => $parentLocations[0]->id,
                     'depth' => $parentLocations[0]->depth + 1,
                     'pathString' => $parentLocations[0]->pathString . 'x/',
-                ]
+                )
             );
         }
 

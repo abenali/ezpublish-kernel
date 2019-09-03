@@ -21,7 +21,6 @@ use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use eZ\Publish\Core\Limitation\ContentTypeLimitationType;
 use eZ\Publish\Core\Repository\Values\Content\Location;
 use eZ\Publish\Core\Repository\Values\Content\ContentCreateStruct;
-use eZ\Publish\SPI\Limitation\Target\Builder\VersionBuilder;
 use eZ\Publish\SPI\Persistence\Content\Type\Handler as SPIHandler;
 
 /**
@@ -29,13 +28,15 @@ use eZ\Publish\SPI\Persistence\Content\Type\Handler as SPIHandler;
  */
 class ContentTypeLimitationTypeTest extends Base
 {
-    /** @var \eZ\Publish\SPI\Persistence\Content\Type\Handler|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Type\Handler|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $contentTypeHandlerMock;
 
     /**
      * Setup Location Handler mock.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
         $this->contentTypeHandlerMock = $this->createMock(SPIHandler::class);
@@ -44,7 +45,7 @@ class ContentTypeLimitationTypeTest extends Base
     /**
      * Tear down Location Handler mock.
      */
-    protected function tearDown(): void
+    public function tearDown()
     {
         unset($this->contentTypeHandlerMock);
         parent::tearDown();
@@ -63,11 +64,11 @@ class ContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValue()
     {
-        return [
-            [new ContentTypeLimitation()],
-            [new ContentTypeLimitation([])],
-            [new ContentTypeLimitation(['limitationValues' => [0, PHP_INT_MAX, '2', 's3fdaf32r']])],
-        ];
+        return array(
+            array(new ContentTypeLimitation()),
+            array(new ContentTypeLimitation(array())),
+            array(new ContentTypeLimitation(array('limitationValues' => array(0, PHP_INT_MAX, '2', 's3fdaf32r')))),
+        );
     }
 
     /**
@@ -87,23 +88,22 @@ class ContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestAcceptValueException()
     {
-        return [
-            [new ObjectStateLimitation()],
-            [new ContentTypeLimitation(['limitationValues' => [true]])],
-        ];
+        return array(
+            array(new ObjectStateLimitation()),
+            array(new ContentTypeLimitation(array('limitationValues' => array(true)))),
+        );
     }
 
     /**
      * @dataProvider providerForTestAcceptValueException
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
      * @param \eZ\Publish\Core\Limitation\ContentTypeLimitationType $limitationType
      */
     public function testAcceptValueException(Limitation $limitation, ContentTypeLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $limitationType->acceptValue($limitation);
     }
 
@@ -112,11 +112,11 @@ class ContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestValidatePass()
     {
-        return [
-            [new ContentTypeLimitation()],
-            [new ContentTypeLimitation([])],
-            [new ContentTypeLimitation(['limitationValues' => [2]])],
-        ];
+        return array(
+            array(new ContentTypeLimitation()),
+            array(new ContentTypeLimitation(array())),
+            array(new ContentTypeLimitation(array('limitationValues' => array(2)))),
+        );
     }
 
     /**
@@ -152,11 +152,11 @@ class ContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestValidateError()
     {
-        return [
-            [new ContentTypeLimitation(), 0],
-            [new ContentTypeLimitation(['limitationValues' => [0]]), 1],
-            [new ContentTypeLimitation(['limitationValues' => [0, PHP_INT_MAX]]), 2],
-        ];
+        return array(
+            array(new ContentTypeLimitation(), 0),
+            array(new ContentTypeLimitation(array('limitationValues' => array(0))), 1),
+            array(new ContentTypeLimitation(array('limitationValues' => array(0, PHP_INT_MAX))), 2),
+        );
     }
 
     /**
@@ -200,11 +200,11 @@ class ContentTypeLimitationTypeTest extends Base
      */
     public function testBuildValue(ContentTypeLimitationType $limitationType)
     {
-        $expected = ['test', 'test' => 9];
+        $expected = array('test', 'test' => 9);
         $value = $limitationType->buildValue($expected);
 
         self::assertInstanceOf(ContentTypeLimitation::class, $value);
-        self::assertIsArray($value->limitationValues);
+        self::assertInternalType('array', $value->limitationValues);
         self::assertEquals($expected, $value->limitationValues);
     }
 
@@ -225,80 +225,66 @@ class ContentTypeLimitationTypeTest extends Base
         $versionInfoMock
             ->expects($this->once())
             ->method('getContentInfo')
-            ->will($this->returnValue(new ContentInfo(['contentTypeId' => 66])));
+            ->will($this->returnValue(new ContentInfo(array('contentTypeId' => 66))));
 
         $versionInfoMock2 = $this->createMock(APIVersionInfo::class);
 
         $versionInfoMock2
             ->expects($this->once())
             ->method('getContentInfo')
-            ->will($this->returnValue(new ContentInfo(['contentTypeId' => 66])));
+            ->will($this->returnValue(new ContentInfo(array('contentTypeId' => 66))));
 
-        return [
+        return array(
             // ContentInfo, no access
-            [
+            array(
                 'limitation' => new ContentTypeLimitation(),
                 'object' => new ContentInfo(),
-                'targets' => [],
+                'targets' => array(),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, no access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [2]]),
+            array(
+                'limitation' => new ContentTypeLimitation(array('limitationValues' => array(2))),
                 'object' => new ContentInfo(),
-                'targets' => [],
+                'targets' => array(),
                 'expected' => false,
-            ],
+            ),
             // ContentInfo, with access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [66]]),
-                'object' => new ContentInfo(['contentTypeId' => 66]),
-                'targets' => [],
+            array(
+                'limitation' => new ContentTypeLimitation(array('limitationValues' => array(66))),
+                'object' => new ContentInfo(array('contentTypeId' => 66)),
+                'targets' => array(),
                 'expected' => true,
-            ],
+            ),
             // Content, with access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [66]]),
+            array(
+                'limitation' => new ContentTypeLimitation(array('limitationValues' => array(66))),
                 'object' => $contentMock,
-                'targets' => [],
+                'targets' => array(),
                 'expected' => true,
-            ],
+            ),
             // VersionInfo, with access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [66]]),
+            array(
+                'limitation' => new ContentTypeLimitation(array('limitationValues' => array(66))),
                 'object' => $versionInfoMock2,
-                'targets' => [],
+                'targets' => array(),
                 'expected' => true,
-            ],
+            ),
             // ContentCreateStruct, no access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [2]]),
-                'object' => new ContentCreateStruct(['contentType' => ((object)['id' => 22])]),
-                'targets' => [],
+            array(
+                'limitation' => new ContentTypeLimitation(array('limitationValues' => array(2))),
+                'object' => new ContentCreateStruct(array('contentType' => ((object)array('id' => 22)))),
+                'targets' => array(),
                 'expected' => false,
-            ],
+            ),
             // ContentCreateStruct, with access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [2, 43]]),
-                'object' => new ContentCreateStruct(['contentType' => ((object)['id' => 43])]),
-                'targets' => [],
+            array(
+                'limitation' => new ContentTypeLimitation(array('limitationValues' => array(2, 43))),
+                'object' => new ContentCreateStruct(array('contentType' => ((object)array('id' => 43)))),
+                'targets' => array(),
                 'expected' => true,
-            ],
-            // ContentType intention test, with access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [2, 43]]),
-                'object' => new ContentCreateStruct(['contentType' => (object)['id' => 22]]),
-                'targets' => [(new VersionBuilder())->createFromAnyContentTypeOf([43])->build()],
-                'expected' => true,
-            ],
-            // ContentType intention test, no access
-            [
-                'limitation' => new ContentTypeLimitation(['limitationValues' => [2, 43]]),
-                'object' => new ContentCreateStruct(['contentType' => (object)['id' => 22]]),
-                'targets' => [(new VersionBuilder())->createFromAnyContentTypeOf([23])->build()],
-                'expected' => false,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -330,7 +316,7 @@ class ContentTypeLimitationTypeTest extends Base
             $targets
         );
 
-        self::assertIsBool($value);
+        self::assertInternalType('boolean', $value);
         self::assertEquals($expected, $value);
     }
 
@@ -339,32 +325,31 @@ class ContentTypeLimitationTypeTest extends Base
      */
     public function providerForTestEvaluateInvalidArgument()
     {
-        return [
+        return array(
             // invalid limitation
-            [
+            array(
                 'limitation' => new ObjectStateLimitation(),
                 'object' => new ContentInfo(),
-                'targets' => [new Location()],
-            ],
+                'targets' => array(new Location()),
+            ),
             // invalid object
-            [
+            array(
                 'limitation' => new ContentTypeLimitation(),
                 'object' => new ObjectStateLimitation(),
-                'targets' => [new Location()],
-            ],
-        ];
+                'targets' => array(new Location()),
+            ),
+        );
     }
 
     /**
      * @dataProvider providerForTestEvaluateInvalidArgument
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testEvaluateInvalidArgument(
         Limitation $limitation,
         ValueObject $object,
         array $targets
     ) {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         // Need to create inline instead of depending on testConstruct() to get correct mock instance
         $limitationType = $this->testConstruct();
 
@@ -389,15 +374,14 @@ class ContentTypeLimitationTypeTest extends Base
 
     /**
      * @depends testConstruct
+     * @expectedException \RuntimeException
      *
      * @param \eZ\Publish\Core\Limitation\ContentTypeLimitationType $limitationType
      */
     public function testGetCriterionInvalidValue(ContentTypeLimitationType $limitationType)
     {
-        $this->expectException(\RuntimeException::class);
-
         $limitationType->getCriterion(
-            new ContentTypeLimitation([]),
+            new ContentTypeLimitation(array()),
             $this->getUserMock()
         );
     }
@@ -410,15 +394,15 @@ class ContentTypeLimitationTypeTest extends Base
     public function testGetCriterionSingleValue(ContentTypeLimitationType $limitationType)
     {
         $criterion = $limitationType->getCriterion(
-            new ContentTypeLimitation(['limitationValues' => [9]]),
+            new ContentTypeLimitation(array('limitationValues' => array(9))),
             $this->getUserMock()
         );
 
         self::assertInstanceOf(ContentTypeId::class, $criterion);
-        self::assertIsArray($criterion->value);
-        self::assertIsString($criterion->operator);
+        self::assertInternalType('array', $criterion->value);
+        self::assertInternalType('string', $criterion->operator);
         self::assertEquals(Operator::EQ, $criterion->operator);
-        self::assertEquals([9], $criterion->value);
+        self::assertEquals(array(9), $criterion->value);
     }
 
     /**
@@ -429,28 +413,27 @@ class ContentTypeLimitationTypeTest extends Base
     public function testGetCriterionMultipleValues(ContentTypeLimitationType $limitationType)
     {
         $criterion = $limitationType->getCriterion(
-            new ContentTypeLimitation(['limitationValues' => [9, 55]]),
+            new ContentTypeLimitation(array('limitationValues' => array(9, 55))),
             $this->getUserMock()
         );
 
         self::assertInstanceOf(ContentTypeId::class, $criterion);
-        self::assertIsArray($criterion->value);
-        self::assertIsString($criterion->operator);
+        self::assertInternalType('array', $criterion->value);
+        self::assertInternalType('string', $criterion->operator);
         self::assertEquals(Operator::IN, $criterion->operator);
-        self::assertEquals([9, 55], $criterion->value);
+        self::assertEquals(array(9, 55), $criterion->value);
     }
 
     /**
      * @depends testConstruct
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotImplementedException
      *
      * @param \eZ\Publish\Core\Limitation\ContentTypeLimitationType $limitationType
      */
     public function testValueSchema(ContentTypeLimitationType $limitationType)
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotImplementedException::class);
-
         self::assertEquals(
-            [],
+            array(),
             $limitationType->valueSchema()
         );
     }

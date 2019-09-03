@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\Persistence\Legacy\Tests\Content\FieldValue\Converter;
 
-use eZ\Publish\API\Repository\LanguageService;
 use eZ\Publish\Core\FieldType\FieldSettings;
 use eZ\Publish\SPI\Persistence\Content\FieldValue;
 use eZ\Publish\Core\Persistence\Legacy\Content\StorageFieldValue;
@@ -23,15 +22,15 @@ use PHPUnit\Framework\TestCase;
  */
 class SelectionTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\SelectionConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\SelectionConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
-        $languageServiceMock = $this->createMock(LanguageService::class);
-
-        $this->converter = new SelectionConverter($languageServiceMock);
+        $this->converter = new SelectionConverter();
     }
 
     /**
@@ -42,7 +41,7 @@ class SelectionTest extends TestCase
     public function testToStorageValue()
     {
         $fieldValue = new FieldValue();
-        $fieldValue->data = [1, 3];
+        $fieldValue->data = array(1, 3);
         $fieldValue->sortKey = '1-3';
 
         $expectedStorageFieldValue = new StorageFieldValue();
@@ -67,7 +66,7 @@ class SelectionTest extends TestCase
     public function testToStorageValueEmpty()
     {
         $fieldValue = new FieldValue();
-        $fieldValue->data = [];
+        $fieldValue->data = array();
         $fieldValue->sortKey = '';
 
         $expectedStorageFieldValue = new StorageFieldValue();
@@ -96,7 +95,7 @@ class SelectionTest extends TestCase
         $storageFieldValue->sortKeyString = '1-3';
 
         $expectedFieldValue = new FieldValue();
-        $expectedFieldValue->data = [1, 3];
+        $expectedFieldValue->data = array(1, 3);
         $expectedFieldValue->sortKey = '1-3';
 
         $actualFieldValue = new FieldValue();
@@ -121,7 +120,7 @@ class SelectionTest extends TestCase
         $storageFieldValue->sortKeyString = '';
 
         $expectedFieldValue = new FieldValue();
-        $expectedFieldValue->data = [];
+        $expectedFieldValue->data = array();
         $expectedFieldValue->sortKey = '';
 
         $actualFieldValue = new FieldValue();
@@ -142,22 +141,22 @@ class SelectionTest extends TestCase
     public function testToStorageFieldDefinitionMultiple()
     {
         $fieldDefinition = new PersistenceFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => new FieldTypeConstraints(
-                    [
+                    array(
                         'fieldSettings' => new FieldSettings(
-                            [
+                            array(
                                 'isMultiple' => true,
-                                'options' => [
+                                'options' => array(
                                     0 => 'First',
                                     1 => 'Second',
                                     2 => 'Third',
-                                ],
-                            ]
+                                ),
+                            )
                         ),
-                    ]
+                    )
                 ),
-            ]
+            )
         );
 
         $expectedStorageFieldDefinition = new StorageFieldDefinition();
@@ -183,20 +182,20 @@ EOT;
     public function testToStorageFieldDefinitionSingle()
     {
         $fieldDefinition = new PersistenceFieldDefinition(
-            [
+            array(
                 'fieldTypeConstraints' => new FieldTypeConstraints(
-                    [
+                    array(
                         'fieldSettings' => new FieldSettings(
-                            [
+                            array(
                                 'isMultiple' => false,
-                                'options' => [
+                                'options' => array(
                                     0 => 'First',
-                                ],
-                            ]
+                                ),
+                            )
                         ),
-                    ]
+                    )
                 ),
-            ]
+            )
         );
 
         $expectedStorageFieldDefinition = new StorageFieldDefinition();
@@ -235,49 +234,31 @@ EOT;
 EOT;
 
         $expectedFieldDefinition = new PersistenceFieldDefinition(
-            [
-                'name' => [
-                    'eng-GB' => 'test name',
-                ],
-                'mainLanguageCode' => 'eng-GB',
+            array(
                 'fieldTypeConstraints' => new FieldTypeConstraints(
-                    [
+                    array(
                         'fieldSettings' => new FieldSettings(
-                            [
+                            array(
                                 'isMultiple' => true,
-                                'options' => [
+                                'options' => array(
                                     0 => 'First',
                                     1 => 'Second',
                                     2 => 'Third',
-                                ],
-                                'multilingualOptions' => [
-                                    'eng-GB' => [
-                                        0 => 'First',
-                                        1 => 'Second',
-                                        2 => 'Third',
-                                    ],
-                                ],
-                            ]
+                                ),
+                            )
                         ),
-                    ]
+                    )
                 ),
                 'defaultValue' => new FieldValue(
-                    [
-                        'data' => [],
+                    array(
+                        'data' => array(),
                         'sortKey' => '',
-                    ]
+                    )
                 ),
-            ]
+            )
         );
 
-        $actualFieldDefinition = new PersistenceFieldDefinition(
-            [
-                'name' => [
-                    'eng-GB' => 'test name',
-                ],
-                'mainLanguageCode' => 'eng-GB',
-            ]
-        );
+        $actualFieldDefinition = new PersistenceFieldDefinition();
 
         $this->converter->toFieldDefinition($storageFieldDefinition, $actualFieldDefinition);
 
@@ -302,36 +283,22 @@ EOT;
 EOT;
 
         $expectedFieldDefinition = new PersistenceFieldDefinition(
-            [
-                'name' => [
-                    'eng-GB' => 'test name',
-                ],
-                'mainLanguageCode' => 'eng-GB',
+            array(
                 'fieldTypeConstraints' => new FieldTypeConstraints(
-                    [
+                    array(
                         'fieldSettings' => new FieldSettings(
-                            [
+                            array(
                                 'isMultiple' => false,
-                                'options' => [],
-                                'multilingualOptions' => [
-                                    'eng-GB' => [],
-                                ],
-                            ]
+                                'options' => array(),
+                            )
                         ),
-                    ]
+                    )
                 ),
-                'defaultValue' => new FieldValue(['data' => []]),
-            ]
+                'defaultValue' => new FieldValue(array('data' => array())),
+            )
         );
 
-        $actualFieldDefinition = new PersistenceFieldDefinition(
-            [
-                'name' => [
-                    'eng-GB' => 'test name',
-                ],
-                'mainLanguageCode' => 'eng-GB',
-            ]
-        );
+        $actualFieldDefinition = new PersistenceFieldDefinition();
 
         $this->converter->toFieldDefinition($storageFieldDefinition, $actualFieldDefinition);
 

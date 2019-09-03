@@ -1,6 +1,6 @@
 parameters:
     # Kernel related params
-    webroot_dir: "%kernel.root_dir%/../public"
+    webroot_dir: "%kernel.root_dir%/../web"
 
     ###
     # ezsettings namespace, default scope
@@ -22,11 +22,6 @@ parameters:
     ezplatform.default_view_templates.content.asset_image: 'EzPublishCoreBundle:default:content/asset_image.html.twig'
     ezplatform.default_view_templates.block: 'EzPublishCoreBundle:default:block/block.html.twig'
 
-    # Default templates
-    ezplatform.default_templates.pagelayout: 'EzPublishCoreBundle::pagelayout.html.twig'
-    ezplatform.default_templates.field_templates: 'EzPublishCoreBundle::content_fields.html.twig'
-    ezplatform.default_templates.fielddefinition_settings_templates: 'EzPublishCoreBundle::fielddefinition_settings.html.twig'
-
     # Image Asset mappings
     ezsettings.default.fieldtypes.ezimageasset.mappings:
         content_type_identifier: image
@@ -34,8 +29,7 @@ parameters:
         name_field_identifier: name
         parent_location_id: 51
 
-    ezsettings.default.pagelayout: '%ezplatform.default_templates.pagelayout%'
-    ezsettings.default.page_layout: '%ezplatform.default_templates.pagelayout%'
+    ezsettings.default.pagelayout: 'EzPublishCoreBundle::pagelayout.html.twig'
 
     # List of content type identifiers to display as image when embedded
     ezplatform.content_view.image_embed_content_types_identifiers: ['image']
@@ -125,21 +119,21 @@ parameters:
 
     # Templates to use while rendering fields
     ezsettings.default.field_templates:
-        - {template: '%ezplatform.default_templates.field_templates%', priority: 0}
+        - {template: EzPublishCoreBundle::content_fields.html.twig, priority: 0}
 
     # Templates for Field edition. Follows the same structure than for field_templates
     ezsettings.default.field_edit_templates: []
 
     # Templates to use while rendering field definition settings
     ezsettings.default.fielddefinition_settings_templates:
-        - {template: '%ezplatform.default_templates.fielddefinition_settings_templates%', priority: 0}
+        - {template: EzPublishCoreBundle::fielddefinition_settings.html.twig, priority: 0}
 
     # Templates for FieldDefinition edition. Follows the same structure than for field_templates
     ezsettings.default.fielddefinition_edit_templates: []
 
     # Security settings
     ezsettings.default.security.login_template: "EzPublishCoreBundle:Security:login.html.twig"
-    ezsettings.default.security.base_layout: "%ezsettings.default.page_layout%"
+    ezsettings.default.security.base_layout: "%ezsettings.default.pagelayout%"
 
     # Image settings
     ezsettings.default.image.temporary_dir: imagetmp
@@ -197,6 +191,84 @@ parameters:
         optimize: "-strip"
 
     ezsettings.default.image_host: ''
+
+    ###
+    # default ezpage settings
+    ##
+    ezpublish.ezpage.enabledLayouts: []
+    ezpublish.ezpage.enabledBlocks: []
+    ezpublish.ezpage.layouts:
+        GlobalZoneLayout:
+            name: Global zone layout
+            template: globalzonelayout.tpl
+        2ZonesLayout1:
+            name: 2 zones (layout 1)
+            template: 2zoneslayout1.tpl
+        2ZonesLayout2:
+            name: 2 zones (layout 2)
+            template: 2zoneslayout2.tpl
+        2ZonesLayout3:
+            name: 2 zones (layout 3)
+            template: 2zoneslayout3.tpl
+        3ZonesLayout1:
+            name: 3 zones (layout 1)
+            template: 3zoneslayout1.tpl
+        3ZonesLayout2:
+            name: 3 zones (layout 2)
+            template: 3zoneslayout2.tpl
+        CallForActionLayout:
+            name: Call For Action zone layout
+            template: callforactionlayout.tpl
+
+    ezpublish.ezpage.blocks:
+        DemoBlock:
+            name: Demo Block
+        Manual2Items:
+            name: 2 items (Manual)
+        Manual3Items:
+            name: 3 items (Manual)
+        Manual4Items:
+            name: 4 items (Manual)
+        Manual5Items:
+            name: 5 items (Manual)
+        Dynamic3Items:
+            name: 3 items (Dynamic)
+        Gallery:
+            name: Gallery (Manual)
+        Video:
+            name: Video (Manual)
+        ItemList:
+            name: Item list
+        MainStory:
+            name: Main story (Manual)
+        Banner:
+            name: Banner
+        TagCloud:
+            name: Tag cloud
+        Poll:
+            name: Poll
+        FlashRecorder:
+            name: Flash Recorder
+        FeedReader:
+            name: Feed reader
+        Keyword:
+            name: Keyword
+        GMap:
+            name: Google Map
+        OnlineUsers:
+            name: Online Users
+        MultimediaCarousel:
+            name: Multimedia carousel
+        Search:
+            name: Search
+        Ads:
+            name: Advertisement
+        LatestContent:
+            name: Latest content
+        TopRated:
+            name: Top Rated
+        GMapItems:
+            name: Google Map Items
 
     ezsettings.default.url_handler.http.options:
         timeout: 10

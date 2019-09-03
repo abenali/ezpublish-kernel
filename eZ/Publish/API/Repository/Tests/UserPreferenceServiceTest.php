@@ -32,8 +32,8 @@ class UserPreferenceServiceTest extends BaseTest
         /* END: Use Case */
 
         $this->assertInstanceOf(UserPreferenceList::class, $userPreferenceList);
-        $this->assertIsArray($userPreferenceList->items);
-        $this->assertIsInt($userPreferenceList->totalCount);
+        $this->assertInternalType('array', $userPreferenceList->items);
+        $this->assertInternalType('int', $userPreferenceList->totalCount);
         $this->assertEquals(5, $userPreferenceList->totalCount);
     }
 
@@ -85,11 +85,11 @@ class UserPreferenceServiceTest extends BaseTest
     /**
      * @covers \eZ\Publish\API\Repository\UserPreferenceService::setUserPreference()
      * @depends testSetUserPreference
+     *
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentException
      */
     public function testSetUserPreferenceThrowsInvalidArgumentExceptionOnInvalidValue()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -108,11 +108,10 @@ class UserPreferenceServiceTest extends BaseTest
     /**
      * @covers \eZ\Publish\API\Repository\UserPreferenceService::setUserPreference()
      * @depends testSetUserPreference
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testSetUserPreferenceThrowsInvalidArgumentExceptionOnEmptyName()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */

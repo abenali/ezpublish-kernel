@@ -65,7 +65,7 @@ class ParentContentTypeLimitationType extends AbstractPersistenceLimitationType 
      */
     public function validate(APILimitationValue $limitationValue)
     {
-        $validationErrors = [];
+        $validationErrors = array();
         foreach ($limitationValue->limitationValues as $key => $id) {
             try {
                 $this->persistence->contentTypeHandler()->load($id);
@@ -73,10 +73,10 @@ class ParentContentTypeLimitationType extends AbstractPersistenceLimitationType 
                 $validationErrors[] = new ValidationError(
                     "limitationValues[%key%] => '%value%' does not exist in the backend",
                     null,
-                    [
+                    array(
                         'value' => $id,
                         'key' => $key,
-                    ]
+                    )
                 );
             }
         }
@@ -93,7 +93,7 @@ class ParentContentTypeLimitationType extends AbstractPersistenceLimitationType 
      */
     public function buildValue(array $limitationValues)
     {
-        return new APIParentContentTypeLimitation(['limitationValues' => $limitationValues]);
+        return new APIParentContentTypeLimitation(array('limitationValues' => $limitationValues));
     }
 
     /**
@@ -133,7 +133,7 @@ class ParentContentTypeLimitationType extends AbstractPersistenceLimitationType 
         // Try to load locations if no targets were provided
         if (empty($targets)) {
             if ($object->published) {
-                $targets = $this->loadParentLocations($object);
+                $targets = $this->persistence->locationHandler()->loadLocationsByContent($object->id);
             } else {
                 // @todo Need support for draft locations to to work correctly
                 $targets = $this->persistence->locationHandler()->loadParentLocationsForDraftContent($object->id);
@@ -192,24 +192,20 @@ class ParentContentTypeLimitationType extends AbstractPersistenceLimitationType 
             return false;
         }
 
-        $hasMandatoryTarget = false;
         foreach ($targets as $target) {
-            if ($target instanceof LocationCreateStruct) {
-                $hasMandatoryTarget = true;
-                $location = $this->persistence->locationHandler()->load($target->parentLocationId);
-                $contentTypeId = $this->persistence->contentHandler()->loadContentInfo($location->contentId)->contentTypeId;
-
-                if (!in_array($contentTypeId, $value->limitationValues)) {
-                    return false;
-                }
+            if (!$target instanceof LocationCreateStruct) {
+                throw new InvalidArgumentException(
+                    '$targets',
+                    'If $object is ContentCreateStruct must contain objects of type: LocationCreateStruct'
+                );
             }
-        }
 
-        if (false === $hasMandatoryTarget) {
-            throw new InvalidArgumentException(
-                '$targets',
-                'If $object is ContentCreateStruct must contain objects of type: LocationCreateStruct'
-            );
+            $location = $this->persistence->locationHandler()->load($target->parentLocationId);
+            $contentTypeId = $this->persistence->contentHandler()->loadContentInfo($location->contentId)->contentTypeId;
+
+            if (!in_array($contentTypeId, $value->limitationValues)) {
+                return false;
+            }
         }
 
         return true;
@@ -237,25 +233,5 @@ class ParentContentTypeLimitationType extends AbstractPersistenceLimitationType 
     public function valueSchema()
     {
         throw new \eZ\Publish\API\Repository\Exceptions\NotImplementedException(__METHOD__);
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\Content\ContentInfo $contentInfo
-     *
-     * @return \eZ\Publish\SPI\Persistence\Content\Location[]
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     */
-    private function loadParentLocations(ContentInfo $contentInfo)
-    {
-        $locations = $this->persistence->locationHandler()->loadLocationsByContent($contentInfo->id);
-        $parentLocations = [];
-        foreach ($locations as $location) {
-            if ($location->depth > 0) {
-                $parentLocations[] = $this->persistence->locationHandler()->load($location->parentId);
-            }
-        }
-
-        return $parentLocations;
     }
 }

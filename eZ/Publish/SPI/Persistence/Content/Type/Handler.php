@@ -330,10 +330,4 @@ interface Handler
      * @return \eZ\Publish\SPI\Persistence\Content\Type
      */
     public function removeContentTypeTranslation(int $contentTypeId, string $languageCode): Type;
-
-    /**
-     * @param int $userId
-     * @param int $status
-     */
-    public function deleteByUserAndStatus(int $userId, int $status): void;
 }

@@ -22,16 +22,22 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class SessionSetDynamicNameListenerTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $configResolver;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $session;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $sessionStorage;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->configResolver = $this->getMockBuilder(ConfigResolverInterface::class)
@@ -49,9 +55,9 @@ class SessionSetDynamicNameListenerTest extends TestCase
     {
         $listener = new SessionSetDynamicNameListener($this->configResolver, $this->session, $this->sessionStorage);
         $this->assertSame(
-            [
-                MVCEvents::SITEACCESS => ['onSiteAccessMatch', 250],
-            ],
+            array(
+                MVCEvents::SITEACCESS => array('onSiteAccessMatch', 250),
+            ),
             $listener->getSubscribedEvents()
         );
     }
@@ -112,39 +118,39 @@ class SessionSetDynamicNameListenerTest extends TestCase
 
     public function onSiteAccessMatchProvider()
     {
-        return [
-            [new SiteAccess('foo'), ['name' => 'eZSESSID'], ['name' => 'eZSESSID']],
-            [new SiteAccess('foo'), ['name' => 'eZSESSID{siteaccess_hash}'], ['name' => 'eZSESSID' . md5('foo')]],
-            [new SiteAccess('foo'), ['name' => 'this_is_a_session_name'], ['name' => 'eZSESSID_this_is_a_session_name']],
-            [new SiteAccess('foo'), ['name' => 'something{siteaccess_hash}'], ['name' => 'eZSESSID_something' . md5('foo')]],
-            [new SiteAccess('bar_baz'), ['name' => '{siteaccess_hash}something'], ['name' => 'eZSESSID_' . md5('bar_baz') . 'something']],
-            [
+        return array(
+            array(new SiteAccess('foo'), array('name' => 'eZSESSID'), array('name' => 'eZSESSID')),
+            array(new SiteAccess('foo'), array('name' => 'eZSESSID{siteaccess_hash}'), array('name' => 'eZSESSID' . md5('foo'))),
+            array(new SiteAccess('foo'), array('name' => 'this_is_a_session_name'), array('name' => 'eZSESSID_this_is_a_session_name')),
+            array(new SiteAccess('foo'), array('name' => 'something{siteaccess_hash}'), array('name' => 'eZSESSID_something' . md5('foo'))),
+            array(new SiteAccess('bar_baz'), array('name' => '{siteaccess_hash}something'), array('name' => 'eZSESSID_' . md5('bar_baz') . 'something')),
+            array(
                 new SiteAccess('foo'),
-                [
+                array(
                     'name' => 'this_is_a_session_name',
                     'cookie_path' => '/foo',
                     'cookie_domain' => 'foo.com',
                     'cookie_lifetime' => 86400,
                     'cookie_secure' => false,
                     'cookie_httponly' => true,
-                ],
-                [
+                ),
+                array(
                     'name' => 'eZSESSID_this_is_a_session_name',
                     'cookie_path' => '/foo',
                     'cookie_domain' => 'foo.com',
                     'cookie_lifetime' => 86400,
                     'cookie_secure' => false,
                     'cookie_httponly' => true,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     public function testOnSiteAccessMatchNoConfiguredSessionName()
     {
-        $configuredSessionStorageOptions = ['cookie_path' => '/bar'];
+        $configuredSessionStorageOptions = array('cookie_path' => '/bar');
         $sessionName = 'some_default_name';
-        $sessionOptions = $configuredSessionStorageOptions + ['name' => "eZSESSID_$sessionName"];
+        $sessionOptions = $configuredSessionStorageOptions + array('name' => "eZSESSID_$sessionName");
 
         $this->session
             ->expects($this->once())

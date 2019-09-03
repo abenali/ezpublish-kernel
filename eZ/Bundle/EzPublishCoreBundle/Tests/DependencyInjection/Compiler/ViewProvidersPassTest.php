@@ -1,7 +1,7 @@
 <?php
 
 /**
- * File containing the ViewProvidersPassTest class.
+ * File containing the BlockViewPassTest class.
  *
  * @copyright Copyright (C) eZ Systems AS. All rights reserved.
  * @license For full copyright and license information view LICENSE file distributed with this source code.
@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class ViewProvidersPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.view_provider.registry', new Definition());
@@ -28,7 +28,7 @@ class ViewProvidersPassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new ViewProvidersPass());
     }
@@ -60,17 +60,17 @@ class ViewProvidersPassTest extends AbstractCompilerPassTestCase
 
     public function addViewProviderProvider()
     {
-        return [
-            [null, 0],
-            [0, 0],
-            [57, 57],
-            [-23, -23],
-            [-255, -255],
-            [-256, -255],
-            [-1000, -255],
-            [255, 255],
-            [256, 255],
-            [1000, 255],
-        ];
+        return array(
+            array(null, 0),
+            array(0, 0),
+            array(57, 57),
+            array(-23, -23),
+            array(-255, -255),
+            array(-256, -255),
+            array(-1000, -255),
+            array(255, 255),
+            array(256, 255),
+            array(1000, 255),
+        );
     }
 }

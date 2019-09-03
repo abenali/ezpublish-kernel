@@ -19,12 +19,14 @@ class LocationParamConverterTest extends AbstractParamConverterTest
 
     const LOCATION_CLASS = Location::class;
 
-    /** @var \eZ\Bundle\EzPublishCoreBundle\Converter\LocationParamConverter */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\Converter\LocationParamConverter
+     */
     private $converter;
 
     private $locationServiceMock;
 
-    protected function setUp(): void
+    public function setUp()
     {
         $this->locationServiceMock = $this->createMock(LocationService::class);
 

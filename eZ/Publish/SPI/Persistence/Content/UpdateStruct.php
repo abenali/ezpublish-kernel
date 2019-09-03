@@ -12,8 +12,10 @@ use eZ\Publish\SPI\Persistence\ValueObject;
 
 class UpdateStruct extends ValueObject
 {
-    /** @var string[] Eg. array( 'eng-GB' => "New Article" ) */
-    public $name = [];
+    /**
+     * @var string[] Eg. array( 'eng-GB' => "New Article" )
+     */
+    public $name = array();
 
     /**
      * Creator user ID for the version.
@@ -27,7 +29,7 @@ class UpdateStruct extends ValueObject
      *
      * @var \eZ\Publish\SPI\Persistence\Content\Field[]
      */
-    public $fields = [];
+    public $fields = array();
 
     /**
      * Modification date for the version.

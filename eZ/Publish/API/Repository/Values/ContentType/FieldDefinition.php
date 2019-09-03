@@ -26,8 +26,7 @@ use eZ\Publish\SPI\Repository\Values\MultiLanguageDescription;
  * @property-read bool $isRequired indicates if this field is required in the content object
  * @property-read bool $isSearchable indicates if the field is searchable
  * @property-read bool $isInfoCollector indicates if this field is used for information collection
- * @property-read mixed $defaultValue the default value of the field
- * @property-read string $mainLanguageCode main Translation (language code) of a multilingual Field Definition
+ * @property-read $defaultValue the default value of the field
  */
 abstract class FieldDefinition extends ValueObject implements MultiLanguageName, MultiLanguageDescription
 {
@@ -114,11 +113,4 @@ abstract class FieldDefinition extends ValueObject implements MultiLanguageName,
      * @var bool
      */
     protected $isSearchable;
-
-    /**
-     * Based on mainLanguageCode of contentType.
-     *
-     * @var string
-     */
-    protected $mainLanguageCode;
 }

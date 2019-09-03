@@ -28,7 +28,7 @@ abstract class TransformationProcessor
      *
      * @var array
      */
-    protected $ruleFiles = [];
+    protected $ruleFiles = array();
 
     /**
      * Compiled rules, which can directly be applied to the input strings.
@@ -53,7 +53,7 @@ abstract class TransformationProcessor
      * @param \eZ\Publish\Core\Persistence\TransformationProcessor\PcreCompiler $compiler
      * @param array $ruleFiles
      */
-    public function __construct(PcreCompiler $compiler, array $ruleFiles = [])
+    public function __construct(PcreCompiler $compiler, array $ruleFiles = array())
     {
         $this->ruleFiles = $ruleFiles;
         $this->compiler = $compiler;
@@ -77,7 +77,7 @@ abstract class TransformationProcessor
      *
      * @return string
      */
-    public function transform($string, array $ruleNames = [])
+    public function transform($string, array $ruleNames = array())
     {
         $rules = $this->getRules();
 

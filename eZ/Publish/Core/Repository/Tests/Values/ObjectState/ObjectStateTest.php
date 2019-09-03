@@ -79,11 +79,10 @@ class ObjectStateTest extends TestCase
      *
      * @covers \eZ\Publish\API\Repository\Values\ObjectState\ObjectState::__get
      * @covers \eZ\Publish\API\Repository\Values\ObjectState\ObjectStateGroup::__get
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testMissingProperty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $objectState = new ObjectState();
         $value = $objectState->notDefined;
         $this->fail('Succeeded getting non existing property');
@@ -94,11 +93,10 @@ class ObjectStateTest extends TestCase
      *
      * @covers \eZ\Publish\API\Repository\Values\ObjectState\ObjectState::__set
      * @covers \eZ\Publish\API\Repository\Values\ObjectState\ObjectStateGroup::__set
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException
      */
     public function testReadOnlyProperty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException::class);
-
         $objectState = new ObjectState();
         $objectState->id = 42;
         $this->fail('Succeeded setting read only property');
@@ -125,12 +123,11 @@ class ObjectStateTest extends TestCase
      *
      * @covers \eZ\Publish\API\Repository\Values\ObjectState\ObjectState::__unset
      * @covers \eZ\Publish\API\Repository\Values\ObjectState\ObjectStateGroup::__unset
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException
      */
     public function testUnsetProperty()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyReadOnlyException::class);
-
-        $objectState = new ObjectState(['id' => 2]);
+        $objectState = new ObjectState(array('id' => 2));
         unset($objectState->id);
         $this->fail('Unsetting read-only property succeeded');
     }

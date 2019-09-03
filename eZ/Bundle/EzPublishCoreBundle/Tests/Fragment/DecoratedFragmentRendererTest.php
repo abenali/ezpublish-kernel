@@ -18,10 +18,12 @@ use Symfony\Component\HttpKernel\Fragment\RoutableFragmentRenderer;
 
 class DecoratedFragmentRendererTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $innerRenderer;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->innerRenderer = $this->createMock(FragmentRendererInterface::class);
@@ -76,7 +78,7 @@ class DecoratedFragmentRendererTest extends TestCase
     {
         $url = 'http://phoenix-rises.fm/foo/bar';
         $request = new Request();
-        $options = ['foo' => 'bar'];
+        $options = array('foo' => 'bar');
         $expectedReturn = '/_fragment?foo=bar';
         $this->innerRenderer
             ->expects($this->once())
@@ -94,7 +96,7 @@ class DecoratedFragmentRendererTest extends TestCase
         $siteAccess = new SiteAccess('test', 'test');
         $request = new Request();
         $request->attributes->set('siteaccess', $siteAccess);
-        $options = ['foo' => 'bar'];
+        $options = array('foo' => 'bar');
         $expectedReturn = '/_fragment?foo=bar';
         $this->innerRenderer
             ->expects($this->once())

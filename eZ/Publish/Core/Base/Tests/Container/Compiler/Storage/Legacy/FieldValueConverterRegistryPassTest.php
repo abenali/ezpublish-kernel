@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class FieldValueConverterRegistryPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.persistence.legacy.field_value_converter.registry', new Definition());
@@ -28,7 +28,7 @@ class FieldValueConverterRegistryPassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new FieldValueConverterRegistryPass());
     }
@@ -42,8 +42,8 @@ class FieldValueConverterRegistryPassTest extends AbstractCompilerPassTestCase
         $def = new Definition();
         $def->setClass($class);
         $def->addTag(
-            FieldValueConverterRegistryPass::CONVERTER_SERVICE_TAG,
-            ['alias' => $fieldTypeIdentifier]
+            'ezpublish.storageEngine.legacy.converter',
+            array('alias' => $fieldTypeIdentifier)
         );
         $this->setDefinition($serviceId, $def);
 
@@ -52,7 +52,7 @@ class FieldValueConverterRegistryPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.persistence.legacy.field_value_converter.registry',
             'register',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 }

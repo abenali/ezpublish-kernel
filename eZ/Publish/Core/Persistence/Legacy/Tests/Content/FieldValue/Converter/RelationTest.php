@@ -20,10 +20,12 @@ use PHPUnit\Framework\TestCase;
  */
 class RelationTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\RelationConverter */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter\RelationConverter
+     */
     protected $converter;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->converter = new RelationConverter();

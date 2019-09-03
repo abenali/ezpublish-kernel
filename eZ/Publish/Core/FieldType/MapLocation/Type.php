@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\FieldType\MapLocation;
 
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\FieldType;
 use eZ\Publish\SPI\Persistence\Content\FieldValue;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentType;
@@ -33,9 +32,16 @@ class Type extends FieldType
     }
 
     /**
-     * @param \eZ\Publish\Core\FieldType\MapLocation\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\MapLocation\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value->address;
     }
@@ -152,11 +158,11 @@ class Type extends FieldType
             return null;
         }
 
-        return [
+        return array(
             'latitude' => $value->latitude,
             'longitude' => $value->longitude,
             'address' => $value->address,
-        ];
+        );
     }
 
     /**
@@ -179,11 +185,11 @@ class Type extends FieldType
     public function toPersistenceValue(SPIValue $value)
     {
         return new FieldValue(
-            [
+            array(
                 'data' => null,
                 'externalData' => $this->toHash($value),
                 'sortKey' => $this->getSortInfo($value),
-            ]
+            )
         );
     }
 

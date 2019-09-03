@@ -33,18 +33,22 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ExceptionListenerTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject|\Symfony\Contracts\Translation\TranslatorInterface */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject|\Symfony\Component\Translation\TranslatorInterface
+     */
     private $translator;
 
-    /** @var ExceptionListener */
+    /**
+     * @var ExceptionListener
+     */
     private $listener;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->translator = $this->createMock(TranslatorInterface::class);
@@ -68,7 +72,7 @@ class ExceptionListenerTest extends TestCase
         return new GetResponseForExceptionEvent(
             $this->createMock(HttpKernelInterface::class),
             new Request(),
-            HttpKernelInterface::MASTER_REQUEST,
+            'master',
             $exception
         );
     }

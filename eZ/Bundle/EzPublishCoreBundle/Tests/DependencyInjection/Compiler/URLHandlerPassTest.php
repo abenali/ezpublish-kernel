@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * File containing the SignalSlotPassTest class.
+ *
  * @copyright Copyright (C) eZ Systems AS. All rights reserved.
  * @license For full copyright and license information view LICENSE file distributed with this source code.
  */
@@ -14,13 +16,13 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class URLHandlerPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.url_checker.handler_registry', new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new URLHandlerPass());
     }
@@ -38,14 +40,15 @@ class URLHandlerPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.url_checker.handler_registry',
             'addHandler',
-            [$scheme, new Reference($serviceId)]
+            array($scheme, new Reference($serviceId))
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRegisterURLHandlerNoScheme()
     {
-        $this->expectException(\LogicException::class);
-
         $serviceId = 'service_id';
         $scheme = 'http';
         $definition = new Definition();
@@ -57,7 +60,7 @@ class URLHandlerPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.url_checker.handler_registry',
             'addHandler',
-            [$scheme, new Reference($serviceId)]
+            array($scheme, new Reference($serviceId))
         );
     }
 }

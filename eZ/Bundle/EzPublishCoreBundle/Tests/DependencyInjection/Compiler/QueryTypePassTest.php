@@ -1,7 +1,7 @@
 <?php
 
 /**
- * File containing the QueryTypePassTest class.
+ * File containing the BlockViewPassTest class.
  *
  * @copyright Copyright (C) eZ Systems AS. All rights reserved.
  * @license For full copyright and license information view LICENSE file distributed with this source code.
@@ -20,13 +20,13 @@ class QueryTypePassTest extends AbstractCompilerPassTestCase
 {
     private static $queryTypeClass = TestQueryType::class;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.query_type.registry', new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new QueryTypePass());
     }

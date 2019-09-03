@@ -16,10 +16,12 @@ use eZ\Publish\API\Repository\Repository;
 
 class ParentLocationTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\ParentLocation */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Id\ParentLocation
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new ParentLocationIdMatcher();
@@ -42,28 +44,28 @@ class ParentLocationTest extends BaseTest
 
     public function matchLocationProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
-                $this->getLocationMock(['parentLocationId' => 123]),
+                $this->getLocationMock(array('parentLocationId' => 123)),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
-                $this->getLocationMock(['parentLocationId' => 456]),
+                $this->getLocationMock(array('parentLocationId' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getLocationMock(['parentLocationId' => 456]),
+            ),
+            array(
+                array(123, 789),
+                $this->getLocationMock(array('parentLocationId' => 456)),
                 false,
-            ],
-            [
-                [123, 789],
-                $this->getLocationMock(['parentLocationId' => 789]),
+            ),
+            array(
+                array(123, 789),
+                $this->getLocationMock(array('parentLocationId' => 789)),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -82,34 +84,34 @@ class ParentLocationTest extends BaseTest
         $this->matcher->setMatchingConfig($matchingConfig);
         $this->assertSame(
             $expectedResult,
-            $this->matcher->matchContentInfo($this->getContentInfoMock(['mainLocationId' => 42]))
+            $this->matcher->matchContentInfo($this->getContentInfoMock(array('mainLocationId' => 42)))
         );
     }
 
     public function matchContentInfoProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 123,
                 $this->generateRepositoryMockForParentLocationId(123),
                 true,
-            ],
-            [
+            ),
+            array(
                 123,
                 $this->generateRepositoryMockForParentLocationId(456),
                 false,
-            ],
-            [
-                [123, 789],
+            ),
+            array(
+                array(123, 789),
                 $this->generateRepositoryMockForParentLocationId(456),
                 false,
-            ],
-            [
-                [123, 789],
+            ),
+            array(
+                array(123, 789),
                 $this->generateRepositoryMockForParentLocationId(789),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -127,7 +129,7 @@ class ParentLocationTest extends BaseTest
             ->with(42)
             ->will(
                 $this->returnValue(
-                    $this->getLocationMock(['parentLocationId' => $parentLocationId])
+                    $this->getLocationMock(array('parentLocationId' => $parentLocationId))
                 )
             );
 

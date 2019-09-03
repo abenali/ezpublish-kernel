@@ -16,7 +16,7 @@ use eZ\Publish\SPI\FieldType\Value;
 /**
  * This class represents a FieldType available to Public API users.
  *
- * @see \eZ\Publish\API\Repository\FieldType
+ * @see eZ\Publish\API\Repository\FieldType
  *
  * @internal Meant for internal use by Repository, type hint against API object instead.
  */
@@ -47,9 +47,9 @@ class FieldType implements FieldTypeInterface
         return $this->internalFieldType->getFieldTypeIdentifier();
     }
 
-    public function getName(Value $value, APIFieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName($value)
     {
-        return $this->internalFieldType->getName($value, $fieldDefinition, $languageCode);
+        return $this->internalFieldType->getName($value);
     }
 
     /**

@@ -39,44 +39,44 @@ class CountryTest extends FieldTypeTest
     protected function createFieldTypeUnderTest()
     {
         $fieldType = new Country(
-            [
-                'BE' => [
+            array(
+                'BE' => array(
                     'Name' => 'Belgium',
                     'Alpha2' => 'BE',
                     'Alpha3' => 'BEL',
                     'IDC' => 32,
-                ],
-                'FR' => [
+                ),
+                'FR' => array(
                     'Name' => 'France',
                     'Alpha2' => 'FR',
                     'Alpha3' => 'FRA',
                     'IDC' => 33,
-                ],
-                'NO' => [
+                ),
+                'NO' => array(
                     'Name' => 'Norway',
                     'Alpha2' => 'NO',
                     'Alpha3' => 'NOR',
                     'IDC' => 47,
-                ],
-                'KP' => [
+                ),
+                'KP' => array(
                     'Name' => "Korea, Democratic People's Republic of",
                     'Alpha2' => 'KP',
                     'Alpha3' => 'PRK',
                     'IDC' => 850,
-                ],
-                'TF' => [
+                ),
+                'TF' => array(
                     'Name' => 'French Southern Territories',
                     'Alpha2' => 'TF',
                     'Alpha3' => 'ATF',
                     'IDC' => 0,
-                ],
-                'CF' => [
+                ),
+                'CF' => array(
                     'Name' => 'Central African Republic',
                     'Alpha2' => 'CF',
                     'Alpha3' => 'CAF',
                     'IDC' => 236,
-                ],
-            ]
+                ),
+            )
         );
         $fieldType->setTransformationProcessor($this->getTransformationProcessorMock());
 
@@ -90,7 +90,7 @@ class CountryTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -100,12 +100,12 @@ class CountryTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [
-            'isMultiple' => [
+        return array(
+            'isMultiple' => array(
                 'type' => 'boolean',
                 'default' => false,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -143,24 +143,24 @@ class CountryTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 'LegoLand',
                 InvalidArgumentException::class,
-            ],
-            [
-                ['Norway', 'France', 'LegoLand'],
+            ),
+            array(
+                array('Norway', 'France', 'LegoLand'),
                 InvalidValue::class,
-            ],
-            [
-                ['FR', 'BE', 'LE'],
+            ),
+            array(
+                array('FR', 'BE', 'LE'),
                 InvalidValue::class,
-            ],
-            [
-                ['FRE', 'BEL', 'LEG'],
+            ),
+            array(
+                array('FRE', 'BEL', 'LEG'),
                 InvalidValue::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -194,66 +194,66 @@ class CountryTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
-                ['BE', 'FR'],
+        return array(
+            array(
+                array('BE', 'FR'),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                        'FR' => [
+                        ),
+                        'FR' => array(
                             'Name' => 'France',
                             'Alpha2' => 'FR',
                             'Alpha3' => 'FRA',
                             'IDC' => 33,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-            [
-                ['Belgium'],
+            ),
+            array(
+                array('Belgium'),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-            [
-                ['BE'],
+            ),
+            array(
+                array('BE'),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-            [
-                ['BEL'],
+            ),
+            array(
+                array('BEL'),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -293,40 +293,40 @@ class CountryTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-                ['BE'],
-            ],
-            [
+                array('BE'),
+            ),
+            array(
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                        'FR' => [
+                        ),
+                        'FR' => array(
                             'Name' => 'France',
                             'Alpha2' => 'FR',
                             'Alpha3' => 'FRA',
                             'IDC' => 33,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-                ['BE', 'FR'],
-            ],
-        ];
+                array('BE', 'FR'),
+            ),
+        );
     }
 
     /**
@@ -366,54 +366,58 @@ class CountryTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
-                ['BE'],
+        return array(
+            array(
+                array('BE'),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-            [
-                ['BE', 'FR'],
+            ),
+            array(
+                array('BE', 'FR'),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                        'FR' => [
+                        ),
+                        'FR' => array(
                             'Name' => 'France',
                             'Alpha2' => 'FR',
                             'Alpha3' => 'FRA',
                             'IDC' => 33,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [new CountryValue(), [], 'en_GB', ''],
-            [new CountryValue(['FR' => ['Name' => 'France']]), [], 'en_GB', 'France'],
-            [
-                new CountryValue(['FR' => ['Name' => 'France'], 'DE' => ['Name' => 'Deutschland']]),
-                [],
-                'en_GB',
+        return array(
+            array(
+                new CountryValue(),
+                '',
+            ),
+            array(
+                new CountryValue(array('FR' => array('Name' => 'France'))),
+                'France',
+            ),
+            array(
+                new CountryValue(array('FR' => array('Name' => 'France'), 'DE' => array('Name' => 'Deutschland'))),
                 'France, Deutschland',
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -463,56 +467,56 @@ class CountryTest extends FieldTypeTest
      */
     public function provideValidDataForValidate()
     {
-        return [
-            [
-                [
-                    'fieldSettings' => [
+        return array(
+            array(
+                array(
+                    'fieldSettings' => array(
                         'isMultiple' => true,
-                    ],
-                ],
-                new CountryValue(),
-            ],
-            [
-                [
-                    'fieldSettings' => [
-                        'isMultiple' => false,
-                    ],
-                ],
-                new CountryValue(
-                    [
-                        'BE' => [
-                            'Name' => 'Belgium',
-                            'Alpha2' => 'BE',
-                            'Alpha3' => 'BEL',
-                            'IDC' => 32,
-                        ],
-                    ]
+                    ),
                 ),
-            ],
-            [
-                [
-                    'fieldSettings' => [
-                        'isMultiple' => true,
-                    ],
-                ],
+                new CountryValue(),
+            ),
+            array(
+                array(
+                    'fieldSettings' => array(
+                        'isMultiple' => false,
+                    ),
+                ),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                        'FR' => [
+                        ),
+                    )
+                ),
+            ),
+            array(
+                array(
+                    'fieldSettings' => array(
+                        'isMultiple' => true,
+                    ),
+                ),
+                new CountryValue(
+                    array(
+                        'BE' => array(
+                            'Name' => 'Belgium',
+                            'Alpha2' => 'BE',
+                            'Alpha3' => 'BEL',
+                            'IDC' => 32,
+                        ),
+                        'FR' => array(
                             'Name' => 'France',
                             'Alpha2' => 'FR',
                             'Alpha3' => 'FRA',
                             'IDC' => 33,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -581,65 +585,65 @@ class CountryTest extends FieldTypeTest
      */
     public function provideInvalidDataForValidate()
     {
-        return [
-            [
-                [
-                    'fieldSettings' => [
+        return array(
+            array(
+                array(
+                    'fieldSettings' => array(
                         'isMultiple' => false,
-                    ],
-                ],
+                    ),
+                ),
                 new CountryValue(
-                    [
-                        'BE' => [
+                    array(
+                        'BE' => array(
                             'Name' => 'Belgium',
                             'Alpha2' => 'BE',
                             'Alpha3' => 'BEL',
                             'IDC' => 32,
-                        ],
-                        'FR' => [
+                        ),
+                        'FR' => array(
                             'Name' => 'France',
                             'Alpha2' => 'FR',
                             'Alpha3' => 'FRA',
                             'IDC' => 33,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-                [
+                array(
                     new ValidationError(
                         'Field definition does not allow multiple countries to be selected.',
                         null,
-                        [],
+                        array(),
                         'countries'
                     ),
-                ],
-            ],
-            [
-                [
-                    'fieldSettings' => [
+                ),
+            ),
+            array(
+                array(
+                    'fieldSettings' => array(
                         'isMultiple' => true,
-                    ],
-                ],
+                    ),
+                ),
                 new CountryValue(
-                    [
-                        'LE' => [
+                    array(
+                        'LE' => array(
                             'Name' => 'LegoLand',
                             'Alpha2' => 'LE',
                             'Alpha3' => 'LEG',
                             'IDC' => 888,
-                        ],
-                    ]
+                        ),
+                    )
                 ),
-                [
+                array(
                     new ValidationError(
                         "Country with Alpha2 code '%alpha2%' is not defined in FieldType settings.",
                         null,
-                        [
+                        array(
                             '%alpha2%' => 'LE',
-                        ],
+                        ),
                         'countries'
                     ),
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 }

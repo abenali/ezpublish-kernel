@@ -1,7 +1,8 @@
 <?php
 
-return [
-  0 => [
+return array(
+  0 =>
+  array(
     'ezcontentobject_id' => '11',
     'ezcontentobject_contentclass_id' => '3',
     'ezcontentobject_section_id' => '2',
@@ -33,9 +34,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '12',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  1 => [
+  ),
+  1 =>
+  array(
     'ezcontentobject_id' => '11',
     'ezcontentobject_contentclass_id' => '3',
     'ezcontentobject_section_id' => '2',
@@ -67,9 +68,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '12',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  2 => [
+  ),
+  2 =>
+  array(
     'ezcontentobject_id' => '11',
     'ezcontentobject_contentclass_id' => '3',
     'ezcontentobject_section_id' => '2',
@@ -101,9 +102,9 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => 'members',
     'ezcontentobject_tree_main_node_id' => '12',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-  3 => [
+  ),
+  3 =>
+  array(
     'ezcontentobject_id' => '11',
     'ezcontentobject_contentclass_id' => '3',
     'ezcontentobject_section_id' => '2',
@@ -135,6 +136,5 @@ return [
     'ezcontentobject_attribute_sort_key_int' => '0',
     'ezcontentobject_attribute_sort_key_string' => '',
     'ezcontentobject_tree_main_node_id' => '12',
-    'ezcontentobject_is_hidden' => '0',
-  ],
-];
+  ),
+);

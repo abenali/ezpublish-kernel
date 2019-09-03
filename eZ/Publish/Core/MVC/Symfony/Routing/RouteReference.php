@@ -12,13 +12,17 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class RouteReference
 {
-    /** @var \Symfony\Component\HttpFoundation\ParameterBag */
+    /**
+     * @var \Symfony\Component\HttpFoundation\ParameterBag
+     */
     private $params;
 
-    /** @var mixed Route name or resource (e.g. Location object). */
+    /**
+     * @var mixed Route name or resource (e.g. Location object).
+     */
     private $route;
 
-    public function __construct($route, array $params = [])
+    public function __construct($route, array $params = array())
     {
         $this->route = $route;
         $this->params = new ParameterBag($params);

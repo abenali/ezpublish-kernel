@@ -16,7 +16,7 @@ class ImageTest extends AbstractParserTestCase
 {
     private $config;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -25,35 +25,35 @@ class ImageTest extends AbstractParserTestCase
         }
     }
 
-    protected function getMinimalConfiguration(): array
+    protected function getMinimalConfiguration()
     {
         $this->config = Yaml::parse(file_get_contents(__DIR__ . '/../../Fixtures/ezpublish_image.yml'));
-        $this->config += [
-            'imagemagick' => [
+        $this->config += array(
+            'imagemagick' => array(
                 'enabled' => true,
                 'path' => $_ENV['imagemagickConvertPath'],
-            ],
-        ];
+            ),
+        );
 
         return $this->config;
     }
 
-    protected function getContainerExtensions(): array
+    protected function getContainerExtensions()
     {
-        return [
-            new EzPublishCoreExtension([new Image()]),
-        ];
+        return array(
+            new EzPublishCoreExtension(array(new Image())),
+        );
     }
 
     public function testVariations()
     {
         $this->load();
 
-        $expectedParsedVariations = [];
+        $expectedParsedVariations = array();
         foreach ($this->config['system'] as $sa => $saConfig) {
-            $expectedParsedVariations[$sa] = [];
+            $expectedParsedVariations[$sa] = array();
             foreach ($saConfig['image_variations'] as $variationName => $imageVariationConfig) {
-                $imageVariationConfig['post_processors'] = [];
+                $imageVariationConfig['post_processors'] = array();
                 foreach ($imageVariationConfig['filters'] as $i => $filter) {
                     $imageVariationConfig['filters'][$filter['name']] = $filter['params'];
                     unset($imageVariationConfig['filters'][$i]);
@@ -73,21 +73,22 @@ class ImageTest extends AbstractParserTestCase
         );
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testPrePostParameters()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $this->load(
-            [
-                'system' => [
-                    'ezdemo_site' => [
-                        'imagemagick' => [
+            array(
+                'system' => array(
+                    'ezdemo_site' => array(
+                        'imagemagick' => array(
                             'pre_parameters' => '-foo -bar',
                             'post_parameters' => '-baz',
-                        ],
-                    ],
-                ],
-            ]
+                        ),
+                    ),
+                ),
+            )
         );
     }
 }

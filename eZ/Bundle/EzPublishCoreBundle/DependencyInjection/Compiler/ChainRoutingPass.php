@@ -32,20 +32,20 @@ class ChainRoutingPass implements CompilerPassInterface
         // The default router will be given the highest priority so that it will be used by default
         if ($container->hasDefinition('router.default')) {
             $defaultRouter = $container->getDefinition('router.default');
-            $defaultRouter->addMethodCall('setSiteAccess', [new Reference('ezpublish.siteaccess')]);
-            $defaultRouter->addMethodCall('setConfigResolver', [new Reference('ezpublish.config.resolver')]);
+            $defaultRouter->addMethodCall('setSiteAccess', array(new Reference('ezpublish.siteaccess')));
+            $defaultRouter->addMethodCall('setConfigResolver', array(new Reference('ezpublish.config.resolver')));
             $defaultRouter->addMethodCall(
                 'setNonSiteAccessAwareRoutes',
-                ['%ezpublish.default_router.non_siteaccess_aware_routes%']
+                array('%ezpublish.default_router.non_siteaccess_aware_routes%')
             );
             $defaultRouter->addMethodCall(
                 'setSiteAccessRouter',
-                [new Reference('ezpublish.siteaccess_router')]
+                array(new Reference('ezpublish.siteaccess_router'))
             );
             if (!$defaultRouter->hasTag('router')) {
                 $defaultRouter->addTag(
                     'router',
-                    ['priority' => 255]
+                    array('priority' => 255)
                 );
             }
         }
@@ -62,10 +62,10 @@ class ChainRoutingPass implements CompilerPassInterface
 
             $chainRouter->addMethodCall(
                 'add',
-                [
+                array(
                     new Reference($id),
                     $priority,
-                ]
+                )
             );
         }
     }

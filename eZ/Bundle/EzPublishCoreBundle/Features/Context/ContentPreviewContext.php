@@ -4,13 +4,19 @@
  */
 namespace eZ\Bundle\EzPublishCoreBundle\Features\Context;
 
+use Behat\Behat\Context\Context;
+use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\MinkExtension\Context\RawMinkContext;
+use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\VersionInfo;
+use EzSystems\BehatBundle\Context\Browser\Context as BrowserContext;
+use EzSystems\PlatformBehatBundle\Context\SubContext\DeprecationNoticeSupressor;
 use PHPUnit\Framework\Assert as Assertion;
 
-class ContentPreviewContext extends RawMinkContext
+class ContentPreviewContext extends BrowserContext implements Context, SnippetAcceptingContext
 {
+    use DeprecationNoticeSupressor;
+
     /** @var \eZ\Bundle\EzPublishCoreBundle\Features\Context\ContentContext */
     private $contentContext;
 
@@ -41,7 +47,7 @@ class ContentPreviewContext extends RawMinkContext
      */
     public function iPreviewThisDraft()
     {
-        $this->getSession()->getDriver()->visit($this->mapToVersionViewUri($this->contentContext->getCurrentDraft()->versionInfo));
+        $this->visit($this->mapToVersionViewUri($this->contentContext->getCurrentDraft()->versionInfo));
     }
 
     /**
@@ -67,8 +73,8 @@ class ContentPreviewContext extends RawMinkContext
 
     protected function checkForExceptions()
     {
-        $exceptionElements = $this->getSession()->getPage()->findAll('xpath', "//div[@class='text-exception']/h1");
-        $exceptionStackTraceItems = $this->getSession()->getPage()->findAll('xpath', "//ol[@id='traces-0']/li");
+        $exceptionElements = $this->getXpath()->findXpath("//div[@class='text-exception']/h1");
+        $exceptionStackTraceItems = $this->getXpath()->findXpath("//ol[@id='traces-0']/li");
         if (count($exceptionElements) > 0) {
             $exceptionElement = $exceptionElements[0];
             $exceptionLines = [$exceptionElement->getText(), ''];

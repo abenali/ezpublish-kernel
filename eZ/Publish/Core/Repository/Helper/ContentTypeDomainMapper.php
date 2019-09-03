@@ -17,7 +17,6 @@ use eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionCreateStruct as 
 use eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionUpdateStruct as APIFieldDefinitionUpdateStruct;
 use eZ\Publish\API\Repository\Values\User\UserReference as APIUserReference;
 use eZ\Publish\Core\Base\Exceptions\ContentTypeFieldDefinitionValidationException;
-use eZ\Publish\Core\FieldType\FieldTypeRegistry;
 use eZ\Publish\Core\FieldType\ValidationError;
 use eZ\Publish\Core\Repository\Values\ContentType\ContentType;
 use eZ\Publish\Core\Repository\Values\ContentType\ContentTypeDraft;
@@ -40,13 +39,19 @@ use DateTime;
  */
 class ContentTypeDomainMapper
 {
-    /** @var \eZ\Publish\SPI\Persistence\Content\Type\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Type\Handler
+     */
     protected $contentTypeHandler;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Language\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Language\Handler
+     */
     protected $contentLanguageHandler;
 
-    /** @var FieldTypeRegistry */
+    /**
+     * @var FieldTypeRegistry
+     */
     protected $fieldTypeRegistry;
 
     /**
@@ -54,7 +59,7 @@ class ContentTypeDomainMapper
      *
      * @param \eZ\Publish\SPI\Persistence\Content\Type\Handler $contentTypeHandler
      * @param \eZ\Publish\SPI\Persistence\Content\Language\Handler $contentLanguageHandler
-     * @param \eZ\Publish\Core\FieldType\FieldTypeRegistry $fieldTypeRegistry
+     * @param FieldTypeRegistry $fieldTypeRegistry
      */
     public function __construct(
         SPITypeHandler $contentTypeHandler,
@@ -77,7 +82,7 @@ class ContentTypeDomainMapper
             $spiContentType->initialLanguageId
         )->languageCode;
 
-        $fieldDefinitions = [];
+        $fieldDefinitions = array();
         foreach ($spiContentType->fieldDefinitions as $spiFieldDefinition) {
             $fieldDefinitions[] = $this->buildFieldDefinitionDomainObject(
                 $spiFieldDefinition,
@@ -87,7 +92,7 @@ class ContentTypeDomainMapper
         }
 
         return new ContentType(
-            [
+            array(
                 'names' => $spiContentType->name,
                 'descriptions' => $spiContentType->description,
                 'contentTypeGroups' => $this->buildContentTypeGroupProxyList($spiContentType->groupIds, $prioritizedLanguages),
@@ -109,7 +114,7 @@ class ContentTypeDomainMapper
                 'defaultSortOrder' => $spiContentType->sortOrder,
                 'prioritizedLanguages' => $prioritizedLanguages,
                 'languageCodes' => $spiContentType->languageCodes,
-            ]
+            )
         );
     }
 
@@ -182,9 +187,9 @@ class ContentTypeDomainMapper
     public function buildContentTypeDraftDomainObject(SPIContentType $spiContentType): APIContentTypeDraft
     {
         return new ContentTypeDraft(
-            [
+            array(
                 'innerContentType' => $this->buildContentTypeDomainObject($spiContentType),
-            ]
+            )
         );
     }
 
@@ -194,7 +199,7 @@ class ContentTypeDomainMapper
     public function buildContentTypeGroupDomainObject(SPIContentTypeGroup $spiGroup, array $prioritizedLanguages = []): APIContentTypeGroup
     {
         return new ContentTypeGroup(
-            [
+            array(
                 'id' => $spiGroup->id,
                 'identifier' => $spiGroup->identifier,
                 'creationDate' => $this->getDateTime($spiGroup->created),
@@ -204,7 +209,7 @@ class ContentTypeDomainMapper
                 'names' => $spiGroup->name,
                 'descriptions' => $spiGroup->description,
                 'prioritizedLanguages' => $prioritizedLanguages,
-            ]
+            )
         );
     }
 
@@ -250,7 +255,7 @@ class ContentTypeDomainMapper
         /** @var $fieldType \eZ\Publish\SPI\FieldType\FieldType */
         $fieldType = $this->fieldTypeRegistry->getFieldType($spiFieldDefinition->fieldType);
         $fieldDefinition = new FieldDefinition(
-            [
+            array(
                 'names' => $spiFieldDefinition->name,
                 'descriptions' => $spiFieldDefinition->description,
                 'id' => $spiFieldDefinition->id,
@@ -267,7 +272,7 @@ class ContentTypeDomainMapper
                 'validatorConfiguration' => (array)$spiFieldDefinition->fieldTypeConstraints->validators,
                 'prioritizedLanguages' => $prioritizedLanguages,
                 'mainLanguageCode' => $mainLanguageCode,
-            ]
+            )
         );
 
         return $fieldDefinition;
@@ -276,8 +281,6 @@ class ContentTypeDomainMapper
     /**
      * Builds SPIFieldDefinition object using API FieldDefinitionUpdateStruct
      * and API FieldDefinition.
-     *
-     * @deprecated use \eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper::buildSPIFieldDefinitionFromUpdateStruct()
      *
      * @throws \eZ\Publish\API\Repository\Exceptions\ContentTypeFieldDefinitionValidationException if validator configuration or
      *         field setting do not validate
@@ -301,7 +304,7 @@ class ContentTypeDomainMapper
             ? $fieldDefinition->fieldSettings
             : $fieldDefinitionUpdateStruct->fieldSettings;
 
-        $validationErrors = [];
+        $validationErrors = array();
         if ($fieldDefinitionUpdateStruct->isSearchable && !$fieldType->isSearchable()) {
             $validationErrors[] = new ValidationError(
                 "FieldType '{$fieldDefinition->fieldTypeIdentifier}' is not searchable"
@@ -318,7 +321,7 @@ class ContentTypeDomainMapper
         }
 
         $spiFieldDefinition = new SPIFieldDefinition(
-            [
+            array(
                 'id' => $fieldDefinition->id,
                 'fieldType' => $fieldDefinition->fieldTypeIdentifier,
                 'name' => $fieldDefinitionUpdateStruct->names === null ?
@@ -351,97 +354,7 @@ class ContentTypeDomainMapper
                 // These properties are precreated in constructor
                 //"fieldTypeConstraints"
                 //"defaultValue"
-            ]
-        );
-
-        $spiFieldDefinition->fieldTypeConstraints->validators = $validatorConfiguration;
-        $spiFieldDefinition->fieldTypeConstraints->fieldSettings = $fieldSettings;
-        $spiFieldDefinition->defaultValue = $fieldType->toPersistenceValue(
-            $fieldType->acceptValue($fieldDefinitionUpdateStruct->defaultValue)
-        );
-
-        return $spiFieldDefinition;
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionUpdateStruct $fieldDefinitionUpdateStruct
-     * @param \eZ\Publish\API\Repository\Values\ContentType\FieldDefinition $fieldDefinition
-     * @param string $mainLanguageCode
-     *
-     * @return \eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     * @throws \eZ\Publish\Core\Base\Exceptions\ContentTypeFieldDefinitionValidationException
-     */
-    public function buildSPIFieldDefinitionFromUpdateStruct(
-        APIFieldDefinitionUpdateStruct $fieldDefinitionUpdateStruct,
-        APIFieldDefinition $fieldDefinition,
-        string $mainLanguageCode
-    ): SPIFieldDefinition {
-        /** @var $fieldType \eZ\Publish\SPI\FieldType\FieldType */
-        $fieldType = $this->fieldTypeRegistry->getFieldType(
-            $fieldDefinition->fieldTypeIdentifier
-        );
-
-        $validatorConfiguration = $fieldDefinitionUpdateStruct->validatorConfiguration === null
-            ? $fieldDefinition->validatorConfiguration
-            : $fieldDefinitionUpdateStruct->validatorConfiguration;
-        $fieldSettings = $fieldDefinitionUpdateStruct->fieldSettings === null
-            ? $fieldDefinition->fieldSettings
-            : $fieldDefinitionUpdateStruct->fieldSettings;
-
-        $validationErrors = [];
-        if ($fieldDefinitionUpdateStruct->isSearchable && !$fieldType->isSearchable()) {
-            $validationErrors[] = new ValidationError(
-                "FieldType '{$fieldDefinition->fieldTypeIdentifier}' is not searchable"
-            );
-        }
-        $validationErrors = array_merge(
-            $validationErrors,
-            $fieldType->validateValidatorConfiguration($validatorConfiguration),
-            $fieldType->validateFieldSettings($fieldSettings)
-        );
-
-        if (!empty($validationErrors)) {
-            throw new ContentTypeFieldDefinitionValidationException($validationErrors);
-        }
-
-        $spiFieldDefinition = new SPIFieldDefinition(
-            [
-                'id' => $fieldDefinition->id,
-                'fieldType' => $fieldDefinition->fieldTypeIdentifier,
-                'name' => $fieldDefinitionUpdateStruct->names === null ?
-                    $fieldDefinition->getNames() :
-                    array_merge($fieldDefinition->getNames(), $fieldDefinitionUpdateStruct->names),
-                'description' => $fieldDefinitionUpdateStruct->descriptions === null ?
-                    $fieldDefinition->getDescriptions() :
-                    array_merge($fieldDefinition->getDescriptions(), $fieldDefinitionUpdateStruct->descriptions),
-                'identifier' => $fieldDefinitionUpdateStruct->identifier === null ?
-                    $fieldDefinition->identifier :
-                    $fieldDefinitionUpdateStruct->identifier,
-                'fieldGroup' => $fieldDefinitionUpdateStruct->fieldGroup === null ?
-                    $fieldDefinition->fieldGroup :
-                    $fieldDefinitionUpdateStruct->fieldGroup,
-                'position' => $fieldDefinitionUpdateStruct->position === null ?
-                    $fieldDefinition->position :
-                    $fieldDefinitionUpdateStruct->position,
-                'isTranslatable' => $fieldDefinitionUpdateStruct->isTranslatable === null ?
-                    $fieldDefinition->isTranslatable :
-                    $fieldDefinitionUpdateStruct->isTranslatable,
-                'isRequired' => $fieldDefinitionUpdateStruct->isRequired === null ?
-                    $fieldDefinition->isRequired :
-                    $fieldDefinitionUpdateStruct->isRequired,
-                'isInfoCollector' => $fieldDefinitionUpdateStruct->isInfoCollector === null ?
-                    $fieldDefinition->isInfoCollector :
-                    $fieldDefinitionUpdateStruct->isInfoCollector,
-                'isSearchable' => $fieldDefinitionUpdateStruct->isSearchable === null ?
-                    $fieldDefinition->isSearchable :
-                    $fieldDefinitionUpdateStruct->isSearchable,
-                'mainLanguageCode' => $mainLanguageCode,
-                // These properties are precreated in constructor
-                //"fieldTypeConstraints"
-                //"defaultValue"
-            ]
+            )
         );
 
         $spiFieldDefinition->fieldTypeConstraints->validators = $validatorConfiguration;
@@ -456,8 +369,6 @@ class ContentTypeDomainMapper
     /**
      * Builds SPIFieldDefinition object using API FieldDefinitionCreateStruct.
      *
-     * @deprecated use \eZ\Publish\Core\Repository\Helper\ContentTypeDomainMapper::buildSPIFieldDefinitionFromCreateStruct()
-     *
      * @throws \eZ\Publish\API\Repository\Exceptions\ContentTypeFieldDefinitionValidationException if validator configuration or
      *         field setting do not validate
      *
@@ -469,15 +380,15 @@ class ContentTypeDomainMapper
     public function buildSPIFieldDefinitionCreate(APIFieldDefinitionCreateStruct $fieldDefinitionCreateStruct, SPIFieldType $fieldType)
     {
         $spiFieldDefinition = new SPIFieldDefinition(
-            [
+            array(
                 'id' => null,
                 'identifier' => $fieldDefinitionCreateStruct->identifier,
                 'fieldType' => $fieldDefinitionCreateStruct->fieldTypeIdentifier,
                 'name' => $fieldDefinitionCreateStruct->names === null ?
-                    [] :
+                    array() :
                     $fieldDefinitionCreateStruct->names,
                 'description' => $fieldDefinitionCreateStruct->descriptions === null ?
-                    [] :
+                    array() :
                     $fieldDefinitionCreateStruct->descriptions,
                 'fieldGroup' => $fieldDefinitionCreateStruct->fieldGroup === null ?
                     '' :
@@ -498,64 +409,7 @@ class ContentTypeDomainMapper
                 // These properties are precreated in constructor
                 //"fieldTypeConstraints"
                 //"defaultValue"
-            ]
-        );
-
-        $spiFieldDefinition->fieldTypeConstraints->validators = $fieldDefinitionCreateStruct->validatorConfiguration;
-        $spiFieldDefinition->fieldTypeConstraints->fieldSettings = $fieldDefinitionCreateStruct->fieldSettings;
-        $spiFieldDefinition->defaultValue = $fieldType->toPersistenceValue(
-            $fieldType->acceptValue($fieldDefinitionCreateStruct->defaultValue)
-        );
-
-        return $spiFieldDefinition;
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\ContentType\FieldDefinitionCreateStruct $fieldDefinitionCreateStruct
-     * @param \eZ\Publish\SPI\FieldType\FieldType $fieldType
-     * @param string $mainLanguageCode
-     *
-     * @return \eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     */
-    public function buildSPIFieldDefinitionFromCreateStruct(
-        APIFieldDefinitionCreateStruct $fieldDefinitionCreateStruct,
-        SPIFieldType $fieldType,
-        string $mainLanguageCode
-    ): SPIFieldDefinition {
-        $spiFieldDefinition = new SPIFieldDefinition(
-            [
-                'id' => null,
-                'identifier' => $fieldDefinitionCreateStruct->identifier,
-                'fieldType' => $fieldDefinitionCreateStruct->fieldTypeIdentifier,
-                'name' => $fieldDefinitionCreateStruct->names === null ?
-                    [] :
-                    $fieldDefinitionCreateStruct->names,
-                'description' => $fieldDefinitionCreateStruct->descriptions === null ?
-                    [] :
-                    $fieldDefinitionCreateStruct->descriptions,
-                'fieldGroup' => $fieldDefinitionCreateStruct->fieldGroup === null ?
-                    '' :
-                    $fieldDefinitionCreateStruct->fieldGroup,
-                'position' => (int)$fieldDefinitionCreateStruct->position,
-                'isTranslatable' => $fieldDefinitionCreateStruct->isTranslatable === null ?
-                    true :
-                    $fieldDefinitionCreateStruct->isTranslatable,
-                'isRequired' => $fieldDefinitionCreateStruct->isRequired === null ?
-                    false :
-                    $fieldDefinitionCreateStruct->isRequired,
-                'isInfoCollector' => $fieldDefinitionCreateStruct->isInfoCollector === null ?
-                    false :
-                    $fieldDefinitionCreateStruct->isInfoCollector,
-                'isSearchable' => $fieldDefinitionCreateStruct->isSearchable === null ?
-                    $fieldType->isSearchable() :
-                    $fieldDefinitionCreateStruct->isSearchable,
-                'mainLanguageCode' => $mainLanguageCode,
-                // These properties are precreated in constructor
-                //"fieldTypeConstraints"
-                //"defaultValue"
-            ]
+            )
         );
 
         $spiFieldDefinition->fieldTypeConstraints->validators = $fieldDefinitionCreateStruct->validatorConfiguration;

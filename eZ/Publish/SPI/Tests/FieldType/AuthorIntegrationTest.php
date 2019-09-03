@@ -82,23 +82,23 @@ class AuthorIntegrationTest extends BaseIntegrationTest
      */
     public function getFieldDefinitionData()
     {
-        return [
+        return array(
             // The ezauthor field type does not have any special field definition
             // properties
-            ['fieldType', 'ezauthor'],
-            [
+            array('fieldType', 'ezauthor'),
+            array(
                 'fieldTypeConstraints',
                 new Content\FieldTypeConstraints(
-                    [
+                    array(
                         'fieldSettings' => new FieldType\FieldSettings(
-                            [
+                            array(
                                 'defaultAuthor' => 0,
-                            ]
+                            )
                         ),
-                    ]
+                    )
                 ),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -109,17 +109,17 @@ class AuthorIntegrationTest extends BaseIntegrationTest
     public function getInitialValue()
     {
         return new Content\FieldValue(
-            [
-                'data' => [
-                    [
+            array(
+                'data' => array(
+                    array(
                         'id' => 14,
                         'name' => 'Hans Mueller',
                         'email' => 'hans@example.com',
-                    ],
-                ],
+                    ),
+                ),
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 
@@ -133,22 +133,22 @@ class AuthorIntegrationTest extends BaseIntegrationTest
     public function getUpdatedValue()
     {
         return new Content\FieldValue(
-            [
-                'data' => [
-                    [
+            array(
+                'data' => array(
+                    array(
                         'id' => 14,
                         'name' => 'Hans Mueller',
                         'email' => 'hans@example.com',
-                    ],
-                    [
+                    ),
+                    array(
                         'id' => 10,
                         'name' => 'Lieschen Mueller',
                         'email' => 'lieschen@example.com',
-                    ],
-                ],
+                    ),
+                ),
                 'externalData' => null,
                 'sortKey' => null,
-            ]
+            )
         );
     }
 }

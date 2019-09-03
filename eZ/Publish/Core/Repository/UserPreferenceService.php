@@ -20,10 +20,14 @@ use eZ\Publish\API\Repository\Repository as RepositoryInterface;
 
 class UserPreferenceService implements UserPreferenceServiceInterface
 {
-    /** @var \eZ\Publish\API\Repository\Repository */
+    /**
+     * @var \eZ\Publish\API\Repository\Repository
+     */
     private $repository;
 
-    /** @var \eZ\Publish\SPI\Persistence\UserPreference\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\UserPreference\Handler
+     */
     private $userPreferenceHandler;
 
     /**

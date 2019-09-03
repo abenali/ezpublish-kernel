@@ -12,8 +12,10 @@ use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\Suggestion\C
 
 class SuggestionCollector implements SuggestionCollectorInterface
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\Suggestion\ConfigSuggestion[] */
-    private $suggestions = [];
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\Suggestion\ConfigSuggestion[]
+     */
+    private $suggestions = array();
 
     /**
      * Adds a config suggestion to the list.

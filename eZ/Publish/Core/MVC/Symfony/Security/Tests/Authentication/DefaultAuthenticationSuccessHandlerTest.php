@@ -18,7 +18,7 @@ class DefaultAuthenticationSuccessHandlerTest extends TestCase
 {
     public function testSetConfigResolver()
     {
-        $successHandler = new DefaultAuthenticationSuccessHandler(new HttpUtils(), []);
+        $successHandler = new DefaultAuthenticationSuccessHandler(new HttpUtils(), array());
         $refHandler = new ReflectionObject($successHandler);
         $refOptions = $refHandler->getProperty('options');
         $refOptions->setAccessible(true);

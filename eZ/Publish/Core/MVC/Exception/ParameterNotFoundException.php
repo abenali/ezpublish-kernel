@@ -15,7 +15,7 @@ use InvalidArgumentException;
  */
 class ParameterNotFoundException extends InvalidArgumentException
 {
-    public function __construct($paramName, $namespace, array $triedScopes = [])
+    public function __construct($paramName, $namespace, array $triedScopes = array())
     {
         $this->message = "Parameter '$paramName' with namespace '$namespace' could not be found.";
         if (!empty($triedScopes)) {

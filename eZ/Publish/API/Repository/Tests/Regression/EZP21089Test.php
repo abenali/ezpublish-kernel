@@ -23,10 +23,12 @@ use DateTime;
  */
 class EZP21089Test extends BaseTest
 {
-    /** @var \eZ\Publish\Core\Repository\Values\ContentType\ContentType */
+    /**
+     * @var \eZ\Publish\Core\Repository\Values\ContentType\ContentType
+     */
     private $contentType;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -40,12 +42,12 @@ class EZP21089Test extends BaseTest
         $typeCreateStruct = $contentTypeService->newContentTypeCreateStruct(
             'new-type'
         );
-        $typeCreateStruct->names = [
+        $typeCreateStruct->names = array(
             'eng-GB' => 'title',
-        ];
-        $typeCreateStruct->descriptions = [
+        );
+        $typeCreateStruct->descriptions = array(
             'eng-GB' => 'description',
-        ];
+        );
         $typeCreateStruct->remoteId = 'new-remoteid';
         $typeCreateStruct->creatorId = $creatorId;
         $typeCreateStruct->creationDate = $creationDate;
@@ -57,12 +59,12 @@ class EZP21089Test extends BaseTest
             'title',
             'ezstring'
         );
-        $titleFieldCreate->names = [
+        $titleFieldCreate->names = array(
             'eng-GB' => 'title',
-        ];
-        $titleFieldCreate->descriptions = [
+        );
+        $titleFieldCreate->descriptions = array(
             'eng-GB' => 'title description',
-        ];
+        );
         $titleFieldCreate->fieldGroup = 'blog-content';
         $titleFieldCreate->position = 1;
         $titleFieldCreate->isTranslatable = true;
@@ -76,12 +78,12 @@ class EZP21089Test extends BaseTest
             'body',
             'ezobjectrelation'
         );
-        $objectRelationFieldCreate->names = [
+        $objectRelationFieldCreate->names = array(
             'eng-GB' => 'object relation',
-        ];
-        $objectRelationFieldCreate->descriptions = [
+        );
+        $objectRelationFieldCreate->descriptions = array(
             'eng-GB' => 'object relation description',
-        ];
+        );
         $objectRelationFieldCreate->fieldGroup = 'blog-content';
         $objectRelationFieldCreate->position = 2;
         $objectRelationFieldCreate->isTranslatable = false;
@@ -99,7 +101,7 @@ class EZP21089Test extends BaseTest
 
         $type = $contentTypeService->createContentType(
             $typeCreateStruct,
-            [$contentTypeService->createContentTypeGroup($groupCreate)]
+            array($contentTypeService->createContentTypeGroup($groupCreate))
         );
 
         $contentTypeService->publishContentTypeDraft($type);
@@ -120,7 +122,7 @@ class EZP21089Test extends BaseTest
         $contentCreateStruct->setField('title', 'Test');
         $contentService->createContent(
             $contentCreateStruct,
-            [$repository->getLocationService()->newLocationCreateStruct(2)]
+            array($repository->getLocationService()->newLocationCreateStruct(2))
         );
     }
 }

@@ -24,14 +24,14 @@ abstract class Type extends FieldType
     /**
      * @see eZ\Publish\Core\FieldType::$validatorConfigurationSchema
      */
-    protected $validatorConfigurationSchema = [
-        'FileSizeValidator' => [
-            'maxFileSize' => [
+    protected $validatorConfigurationSchema = array(
+        'FileSizeValidator' => array(
+            'maxFileSize' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-        ],
-    ];
+            ),
+        ),
+    );
 
     /**
      * Creates a specific value of the derived class from $inputValue.
@@ -43,9 +43,16 @@ abstract class Type extends FieldType
     abstract protected function createValue(array $inputValue);
 
     /**
-     * @param \eZ\Publish\Core\FieldType\BinaryBase\Value|\eZ\Publish\SPI\FieldType\Value $value
+     * Returns the name of the given field value.
+     *
+     * It will be used to generate content name and url alias if current field is designated
+     * to be used in the content name/urlAlias pattern.
+     *
+     * @param \eZ\Publish\Core\FieldType\BinaryBase\Value $value
+     *
+     * @return string
      */
-    public function getName(SPIValue $value, FieldDefinition $fieldDefinition, string $languageCode): string
+    public function getName(SPIValue $value)
     {
         return (string)$value->fileName;
     }
@@ -61,7 +68,7 @@ abstract class Type extends FieldType
     {
         // construction only from path
         if (is_string($inputValue)) {
-            $inputValue = ['inputUri' => $inputValue];
+            $inputValue = array('inputUri' => $inputValue);
         }
 
         // default construction from array
@@ -177,7 +184,7 @@ abstract class Type extends FieldType
      */
     public function toHash(SPIValue $value)
     {
-        return [
+        return array(
             'id' => $value->id,
             // Kept for BC with eZ Publish 5.0 (EZP-20948, EZP-22808)
             'path' => $value->inputUri,
@@ -186,7 +193,7 @@ abstract class Type extends FieldType
             'fileSize' => $value->fileSize,
             'mimeType' => $value->mimeType,
             'uri' => $value->uri,
-        ];
+        );
     }
 
     /**
@@ -215,11 +222,11 @@ abstract class Type extends FieldType
     {
         // Store original data as external (to indicate they need to be stored)
         return new PersistenceValue(
-            [
+            array(
                 'data' => null,
                 'externalData' => $this->toHash($value),
                 'sortKey' => $this->getSortInfo($value),
-            ]
+            )
         );
     }
 
@@ -237,7 +244,7 @@ abstract class Type extends FieldType
         // Restored data comes in $data, since it has already been processed
         // there might be more data in the persistence value than needed here
         $result = $this->fromHash(
-            [
+            array(
                 'id' => (isset($fieldValue->externalData['id'])
                     ? $fieldValue->externalData['id']
                     : null),
@@ -253,7 +260,7 @@ abstract class Type extends FieldType
                 'uri' => (isset($fieldValue->externalData['uri'])
                     ? $fieldValue->externalData['uri']
                     : null),
-            ]
+            )
         );
 
         return $result;
@@ -271,7 +278,7 @@ abstract class Type extends FieldType
      */
     public function validate(FieldDefinition $fieldDefinition, SPIValue $fieldValue)
     {
-        $errors = [];
+        $errors = array();
 
         if ($this->isEmptyValue($fieldValue)) {
             return $errors;
@@ -291,9 +298,9 @@ abstract class Type extends FieldType
                         $errors[] = new ValidationError(
                             'The file size cannot exceed %size% byte.',
                             'The file size cannot exceed %size% bytes.',
-                            [
+                            array(
                                 '%size%' => $parameters['maxFileSize'],
-                            ],
+                            ),
                             'fileSize'
                         );
                     }
@@ -313,7 +320,7 @@ abstract class Type extends FieldType
      */
     public function validateValidatorConfiguration($validatorConfiguration)
     {
-        $validationErrors = [];
+        $validationErrors = array();
 
         foreach ($validatorConfiguration as $validatorIdentifier => $parameters) {
             switch ($validatorIdentifier) {
@@ -322,10 +329,10 @@ abstract class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             'Validator %validator% expects parameter %parameter% to be set.',
                             null,
-                            [
+                            array(
                                 '%validator%' => $validatorIdentifier,
                                 '%parameter%' => 'maxFileSize',
-                            ],
+                            ),
                             "[$validatorIdentifier][maxFileSize]"
                         );
                         break;
@@ -334,12 +341,12 @@ abstract class Type extends FieldType
                         $validationErrors[] = new ValidationError(
                             'Validator %validator% expects parameter %parameter% to be of %type%.',
                             null,
-                            [
+                            array(
                                 '%validator%' => $validatorIdentifier,
                                 '%parameter%' => 'maxFileSize',
                                 '%type%' => 'integer',
                                 "[$validatorIdentifier][maxFileSize]",
-                            ]
+                            )
                         );
                     }
                     break;
@@ -347,9 +354,9 @@ abstract class Type extends FieldType
                     $validationErrors[] = new ValidationError(
                         "Validator '%validator%' is unknown",
                         null,
-                        [
+                        array(
                             '%validator%' => $validatorIdentifier,
-                        ],
+                        ),
                         "[$validatorIdentifier]"
                     );
             }

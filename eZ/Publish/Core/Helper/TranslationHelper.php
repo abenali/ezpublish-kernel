@@ -25,16 +25,24 @@ use Psr\Log\LoggerInterface;
  */
 class TranslationHelper
 {
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /**
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
+     */
     protected $configResolver;
 
-    /** @var \eZ\Publish\API\Repository\ContentService */
+    /**
+     * @var \eZ\Publish\API\Repository\ContentService
+     */
     protected $contentService;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $siteAccessesByLanguage;
 
-    /** @var \Psr\Log\LoggerInterface */
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $logger;
 
     public function __construct(ConfigResolverInterface $configResolver, ContentService $contentService, array $siteAccessesByLanguage, LoggerInterface $logger = null)
@@ -278,7 +286,7 @@ class TranslationHelper
     {
         $translationSiteAccesses = $this->configResolver->getParameter('translation_siteaccesses');
         $relatedSiteAccesses = $translationSiteAccesses ?: $this->configResolver->getParameter('related_siteaccesses');
-        $availableLanguages = [];
+        $availableLanguages = array();
         $currentLanguages = $this->configResolver->getParameter('languages');
         $availableLanguages[] = array_shift($currentLanguages);
 
@@ -301,7 +309,7 @@ class TranslationHelper
     private function getLanguages($forcedLanguage = null, $fallbackLanguage = null)
     {
         if ($forcedLanguage !== null) {
-            $languages = [$forcedLanguage];
+            $languages = array($forcedLanguage);
         } else {
             $languages = $this->configResolver->getParameter('languages');
         }

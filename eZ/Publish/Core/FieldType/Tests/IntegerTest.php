@@ -45,18 +45,18 @@ class IntegerTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [
-            'IntegerValueValidator' => [
-                'minIntegerValue' => [
+        return array(
+            'IntegerValueValidator' => array(
+                'minIntegerValue' => array(
                     'type' => 'int',
                     'default' => null,
-                ],
-                'maxIntegerValue' => [
+                ),
+                'maxIntegerValue' => array(
                     'type' => 'int',
                     'default' => null,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -66,7 +66,7 @@ class IntegerTest extends FieldTypeTest
      */
     protected function getSettingsSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -102,20 +102,20 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 'foo',
                 InvalidArgumentException::class,
-            ],
-            [
-                [],
+            ),
+            array(
+                array(),
                 InvalidArgumentException::class,
-            ],
-            [
+            ),
+            array(
                 new IntegerValue('foo'),
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -149,24 +149,24 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new IntegerValue(),
-            ],
-            [
+            ),
+            array(
                 42,
                 new IntegerValue(42),
-            ],
-            [
+            ),
+            array(
                 23,
                 new IntegerValue(23),
-            ],
-            [
+            ),
+            array(
                 new IntegerValue(23),
                 new IntegerValue(23),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -206,16 +206,16 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new IntegerValue(),
                 null,
-            ],
-            [
+            ),
+            array(
                 new IntegerValue(42),
                 42,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -255,16 +255,16 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
+        return array(
+            array(
                 null,
                 new IntegerValue(),
-            ],
-            [
+            ),
+            array(
                 42,
                 new IntegerValue(42),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -297,47 +297,47 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideValidValidatorConfiguration()
     {
-        return [
-            [
-                [],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+        return array(
+            array(
+                array(),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'minIntegerValue' => null,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'minIntegerValue' => 23,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'maxIntegerValue' => null,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'maxIntegerValue' => 23,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'minIntegerValue' => 23,
                         'maxIntegerValue' => 42,
-                    ],
-                ],
-            ],
-        ];
+                    ),
+                ),
+            ),
+        );
     }
 
     /**
@@ -384,34 +384,34 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideInvalidValidatorConfiguration()
     {
-        return [
-            [
-                [
-                    'NonExistentValidator' => [],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+        return array(
+            array(
+                array(
+                    'NonExistentValidator' => array(),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'nonExistentValue' => 23,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'minIntegerValue' => .23,
-                    ],
-                ],
-            ],
-            [
-                [
-                    'IntegerValueValidator' => [
+                    ),
+                ),
+            ),
+            array(
+                array(
+                    'IntegerValueValidator' => array(
                         'maxIntegerValue' => .42,
-                    ],
-                ],
-            ],
-        ];
+                    ),
+                ),
+            ),
+        );
     }
 
     protected function provideFieldTypeIdentifier()
@@ -419,12 +419,12 @@ class IntegerTest extends FieldTypeTest
         return 'ezinteger';
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            [$this->getEmptyValueExpectation(), [], 'en_GB', ''],
-            [new IntegerValue(42), [], 'en_GB', '42'],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+            array(new IntegerValue(42), '42'),
+        );
     }
 
     /**
@@ -474,19 +474,19 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideValidDataForValidate()
     {
-        return [
-            [
-                [
-                    'validatorConfiguration' => [
-                        'IntegerValueValidator' => [
+        return array(
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'IntegerValueValidator' => array(
                             'minIntegerValue' => 5,
                             'maxIntegerValue' => 10,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new IntegerValue(7),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -555,78 +555,78 @@ class IntegerTest extends FieldTypeTest
      */
     public function provideInvalidDataForValidate()
     {
-        return [
-            [
-                [
-                    'validatorConfiguration' => [
-                        'IntegerValueValidator' => [
+        return array(
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'IntegerValueValidator' => array(
                             'minIntegerValue' => 5,
                             'maxIntegerValue' => 10,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new IntegerValue(3),
-                [
+                array(
                     new ValidationError(
                         'The value can not be lower than %size%.',
                         null,
-                        [
+                        array(
                             '%size%' => 5,
-                        ],
+                        ),
                         'value'
                     ),
-                ],
-            ],
-            [
-                [
-                    'validatorConfiguration' => [
-                        'IntegerValueValidator' => [
+                ),
+            ),
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'IntegerValueValidator' => array(
                             'minIntegerValue' => 5,
                             'maxIntegerValue' => 10,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new IntegerValue(13),
-                [
+                array(
                     new ValidationError(
                         'The value can not be higher than %size%.',
                         null,
-                        [
+                        array(
                             '%size%' => 10,
-                        ],
+                        ),
                         'value'
                     ),
-                ],
-            ],
-            [
-                [
-                    'validatorConfiguration' => [
-                        'IntegerValueValidator' => [
+                ),
+            ),
+            array(
+                array(
+                    'validatorConfiguration' => array(
+                        'IntegerValueValidator' => array(
                             'minIntegerValue' => 10,
                             'maxIntegerValue' => 5,
-                        ],
-                    ],
-                ],
+                        ),
+                    ),
+                ),
                 new IntegerValue(7),
-                [
+                array(
                     new ValidationError(
                         'The value can not be higher than %size%.',
                         null,
-                        [
+                        array(
                             '%size%' => 5,
-                        ],
+                        ),
                         'value'
                     ),
                     new ValidationError(
                         'The value can not be lower than %size%.',
                         null,
-                        [
+                        array(
                             '%size%' => 10,
-                        ],
+                        ),
                         'value'
                     ),
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 }

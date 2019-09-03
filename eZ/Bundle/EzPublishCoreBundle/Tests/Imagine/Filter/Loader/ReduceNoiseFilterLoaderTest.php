@@ -15,23 +15,28 @@ use PHPUnit\Framework\TestCase;
 
 class ReduceNoiseFilterLoaderTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $filter;
 
-    /** @var ReduceNoiseFilterLoader */
+    /**
+     * @var ReduceNoiseFilterLoader
+     */
     private $loader;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->filter = $this->createMock(FilterInterface::class);
         $this->loader = new ReduceNoiseFilterLoader($this->filter);
     }
 
+    /**
+     * @expectedException \Imagine\Exception\NotSupportedException
+     */
     public function testLoadInvalidDriver()
     {
-        $this->expectException(\Imagine\Exception\NotSupportedException::class);
-
         $this->loader->load($this->createMock(ImageInterface::class));
     }
 }

@@ -30,7 +30,9 @@ class AbstractTestCase extends LanguageAwareTestCase
      */
     private $converterRegistry;
 
-    /** @var \eZ\Publish\SPI\Persistence\Content\Type\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\Content\Type\Handler
+     */
     private $contentTypeHandler;
 
     /**
@@ -40,7 +42,7 @@ class AbstractTestCase extends LanguageAwareTestCase
      * time, which is not required to spent, since we are only reading from the
      * database anyways.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         if (!self::$setup) {
             parent::setUp();
@@ -96,19 +98,20 @@ class AbstractTestCase extends LanguageAwareTestCase
     {
         if (!isset($this->converterRegistry)) {
             $this->converterRegistry = new ConverterRegistry(
-                [
+                array(
                     'ezdatetime' => new Converter\DateAndTimeConverter(),
                     'ezinteger' => new Converter\IntegerConverter(),
                     'ezstring' => new Converter\TextLineConverter(),
-                    'ezfloat' => new Converter\FloatConverter(),
+                    'ezprice' => new Converter\IntegerConverter(),
                     'ezurl' => new Converter\UrlConverter(),
+                    'ezrichtext' => new Converter\RichTextConverter(),
                     'ezboolean' => new Converter\CheckboxConverter(),
                     'ezkeyword' => new Converter\KeywordConverter(),
                     'ezauthor' => new Converter\AuthorConverter(),
                     'ezimage' => new Converter\NullConverter(),
                     'ezsrrating' => new Converter\NullConverter(),
                     'ezmultioption' => new Converter\NullConverter(),
-                ]
+                )
             );
         }
 

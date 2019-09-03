@@ -15,10 +15,12 @@ use eZ\Publish\API\Repository\Repository;
 
 class DepthTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Depth */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\Depth
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new DepthMatcher();
@@ -41,38 +43,38 @@ class DepthTest extends BaseTest
 
     public function matchLocationProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 1,
-                $this->getLocationMock(['depth' => 1]),
+                $this->getLocationMock(array('depth' => 1)),
                 true,
-            ],
-            [
+            ),
+            array(
                 1,
-                $this->getLocationMock(['depth' => 2]),
+                $this->getLocationMock(array('depth' => 2)),
                 false,
-            ],
-            [
-                [1, 3],
-                $this->getLocationMock(['depth' => 2]),
+            ),
+            array(
+                array(1, 3),
+                $this->getLocationMock(array('depth' => 2)),
                 false,
-            ],
-            [
-                [1, 3],
-                $this->getLocationMock(['depth' => 3]),
+            ),
+            array(
+                array(1, 3),
+                $this->getLocationMock(array('depth' => 3)),
                 true,
-            ],
-            [
-                [1, 3],
-                $this->getLocationMock(['depth' => 0]),
+            ),
+            array(
+                array(1, 3),
+                $this->getLocationMock(array('depth' => 0)),
                 false,
-            ],
-            [
-                [0, 1],
-                $this->getLocationMock(['depth' => 0]),
+            ),
+            array(
+                array(0, 1),
+                $this->getLocationMock(array('depth' => 0)),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -91,34 +93,34 @@ class DepthTest extends BaseTest
         $this->matcher->setMatchingConfig($matchingConfig);
         $this->assertSame(
             $expectedResult,
-            $this->matcher->matchContentInfo($this->getContentInfoMock(['mainLocationId' => 42]))
+            $this->matcher->matchContentInfo($this->getContentInfoMock(array('mainLocationId' => 42)))
         );
     }
 
     public function matchContentInfoProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 1,
                 $this->generateRepositoryMockForDepth(1),
                 true,
-            ],
-            [
+            ),
+            array(
                 1,
                 $this->generateRepositoryMockForDepth(2),
                 false,
-            ],
-            [
-                [1, 3],
+            ),
+            array(
+                array(1, 3),
                 $this->generateRepositoryMockForDepth(2),
                 false,
-            ],
-            [
-                [1, 3],
+            ),
+            array(
+                array(1, 3),
                 $this->generateRepositoryMockForDepth(3),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -136,7 +138,7 @@ class DepthTest extends BaseTest
             ->with(42)
             ->will(
                 $this->returnValue(
-                    $this->getLocationMock(['depth' => $depth])
+                    $this->getLocationMock(array('depth' => $depth))
                 )
             );
 

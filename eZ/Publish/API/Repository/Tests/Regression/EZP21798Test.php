@@ -51,7 +51,7 @@ class EZP21798Test extends BaseTest
         $contentCreateStructFolder->setField('name', 'News');
 
         $locationCreateStructFolder = $locationService->newLocationCreateStruct(2);
-        $draftFolder = $contentService->createContent($contentCreateStructFolder, [$locationCreateStructFolder]);
+        $draftFolder = $contentService->createContent($contentCreateStructFolder, array($locationCreateStructFolder));
         $contentFolder = $contentService->publishVersion($draftFolder->versionInfo);
 
         // Create a new article, inside the folder
@@ -60,11 +60,19 @@ class EZP21798Test extends BaseTest
 
         $contentCreateStructArticle->setField('title', 'Article 1');
 
+        $contentCreateStructArticle->setField(
+            'intro',
+            '<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0-variant ezpublish-1.0">
+  <para>This is summary of Article Test</para>
+</section>'
+        );
+
         $newsLocation = $urlAliasService->lookup('/News');
         $locationNews = $locationService->loadLocation($newsLocation->destination);
 
         $locationCreateStructArticle = $locationService->newLocationCreateStruct($locationNews->id);
-        $draftArticle = $contentService->createContent($contentCreateStructArticle, [$locationCreateStructArticle]);
+        $draftArticle = $contentService->createContent($contentCreateStructArticle, array($locationCreateStructArticle));
         $contentArticle = $contentService->publishVersion($draftArticle->versionInfo);
 
         // Assign the article to the Private Section
@@ -92,7 +100,7 @@ class EZP21798Test extends BaseTest
         $newPolicy = $roleService->newPolicyUpdateStruct();
         $newLimitation = new \eZ\Publish\API\Repository\Values\User\Limitation\SectionLimitation();
         $section = $sectionService->loadSectionByIdentifier('private');
-        $newLimitation->limitationValues = [1, $section->id];
+        $newLimitation->limitationValues = array(1, $section->id);
         $newPolicy->addLimitation($newLimitation);
 
         $roleService->updatePolicy($policies[$numPolicies], $newPolicy);

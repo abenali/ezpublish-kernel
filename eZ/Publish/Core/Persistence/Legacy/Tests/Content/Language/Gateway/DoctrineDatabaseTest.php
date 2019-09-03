@@ -27,12 +27,27 @@ class DoctrineDatabaseTest extends TestCase
     /**
      * Inserts DB fixture.
      */
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
         $this->insertDatabaseFixture(
             __DIR__ . '/../../_fixtures/languages.php'
+        );
+    }
+
+    /**
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Language\Gateway\DoctrineDatabase::__construct
+     */
+    public function testCtor()
+    {
+        $handler = $this->getDatabaseHandler();
+        $gateway = $this->getDatabaseGateway();
+
+        $this->assertAttributeSame(
+            $handler,
+            'dbHandler',
+            $gateway
         );
     }
 
@@ -47,14 +62,14 @@ class DoctrineDatabaseTest extends TestCase
         $gateway->insertLanguage($this->getLanguageFixture());
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'id' => '8',
                     'locale' => 'de-DE',
                     'name' => 'Deutsch (Deutschland)',
                     'disabled' => '0',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('id', 'locale', 'name', 'disabled')
                 ->from('ezcontent_language')
@@ -92,14 +107,14 @@ class DoctrineDatabaseTest extends TestCase
         $gateway->updateLanguage($language);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'id' => '2',
                     'locale' => 'de-DE',
                     'name' => 'Deutsch (Deutschland)',
                     'disabled' => '0',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('id', 'locale', 'name', 'disabled')
                 ->from('ezcontent_language')
@@ -108,24 +123,24 @@ class DoctrineDatabaseTest extends TestCase
     }
 
     /**
-     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Language\Gateway\DoctrineDatabase::loadLanguageListData
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Language\Gateway\DoctrineDatabase::loadLanguageData
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Language\Gateway\DoctrineDatabase::createFindQuery
      */
-    public function testLoadLanguageListData()
+    public function testLoadLanguageData()
     {
         $gateway = $this->getDatabaseGateway();
 
-        $result = $gateway->loadLanguageListData([2]);
+        $result = $gateway->loadLanguageData(2);
 
         $this->assertEquals(
-            [
-                [
+            array(
+                array(
                     'id' => '2',
                     'locale' => 'eng-US',
                     'name' => 'English (American)',
                     'disabled' => '0',
-                ],
-            ],
+                ),
+            ),
             $result
         );
     }
@@ -141,20 +156,20 @@ class DoctrineDatabaseTest extends TestCase
         $result = $gateway->loadAllLanguagesData();
 
         $this->assertEquals(
-            [
-                [
+            array(
+                array(
                     'id' => '2',
                     'locale' => 'eng-US',
                     'name' => 'English (American)',
                     'disabled' => '0',
-                ],
-                [
+                ),
+                array(
                     'id' => '4',
                     'locale' => 'eng-GB',
                     'name' => 'English (United Kingdom)',
                     'disabled' => '0',
-                ],
-            ],
+                ),
+            ),
             $result
         );
     }
@@ -169,22 +184,22 @@ class DoctrineDatabaseTest extends TestCase
         $result = $gateway->deleteLanguage(2);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'count' => '1',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('COUNT( * ) AS count')
                 ->from('ezcontent_language')
         );
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'count' => '0',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('COUNT( * ) AS count')
                 ->from('ezcontent_language')

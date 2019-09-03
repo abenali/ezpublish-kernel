@@ -84,7 +84,7 @@ class Handler implements BaseLanguageHandler
     public function load($id)
     {
         $languages = $this->languageMapper->extractLanguagesFromRows(
-            $this->languageGateway->loadLanguageListData([$id])
+            $this->languageGateway->loadLanguageData($id)
         );
 
         if (count($languages) < 1) {
@@ -92,17 +92,6 @@ class Handler implements BaseLanguageHandler
         }
 
         return reset($languages);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadList(array $ids): iterable
-    {
-        return $this->languageMapper->extractLanguagesFromRows(
-            $this->languageGateway->loadLanguageListData($ids),
-            'id'
-        );
     }
 
     /**
@@ -117,7 +106,7 @@ class Handler implements BaseLanguageHandler
     public function loadByLanguageCode($languageCode)
     {
         $languages = $this->languageMapper->extractLanguagesFromRows(
-            $this->languageGateway->loadLanguageListDataByLanguageCode([$languageCode])
+            $this->languageGateway->loadLanguageDataByLanguageCode($languageCode)
         );
 
         if (count($languages) < 1) {
@@ -125,16 +114,6 @@ class Handler implements BaseLanguageHandler
         }
 
         return reset($languages);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function loadListByLanguageCodes(array $languageCodes): iterable
-    {
-        return $this->languageMapper->extractLanguagesFromRows(
-            $this->languageGateway->loadLanguageListDataByLanguageCode($languageCodes)
-        );
     }
 
     /**

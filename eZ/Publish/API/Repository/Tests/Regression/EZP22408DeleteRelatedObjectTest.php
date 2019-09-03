@@ -14,10 +14,12 @@ use eZ\Publish\Core\FieldType\Relation\Value as RelationValue;
 
 class EZP22408DeleteRelatedObjectTest extends BaseTest
 {
-    /** @var ContentType */
+    /**
+     * @var ContentType
+     */
     private $testContentType;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
@@ -30,19 +32,21 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
         $targetObject2 = $this->createTargetObject('Relation list target object 2');
         $referenceObject = $this->createReferenceObject(
             'Reference object',
-            [
+            array(
                 $targetObject1->id,
                 $targetObject2->id,
-            ]
+            )
         );
 
         $contentService = $this->getRepository()->getContentService();
         $contentService->deleteContent($targetObject1->contentInfo);
 
         $reloadedReferenceObject = $contentService->loadContent($referenceObject->id);
-        /** @var RelationListValue */
+        /**
+         * @var RelationListValue
+         */
         $relationListValue = $reloadedReferenceObject->getFieldValue('relation_list');
-        $this->assertSame([$targetObject2->id], $relationListValue->destinationContentIds);
+        $this->assertSame(array($targetObject2->id), $relationListValue->destinationContentIds);
     }
 
     public function testSingleRelationIsUpdatedWhenRelatedObjectIsDeleted()
@@ -50,7 +54,7 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
         $targetObject = $this->createTargetObject('Single relation target object');
         $referenceObject = $this->createReferenceObject(
             'Reference object',
-            [],
+            array(),
             $targetObject->id
         );
 
@@ -58,7 +62,9 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
         $contentService->deleteContent($targetObject->contentInfo);
 
         $reloadedReferenceObject = $contentService->loadContent($referenceObject->id);
-        /** @var RelationValue */
+        /**
+         * @var RelationValue
+         */
         $relationValue = $reloadedReferenceObject->getFieldValue('single_relation');
         $this->assertEmpty($relationValue->destinationContentId);
     }
@@ -70,45 +76,45 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
 
         $createStruct = $contentTypeService->newContentTypeCreateStruct('test_content_type');
         $createStruct->mainLanguageCode = $languageCode;
-        $createStruct->names = [$languageCode => 'Test Content Type'];
+        $createStruct->names = array($languageCode => 'Test Content Type');
         $createStruct->nameSchema = '<name>';
         $createStruct->urlAliasSchema = '<name>';
 
         $createStruct->addFieldDefinition(
             new FieldDefinitionCreateStruct(
-                [
+                array(
                     'fieldTypeIdentifier' => 'ezstring',
                     'identifier' => 'name',
-                    'names' => [$languageCode => 'Name'],
+                    'names' => array($languageCode => 'Name'),
                     'position' => 1,
-                ]
+                )
             )
         );
 
         $createStruct->addFieldDefinition(
             new FieldDefinitionCreateStruct(
-                [
+                array(
                     'fieldTypeIdentifier' => 'ezobjectrelationlist',
                     'identifier' => 'relation_list',
-                    'names' => [$languageCode => 'Relation List'],
+                    'names' => array($languageCode => 'Relation List'),
                     'position' => 2,
-                ]
+                )
             )
         );
 
         $createStruct->addFieldDefinition(
             new FieldDefinitionCreateStruct(
-                [
+                array(
                     'fieldTypeIdentifier' => 'ezobjectrelation',
                     'identifier' => 'single_relation',
-                    'names' => [$languageCode => 'Single Relation'],
+                    'names' => array($languageCode => 'Single Relation'),
                     'position' => 3,
-                ]
+                )
             )
         );
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $this->testContentType = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $this->testContentType = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($this->testContentType);
     }
 
@@ -133,9 +139,9 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
 
         $object = $contentService->createContent(
             $createStruct,
-            [
+            array(
                 $this->getLocationCreateStruct(),
-            ]
+            )
         );
 
         return $contentService->publishVersion($object->versionInfo);
@@ -148,7 +154,7 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
      *
      * @return \eZ\Publish\API\Repository\Values\Content\Content
      */
-    private function createReferenceObject($name, array $relationListTarget = [], $singleRelationTarget = null)
+    private function createReferenceObject($name, array $relationListTarget = array(), $singleRelationTarget = null)
     {
         $contentService = $this->getRepository()->getContentService();
         $createStruct = $contentService->newContentCreateStruct(
@@ -167,9 +173,9 @@ class EZP22408DeleteRelatedObjectTest extends BaseTest
 
         $object = $contentService->createContent(
             $createStruct,
-            [
+            array(
                 $this->getLocationCreateStruct(),
-            ]
+            )
         );
 
         return $contentService->publishVersion($object->versionInfo);

@@ -18,10 +18,14 @@ use Symfony\Component\HttpKernel\Fragment\RoutableFragmentRenderer;
 
 class InlineFragmentRenderer extends BaseRenderer implements SiteAccessAware
 {
-    /** @var \Symfony\Component\HttpKernel\Fragment\FragmentRendererInterface */
+    /**
+     * @var \Symfony\Component\HttpKernel\Fragment\FragmentRendererInterface
+     */
     private $innerRenderer;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\SiteAccess */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\SiteAccess
+     */
     private $siteAccess;
 
     public function __construct(FragmentRendererInterface $innerRenderer)
@@ -41,7 +45,7 @@ class InlineFragmentRenderer extends BaseRenderer implements SiteAccessAware
         $this->siteAccess = $siteAccess;
     }
 
-    public function render($uri, Request $request, array $options = [])
+    public function render($uri, Request $request, array $options = array())
     {
         if ($uri instanceof ControllerReference) {
             if ($request->attributes->has('siteaccess')) {

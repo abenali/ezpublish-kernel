@@ -25,13 +25,19 @@ class DynamicSettingsListener implements EventSubscriberInterface
      */
     private $resettableServiceIds;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $updatableServices;
 
-    /** @var ExpressionLanguage */
+    /**
+     * @var ExpressionLanguage
+     */
     private $expressionLanguage;
 
-    /** @var ContainerInterface */
+    /**
+     * @var ContainerInterface
+     */
     private $container;
 
     public function __construct(array $resettableServiceIds, array $updatableServices, ExpressionLanguage $expressionLanguage = null)
@@ -48,11 +54,11 @@ class DynamicSettingsListener implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [
-            MVCEvents::SITEACCESS => ['onSiteAccessMatch', 254],
-            MVCEvents::CONFIG_SCOPE_CHANGE => ['onConfigScopeChange', 90],
-            MVCEvents::CONFIG_SCOPE_RESTORE => ['onConfigScopeChange', 90],
-        ];
+        return array(
+            MVCEvents::SITEACCESS => array('onSiteAccessMatch', 254),
+            MVCEvents::CONFIG_SCOPE_CHANGE => array('onConfigScopeChange', 90),
+            MVCEvents::CONFIG_SCOPE_RESTORE => array('onConfigScopeChange', 90),
+        );
     }
 
     public function onSiteAccessMatch(PostSiteAccessMatchEvent $event)
@@ -81,7 +87,7 @@ class DynamicSettingsListener implements EventSubscriberInterface
                 continue;
             }
 
-            // @todo Replace DynamicSettings implementation since it's no longer allowed in SF 4
+            $this->container->set($serviceId, null);
         }
 
         // Update services that can be updated.

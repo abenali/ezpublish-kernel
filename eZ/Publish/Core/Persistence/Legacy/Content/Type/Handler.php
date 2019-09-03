@@ -25,7 +25,9 @@ use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 
 class Handler implements BaseContentTypeHandler
 {
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway
+     */
     protected $contentTypeGateway;
 
     /**
@@ -487,21 +489,19 @@ class Handler implements BaseContentTypeHandler
      */
     public function getFieldDefinition($id, $status)
     {
-        $rows = $this->contentTypeGateway->loadFieldDefinition($id, $status);
+        $row = $this->contentTypeGateway->loadFieldDefinition($id, $status);
 
-        if ($rows === false) {
+        if ($row === false) {
             throw new NotFoundException(
                 'FieldDefinition',
-                [
+                array(
                     'id' => $id,
                     'status' => $status,
-                ]
+                )
             );
         }
 
-        $multilingualData = $this->mapper->extractMultilingualData($rows);
-
-        return $this->mapper->extractFieldFromRow(reset($rows), $multilingualData);
+        return $this->mapper->extractFieldFromRow($row);
     }
 
     /**
@@ -635,17 +635,6 @@ class Handler implements BaseContentTypeHandler
         unset($type->description[$languageCode]);
 
         foreach ($type->fieldDefinitions as $fieldDefinition) {
-            $this->contentTypeGateway->removeFieldDefinitionTranslation(
-                $fieldDefinition->id,
-                $languageCode,
-                Type::STATUS_DRAFT
-            );
-
-            //Refresh FieldDefinition object after removing translation data.
-            $fieldDefinition = $this->getFieldDefinition(
-                $fieldDefinition->id,
-                Type::STATUS_DRAFT
-            );
             unset($fieldDefinition->name[$languageCode]);
             unset($fieldDefinition->description[$languageCode]);
             $storageFieldDefinition = new StorageFieldDefinition();
@@ -661,10 +650,5 @@ class Handler implements BaseContentTypeHandler
         $updateStruct = $this->mapper->createUpdateStructFromType($type);
 
         return $this->update($type->id, Type::STATUS_DRAFT, $updateStruct);
-    }
-
-    public function deleteByUserAndStatus(int $userId, int $status): void
-    {
-        $this->contentTypeGateway->removeByUserAndVersion($userId, $status);
     }
 }

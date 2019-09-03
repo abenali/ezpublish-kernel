@@ -21,12 +21,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the createObjectStateGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::createObjectStateGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testCreateObjectStateGroup
      */
     public function testCreateObjectStateGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);
@@ -43,14 +42,14 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
             'publishing'
         );
         $objectStateGroupCreate->defaultLanguageCode = 'eng-US';
-        $objectStateGroupCreate->names = [
+        $objectStateGroupCreate->names = array(
             'eng-US' => 'Publishing',
             'eng-GB' => 'Sindelfingen',
-        ];
-        $objectStateGroupCreate->descriptions = [
+        );
+        $objectStateGroupCreate->descriptions = array(
             'eng-US' => 'Put something online',
             'eng-GB' => 'Put something ton Sindelfingen.',
-        ];
+        );
 
         // Throws unauthorized exception, since the anonymous user must not
         // create object state groups
@@ -64,12 +63,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the updateObjectStateGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::updateObjectStateGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testUpdateObjectStateGroup
      */
     public function testUpdateObjectStateGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $objectStateGroupId = $this->generateId('objectstategroup', 2);
@@ -92,12 +90,12 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
         $groupUpdateStruct = $objectStateService->newObjectStateGroupUpdateStruct();
         $groupUpdateStruct->identifier = 'sindelfingen';
         $groupUpdateStruct->defaultLanguageCode = 'ger-DE';
-        $groupUpdateStruct->names = [
+        $groupUpdateStruct->names = array(
             'ger-DE' => 'Sindelfingen',
-        ];
-        $groupUpdateStruct->descriptions = [
+        );
+        $groupUpdateStruct->descriptions = array(
             'ger-DE' => 'Sindelfingen ist nicht nur eine Stadt',
-        ];
+        );
 
         // Throws unauthorized exception, since the anonymous user must not
         // update object state groups
@@ -112,12 +110,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the deleteObjectStateGroup() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::deleteObjectStateGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testDeleteObjectStateGroup
      */
     public function testDeleteObjectStateGroupThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $objectStateGroupId = $this->generateId('objectstategroup', 2);
@@ -147,12 +144,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the createObjectState() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::createObjectState()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testCreateObjectState
      */
     public function testCreateObjectStateThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $objectStateGroupId = $this->generateId('objectstategroup', 2);
@@ -177,12 +173,12 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
         );
         $objectStateCreateStruct->priority = 23;
         $objectStateCreateStruct->defaultLanguageCode = 'eng-US';
-        $objectStateCreateStruct->names = [
+        $objectStateCreateStruct->names = array(
             'eng-US' => 'Locked and Unlocked',
-        ];
-        $objectStateCreateStruct->descriptions = [
+        );
+        $objectStateCreateStruct->descriptions = array(
             'eng-US' => 'A state between locked and unlocked.',
-        ];
+        );
 
         // Throws unauthorized exception, since the anonymous user must not
         // create object states
@@ -197,12 +193,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the updateObjectState() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::updateObjectState()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testUpdateObjectState
      */
     public function testUpdateObjectStateThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $objectStateId = $this->generateId('objectstate', 2);
@@ -224,14 +219,14 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
         $updateStateStruct = $objectStateService->newObjectStateUpdateStruct();
         $updateStateStruct->identifier = 'somehow_locked';
         $updateStateStruct->defaultLanguageCode = 'ger-DE';
-        $updateStateStruct->names = [
+        $updateStateStruct->names = array(
             'eng-US' => 'Somehow locked',
             'ger-DE' => 'Irgendwie gelockt',
-        ];
-        $updateStateStruct->descriptions = [
+        );
+        $updateStateStruct->descriptions = array(
             'eng-US' => 'The object is somehow locked',
             'ger-DE' => 'Sindelfingen',
-        ];
+        );
 
         // Throws unauthorized exception, since the anonymous user must not
         // update object states
@@ -246,12 +241,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the setPriorityOfObjectState() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::setPriorityOfObjectState()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testSetPriorityOfObjectState
      */
     public function testSetPriorityOfObjectStateThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $objectStateId = $this->generateId('objectstate', 2);
@@ -283,12 +277,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the deleteObjectState() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::deleteObjectState()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testDeleteObjectState
      */
     public function testDeleteObjectStateThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $notLockedObjectStateId = $this->generateId('objectstate', 1);
@@ -316,12 +309,11 @@ class ObjectStateServiceAuthorizationTest extends BaseTest
      * Test for the setContentState() method.
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::setContentState()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testSetContentState
      */
     public function testSetContentStateThrowsUnauthorizedException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         $anonymousUserId = $this->generateId('user', 10);

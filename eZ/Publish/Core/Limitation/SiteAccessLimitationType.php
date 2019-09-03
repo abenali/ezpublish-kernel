@@ -23,7 +23,9 @@ use eZ\Publish\SPI\Limitation\Type as SPILimitationTypeInterface;
  */
 class SiteAccessLimitationType implements SPILimitationTypeInterface
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     private $siteAccessList = [];
 
     public function __construct(array $siteAccessList = [])
@@ -86,10 +88,10 @@ class SiteAccessLimitationType implements SPILimitationTypeInterface
                 $validationErrors[] = new ValidationError(
                     "\$limitationValue->limitationValues[%key%] => Invalid SiteAccess value \"$value\"",
                     null,
-                    [
+                    array(
                         'value' => $value,
                         'key' => $key,
-                    ]
+                    )
                 );
             }
         }
@@ -106,7 +108,7 @@ class SiteAccessLimitationType implements SPILimitationTypeInterface
      */
     public function buildValue(array $limitationValues)
     {
-        return new APISiteAccessLimitation(['limitationValues' => $limitationValues]);
+        return new APISiteAccessLimitation(array('limitationValues' => $limitationValues));
     }
 
     /**

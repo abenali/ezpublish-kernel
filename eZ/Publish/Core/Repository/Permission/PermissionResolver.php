@@ -9,17 +9,14 @@ namespace eZ\Publish\Core\Repository\Permission;
 use eZ\Publish\API\Repository\PermissionResolver as PermissionResolverInterface;
 use eZ\Publish\API\Repository\Repository as RepositoryInterface;
 use eZ\Publish\API\Repository\Values\User\Limitation;
-use eZ\Publish\API\Repository\Values\User\LookupLimitationResult;
-use eZ\Publish\API\Repository\Values\User\LookupPolicyLimitations;
 use eZ\Publish\API\Repository\Values\User\UserReference as APIUserReference;
 use eZ\Publish\API\Repository\Values\ValueObject;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue;
 use eZ\Publish\Core\Repository\Helper\LimitationService;
 use eZ\Publish\Core\Repository\Helper\RoleDomainMapper;
-use eZ\Publish\SPI\Limitation\Target;
-use eZ\Publish\SPI\Limitation\TargetAwareType;
 use eZ\Publish\SPI\Limitation\Type as LimitationType;
 use eZ\Publish\SPI\Persistence\User\Handler as UserHandler;
+use Closure;
 use Exception;
 
 /**
@@ -34,13 +31,19 @@ class PermissionResolver implements PermissionResolverInterface
      */
     private $sudoNestingLevel = 0;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\RoleDomainMapper */
+    /**
+     * @var \eZ\Publish\Core\Repository\Helper\RoleDomainMapper
+     */
     private $roleDomainMapper;
 
-    /** @var \eZ\Publish\Core\Repository\Helper\LimitationService */
+    /**
+     * @var \eZ\Publish\Core\Repository\Helper\LimitationService
+     */
     private $limitationService;
 
-    /** @var \eZ\Publish\SPI\Persistence\User\Handler */
+    /**
+     * @var \eZ\Publish\SPI\Persistence\User\Handler
+     */
     private $userHandler;
 
     /**
@@ -111,10 +114,10 @@ class PermissionResolver implements PermissionResolverInterface
         }
 
         // Uses SPI to avoid triggering permission checks in Role/User service
-        $permissionSets = [];
+        $permissionSets = array();
         $spiRoleAssignments = $this->userHandler->loadRoleAssignmentsByGroupId($userReference->getUserId(), true);
         foreach ($spiRoleAssignments as $spiRoleAssignment) {
-            $permissionSet = ['limitation' => null, 'policies' => []];
+            $permissionSet = array('limitation' => null, 'policies' => array());
 
             $spiRole = $this->userHandler->loadRole($spiRoleAssignment->roleId);
             foreach ($spiRole->policies as $spiPolicy) {
@@ -180,16 +183,12 @@ class PermissionResolver implements PermissionResolverInterface
              *
              * @var \eZ\Publish\API\Repository\Values\User\Limitation[]
              */
-            if (
-                $permissionSet['limitation'] instanceof Limitation
-                && $this->isDeniedByRoleLimitation(
-                    $permissionSet['limitation'],
-                    $currentUserRef,
-                    $object,
-                    $targets
-                )
-            ) {
-                continue;
+            if ($permissionSet['limitation'] instanceof Limitation) {
+                $type = $this->limitationService->getLimitationType($permissionSet['limitation']->getIdentifier());
+                $accessVote = $type->evaluate($permissionSet['limitation'], $currentUserRef, $object, $targets);
+                if ($accessVote === LimitationType::ACCESS_DENIED) {
+                    continue;
+                }
             }
 
             /**
@@ -217,12 +216,7 @@ class PermissionResolver implements PermissionResolverInterface
                 $limitationsPass = true;
                 foreach ($limitations as $limitation) {
                     $type = $this->limitationService->getLimitationType($limitation->getIdentifier());
-                    $accessVote = $type->evaluate(
-                        $limitation,
-                        $currentUserRef,
-                        $object,
-                        $this->prepareTargetsForType($targets, $type)
-                    );
+                    $accessVote = $type->evaluate($limitation, $currentUserRef, $object, $targets);
                     /*
                      * For policy limitation atm only support ACCESS_GRANTED
                      *
@@ -245,130 +239,6 @@ class PermissionResolver implements PermissionResolverInterface
         }
 
         return false; // None of the limitation sets wanted to let you in, sorry!
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function lookupLimitations(
-        string $module,
-        string $function,
-        ValueObject $object,
-        array $targets = [],
-        array $limitationsIdentifiers = []
-    ): LookupLimitationResult {
-        $permissionSets = $this->hasAccess($module, $function);
-
-        if (is_bool($permissionSets)) {
-            return new LookupLimitationResult($permissionSets);
-        }
-
-        if (empty($targets)) {
-            $targets = null;
-        }
-
-        $currentUserReference = $this->getCurrentUserReference();
-
-        $passedLimitations = [];
-        $passedRoleLimitations = [];
-
-        foreach ($permissionSets as $permissionSet) {
-            if ($this->isDeniedByRoleLimitation($permissionSet['limitation'], $currentUserReference, $object, $targets)) {
-                continue;
-            }
-
-            /** @var \eZ\Publish\API\Repository\Values\User\Policy $policy */
-            foreach ($permissionSet['policies'] as $policy) {
-                $policyLimitations = $policy->getLimitations();
-
-                /** Return empty array if policy gives full access (aka no limitations) */
-                if ($policyLimitations === '*') {
-                    return new LookupLimitationResult(true);
-                }
-
-                $limitationsPass = true;
-                $possibleLimitations = [];
-                $possibleRoleLimitation = $permissionSet['limitation'];
-                foreach ($policyLimitations as $limitation) {
-                    $limitationsPass = $this->isGrantedByLimitation($limitation, $currentUserReference, $object, $targets);
-                    if (!$limitationsPass) {
-                        break;
-                    }
-
-                    $possibleLimitations[] = $limitation;
-                }
-
-                $limitationFilter = function (Limitation $limitation) use ($limitationsIdentifiers) {
-                    return \in_array($limitation->getIdentifier(), $limitationsIdentifiers, true);
-                };
-
-                if (!empty($limitationsIdentifiers)) {
-                    $possibleLimitations = array_filter($possibleLimitations, $limitationFilter);
-                    if (!\in_array($possibleRoleLimitation, $limitationsIdentifiers, true)) {
-                        $possibleRoleLimitation = null;
-                    }
-                }
-
-                if ($limitationsPass) {
-                    $passedLimitations[] = new LookupPolicyLimitations($policy, $possibleLimitations);
-                    if (null !== $possibleRoleLimitation) {
-                        $passedRoleLimitations[] = $possibleRoleLimitation;
-                    }
-                }
-            }
-        }
-
-        return new LookupLimitationResult(!empty($passedLimitations), $passedRoleLimitations, $passedLimitations);
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\User\Limitation $limitation
-     * @param \eZ\Publish\API\Repository\Values\User\UserReference $currentUserReference
-     * @param \eZ\Publish\API\Repository\Values\ValueObject $object
-     * @param array|null $targets
-     *
-     * @return bool
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     */
-    private function isGrantedByLimitation(
-        Limitation $limitation,
-        APIUserReference $currentUserReference,
-        ValueObject $object,
-        ?array $targets
-    ): bool {
-        $type = $this->limitationService->getLimitationType($limitation->getIdentifier());
-        $accessVote = $type->evaluate($limitation, $currentUserReference, $object, $targets);
-
-        return $accessVote === LimitationType::ACCESS_GRANTED;
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\User\Limitation|null $limitation
-     * @param \eZ\Publish\API\Repository\Values\User\UserReference $currentUserReference
-     * @param \eZ\Publish\API\Repository\Values\ValueObject $object
-     * @param array|null $targets
-     *
-     * @return bool
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\BadStateException
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     */
-    private function isDeniedByRoleLimitation(
-        ?Limitation $limitation,
-        APIUserReference $currentUserReference,
-        ValueObject $object,
-        ?array $targets
-    ): bool {
-        if (null === $limitation) {
-            return false;
-        }
-
-        $type = $this->limitationService->getLimitationType($limitation->getIdentifier());
-        $accessVote = $type->evaluate($limitation, $currentUserReference, $object, $targets);
-
-        return $accessVote === LimitationType::ACCESS_DENIED;
     }
 
     /**
@@ -396,7 +266,7 @@ class PermissionResolver implements PermissionResolverInterface
      *
      * @return mixed
      */
-    public function sudo(callable $callback, RepositoryInterface $outerRepository)
+    public function sudo(Closure $callback, RepositoryInterface $outerRepository)
     {
         ++$this->sudoNestingLevel;
         try {
@@ -409,40 +279,5 @@ class PermissionResolver implements PermissionResolverInterface
         --$this->sudoNestingLevel;
 
         return $returnValue;
-    }
-
-    /**
-     * Prepare list of targets for the given Type keeping BC.
-     *
-     * @param array|null $targets
-     * @param \eZ\Publish\SPI\Limitation\Type $type
-     *
-     * @return array|null
-     */
-    private function prepareTargetsForType(?array $targets, LimitationType $type): ?array
-    {
-        $isTargetAware = $type instanceof TargetAwareType;
-
-        // BC: null for empty targets is still expected by some Limitations, so needs to be preserved
-        if (null === $targets) {
-            return $isTargetAware ? [] : null;
-        }
-
-        // BC: for TargetAware Limitations return only instances of Target, for others return only non-Target instances
-        $targets = array_filter(
-            $targets,
-            function ($target) use ($isTargetAware) {
-                $isTarget = $target instanceof Target;
-
-                return $isTargetAware ? $isTarget : !$isTarget;
-            }
-        );
-
-        // BC: treat empty targets after filtering as if they were empty the whole time
-        if (!$isTargetAware && empty($targets)) {
-            return null;
-        }
-
-        return $targets;
     }
 }

@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class RegisterLimitationTypePassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition('ezpublish.api.repository.factory', new Definition());
@@ -28,7 +28,7 @@ class RegisterLimitationTypePassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new RegisterLimitationTypePass());
     }
@@ -38,7 +38,7 @@ class RegisterLimitationTypePassTest extends AbstractCompilerPassTestCase
         $fieldTypeIdentifier = 'field_type_identifier';
         $serviceId = 'service_id';
         $def = new Definition();
-        $def->addTag('ezpublish.limitationType', ['alias' => $fieldTypeIdentifier]);
+        $def->addTag('ezpublish.limitationType', array('alias' => $fieldTypeIdentifier));
         $this->setDefinition($serviceId, $def);
 
         $this->compile();
@@ -46,14 +46,15 @@ class RegisterLimitationTypePassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.api.repository.factory',
             'registerLimitationType',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testRegisterLimitationTypeNoAlias()
     {
-        $this->expectException(\LogicException::class);
-
         $fieldTypeIdentifier = 'field_type_identifier';
         $serviceId = 'service_id';
         $def = new Definition();
@@ -65,7 +66,7 @@ class RegisterLimitationTypePassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.api.repository.factory',
             'registerLimitationType',
-            [$fieldTypeIdentifier, new Reference($serviceId)]
+            array($fieldTypeIdentifier, new Reference($serviceId))
         );
     }
 }

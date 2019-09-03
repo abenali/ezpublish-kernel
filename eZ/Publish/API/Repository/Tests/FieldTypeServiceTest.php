@@ -33,7 +33,7 @@ class FieldTypeServiceTest extends BaseTest
         /* END: Use Case */
 
         // Require at least 1 field type
-        $this->assertNotCount(0, $fieldTypes);
+        $this->assertNotEquals(0, count($fieldTypes));
 
         foreach ($fieldTypes as $fieldType) {
             $this->assertInstanceOf(
@@ -75,11 +75,10 @@ class FieldTypeServiceTest extends BaseTest
      * Test for the getFieldType() method.
      *
      * @see \eZ\Publish\API\Repository\FieldTypeService::getFieldType()
+     * @expectedException \RuntimeException
      */
     public function testGetFieldTypeThrowsNotFoundException()
     {
-        $this->expectException(\RuntimeException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */

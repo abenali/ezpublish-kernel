@@ -19,14 +19,14 @@ class NotificationRendererPassTest extends AbstractCompilerPassTestCase
     const NOTIFICATION_RENDERER_ID = 'notification.renderer.id';
     const NOTIFICATION_ALIAS = 'example';
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
 
         $this->setDefinition(NotificationRendererPass::REGISTRY_DEFINITION_ID, new Definition());
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new NotificationRendererPass());
     }
@@ -48,10 +48,11 @@ class NotificationRendererPassTest extends AbstractCompilerPassTestCase
         );
     }
 
+    /**
+     * @expectedException \LogicException
+     */
     public function testAddRendererWithoutAliasThrowsLogicException()
     {
-        $this->expectException(\LogicException::class);
-
         $definition = new Definition();
         $definition->addTag(NotificationRendererPass::TAG_NAME);
 

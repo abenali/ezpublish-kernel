@@ -56,10 +56,10 @@ class FloatValueValidatorTest extends TestCase
      */
     public function testConstraintsInitializeGet()
     {
-        $constraints = [
+        $constraints = array(
             'minFloatValue' => 0.5,
             'maxFloatValue' => 22 / 7,
-        ];
+        );
         $validator = new FloatValueValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -75,16 +75,16 @@ class FloatValueValidatorTest extends TestCase
      */
     public function testGetConstraintsSchema()
     {
-        $constraintsSchema = [
-            'minFloatValue' => [
+        $constraintsSchema = array(
+            'minFloatValue' => array(
                 'type' => 'float',
                 'default' => null,
-            ],
-            'maxFloatValue' => [
+            ),
+            'maxFloatValue' => array(
                 'type' => 'float',
                 'default' => null,
-            ],
-        ];
+            ),
+        );
         $validator = new FloatValueValidator();
         $this->assertSame($constraintsSchema, $validator->getConstraintsSchema());
     }
@@ -97,10 +97,10 @@ class FloatValueValidatorTest extends TestCase
      */
     public function testConstraintsSetGet()
     {
-        $constraints = [
+        $constraints = array(
             'minFloatValue' => 0.5,
             'maxFloatValue' => 22 / 7,
-        ];
+        );
         $validator = new FloatValueValidator();
         $validator->minFloatValue = $constraints['minFloatValue'];
         $validator->maxFloatValue = $constraints['maxFloatValue'];
@@ -112,14 +112,13 @@ class FloatValueValidatorTest extends TestCase
      * Tests initializing with a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::initializeWithConstraints
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testInitializeBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
-        $constraints = [
+        $constraints = array(
             'unexisting' => 0,
-        ];
+        );
         $validator = new FloatValueValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -130,11 +129,10 @@ class FloatValueValidatorTest extends TestCase
      * Tests setting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__set
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testSetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new FloatValueValidator();
         $validator->unexisting = 0;
     }
@@ -143,11 +141,10 @@ class FloatValueValidatorTest extends TestCase
      * Tests getting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__get
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testGetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new FloatValueValidator();
         $null = $validator->unexisting;
     }
@@ -165,18 +162,18 @@ class FloatValueValidatorTest extends TestCase
         $validator->minFloatValue = 10 / 7;
         $validator->maxFloatValue = 11 / 7;
         $this->assertTrue($validator->validate(new FloatValue($value)));
-        $this->assertSame([], $validator->getMessage());
+        $this->assertSame(array(), $validator->getMessage());
     }
 
     public function providerForValidateOK()
     {
-        return [
-            [100 / 70],
-            [101 / 70],
-            [105 / 70],
-            [109 / 70],
-            [110 / 70],
-        ];
+        return array(
+            array(100 / 70),
+            array(101 / 70),
+            array(105 / 70),
+            array(109 / 70),
+            array(110 / 70),
+        );
     }
 
     /**
@@ -213,12 +210,12 @@ class FloatValueValidatorTest extends TestCase
 
     public function providerForValidateKO()
     {
-        return [
-            [-10 / 7, 'The value can not be lower than %size%.', ['%size%' => $this->getMinFloatValue()]],
-            [0, 'The value can not be lower than %size%.', ['%size%' => $this->getMinFloatValue()]],
-            [99 / 70, 'The value can not be lower than %size%.', ['%size%' => $this->getMinFloatValue()]],
-            [111 / 70, 'The value can not be higher than %size%.', ['%size%' => $this->getMaxFloatValue()]],
-        ];
+        return array(
+            array(-10 / 7, 'The value can not be lower than %size%.', array('%size%' => $this->getMinFloatValue())),
+            array(0, 'The value can not be lower than %size%.', array('%size%' => $this->getMinFloatValue())),
+            array(99 / 70, 'The value can not be lower than %size%.', array('%size%' => $this->getMinFloatValue())),
+            array(111 / 70, 'The value can not be higher than %size%.', array('%size%' => $this->getMaxFloatValue())),
+        );
     }
 
     /**
@@ -238,33 +235,33 @@ class FloatValueValidatorTest extends TestCase
 
     public function providerForValidateConstraintsOK()
     {
-        return [
-            [
-                [],
-                [
+        return array(
+            array(
+                array(),
+                array(
                     'minFloatValue' => 5,
-                ],
-                [
+                ),
+                array(
                     'maxFloatValue' => 2.2,
-                ],
-                [
+                ),
+                array(
                     'minFloatValue' => null,
                     'maxFloatValue' => null,
-                ],
-                [
+                ),
+                array(
                     'minFloatValue' => -5,
                     'maxFloatValue' => null,
-                ],
-                [
+                ),
+                array(
                     'minFloatValue' => null,
                     'maxFloatValue' => 12.7,
-                ],
-                [
+                ),
+                array(
                     'minFloatValue' => 6,
                     'maxFloatValue' => 8.3,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -296,88 +293,88 @@ class FloatValueValidatorTest extends TestCase
 
     public function providerForValidateConstraintsKO()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'minFloatValue' => true,
-                ],
-                ["Validator parameter '%parameter%' value must be of numeric type"],
-                [
-                    ['%parameter%' => 'minFloatValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of numeric type"),
+                array(
+                    array('%parameter%' => 'minFloatValue'),
+                ),
+            ),
+            array(
+                array(
                     'minFloatValue' => 'five thousand bytes',
-                ],
-                ["Validator parameter '%parameter%' value must be of numeric type"],
-                [
-                    ['%parameter%' => 'minFloatValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of numeric type"),
+                array(
+                    array('%parameter%' => 'minFloatValue'),
+                ),
+            ),
+            array(
+                array(
                     'minFloatValue' => 'five thousand bytes',
                     'maxFloatValue' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of numeric type"],
-                [
-                    ['%parameter%' => 'minFloatValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of numeric type"),
+                array(
+                    array('%parameter%' => 'minFloatValue'),
+                ),
+            ),
+            array(
+                array(
                     'maxFloatValue' => new \DateTime(),
                     'minFloatValue' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of numeric type"],
-                [
-                    ['%parameter%' => 'maxFloatValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of numeric type"),
+                array(
+                    array('%parameter%' => 'maxFloatValue'),
+                ),
+            ),
+            array(
+                array(
                     'minFloatValue' => true,
                     'maxFloatValue' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of numeric type"],
-                [
-                    ['%parameter%' => 'minFloatValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of numeric type"),
+                array(
+                    array('%parameter%' => 'minFloatValue'),
+                ),
+            ),
+            array(
+                array(
                     'minFloatValue' => 'five thousand bytes',
                     'maxFloatValue' => 'ten billion bytes',
-                ],
-                [
+                ),
+                array(
                     "Validator parameter '%parameter%' value must be of numeric type",
                     "Validator parameter '%parameter%' value must be of numeric type",
-                ],
-                [
-                    ['%parameter%' => 'minFloatValue'],
-                    ['%parameter%' => 'maxFloatValue'],
-                ],
-            ],
-            [
-                [
+                ),
+                array(
+                    array('%parameter%' => 'minFloatValue'),
+                    array('%parameter%' => 'maxFloatValue'),
+                ),
+            ),
+            array(
+                array(
                     'brljix' => 12345,
-                ],
-                ["Validator parameter '%parameter%' is unknown"],
-                [
-                    ['%parameter%' => 'brljix'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' is unknown"),
+                array(
+                    array('%parameter%' => 'brljix'),
+                ),
+            ),
+            array(
+                array(
                     'minFloatValue' => 12345,
                     'brljix' => 12345,
-                ],
-                ["Validator parameter '%parameter%' is unknown"],
-                [
-                    ['%parameter%' => 'brljix'],
-                ],
-            ],
-        ];
+                ),
+                array("Validator parameter '%parameter%' is unknown"),
+                array(
+                    array('%parameter%' => 'brljix'),
+                ),
+            ),
+        );
     }
 }

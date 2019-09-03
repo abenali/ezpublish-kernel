@@ -9,7 +9,6 @@
 namespace eZ\Publish\Core\Repository;
 
 use eZ\Publish\API\Repository\FieldTypeService as FieldTypeServiceInterface;
-use eZ\Publish\Core\FieldType\FieldTypeRegistry;
 use eZ\Publish\Core\Repository\Values\ContentType\FieldType;
 
 /**
@@ -19,7 +18,9 @@ use eZ\Publish\Core\Repository\Values\ContentType\FieldType;
  */
 class FieldTypeService implements FieldTypeServiceInterface
 {
-    /** @var \eZ\Publish\Core\FieldType\FieldTypeRegistry */
+    /**
+     * @var Helper\FieldTypeRegistry
+     */
     protected $fieldTypeRegistry;
 
     /**
@@ -27,14 +28,14 @@ class FieldTypeService implements FieldTypeServiceInterface
      *
      * @var \eZ\Publish\API\Repository\FieldType[]
      */
-    protected $fieldTypes = [];
+    protected $fieldTypes = array();
 
     /**
      * Setups service with reference to repository object that created it & corresponding handler.
      *
-     * @param \eZ\Publish\Core\FieldType\FieldTypeRegistry $fieldTypeRegistry Registry for SPI FieldTypes
+     * @param Helper\FieldTypeRegistry $fieldTypeRegistry Registry for SPI FieldTypes
      */
-    public function __construct(FieldTypeRegistry $fieldTypeRegistry)
+    public function __construct(Helper\FieldTypeRegistry $fieldTypeRegistry)
     {
         $this->fieldTypeRegistry = $fieldTypeRegistry;
     }

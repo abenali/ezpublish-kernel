@@ -14,25 +14,29 @@ use Psr\Log\LoggerInterface;
 
 class LocaleConverterTest extends TestCase
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Locale\LocaleConverter */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Locale\LocaleConverter
+     */
     private $localeConverter;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     private $logger;
 
     private $conversionMap;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
-        $this->conversionMap = [
+        $this->conversionMap = array(
             'eng-GB' => 'en_GB',
             'eng-US' => 'en_US',
             'fre-FR' => 'fr_FR',
             'ger-DE' => 'de_DE',
             'nor-NO' => 'no_NO',
             'cro-HR' => 'hr_HR',
-        ];
+        );
 
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->localeConverter = new LocaleConverter($this->conversionMap, $this->logger);
@@ -59,14 +63,14 @@ class LocaleConverterTest extends TestCase
 
     public function convertToPOSIXProvider()
     {
-        return [
-            ['eng-GB', 'en_GB'],
-            ['eng-US', 'en_US'],
-            ['fre-FR', 'fr_FR'],
-            ['chi-CN', null],
-            ['epo-EO', null],
-            ['nor-NO', 'no_NO'],
-        ];
+        return array(
+            array('eng-GB', 'en_GB'),
+            array('eng-US', 'en_US'),
+            array('fre-FR', 'fr_FR'),
+            array('chi-CN', null),
+            array('epo-EO', null),
+            array('nor-NO', 'no_NO'),
+        );
     }
 
     /**
@@ -90,13 +94,13 @@ class LocaleConverterTest extends TestCase
 
     public function convertToEzProvider()
     {
-        return [
-            ['en_GB', 'eng-GB'],
-            ['en_US', 'eng-US'],
-            ['fr_FR', 'fre-FR'],
-            ['zh-CN', null],
-            ['eo', null],
-            ['no_NO', 'nor-NO'],
-        ];
+        return array(
+            array('en_GB', 'eng-GB'),
+            array('en_US', 'eng-US'),
+            array('fr_FR', 'fre-FR'),
+            array('zh-CN', null),
+            array('eo', null),
+            array('no_NO', 'nor-NO'),
+        );
     }
 }

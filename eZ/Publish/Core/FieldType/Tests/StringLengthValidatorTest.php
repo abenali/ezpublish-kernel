@@ -57,10 +57,10 @@ class StringLengthValidatorTest extends TestCase
      */
     public function testConstraintsInitializeGet()
     {
-        $constraints = [
+        $constraints = array(
             'minStringLength' => 5,
             'maxStringLength' => 10,
-        ];
+        );
         $validator = new StringLengthValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -76,16 +76,16 @@ class StringLengthValidatorTest extends TestCase
      */
     public function testGetConstraintsSchema()
     {
-        $constraintsSchema = [
-            'minStringLength' => [
+        $constraintsSchema = array(
+            'minStringLength' => array(
                 'type' => 'int',
                 'default' => 0,
-            ],
-            'maxStringLength' => [
+            ),
+            'maxStringLength' => array(
                 'type' => 'int',
                 'default' => null,
-            ],
-        ];
+            ),
+        );
         $validator = new StringLengthValidator();
         $this->assertSame($constraintsSchema, $validator->getConstraintsSchema());
     }
@@ -98,10 +98,10 @@ class StringLengthValidatorTest extends TestCase
      */
     public function testConstraintsSetGet()
     {
-        $constraints = [
+        $constraints = array(
             'minStringLength' => 5,
             'maxStringLength' => 10,
-        ];
+        );
         $validator = new StringLengthValidator();
         $validator->minStringLength = $constraints['minStringLength'];
         $validator->maxStringLength = $constraints['maxStringLength'];
@@ -113,14 +113,13 @@ class StringLengthValidatorTest extends TestCase
      * Tests initializing with a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::initializeWithConstraints
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testInitializeBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
-        $constraints = [
+        $constraints = array(
             'unexisting' => 0,
-        ];
+        );
         $validator = new StringLengthValidator();
         $validator->initializeWithConstraints(
             $constraints
@@ -131,11 +130,10 @@ class StringLengthValidatorTest extends TestCase
      * Tests setting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__set
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testSetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new StringLengthValidator();
         $validator->unexisting = 0;
     }
@@ -144,11 +142,10 @@ class StringLengthValidatorTest extends TestCase
      * Tests getting a wrong constraint.
      *
      * @covers \eZ\Publish\Core\FieldType\Validator::__get
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException
      */
     public function testGetBadConstraint()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\PropertyNotFoundException::class);
-
         $validator = new StringLengthValidator();
         $null = $validator->unexisting;
     }
@@ -166,17 +163,17 @@ class StringLengthValidatorTest extends TestCase
         $validator->minStringLength = 5;
         $validator->maxStringLength = 10;
         $this->assertTrue($validator->validate(new TextLineValue($value)));
-        $this->assertSame([], $validator->getMessage());
+        $this->assertSame(array(), $validator->getMessage());
     }
 
     public function providerForValidateOK()
     {
-        return [
-            ['hello'],
-            ['hello!'],
-            ['0123456789'],
-            ['♔♕♖♗♘♙♚♛♜♝'],
-        ];
+        return array(
+            array('hello'),
+            array('hello!'),
+            array('0123456789'),
+            array('♔♕♖♗♘♙♚♛♜♝'),
+        );
     }
 
     /**
@@ -217,32 +214,32 @@ class StringLengthValidatorTest extends TestCase
 
     public function providerForValidateKO()
     {
-        return [
-            [
+        return array(
+            array(
                 '',
                 'The string cannot be shorter than %size% character.',
                 'The string cannot be shorter than %size% characters.',
-                ['%size%' => $this->getMinStringLength()],
-            ],
-            [
+                array('%size%' => $this->getMinStringLength()),
+            ),
+            array(
                 'Hi!',
                 'The string cannot be shorter than %size% character.',
                 'The string cannot be shorter than %size% characters.',
-                ['%size%' => $this->getMinStringLength()],
-            ],
-            [
+                array('%size%' => $this->getMinStringLength()),
+            ),
+            array(
                 '0123456789!',
                 'The string can not exceed %size% character.',
                 'The string can not exceed %size% characters.',
-                ['%size%' => $this->getMaxStringLength()],
-            ],
-            [
+                array('%size%' => $this->getMaxStringLength()),
+            ),
+            array(
                 'ABC♔',
                 'The string cannot be shorter than %size% character.',
                 'The string cannot be shorter than %size% characters.',
-                ['%size%' => $this->getMinStringLength()],
-            ],
-        ];
+                array('%size%' => $this->getMinStringLength()),
+            ),
+        );
     }
 
     /**
@@ -262,33 +259,33 @@ class StringLengthValidatorTest extends TestCase
 
     public function providerForValidateConstraintsOK()
     {
-        return [
-            [
-                [],
-                [
+        return array(
+            array(
+                array(),
+                array(
                     'minStringLength' => 5,
-                ],
-                [
+                ),
+                array(
                     'maxStringLength' => 2,
-                ],
-                [
+                ),
+                array(
                     'minStringLength' => false,
                     'maxStringLength' => false,
-                ],
-                [
+                ),
+                array(
                     'minStringLength' => -5,
                     'maxStringLength' => false,
-                ],
-                [
+                ),
+                array(
                     'minStringLength' => false,
                     'maxStringLength' => 12,
-                ],
-                [
+                ),
+                array(
                     'minStringLength' => 6,
                     'maxStringLength' => 8,
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -320,88 +317,88 @@ class StringLengthValidatorTest extends TestCase
 
     public function providerForValidateConstraintsKO()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'minStringLength' => true,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minStringLength'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minStringLength'),
+                ),
+            ),
+            array(
+                array(
                     'minStringLength' => 'five thousand characters',
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minStringLength'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minStringLength'),
+                ),
+            ),
+            array(
+                array(
                     'minStringLength' => 'five thousand characters',
                     'maxStringLength' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minStringLength'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minStringLength'),
+                ),
+            ),
+            array(
+                array(
                     'maxStringLength' => new \DateTime(),
                     'minStringLength' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'maxStringLength'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'maxStringLength'),
+                ),
+            ),
+            array(
+                array(
                     'minStringLength' => true,
                     'maxStringLength' => 1234,
-                ],
-                ["Validator parameter '%parameter%' value must be of integer type"],
-                [
-                    ['%parameter%' => 'minStringLength'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' value must be of integer type"),
+                array(
+                    array('%parameter%' => 'minStringLength'),
+                ),
+            ),
+            array(
+                array(
                     'minStringLength' => 'five thousand characters',
                     'maxStringLength' => 'ten billion characters',
-                ],
-                [
+                ),
+                array(
                     "Validator parameter '%parameter%' value must be of integer type",
                     "Validator parameter '%parameter%' value must be of integer type",
-                ],
-                [
-                    ['%parameter%' => 'minStringLength'],
-                    ['%parameter%' => 'maxStringLength'],
-                ],
-            ],
-            [
-                [
+                ),
+                array(
+                    array('%parameter%' => 'minStringLength'),
+                    array('%parameter%' => 'maxStringLength'),
+                ),
+            ),
+            array(
+                array(
                     'brljix' => 12345,
-                ],
-                ["Validator parameter '%parameter%' is unknown"],
-                [
-                    ['%parameter%' => 'brljix'],
-                ],
-            ],
-            [
-                [
+                ),
+                array("Validator parameter '%parameter%' is unknown"),
+                array(
+                    array('%parameter%' => 'brljix'),
+                ),
+            ),
+            array(
+                array(
                     'minStringLength' => 12345,
                     'brljix' => 12345,
-                ],
-                ["Validator parameter '%parameter%' is unknown"],
-                [
-                    ['%parameter%' => 'brljix'],
-                ],
-            ],
-        ];
+                ),
+                array("Validator parameter '%parameter%' is unknown"),
+                array(
+                    array('%parameter%' => 'brljix'),
+                ),
+            ),
+        );
     }
 }

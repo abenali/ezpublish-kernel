@@ -17,10 +17,12 @@ use eZ\Publish\API\Repository\Repository;
 
 class UrlAliasTest extends BaseTest
 {
-    /** @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\UrlAlias */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\UrlAlias
+     */
     private $matcher;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->matcher = new UrlAliasMatcher();
@@ -45,13 +47,13 @@ class UrlAliasTest extends BaseTest
 
     public function setMatchingConfigProvider()
     {
-        return [
-            ['/foo/bar/', ['foo/bar']],
-            ['/foo/bar/', ['foo/bar']],
-            ['/foo/bar', ['foo/bar']],
-            [['/foo/bar/', 'baz/biz/'], ['foo/bar', 'baz/biz']],
-            [['foo/bar', 'baz/biz'], ['foo/bar', 'baz/biz']],
-        ];
+        return array(
+            array('/foo/bar/', array('foo/bar')),
+            array('/foo/bar/', array('foo/bar')),
+            array('/foo/bar', array('foo/bar')),
+            array(array('/foo/bar/', 'baz/biz/'), array('foo/bar', 'baz/biz')),
+            array(array('foo/bar', 'baz/biz'), array('foo/bar', 'baz/biz')),
+        );
     }
 
     /**
@@ -65,13 +67,13 @@ class UrlAliasTest extends BaseTest
     {
         // First an url alias that will never match, then the right url alias.
         // This ensures to test even if the location has several url aliases.
-        $urlAliasList = [
+        $urlAliasList = array(
             $this->createMock(URLAlias::class),
             $this
                 ->getMockBuilder(URLAlias::class)
-                ->setConstructorArgs([['path' => $path]])
+                ->setConstructorArgs(array(array('path' => $path)))
                 ->getMockForAbstractClass(),
-        ];
+        );
 
         $urlAliasServiceMock = $this->createMock(URLAliasService::class);
         $urlAliasServiceMock->expects($this->at(0))
@@ -80,7 +82,7 @@ class UrlAliasTest extends BaseTest
                 $this->isInstanceOf(Location::class),
                 true
             )
-            ->will($this->returnValue([]));
+            ->will($this->returnValue(array()));
         $urlAliasServiceMock->expects($this->at(1))
             ->method('listLocationAliases')
             ->with(
@@ -120,43 +122,42 @@ class UrlAliasTest extends BaseTest
 
     public function matchLocationProvider()
     {
-        return [
-            [
+        return array(
+            array(
                 'foo/url',
                 $this->generateRepositoryMockForUrlAlias('/foo/url'),
                 true,
-            ],
-            [
+            ),
+            array(
                 '/foo/url',
                 $this->generateRepositoryMockForUrlAlias('/foo/url'),
                 true,
-            ],
-            [
+            ),
+            array(
                 'foo/url',
                 $this->generateRepositoryMockForUrlAlias('/bar/url'),
                 false,
-            ],
-            [
-                ['foo/url', 'baz'],
+            ),
+            array(
+                array('foo/url', 'baz'),
                 $this->generateRepositoryMockForUrlAlias('/bar/url'),
                 false,
-            ],
-            [
-                ['foo/url   ', 'baz   '],
+            ),
+            array(
+                array('foo/url   ', 'baz   '),
                 $this->generateRepositoryMockForUrlAlias('/baz'),
                 true,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
+     * @expectedException \RuntimeException
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\UrlAlias::matchContentInfo
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\ContentBased\UrlAlias::setMatchingConfig
      */
     public function testMatchContentInfo()
     {
-        $this->expectException(\RuntimeException::class);
-
         $this->matcher->setMatchingConfig('foo/bar');
         $this->matcher->matchContentInfo($this->getContentInfoMock());
     }

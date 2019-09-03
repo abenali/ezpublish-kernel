@@ -23,7 +23,7 @@ class Mapper
      *
      * @return \eZ\Publish\SPI\Persistence\Content\Language
      */
-    public function createLanguageFromCreateStruct(CreateStruct $struct): Language
+    public function createLanguageFromCreateStruct(CreateStruct $struct)
     {
         $language = new Language();
 
@@ -38,13 +38,12 @@ class Mapper
      * Extracts Language objects from $rows.
      *
      * @param array $rows
-     * @param string $key Column name for use as key in returned array.
      *
      * @return \eZ\Publish\SPI\Persistence\Content\Language[]
      */
-    public function extractLanguagesFromRows(array $rows, string $key = 'locale'): array
+    public function extractLanguagesFromRows(array $rows)
     {
-        $languages = [];
+        $languages = array();
 
         foreach ($rows as $row) {
             $language = new Language();
@@ -54,7 +53,7 @@ class Mapper
             $language->name = $row['name'];
             $language->isEnabled = !((int)$row['disabled']);
 
-            $languages[$row[$key]] = $language;
+            $languages[$row['locale']] = $language;
         }
 
         return $languages;

@@ -8,6 +8,7 @@
  */
 namespace eZ\Publish\API\Repository\Tests;
 
+use eZ\Publish\API\Repository\Tests\SetupFactory\LegacyElasticsearch;
 use EzSystems\EzPlatformSolrSearchEngine\Tests\SetupFactory\LegacySetupFactory as LegacySolrSetupFactory;
 use eZ\Publish\API\Repository\Values\Content\LocationQuery;
 use eZ\Publish\API\Repository\Values\Content\Query;
@@ -29,7 +30,17 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
     const SETUP_DEDICATED = 'dedicated';
     const SETUP_SHARED = 'shared';
     const SETUP_SINGLE = 'single';
-    const SETUP_CLOUD = 'cloud';
+
+    public function setUp()
+    {
+        $setupFactory = $this->getSetupFactory();
+
+        if ($setupFactory instanceof LegacyElasticsearch) {
+            $this->markTestIncomplete('Not implemented for Elasticsearch Search Engine');
+        }
+
+        parent::setUp();
+    }
 
     /**
      * @return \eZ\Publish\API\Repository\Values\ContentType\ContentType
@@ -41,12 +52,12 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
         $createStruct = $contentTypeService->newContentTypeCreateStruct('test-type');
         $createStruct->mainLanguageCode = 'eng-GB';
-        $createStruct->names = ['eng-GB' => 'Test type'];
+        $createStruct->names = array('eng-GB' => 'Test type');
         $createStruct->creatorId = 14;
         $createStruct->creationDate = new DateTime();
 
         $fieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('search_field', 'ezinteger');
-        $fieldCreate->names = ['eng-GB' => 'Search field'];
+        $fieldCreate->names = array('eng-GB' => 'Search field');
         $fieldCreate->fieldGroup = 'main';
         $fieldCreate->position = 1;
         $fieldCreate->isTranslatable = true;
@@ -55,7 +66,7 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
         $createStruct->addFieldDefinition($fieldCreate);
 
         $fieldCreate = $contentTypeService->newFieldDefinitionCreateStruct('sort_field', 'ezinteger');
-        $fieldCreate->names = ['eng-GB' => 'Sort field'];
+        $fieldCreate->names = array('eng-GB' => 'Sort field');
         $fieldCreate->fieldGroup = 'main';
         $fieldCreate->position = 2;
         $fieldCreate->isTranslatable = false;
@@ -64,7 +75,7 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
         $createStruct->addFieldDefinition($fieldCreate);
 
         $contentGroup = $contentTypeService->loadContentTypeGroupByIdentifier('Content');
-        $contentTypeDraft = $contentTypeService->createContentType($createStruct, [$contentGroup]);
+        $contentTypeDraft = $contentTypeService->createContentType($createStruct, array($contentGroup));
         $contentTypeService->publishContentTypeDraft($contentTypeDraft);
         $contentType = $contentTypeService->loadContentType($contentTypeDraft->id);
 
@@ -102,7 +113,7 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
         $contentCreateStruct->setField('sort_field', $sortValue, $mainLanguageCode);
 
-        $data = [];
+        $data = array();
         $data['content'] = $contentService->publishVersion(
             $contentService->createContent($contentCreateStruct)->versionInfo
         );
@@ -137,16 +148,16 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
         $contentType = $this->createTestContentType();
 
-        $context = [
+        $context = array(
             $repository,
-            [
+            array(
                 1 => $this->createContent(
                     $contentType,
-                    [
+                    array(
                         'eng-GB' => 1,
                         'ger-DE' => 2,
                         'por-PT' => 3,
-                    ],
+                    ),
                     'eng-GB',
                     false,
                     1,
@@ -154,11 +165,11 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
                 ),
                 2 => $this->createContent(
                     $contentType,
-                    [
+                    array(
                         //"eng-GB" => ,
                         'ger-DE' => 1,
                         'por-PT' => 2,
-                    ],
+                    ),
                     'por-PT',
                     true,
                     2,
@@ -166,18 +177,18 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
                 ),
                 3 => $this->createContent(
                     $contentType,
-                    [
+                    array(
                         //"eng-GB" => ,
                         //"ger-DE" => ,
                         'por-PT' => 1,
-                    ],
+                    ),
                     'por-PT',
                     false,
                     3,
                     $parentLocationIds
                 ),
-            ],
-        ];
+            ),
+        );
 
         $this->refreshSearch($repository);
 
@@ -186,1293 +197,1204 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
     public function testCreateTestContent()
     {
-        return $this->createTestContent([2, 12]);
+        return $this->createTestContent(array(2, 12));
     }
 
     public function providerForTestFind()
     {
-        return [
-            0 => [
-                [
-                    'languages' => [
+        return array(
+            0 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            1 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            1 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'por-PT',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            2 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            2 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'eng-GB',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            3 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            3 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'por-PT',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            4 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            4 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            5 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            5 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            6 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            6 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            7 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            7 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            8 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            8 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            9 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            9 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            10 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            10 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            11 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            11 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            12 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            12 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'localhost:8983/solr/core0',
-                        ],
-                    ],
-                ],
-            ],
-            13 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            13 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            14 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            14 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            15 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            15 => array(
+                array(
+                    'languages' => array(
                         'eng-US',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [],
-            ],
-            16 => [
-                [
-                    'languages' => [
+                ),
+                array(),
+            ),
+            16 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            17 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            17 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'por-PT',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            18 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            18 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'eng-GB',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            19 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            19 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'por-PT',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            20 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            20 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            21 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            21 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            22 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            22 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            23 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            23 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            24 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            24 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            25 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            25 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            26 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            26 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            27 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            27 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            28 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            28 => array(
+                array(
+                    'languages' => array(
                         'eng-GB',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core3',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core0_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core0',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core3_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            29 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            29 => array(
+                array(
+                    'languages' => array(
                         'ger-DE',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'ger-DE',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core3',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core1_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            30 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            30 => array(
+                array(
+                    'languages' => array(
                         'por-PT',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         1,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core2',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core2_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            31 => [
-                [
-                    'languages' => [
+                        ),
+                    ),
+                ),
+            ),
+            31 => array(
+                array(
+                    'languages' => array(
                         'eng-US',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core0',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core3_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            32 => [
-                [
-                    'languages' => [],
+                        ),
+                    ),
+                ),
+            ),
+            32 => array(
+                array(
+                    'languages' => array(),
                     'useAlwaysAvailable' => true,
-                ],
-                $mainLanguages = [
-                    [
+                ),
+                $mainLanguages = array(
+                    array(
                         1,
                         'eng-GB',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core0',
                             self::SETUP_SHARED => 'localhost:8983/solr/core0',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core3_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core0',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core3_shard1_replica1/',
-                        ],
-                    ],
-                    [
+                        ),
+                    ),
+                    array(
                         3,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core0',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core3_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-            33 => [
-                [
-                    'languages' => [],
+                        ),
+                    ),
+                ),
+            ),
+            33 => array(
+                array(
+                    'languages' => array(),
                     'useAlwaysAvailable' => false,
-                ],
+                ),
                 $mainLanguages,
-            ],
-            34 => [
-                [
+            ),
+            34 => array(
+                array(
                     'useAlwaysAvailable' => true,
-                ],
+                ),
                 $mainLanguages,
-            ],
-            35 => [
-                [
+            ),
+            35 => array(
+                array(
                     'useAlwaysAvailable' => false,
-                ],
+                ),
                 $mainLanguages,
-            ],
-            36 => [
-                [
-                    'languages' => [],
-                ],
+            ),
+            36 => array(
+                array(
+                    'languages' => array(),
+                ),
                 $mainLanguages,
-            ],
-            37 => [
-                [],
+            ),
+            37 => array(
+                array(),
                 $mainLanguages,
-            ],
-            38 => [
-                [
-                    'languages' => [
+            ),
+            38 => array(
+                array(
+                    'languages' => array(
                         'eng-US',
-                    ],
+                    ),
                     'useAlwaysAvailable' => false,
-                ],
-                [],
-            ],
-            39 => [
-                [
-                    'languages' => [
+                ),
+                array(),
+            ),
+            39 => array(
+                array(
+                    'languages' => array(
                         'eng-US',
-                    ],
+                    ),
                     'useAlwaysAvailable' => true,
-                ],
-                [
-                    [
+                ),
+                array(
+                    array(
                         2,
                         'por-PT',
-                        [
+                        array(
                             self::SETUP_DEDICATED => 'localhost:8983/solr/core2',
                             self::SETUP_SHARED => 'localhost:8983/solr/core0',
                             self::SETUP_SINGLE => 'localhost:8983/solr/collection1',
-                            self::SETUP_CLOUD => 'http://localhost:8983/solr/core3_shard1_replica1/',
-                        ],
-                    ],
-                ],
-            ],
-        ];
+                        ),
+                    ),
+                ),
+            ),
+        );
     }
 
     protected function getSetupType()
     {
-        if (getenv('SOLR_CLOUD')) {
-            return self::SETUP_CLOUD;
-        }
-
         $coresSetup = getenv('CORES_SETUP');
+
         switch ($coresSetup) {
             case self::SETUP_DEDICATED:
                 return self::SETUP_DEDICATED;
@@ -1500,7 +1422,7 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
     /**
      * @dataProvider providerForTestFind
-     * @depends      testCreateTestContent
+     * @depends testCreateTestContent
      *
      * @param array $languageSettings
      * @param array $contentDataList
@@ -1514,12 +1436,12 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
         /** @var \eZ\Publish\Api\Repository\Repository $repository */
         list($repository, $data) = $context;
 
-        $queryProperties = [
+        $queryProperties = array(
             'filter' => new Criterion\ContentTypeIdentifier('test-type'),
-            'sortClauses' => [
+            'sortClauses' => array(
                 new SortClause\Field('test-type', 'sort_field'),
-            ],
-        ];
+            ),
+        );
 
         $searchResult = $repository->getSearchService()->findContent(
             new Query($queryProperties),
@@ -1550,7 +1472,7 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
     /**
      * @dataProvider providerForTestFind
-     * @depends      testCreateTestContent
+     * @depends testCreateTestContent
      *
      * @param array $languageSettings
      * @param array $contentDataList
@@ -1564,17 +1486,17 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
         /** @var \eZ\Publish\Api\Repository\Repository $repository */
         list($repository, $data) = $context;
 
-        $queryProperties = [
+        $queryProperties = array(
             'filter' => new Criterion\LogicalAnd(
-                [
+                array(
                     new Criterion\ContentTypeIdentifier('test-type'),
                     new Criterion\Subtree('/1/2/'),
-                ]
+                )
             ),
-            'sortClauses' => [
+            'sortClauses' => array(
                 new SortClause\Field('test-type', 'sort_field'),
-            ],
-        ];
+            ),
+        );
 
         $searchResult = $repository->getSearchService()->findLocations(
             new LocationQuery($queryProperties),
@@ -1605,7 +1527,7 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
 
     /**
      * @dataProvider providerForTestFind
-     * @depends      testCreateTestContent
+     * @depends testCreateTestContent
      *
      * @param array $languageSettings
      * @param array $contentDataList
@@ -1619,13 +1541,13 @@ class SearchServiceTranslationLanguageFallbackTest extends BaseTest
         /** @var \eZ\Publish\Api\Repository\Repository $repository */
         list($repository, $data) = $context;
 
-        $queryProperties = [
+        $queryProperties = array(
             'filter' => new Criterion\ContentTypeIdentifier('test-type'),
-            'sortClauses' => [
+            'sortClauses' => array(
                 new SortClause\Location\Depth(Query::SORT_ASC),
                 new SortClause\Field('test-type', 'sort_field'),
-            ],
-        ];
+            ),
+        );
 
         $searchResult = $repository->getSearchService()->findLocations(
             new LocationQuery($queryProperties),

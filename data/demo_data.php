@@ -934,8 +934,8 @@ return array(
       'data_float2' => '0',
       'data_float3' => '0',
       'data_float4' => '0',
-      'data_int1' => '7',
-      'data_int2' => '10',
+      'data_int1' => '0',
+      'data_int2' => '0',
       'data_int3' => '0',
       'data_int4' => '0',
       'data_text1' => '',
@@ -2863,7 +2863,7 @@ return array(
       'data_text3' => '',
       'data_text4' => '',
       'data_text5' => '',
-      'data_type_string' => 'ezfloat',
+      'data_type_string' => 'ezprice',
       'id' => '216',
       'identifier' => 'price',
       'is_information_collector' => '0',
@@ -3353,6 +3353,36 @@ return array(
       'serialized_data_text' => 'a:0:{}',
       'serialized_description_list' => 'a:1:{s:6:"eng-GB";s:0:"";}',
       'serialized_name_list' => 'a:2:{s:6:"eng-GB";s:4:"Name";s:16:"always-available";s:6:"eng-GB";}',
+      'version' => '0',
+    ),
+    86 =>
+    array(
+      'can_translate' => '1',
+      'category' => '',
+      'contentclass_id' => '23',
+      'data_float1' => '0',
+      'data_float2' => '0',
+      'data_float3' => '0',
+      'data_float4' => '0',
+      'data_int1' => '0',
+      'data_int2' => '0',
+      'data_int3' => '0',
+      'data_int4' => '0',
+      'data_text1' => '',
+      'data_text2' => '',
+      'data_text3' => '',
+      'data_text4' => '',
+      'data_text5' => '',
+      'data_type_string' => 'ezpage',
+      'id' => '233',
+      'identifier' => 'page',
+      'is_information_collector' => '0',
+      'is_required' => '0',
+      'is_searchable' => '0',
+      'placement' => '2',
+      'serialized_data_text' => 'a:0:{}',
+      'serialized_description_list' => 'a:1:{s:6:"eng-GB";s:0:"";}',
+      'serialized_name_list' => 'a:2:{s:6:"eng-GB";s:6:"Layout";s:16:"always-available";s:6:"eng-GB";}',
       'version' => '0',
     ),
     87 =>
@@ -5457,6 +5487,36 @@ return array(
       'serialized_name_list' => 'a:2:{s:6:"eng-GB";s:17:"Footer Javascript";s:16:"always-available";s:6:"eng-GB";}',
       'version' => '0',
     ),
+    157 =>
+    array(
+      'can_translate' => '1',
+      'category' => '',
+      'contentclass_id' => '1',
+      'data_float1' => '0',
+      'data_float2' => '0',
+      'data_float3' => '0',
+      'data_float4' => '0',
+      'data_int1' => '0',
+      'data_int2' => '0',
+      'data_int3' => '0',
+      'data_int4' => '0',
+      'data_text1' => '',
+      'data_text2' => '',
+      'data_text3' => '',
+      'data_text4' => '',
+      'data_text5' => '',
+      'data_type_string' => 'ezpage',
+      'id' => '304',
+      'identifier' => 'call_for_action',
+      'is_information_collector' => '0',
+      'is_required' => '0',
+      'is_searchable' => '0',
+      'placement' => '6',
+      'serialized_data_text' => 'a:2:{s:6:"eng-GB";s:0:"";s:16:"always-available";s:6:"eng-GB";}',
+      'serialized_description_list' => 'a:2:{s:6:"eng-GB";s:0:"";s:16:"always-available";s:6:"eng-GB";}',
+      'serialized_name_list' => 'a:2:{s:6:"eng-GB";s:15:"Call For Action";s:16:"always-available";s:6:"eng-GB";}',
+      'version' => '0',
+    ),
     158 =>
     array(
       'can_translate' => '1',
@@ -7491,6 +7551,32 @@ keywords=cms, publish, e-commerce, content management, development framework',
       'sort_key_string' => 'home',
       'version' => '1',
     ),
+    77 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '233',
+      'contentobject_id' => '57',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page>
+  <zone_layout>2ZonesLayout1</zone_layout>
+  <zone id="id_865346aabbcc48a9839274cc554868be">
+    <zone_identifier>left</zone_identifier>
+  </zone>
+  <zone id="id_f742abffba08fc849b6e80dec769a74c">
+    <zone_identifier>right</zone_identifier>
+  </zone>
+</page>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '187',
+      'language_code' => 'eng-GB',
+      'language_id' => '3',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
     78 =>
     array(
       'attribute_original_id' => '0',
@@ -7913,6 +7999,114 @@ keywords=cms, publish, e-commerce, content management, development framework',
       'id' => '213',
       'language_code' => 'eng-GB',
       'language_id' => '3',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
+    104 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '304',
+      'contentobject_id' => '41',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page/>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '214',
+      'language_code' => 'eng-GB',
+      'language_id' => '2',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
+    105 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '304',
+      'contentobject_id' => '45',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page/>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '215',
+      'language_code' => 'eng-GB',
+      'language_id' => '2',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
+    106 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '304',
+      'contentobject_id' => '49',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page/>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '216',
+      'language_code' => 'eng-GB',
+      'language_id' => '2',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
+    107 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '304',
+      'contentobject_id' => '50',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page/>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '217',
+      'language_code' => 'eng-GB',
+      'language_id' => '2',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
+    108 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '304',
+      'contentobject_id' => '51',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page/>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '218',
+      'language_code' => 'eng-GB',
+      'language_id' => '2',
+      'sort_key_int' => '0',
+      'sort_key_string' => '',
+      'version' => '1',
+    ),
+    109 =>
+    array(
+      'attribute_original_id' => '0',
+      'contentclassattribute_id' => '304',
+      'contentobject_id' => '56',
+      'data_float' => '0',
+      'data_int' => null,
+      'data_text' => '<?xml version="1.0"?>
+<page/>
+',
+      'data_type_string' => 'ezpage',
+      'id' => '219',
+      'language_code' => 'eng-GB',
+      'language_id' => '2',
       'sort_key_int' => '0',
       'sort_key_string' => '',
       'version' => '1',

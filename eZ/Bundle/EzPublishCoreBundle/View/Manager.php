@@ -29,7 +29,8 @@ class Manager extends BaseManager implements SiteAccessAware
 
         $providers = array_merge(
             $this->getAllLocationViewProviders(),
-            $this->getAllContentViewProviders()
+            $this->getAllContentViewProviders(),
+            $this->getAllBlockViewProviders()
         );
         foreach ($providers as $provider) {
             if ($provider instanceof SiteAccessAware) {

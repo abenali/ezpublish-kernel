@@ -9,9 +9,9 @@ namespace eZ\Publish\Core\Repository\Permission;
 use eZ\Publish\API\Repository\PermissionResolver as APIPermissionResolver;
 use eZ\Publish\API\Repository\PermissionCriterionResolver as APIPermissionCriterionResolver;
 use eZ\Publish\API\Repository\Repository as RepositoryInterface;
-use eZ\Publish\API\Repository\Values\User\LookupLimitationResult;
 use eZ\Publish\API\Repository\Values\User\UserReference;
 use eZ\Publish\API\Repository\Values\ValueObject;
+use Closure;
 use Exception;
 
 /**
@@ -27,13 +27,19 @@ use Exception;
  */
 class CachedPermissionService implements APIPermissionResolver, APIPermissionCriterionResolver
 {
-    /** @var \eZ\Publish\API\Repository\PermissionResolver */
+    /**
+     * @var \eZ\Publish\API\Repository\PermissionResolver
+     */
     private $permissionResolver;
 
-    /** @var \eZ\Publish\API\Repository\PermissionCriterionResolver */
+    /**
+     * @var \eZ\Publish\API\Repository\PermissionCriterionResolver
+     */
     private $permissionCriterionResolver;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $cacheTTL;
 
     /**
@@ -98,25 +104,12 @@ class CachedPermissionService implements APIPermissionResolver, APIPermissionCri
         return $this->permissionResolver->canUser($module, $function, $object, $targets);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function lookupLimitations(
-        string $module,
-        string $function,
-        ValueObject $object,
-        array $targets = [],
-        array $limitations = []
-    ): LookupLimitationResult {
-        return $this->permissionResolver->lookupLimitations($module, $function, $object, $targets, $limitations);
-    }
-
-    public function getPermissionsCriterion($module = 'content', $function = 'read', ?array $targets = null)
+    public function getPermissionsCriterion($module = 'content', $function = 'read')
     {
         // We only cache content/read lookup as those are the once frequently done, and it's only one we can safely
         // do that won't harm the system if it becomes stale (but user might experience permissions exceptions if it do)
         if ($module !== 'content' || $function !== 'read' || $this->sudoNestingLevel > 0) {
-            return $this->permissionCriterionResolver->getPermissionsCriterion($module, $function, $targets);
+            return $this->permissionCriterionResolver->getPermissionsCriterion($module, $function);
         }
 
         if ($this->permissionCriterion !== null) {
@@ -127,7 +120,7 @@ class CachedPermissionService implements APIPermissionResolver, APIPermissionCri
         }
 
         $this->permissionCriterionTs = time();
-        $this->permissionCriterion = $this->permissionCriterionResolver->getPermissionsCriterion($module, $function, $targets);
+        $this->permissionCriterion = $this->permissionCriterionResolver->getPermissionsCriterion($module, $function);
 
         return $this->permissionCriterion;
     }
@@ -135,7 +128,7 @@ class CachedPermissionService implements APIPermissionResolver, APIPermissionCri
     /**
      * @internal For internal use only, do not depend on this method.
      */
-    public function sudo(callable $callback, RepositoryInterface $outerRepository)
+    public function sudo(Closure $callback, RepositoryInterface $outerRepository)
     {
         ++$this->sudoNestingLevel;
         try {

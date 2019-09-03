@@ -8,4 +8,4 @@ $relation->sourceContentVersionNo = 1;
 $relation->type = 1;
 $relation->destinationContentId = 2;
 
-return [1 => $relation];
+return array( 1 => $relation );

@@ -16,7 +16,9 @@ use eZ\Publish\Core\Search\Common\Indexer as SearchEngineIndexer;
  */
 class SearchEngineIndexerFactory
 {
-    /** @var \eZ\Bundle\EzPublishCoreBundle\ApiLoader\RepositoryConfigurationProvider */
+    /**
+     * @var \eZ\Bundle\EzPublishCoreBundle\ApiLoader\RepositoryConfigurationProvider
+     */
     private $repositoryConfigurationProvider;
 
     /**

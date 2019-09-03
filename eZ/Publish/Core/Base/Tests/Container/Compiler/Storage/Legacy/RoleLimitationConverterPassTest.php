@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class RoleLimitationConverterPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->setDefinition(
@@ -31,7 +31,7 @@ class RoleLimitationConverterPassTest extends AbstractCompilerPassTestCase
      *
      *   $container->addCompilerPass(new MyCompilerPass());
      */
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new RoleLimitationConverterPass());
     }
@@ -48,7 +48,7 @@ class RoleLimitationConverterPassTest extends AbstractCompilerPassTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
             'ezpublish.persistence.legacy.role.limitation.converter',
             'addHandler',
-            [new Reference($serviceId)]
+            array(new Reference($serviceId))
         );
     }
 }

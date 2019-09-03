@@ -7,6 +7,8 @@ namespace eZ\Bundle\EzPublishCoreBundle\Features\Context;
 
 use Behat\Behat\Context\Context;
 use PHPUnit\Framework\Assert as Assertion;
+use EzSystems\PlatformBehatBundle\Context\RepositoryContext;
+use eZ\Publish\API\Repository\Repository;
 use eZ\Publish\API\Repository\RoleService;
 use eZ\Publish\API\Repository\Exceptions as ApiExceptions;
 
@@ -15,14 +17,20 @@ use eZ\Publish\API\Repository\Exceptions as ApiExceptions;
  */
 class RoleContext implements Context
 {
-    /** @var \eZ\Publish\API\Repository\roleService */
+    use RepositoryContext;
+
+    /**
+     * @var \eZ\Publish\API\Repository\roleService
+     */
     protected $roleService;
 
     /**
+     * @injectService $repository @ezpublish.api.repository
      * @injectService $roleService @ezpublish.api.service.role
      */
-    public function __construct(RoleService $roleService)
+    public function __construct(Repository $repository, RoleService $roleService)
     {
+        $this->setRepository($repository);
         $this->roleService = $roleService;
     }
 

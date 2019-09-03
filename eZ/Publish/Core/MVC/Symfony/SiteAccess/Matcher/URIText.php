@@ -14,10 +14,14 @@ use eZ\Publish\Core\MVC\Symfony\SiteAccess\URILexer;
 
 class URIText extends Regex implements VersatileMatcher, URILexer
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $prefix;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     private $suffix;
 
     /**

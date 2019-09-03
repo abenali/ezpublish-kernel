@@ -23,7 +23,7 @@ class RoleCreateStruct extends APIRoleCreateStruct
      *
      * @var \eZ\Publish\API\Repository\Values\User\PolicyCreateStruct[]
      */
-    protected $policies = [];
+    protected $policies = array();
 
     /**
      * Returns policies associated with the role.

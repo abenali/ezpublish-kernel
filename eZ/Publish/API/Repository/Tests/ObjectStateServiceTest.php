@@ -61,12 +61,12 @@ class ObjectStateServiceTest extends BaseTest
     public function testNewObjectStateGroupCreateStructValues(ObjectStateGroupCreateStruct $objectStateGroupCreate)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'identifier' => 'publishing',
                 'defaultLanguageCode' => null,
                 'names' => null,
                 'descriptions' => null,
-            ],
+            ),
             $objectStateGroupCreate
         );
     }
@@ -106,12 +106,12 @@ class ObjectStateServiceTest extends BaseTest
     public function testNewObjectStateGroupUpdateStructValues(ObjectStateGroupUpdateStruct $objectStateGroupUpdate)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'identifier' => null,
                 'defaultLanguageCode' => null,
                 'names' => null,
                 'descriptions' => null,
-            ],
+            ),
             $objectStateGroupUpdate
         );
     }
@@ -153,13 +153,13 @@ class ObjectStateServiceTest extends BaseTest
     public function testNewObjectStateCreateStructValues(ObjectStateCreateStruct $objectStateCreate)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'identifier' => 'pending',
                 'priority' => false,
                 'defaultLanguageCode' => null,
                 'names' => null,
                 'descriptions' => null,
-            ],
+            ),
             $objectStateCreate
         );
     }
@@ -199,12 +199,12 @@ class ObjectStateServiceTest extends BaseTest
     public function testNewObjectStateUpdateStructValues(ObjectStateUpdateStruct $objectStateUpdate)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'identifier' => null,
                 'defaultLanguageCode' => null,
                 'names' => null,
                 'descriptions' => null,
-            ],
+            ),
             $objectStateUpdate
         );
     }
@@ -227,14 +227,14 @@ class ObjectStateServiceTest extends BaseTest
             'publishing'
         );
         $objectStateGroupCreate->defaultLanguageCode = 'eng-US';
-        $objectStateGroupCreate->names = [
+        $objectStateGroupCreate->names = array(
             'eng-US' => 'Publishing',
             'ger-DE' => 'Sindelfingen',
-        ];
-        $objectStateGroupCreate->descriptions = [
+        );
+        $objectStateGroupCreate->descriptions = array(
             'eng-US' => 'Put something online',
             'ger-DE' => 'Put something ton Sindelfingen.',
-        ];
+        );
 
         $createdObjectStateGroup = $objectStateService->createObjectStateGroup(
             $objectStateGroupCreate
@@ -284,11 +284,10 @@ class ObjectStateServiceTest extends BaseTest
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::createObjectStateGroup()
      * @depends testCreateObjectStateGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testCreateObjectStateGroupThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $objectStateService = $repository->getObjectStateService();
@@ -298,14 +297,14 @@ class ObjectStateServiceTest extends BaseTest
             'ez_lock'
         );
         $objectStateGroupCreate->defaultLanguageCode = 'eng-US';
-        $objectStateGroupCreate->names = [
+        $objectStateGroupCreate->names = array(
             'eng-US' => 'Publishing',
             'eng-GB' => 'Sindelfingen',
-        ];
-        $objectStateGroupCreate->descriptions = [
+        );
+        $objectStateGroupCreate->descriptions = array(
             'eng-US' => 'Put something online',
             'eng-GB' => 'Put something ton Sindelfingen.',
-        ];
+        );
 
         // This call will fail because group with 'ez_lock' identifier already exists
         $objectStateService->createObjectStateGroup(
@@ -356,12 +355,11 @@ class ObjectStateServiceTest extends BaseTest
      *
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::loadObjectStateGroup()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends testLoadObjectStateGroup
      */
     public function testLoadObjectStateGroupThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $nonExistentObjectStateGroupId = $this->generateId('objectstategroup', self::DB_INT_MAX);
@@ -397,7 +395,7 @@ class ObjectStateServiceTest extends BaseTest
         $loadedObjectStateGroups = $objectStateService->loadObjectStateGroups();
         /* END: Use Case */
 
-        $this->assertIsArray($loadedObjectStateGroups);
+        $this->assertInternalType('array', $loadedObjectStateGroups);
 
         $this->assertObjectsLoadedByIdentifiers(
             $expectedGroupIdentifiers,
@@ -502,7 +500,7 @@ class ObjectStateServiceTest extends BaseTest
         $loadedObjectStateGroups = $objectStateService->loadObjectStateGroups(2);
         /* END: Use Case */
 
-        $this->assertIsArray($loadedObjectStateGroups);
+        $this->assertInternalType('array', $loadedObjectStateGroups);
 
         $this->assertObjectsLoadedByIdentifiers(
             array_slice($existingGroupIdentifiers, 2),
@@ -551,7 +549,7 @@ class ObjectStateServiceTest extends BaseTest
         $loadedObjectStateGroups = $objectStateService->loadObjectStateGroups(1, 2);
         /* END: Use Case */
 
-        $this->assertIsArray($loadedObjectStateGroups);
+        $this->assertInternalType('array', $loadedObjectStateGroups);
 
         $this->assertObjectsLoadedByIdentifiers(
             array_slice($existingGroupIdentifiers, 1, 2),
@@ -585,10 +583,12 @@ class ObjectStateServiceTest extends BaseTest
         $loadedObjectStates = $objectStateService->loadObjectStates($objectStateGroup);
         /* END: Use Case */
 
-        $this->assertIsArray($loadedObjectStates
+        $this->assertInternalType(
+            'array',
+            $loadedObjectStates
         );
         $this->assertObjectsLoadedByIdentifiers(
-            ['not_locked' => true, 'locked' => true],
+            array('not_locked' => true, 'locked' => true),
             $loadedObjectStates,
             'ObjectState'
         );
@@ -620,12 +620,12 @@ class ObjectStateServiceTest extends BaseTest
         $groupUpdateStruct = $objectStateService->newObjectStateGroupUpdateStruct();
         $groupUpdateStruct->identifier = 'sindelfingen';
         $groupUpdateStruct->defaultLanguageCode = 'ger-DE';
-        $groupUpdateStruct->names = [
+        $groupUpdateStruct->names = array(
             'ger-DE' => 'Sindelfingen',
-        ];
-        $groupUpdateStruct->descriptions = [
+        );
+        $groupUpdateStruct->descriptions = array(
             'ger-DE' => 'Sindelfingen ist nicht nur eine Stadt',
-        ];
+        );
 
         // Updates the $loadObjectStateGroup with the data from
         // $groupUpdateStruct and returns the updated group
@@ -642,12 +642,12 @@ class ObjectStateServiceTest extends BaseTest
             $updatedObjectStateGroup
         );
 
-        return [
+        return array(
             $loadedObjectStateGroup,
             $groupUpdateStruct,
             $updatedObjectStateGroup,
             $allObjectGroups,
-        ];
+        );
     }
 
     /**
@@ -696,11 +696,10 @@ class ObjectStateServiceTest extends BaseTest
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::updateObjectStateGroup()
      * @depends testUpdateObjectStateGroup
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function testUpdateObjectStateGroupThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $objectStateService = $repository->getObjectStateService();
@@ -710,14 +709,14 @@ class ObjectStateServiceTest extends BaseTest
             'publishing'
         );
         $objectStateGroupCreate->defaultLanguageCode = 'eng-US';
-        $objectStateGroupCreate->names = [
+        $objectStateGroupCreate->names = array(
             'eng-US' => 'Publishing',
             'eng-GB' => 'Sindelfingen',
-        ];
-        $objectStateGroupCreate->descriptions = [
+        );
+        $objectStateGroupCreate->descriptions = array(
             'eng-US' => 'Put something online',
             'eng-GB' => 'Put something ton Sindelfingen.',
-        ];
+        );
 
         $createdObjectStateGroup = $objectStateService->createObjectStateGroup(
             $objectStateGroupCreate
@@ -727,12 +726,12 @@ class ObjectStateServiceTest extends BaseTest
         // 'ez_lock' is the identifier of already existing group
         $groupUpdateStruct->identifier = 'ez_lock';
         $groupUpdateStruct->defaultLanguageCode = 'ger-DE';
-        $groupUpdateStruct->names = [
+        $groupUpdateStruct->names = array(
             'ger-DE' => 'Sindelfingen',
-        ];
-        $groupUpdateStruct->descriptions = [
+        );
+        $groupUpdateStruct->descriptions = array(
             'ger-DE' => 'Sindelfingen ist nicht nur eine Stadt',
-        ];
+        );
 
         // This call will fail since state group with 'ez_lock' identifier already exists
         $objectStateService->updateObjectStateGroup(
@@ -763,8 +762,8 @@ class ObjectStateServiceTest extends BaseTest
             $updatedObjectStateGroup
         );
 
-        $this->assertContainsEquals($updatedObjectStateGroup, $allObjectGroups, '');
-        $this->assertNotContainsEquals($loadedObjectStateGroup, $allObjectGroups, '');
+        $this->assertContains($updatedObjectStateGroup, $allObjectGroups, '', false, false);
+        $this->assertNotContains($loadedObjectStateGroup, $allObjectGroups, '', false, false);
     }
 
     /**
@@ -798,10 +797,10 @@ class ObjectStateServiceTest extends BaseTest
             'eng-US' => 'Locked and Unlocked',
             'ger-DE' => 'geschlossen und ungeschlossen',
         ];
-        $objectStateCreateStruct->descriptions = [
+        $objectStateCreateStruct->descriptions = array(
             'eng-US' => 'A state between locked and unlocked.',
             'ger-DE' => 'ein Zustand zwischen geschlossen und ungeschlossen.',
-        ];
+        );
 
         // Creates a new object state in the $loadObjectStateGroup with the
         // data from $objectStateCreateStruct
@@ -881,6 +880,7 @@ class ObjectStateServiceTest extends BaseTest
     /**
      * Test for the createObjectState() method.
      *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::createObjectState()
      * @depends testLoadObjectStateGroup
@@ -888,8 +888,6 @@ class ObjectStateServiceTest extends BaseTest
      */
     public function testCreateObjectStateThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $objectStateGroupId = $this->generateId('objectstategroup', 2);
@@ -907,12 +905,12 @@ class ObjectStateServiceTest extends BaseTest
         );
         $objectStateCreateStruct->priority = 23;
         $objectStateCreateStruct->defaultLanguageCode = 'eng-US';
-        $objectStateCreateStruct->names = [
+        $objectStateCreateStruct->names = array(
             'eng-US' => 'Locked and Unlocked',
-        ];
-        $objectStateCreateStruct->descriptions = [
+        );
+        $objectStateCreateStruct->descriptions = array(
             'eng-US' => 'A state between locked and unlocked.',
-        ];
+        );
 
         // This call will fail because object state with
         // 'not_locked' identifier already exists
@@ -991,15 +989,15 @@ class ObjectStateServiceTest extends BaseTest
     public function testLoadObjectStateStructValues(ObjectState $loadedObjectState)
     {
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'id' => 2,
                 'identifier' => 'locked',
                 'priority' => 1,
                 'mainLanguageCode' => 'eng-US',
-                'languageCodes' => [0 => 'eng-US'],
-                'names' => ['eng-US' => 'Locked'],
-                'descriptions' => ['eng-US' => ''],
-            ],
+                'languageCodes' => array(0 => 'eng-US'),
+                'names' => array('eng-US' => 'Locked'),
+                'descriptions' => array('eng-US' => ''),
+            ),
             $loadedObjectState
         );
 
@@ -1014,12 +1012,11 @@ class ObjectStateServiceTest extends BaseTest
      *
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::loadObjectState()
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
      * @depends testLoadObjectState
      */
     public function testLoadObjectStateThrowsNotFoundException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $repository = $this->getRepository();
 
         $nonExistingObjectStateId = $this->generateId('objectstate', self::DB_INT_MAX);
@@ -1241,14 +1238,14 @@ class ObjectStateServiceTest extends BaseTest
         $updateStateStruct = $objectStateService->newObjectStateUpdateStruct();
         $updateStateStruct->identifier = 'somehow_locked';
         $updateStateStruct->defaultLanguageCode = 'ger-DE';
-        $updateStateStruct->names = [
+        $updateStateStruct->names = array(
             'eng-US' => 'Somehow locked',
             'ger-DE' => 'Irgendwie gelockt',
-        ];
-        $updateStateStruct->descriptions = [
+        );
+        $updateStateStruct->descriptions = array(
             'eng-US' => 'The object is somehow locked',
             'ger-DE' => 'Sindelfingen',
-        ];
+        );
 
         $updatedObjectState = $objectStateService->updateObjectState(
             $loadedObjectState,
@@ -1263,12 +1260,12 @@ class ObjectStateServiceTest extends BaseTest
             $updatedObjectState
         );
 
-        return [
+        return array(
             $loadedObjectState,
             $updateStateStruct,
             $updatedObjectState,
             $allObjectStates,
-        ];
+        );
     }
 
     /**
@@ -1320,14 +1317,13 @@ class ObjectStateServiceTest extends BaseTest
     /**
      * Test for the updateObjectState() method.
      *
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      *
      * @see \eZ\Publish\API\Repository\ObjectStateService::updateObjectState()
      * @depends testUpdateObjectState
      */
     public function testUpdateObjectStateThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $objectStateId = $this->generateId('objectstate', 2);
@@ -1342,14 +1338,14 @@ class ObjectStateServiceTest extends BaseTest
         // 'not_locked' is the identifier of already existing state
         $updateStateStruct->identifier = 'not_locked';
         $updateStateStruct->defaultLanguageCode = 'ger-DE';
-        $updateStateStruct->names = [
+        $updateStateStruct->names = array(
             'eng-US' => 'Somehow locked',
             'ger-DE' => 'Irgendwie gelockt',
-        ];
-        $updateStateStruct->descriptions = [
+        );
+        $updateStateStruct->descriptions = array(
             'eng-US' => 'The object is somehow locked',
             'ger-DE' => 'Sindelfingen',
-        ];
+        );
 
         // This call will fail because state with
         // 'not_locked' identifier already exists
@@ -1377,15 +1373,15 @@ class ObjectStateServiceTest extends BaseTest
         ) = $testData;
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'id' => $loadedObjectState->id,
                 'identifier' => $updateStateStruct->identifier,
                 'priority' => $loadedObjectState->priority,
                 'mainLanguageCode' => $updateStateStruct->defaultLanguageCode,
-                'languageCodes' => ['eng-US', 'ger-DE'],
+                'languageCodes' => array('eng-US', 'ger-DE'),
                 'names' => $updateStateStruct->names,
                 'descriptions' => $updateStateStruct->descriptions,
-            ],
+            ),
             $updatedObjectState
         );
 
@@ -1394,8 +1390,8 @@ class ObjectStateServiceTest extends BaseTest
             $updatedObjectState->getObjectStateGroup()
         );
 
-        $this->assertContainsEquals($updatedObjectState, $allObjectStates, '');
-        $this->assertNotContainsEquals($loadedObjectState, $allObjectStates, '');
+        $this->assertContains($updatedObjectState, $allObjectStates, '', false, false);
+        $this->assertNotContains($loadedObjectState, $allObjectStates, '', false, false);
     }
 
     /**
@@ -1503,7 +1499,7 @@ class ObjectStateServiceTest extends BaseTest
         );
         $objectStateCreateStruct->priority = 1;
         $objectStateCreateStruct->defaultLanguageCode = 'eng-US';
-        $objectStateCreateStruct->names = ['eng-US' => 'Sindelfingen'];
+        $objectStateCreateStruct->names = array('eng-US' => 'Sindelfingen');
 
         $createdState = $objectStateService->createObjectState(
             $customGroup,
@@ -1538,7 +1534,7 @@ class ObjectStateServiceTest extends BaseTest
             $initialObjectState
         );
         $this->assertEquals('sindelfingen', $initialObjectState->identifier);
-        $this->assertEquals(['eng-US' => 'Sindelfingen'], $initialObjectState->names);
+        $this->assertEquals(array('eng-US' => 'Sindelfingen'), $initialObjectState->names);
         $this->assertEquals('eng-US', $initialObjectState->defaultLanguageCode);
     }
 
@@ -1592,12 +1588,11 @@ class ObjectStateServiceTest extends BaseTest
      * Test for the setContentState() method.
      *
      * @covers \eZ\Publish\API\Repository\ObjectStateService::setContentState
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      * @depends eZ\Publish\API\Repository\Tests\ObjectStateServiceTest::testSetContentState
      */
     public function testSetContentStateThrowsInvalidArgumentException()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\InvalidArgumentException::class);
-
         $repository = $this->getRepository();
 
         $createdStateGroups = $this->createObjectStateGroups();

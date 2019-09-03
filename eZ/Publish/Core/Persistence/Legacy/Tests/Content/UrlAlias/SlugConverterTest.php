@@ -22,13 +22,35 @@ use PHPUnit\Framework\TestSuite;
 class SlugConverterTest extends TestCase
 {
     /**
+     * Test for the __construct() method.
+     *
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\UrlAlias\SlugConverter::__construct
+     */
+    public function testConstructor()
+    {
+        $slugConverter = $this->getMockedSlugConverter();
+
+        $this->assertAttributeSame(
+            $this->getTransformationProcessorMock(),
+            'transformationProcessor',
+            $slugConverter
+        );
+
+        $this->assertAttributeInternalType(
+            'array',
+            'configuration',
+            $slugConverter
+        );
+    }
+
+    /**
      * Test for the convert() method.
      *
      * @covers \eZ\Publish\Core\Persistence\Legacy\Content\UrlAlias\SlugConverter::convert
      */
     public function testConvert()
     {
-        $slugConverter = $this->getSlugConverterMock(['cleanupText']);
+        $slugConverter = $this->getSlugConverterMock(array('cleanupText'));
         $transformationProcessor = $this->getTransformationProcessorMock();
 
         $text = 'test text  č ';
@@ -37,7 +59,7 @@ class SlugConverterTest extends TestCase
 
         $transformationProcessor->expects($this->atLeastOnce())
             ->method('transform')
-            ->with($text, ['test_command1'])
+            ->with($text, array('test_command1'))
             ->will($this->returnValue($transformedText));
 
         $slugConverter->expects($this->once())
@@ -58,7 +80,7 @@ class SlugConverterTest extends TestCase
      */
     public function testConvertWithDefaultTextFallback()
     {
-        $slugConverter = $this->getSlugConverterMock(['cleanupText']);
+        $slugConverter = $this->getSlugConverterMock(array('cleanupText'));
         $transformationProcessor = $this->getTransformationProcessorMock();
 
         $defaultText = 'test text  č ';
@@ -67,7 +89,7 @@ class SlugConverterTest extends TestCase
 
         $transformationProcessor->expects($this->atLeastOnce())
             ->method('transform')
-            ->with($defaultText, ['test_command1'])
+            ->with($defaultText, array('test_command1'))
             ->will($this->returnValue($transformedText));
 
         $slugConverter->expects($this->once())
@@ -88,7 +110,7 @@ class SlugConverterTest extends TestCase
      */
     public function testConvertWithGivenTransformation()
     {
-        $slugConverter = $this->getSlugConverterMock(['cleanupText']);
+        $slugConverter = $this->getSlugConverterMock(array('cleanupText'));
         $transformationProcessor = $this->getTransformationProcessorMock();
 
         $text = 'test text  č ';
@@ -97,7 +119,7 @@ class SlugConverterTest extends TestCase
 
         $transformationProcessor->expects($this->atLeastOnce())
             ->method('transform')
-            ->with($text, ['test_command2'])
+            ->with($text, array('test_command2'))
             ->will($this->returnValue($transformedText));
 
         $slugConverter->expects($this->once())
@@ -113,12 +135,12 @@ class SlugConverterTest extends TestCase
 
     public function providerForTestGetUniqueCounterValue()
     {
-        return [
-            ['reserved', true, 2],
-            ['reserved', false, 1],
-            ['not-reserved', true, 1],
-            ['not-reserved', false, 1],
-        ];
+        return array(
+            array('reserved', true, 2),
+            array('reserved', false, 1),
+            array('not-reserved', true, 1),
+            array('not-reserved', false, 1),
+        );
     }
 
     /**
@@ -232,35 +254,43 @@ class SlugConverterTest extends TestCase
         );
     }
 
-    /** @var array */
-    protected $configuration = [
+    /**
+     * @var array
+     */
+    protected $configuration = array(
         'transformation' => 'testTransformation1',
-        'transformationGroups' => [
-            'testTransformation1' => [
-                'commands' => [
+        'transformationGroups' => array(
+            'testTransformation1' => array(
+                'commands' => array(
                     'test_command1',
-                ],
+                ),
                 'cleanupMethod' => 'test_cleanup1',
-            ],
-            'testTransformation2' => [
-                'commands' => [
+            ),
+            'testTransformation2' => array(
+                'commands' => array(
                     'test_command2',
-                ],
+                ),
                 'cleanupMethod' => 'test_cleanup2',
-            ],
-        ],
-        'reservedNames' => [
+            ),
+        ),
+        'reservedNames' => array(
             'reserved',
-        ],
-    ];
+        ),
+    );
 
-    /** @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlAlias\SlugConverter */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Legacy\Content\UrlAlias\SlugConverter
+     */
     protected $slugConverter;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $slugConverterMock;
 
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
     protected $transformationProcessorMock;
 
     /**
@@ -283,16 +313,16 @@ class SlugConverterTest extends TestCase
      *
      * @return \eZ\Publish\Core\Persistence\Legacy\Content\UrlAlias\SlugConverter|\PHPUnit\Framework\MockObject\MockObject
      */
-    protected function getSlugConverterMock(array $methods = [])
+    protected function getSlugConverterMock(array $methods = array())
     {
         if (!isset($this->slugConverterMock)) {
             $this->slugConverterMock = $this->getMockBuilder(SlugConverter::class)
                 ->setMethods($methods)
                 ->setConstructorArgs(
-                    [
+                    array(
                         $this->getTransformationProcessorMock(),
                         $this->configuration,
-                    ]
+                    )
                 )
                 ->getMock();
         }
@@ -308,12 +338,12 @@ class SlugConverterTest extends TestCase
         if (!isset($this->transformationProcessorMock)) {
             $this->transformationProcessorMock = $this->getMockForAbstractClass(
                 TransformationProcessor::class,
-                [],
+                array(),
                 '',
                 false,
                 true,
                 true,
-                ['transform']
+                array('transform')
             );
         }
 

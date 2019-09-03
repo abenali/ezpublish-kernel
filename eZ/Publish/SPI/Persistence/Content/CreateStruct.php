@@ -12,16 +12,24 @@ use eZ\Publish\SPI\Persistence\ValueObject;
 
 class CreateStruct extends ValueObject
 {
-    /** @var string[] Eg. array( 'eng-GB' => "New Article" ) */
+    /**
+     * @var string[] Eg. array( 'eng-GB' => "New Article" )
+     */
     public $name;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     public $typeId;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     public $sectionId;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     public $ownerId;
 
     /**
@@ -30,7 +38,7 @@ class CreateStruct extends ValueObject
      *
      * @var \eZ\Publish\SPI\Persistence\Content\Location\CreateStruct[]
      */
-    public $locations = [];
+    public $locations = array();
 
     /**
      * Contains *all* fields of the object to be created.
@@ -42,12 +50,16 @@ class CreateStruct extends ValueObject
      *
      * @var Field[]
      */
-    public $fields = [];
+    public $fields = array();
 
-    /** @var bool Always available flag */
+    /**
+     * @var bool Always available flag
+     */
     public $alwaysAvailable = false;
 
-    /** @var string Remote identifier used as a custom identifier for the object */
+    /**
+     * @var string Remote identifier used as a custom identifier for the object
+     */
     public $remoteId;
 
     /**

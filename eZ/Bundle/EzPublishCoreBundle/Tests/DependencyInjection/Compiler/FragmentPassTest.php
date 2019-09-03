@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class FragmentPassTest extends AbstractCompilerPassTestCase
 {
-    protected function registerCompilerPass(ContainerBuilder $container): void
+    protected function registerCompilerPass(ContainerBuilder $container)
     {
         $container->addCompilerPass(new FragmentPass());
     }
@@ -63,26 +63,26 @@ class FragmentPassTest extends AbstractCompilerPassTestCase
 
         $this->assertContainerBuilderHasServiceDefinitionWithParent('fragment.renderer.inline', 'ezpublish.decorated_fragment_renderer');
         $decoratedInlineDef = $this->container->getDefinition('fragment.renderer.inline');
-        $this->assertSame(['kernel.fragment_renderer' => [[]]], $decoratedInlineDef->getTags());
+        $this->assertSame(array('kernel.fragment_renderer' => array(array())), $decoratedInlineDef->getTags());
         $this->assertEquals(
-            [new Reference('fragment.renderer.inline.inner')],
+            array(new Reference('fragment.renderer.inline.inner')),
             $decoratedInlineDef->getArguments()
         );
         $this->assertSame($inlineClass, $decoratedInlineDef->getClass());
 
         $this->assertContainerBuilderHasServiceDefinitionWithParent('fragment.renderer.esi', 'ezpublish.decorated_fragment_renderer');
         $decoratedEsiDef = $this->container->getDefinition('fragment.renderer.esi');
-        $this->assertSame(['kernel.fragment_renderer' => [[]]], $decoratedEsiDef->getTags());
+        $this->assertSame(array('kernel.fragment_renderer' => array(array())), $decoratedEsiDef->getTags());
         $this->assertEquals(
-            [new Reference('fragment.renderer.esi.inner')],
+            array(new Reference('fragment.renderer.esi.inner')),
             $decoratedEsiDef->getArguments()
         );
 
         $this->assertContainerBuilderHasServiceDefinitionWithParent('fragment.renderer.hinclude', 'ezpublish.decorated_fragment_renderer');
         $decoratedHincludeDef = $this->container->getDefinition('fragment.renderer.hinclude');
-        $this->assertSame(['kernel.fragment_renderer' => [[]]], $decoratedHincludeDef->getTags());
+        $this->assertSame(array('kernel.fragment_renderer' => array(array())), $decoratedHincludeDef->getTags());
         $this->assertEquals(
-            [new Reference('fragment.renderer.hinclude.inner')],
+            array(new Reference('fragment.renderer.hinclude.inner')),
             $decoratedHincludeDef->getArguments()
         );
     }

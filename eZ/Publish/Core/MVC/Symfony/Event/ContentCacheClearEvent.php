@@ -10,7 +10,7 @@ namespace eZ\Publish\Core\MVC\Symfony\Event;
 
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\Location;
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class ContentCacheClearEvent.
@@ -20,10 +20,14 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class ContentCacheClearEvent extends Event
 {
-    /** @var ContentInfo */
+    /**
+     * @var ContentInfo
+     */
     private $contentInfo;
 
-    /** @var Location[] */
+    /**
+     * @var Location[]
+     */
     private $locationsToClear = [];
 
     public function __construct(ContentInfo $contentInfo)

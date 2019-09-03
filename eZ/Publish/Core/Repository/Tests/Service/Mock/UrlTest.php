@@ -9,7 +9,6 @@ namespace eZ\Publish\Core\Repository\Tests\Service\Mock;
 use DateTime;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
 use eZ\Publish\API\Repository\Values\URL\UsageSearchResult;
-use eZ\Publish\Core\Base\Exceptions\UnauthorizedException;
 use eZ\Publish\Core\Repository\Tests\Service\Mock\Base as BaseServiceMockTest;
 use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
@@ -25,34 +24,33 @@ use eZ\Publish\SPI\Persistence\URL\URL as SpiUrl;
 
 class UrlTest extends BaseServiceMockTest
 {
-    private const URL_ID = 12;
-    private const URL_EZ_NO = 'http://ez.no';
-    private const URL_EZ_COM = 'http://ez.com';
-
-    /** @var \eZ\Publish\API\Repository\URLService|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var \eZ\Publish\API\Repository\URLService|\PHPUnit\Framework\MockObject\MockObject
+     */
     private $urlHandler;
 
-    /** @var \eZ\Publish\API\Repository\PermissionResolver|\PHPUnit\Framework\MockObject\MockObject */
-    private $permissionResolver;
-
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->urlHandler = $this->getPersistenceMockHandler('URL\\Handler');
-        $this->permissionResolver = $this->getPermissionResolverMock();
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UnauthorizedException
+     */
     public function testFindUrlsUnauthorized()
     {
-        $this->configureUrlViewPermissionForHasAccess(false);
+        $this->configureUrlViewPermission(false);
 
-        $this->expectException(UnauthorizedException::class);
         $this->createUrlService()->findUrls(new URLQuery());
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
+     */
     public function testFindUrlsNonNumericOffset()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue::class);
+        $this->configureUrlViewPermission(true);
 
         $query = new URLQuery();
         $query->offset = 'foo';
@@ -60,9 +58,12 @@ class UrlTest extends BaseServiceMockTest
         $this->createUrlService()->findUrls($query);
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue
+     */
     public function testFindUrlsNonNumericLimit()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\InvalidArgumentValue::class);
+        $this->configureUrlViewPermission(true);
 
         $query = new URLQuery();
         $query->limit = 'foo';
@@ -72,11 +73,11 @@ class UrlTest extends BaseServiceMockTest
 
     public function testFindUrls()
     {
-        $url = $this->getApiUrl();
-
-        $this->configureUrlViewPermissionForHasAccess(true);
+        $this->configureUrlViewPermission(true);
 
         $query = new URLQuery();
+
+        $url = $this->getApiUrl();
 
         $results = [
             'count' => 1,
@@ -99,27 +100,32 @@ class UrlTest extends BaseServiceMockTest
         $this->assertEquals($expected, $this->createUrlService()->findUrls($query));
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UnauthorizedException
+     */
     public function testUpdateUrlUnauthorized()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UnauthorizedException::class);
-
         $url = $this->getApiUrl();
 
-        $this->configureUrlUpdatePermission($url, false);
+        $this->getRepositoryMock()
+            ->expects($this->once())
+            ->method('hasAccess')
+            ->with('url', 'update')
+            ->willReturn(false);
 
         $this->createUrlService()->updateUrl($url, new URLUpdateStruct());
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\InvalidArgumentException
+     */
     public function testUpdateUrlNonUnique()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\InvalidArgumentException::class);
+        $this->configureUrlUpdatePermission(true);
 
-        $url = $this->getApiUrl(self::URL_ID, self::URL_EZ_NO);
-
-        $this->configureUrlUpdatePermission($url, true);
-
+        $url = $this->getApiUrl(1, 'http://ez.no');
         $struct = new URLUpdateStruct([
-            'url' => self::URL_EZ_COM,
+            'url' => 'http://ez.com',
         ]);
 
         $urlService = $this->createUrlService(['isUnique']);
@@ -134,17 +140,17 @@ class UrlTest extends BaseServiceMockTest
 
     public function testUpdateUrl()
     {
-        $apiUrl = $this->getApiUrl(self::URL_ID, self::URL_EZ_NO);
+        $apiUrl = $this->getApiUrl(1, 'http://ez.no');
         $apiStruct = new URLUpdateStruct([
-            'url' => self::URL_EZ_COM,
+            'url' => 'http://ez.com',
             'isValid' => false,
             'lastChecked' => new DateTime(),
         ]);
 
         $this->configurePermissions([
-            ['url', 'update', $apiUrl, []],
-            ['url', 'view', $apiUrl, []],
-            ['url', 'view', new URL(['id' => self::URL_ID, 'url' => self::URL_EZ_COM, 'isValid' => true]), []],
+            ['url', 'update', null],
+            ['url', 'view', null],
+            ['url', 'view', null],
         ]);
 
         $urlService = $this->createUrlService(['isUnique']);
@@ -193,23 +199,16 @@ class UrlTest extends BaseServiceMockTest
 
     public function testUpdateUrlStatus()
     {
-        $apiUrl = $this->getApiUrl(self::URL_ID, self::URL_EZ_NO);
+        $apiUrl = $this->getApiUrl(1, 'http://ez.no');
         $apiStruct = new URLUpdateStruct([
             'isValid' => true,
             'lastChecked' => new DateTime('@' . time()),
         ]);
 
-        $urlAfterUpdate = new URL([
-            'id' => self::URL_ID,
-            'url' => self::URL_EZ_NO,
-            'isValid' => true,
-            'lastChecked' => new DateTime('@' . time()),
-        ]);
-
         $this->configurePermissions([
-            ['url', 'update', $apiUrl, []],
-            ['url', 'view', $apiUrl, []],
-            ['url', 'view', $urlAfterUpdate, []],
+            ['url', 'update', null],
+            ['url', 'view', null],
+            ['url', 'view', null],
         ]);
 
         $urlService = $this->createUrlService(['isUnique']);
@@ -256,80 +255,50 @@ class UrlTest extends BaseServiceMockTest
         ]), $urlService->updateUrl($apiUrl, $apiStruct));
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UnauthorizedException
+     */
     public function testLoadByIdUnauthorized()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UnauthorizedException::class);
+        $this->configureUrlViewPermission(false);
 
-        $this->configureUrlViewPermission(
-            new URL([
-                'id' => self::URL_ID,
-            ]),
-            false
-        );
-
-        $this->urlHandler
-            ->expects($this->once())
-            ->method('loadById')
-            ->with(self::URL_ID)
-            ->willReturn(new SpiUrl([
-                'id' => self::URL_ID,
-            ]));
-
-        $this->createUrlService()->loadById(self::URL_ID);
+        $this->createUrlService()->loadById(1);
     }
 
     public function testLoadById()
     {
-        $url = new URL([
-            'id' => self::URL_ID,
-        ]);
+        $this->configureUrlViewPermission(true);
 
-        $this->configureUrlViewPermission($url, true);
+        $urlId = 12;
 
         $this->urlHandler
             ->expects($this->once())
             ->method('loadById')
-            ->with(self::URL_ID)
+            ->with($urlId)
             ->willReturn(new SpiUrl([
-                'id' => self::URL_ID,
+                'id' => $urlId,
             ]));
 
-        $this->assertEquals($url, $this->createUrlService()->loadById(self::URL_ID));
+        $this->assertEquals(new URL([
+            'id' => $urlId,
+        ]), $this->createUrlService()->loadById($urlId));
     }
 
+    /**
+     * @expectedException \eZ\Publish\Core\Base\Exceptions\UnauthorizedException
+     */
     public function testLoadByUrlUnauthorized()
     {
-        $this->expectException(\eZ\Publish\Core\Base\Exceptions\UnauthorizedException::class);
+        $this->configureUrlViewPermission(false);
 
-        $url = self::URL_EZ_NO;
-
-        $this->configureUrlViewPermission(
-            new URL([
-                'id' => self::URL_ID,
-            ]),
-            false
-        );
-
-        $this->urlHandler
-            ->expects($this->once())
-            ->method('loadByUrl')
-            ->with($url)
-            ->willReturn(new SpiUrl([
-                'id' => self::URL_ID,
-            ]));
-
-        $this->createUrlService()->loadByUrl(self::URL_EZ_NO);
+        $this->createUrlService()->loadByUrl('http://ez.no');
     }
 
     public function testLoadByUrl()
     {
-        $url = self::URL_EZ_NO;
+        $this->configureUrlViewPermission(true);
 
-        $apiUrl = new URL([
-            'url' => $url,
-        ]);
-
-        $this->configureUrlViewPermission($apiUrl, true);
+        $url = 'http://ez.no';
 
         $this->urlHandler
             ->expects($this->once())
@@ -339,7 +308,9 @@ class UrlTest extends BaseServiceMockTest
                 'url' => $url,
             ]));
 
-        $this->assertEquals($apiUrl, $this->createUrlService()->loadByUrl($url));
+        $this->assertEquals(new URL([
+            'url' => $url,
+        ]), $this->createUrlService()->loadByUrl($url));
     }
 
     /**
@@ -347,7 +318,7 @@ class UrlTest extends BaseServiceMockTest
      */
     public function testFindUsages($offset, $limit, ContentQuery $expectedQuery, array $usages)
     {
-        $url = $this->getApiUrl(self::URL_ID, self::URL_EZ_NO);
+        $url = $this->getApiUrl(1, 'http://ez.no');
 
         if (!empty($usages)) {
             $searchService = $this->createMock(SearchService::class);
@@ -426,7 +397,7 @@ class UrlTest extends BaseServiceMockTest
         $this->assertEquals(new URLUpdateStruct(), $this->createUrlService()->createUpdateStruct());
     }
 
-    protected function configureUrlViewPermissionForHasAccess($hasAccess = false)
+    protected function configureUrlViewPermission($hasAccess = false)
     {
         $this->getRepositoryMock()
             ->expects($this->once())
@@ -435,37 +406,20 @@ class UrlTest extends BaseServiceMockTest
             ->willReturn($hasAccess);
     }
 
-    protected function configureUrlViewPermission($object, $hasAccess = false)
+    protected function configureUrlUpdatePermission($hasAccess = false)
     {
-        $this->permissionResolver
+        $this->getRepositoryMock()
             ->expects($this->once())
-            ->method('canUser')
-            ->with(
-                $this->equalTo('url'),
-                $this->equalTo('view'),
-                $this->equalTo($object)
-            )
-            ->will($this->returnValue($hasAccess));
-    }
-
-    protected function configureUrlUpdatePermission($object, $hasAccess = false)
-    {
-        $this->permissionResolver
-            ->expects($this->once())
-            ->method('canUser')
-            ->with(
-                $this->equalTo('url'),
-                $this->equalTo('update'),
-                $this->equalTo($object)
-            )
-            ->will($this->returnValue($hasAccess));
+            ->method('hasAccess')
+            ->with('url', 'update')
+            ->willReturn($hasAccess);
     }
 
     protected function configurePermissions(array $permissions)
     {
-        $this->permissionResolver
+        $this->getRepositoryMock()
             ->expects($this->exactly(count($permissions)))
-            ->method('canUser')
+            ->method('hasAccess')
             ->withConsecutive(...$permissions)
             ->willReturn(true);
     }
@@ -477,7 +431,7 @@ class UrlTest extends BaseServiceMockTest
     {
         return $this
             ->getMockBuilder(URLService::class)
-            ->setConstructorArgs([$this->getRepositoryMock(), $this->urlHandler, $this->permissionResolver])
+            ->setConstructorArgs([$this->getRepositoryMock(), $this->urlHandler])
             ->setMethods($methods)
             ->getMock();
     }

@@ -186,7 +186,7 @@ class ServiceContainer implements Container
         }
 
         // Compile container if necessary
-        if ($this->innerContainer instanceof ContainerBuilder && !$this->innerContainer->isCompiled()) {
+        if ($this->innerContainer instanceof ContainerBuilder && !$this->innerContainer->isFrozen()) {
             $this->innerContainer->compile();
         }
     }
@@ -205,10 +205,10 @@ class ServiceContainer implements Container
         }
 
         $content = $dumper->dump(
-            [
+            array(
                 'class' => $this->containerClassName,
                 'base_class' => 'Container',
-            ]
+            )
         );
 
         $cache->write($content, $this->innerContainer->getResources());

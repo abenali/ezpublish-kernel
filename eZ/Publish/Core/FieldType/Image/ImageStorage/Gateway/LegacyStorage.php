@@ -18,7 +18,9 @@ use eZ\Publish\Core\FieldType\Image\ImageStorage\Gateway;
  */
 class LegacyStorage extends Gateway
 {
-    /** @var \eZ\Publish\Core\Persistence\Database\DatabaseHandler */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Database\DatabaseHandler
+     */
     protected $dbHandler;
 
     /**
@@ -34,7 +36,9 @@ class LegacyStorage extends Gateway
         'data_string' => 'xml',
     ];
 
-    /** @var \eZ\Publish\Core\IO\UrlRedecoratorInterface */
+    /**
+     * @var \eZ\Publish\Core\IO\UrlRedecoratorInterface
+     */
     private $redecorator;
 
     public function __construct(UrlRedecoratorInterface $redecorator, DatabaseHandler $dbHandler)
@@ -154,7 +158,7 @@ class LegacyStorage extends Gateway
         $statement = $selectQuery->prepare();
         $statement->execute();
 
-        $fieldLookup = [];
+        $fieldLookup = array();
         foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $row) {
             $fieldLookup[$row['id']] = $row['data_text'];
         }
@@ -288,7 +292,7 @@ class LegacyStorage extends Gateway
             return null;
         }
 
-        $files = [];
+        $files = array();
 
         $dom = new \DOMDocument();
         $dom->loadXml($xml);

@@ -10,12 +10,11 @@ namespace eZ\Bundle\EzPublishIOBundle\DependencyInjection\Compiler;
 
 use ArrayObject;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
-use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
 
 /**
  * This compiler pass will create the metadata and binarydata IO handlers depending on container configuration.
@@ -47,10 +46,10 @@ class IOConfigurationPass implements CompilerPassInterface
     {
         $ioMetadataHandlers = $container->hasParameter('ez_io.metadata_handlers') ?
             $container->getParameter('ez_io.metadata_handlers') :
-            [];
+            array();
         $this->processHandlers(
             $container,
-            $container->getDefinition('ezpublish.core.io.metadata_handler.registry'),
+            $container->getDefinition('ezpublish.core.io.metadata_handler.factory'),
             $ioMetadataHandlers,
             $this->metadataHandlerFactories,
             'ezpublish.core.io.metadata_handler.flysystem.default'
@@ -58,10 +57,10 @@ class IOConfigurationPass implements CompilerPassInterface
 
         $ioBinarydataHandlers = $container->hasParameter('ez_io.binarydata_handlers') ?
             $container->getParameter('ez_io.binarydata_handlers') :
-            [];
+            array();
         $this->processHandlers(
             $container,
-            $container->getDefinition('ezpublish.core.io.binarydata_handler.registry'),
+            $container->getDefinition('ezpublish.core.io.binarydata_handler.factory'),
             $ioBinarydataHandlers,
             $this->binarydataHandlerFactories,
             'ezpublish.core.io.binarydata_handler.flysystem.default'
@@ -86,22 +85,21 @@ class IOConfigurationPass implements CompilerPassInterface
         ArrayObject $factories,
         $defaultHandler
     ) {
-        $handlers = ['default' => new Reference($defaultHandler)];
+        $handlers = array('default' => $defaultHandler);
 
         foreach ($configuredHandlers as $name => $config) {
             $configurationFactory = $this->getFactory($factories, $config['type'], $container);
 
             $parentHandlerId = $configurationFactory->getParentServiceId();
             $handlerId = sprintf('%s.%s', $parentHandlerId, $name);
-            $handlerServiceDefinition = new ChildDefinition($parentHandlerId);
-            $definition = $container->setDefinition($handlerId, $handlerServiceDefinition);
+            $definition = $container->setDefinition($handlerId, new DefinitionDecorator($parentHandlerId));
 
             $configurationFactory->configureHandler($definition, $config);
 
-            $handlers[$name] = new Reference($handlerId);
+            $handlers[$name] = $handlerId;
         }
 
-        $factory->addMethodCall('setHandlersMap', [$handlers]);
+        $factory->addMethodCall('setHandlersMap', array($handlers));
     }
 
     /**

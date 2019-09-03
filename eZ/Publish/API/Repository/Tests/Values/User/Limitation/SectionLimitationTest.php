@@ -56,7 +56,7 @@ class SectionLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new SectionLimitation(
-                ['limitationValues' => [3]]
+                array('limitationValues' => array(3))
             )
         );
 
@@ -83,11 +83,10 @@ class SectionLimitationTest extends BaseLimitationTest
      * @see \eZ\Publish\API\Repository\Values\User\Limitation\SectionLimitation
      *
      * @throws \ErrorException
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
      */
     public function testSectionLimitationForbid()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\UnauthorizedException::class);
-
         $repository = $this->getRepository();
 
         /* BEGIN: Use Case */
@@ -114,7 +113,7 @@ class SectionLimitationTest extends BaseLimitationTest
         $policyUpdate = $roleService->newPolicyUpdateStruct();
         $policyUpdate->addLimitation(
             new SectionLimitation(
-                ['limitationValues' => [1, 6]]
+                array('limitationValues' => array(1, 6))
             )
         );
 

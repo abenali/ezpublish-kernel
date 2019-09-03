@@ -9,11 +9,12 @@
 namespace eZ\Bundle\EzPublishCoreBundle\EventListener;
 
 use eZ\Publish\Core\MVC\Exception\InvalidSiteAccessException;
-use eZ\Publish\Core\MVC\Symfony\Event\ConsoleInitEvent;
 use eZ\Publish\Core\MVC\Symfony\Event\ScopeChangeEvent;
 use eZ\Publish\Core\MVC\Symfony\MVCEvents;
 use eZ\Publish\Core\MVC\Symfony\SiteAccess;
 use eZ\Publish\Core\MVC\Symfony\SiteAccess\SiteAccessAware;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -22,13 +23,19 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class ConsoleCommandListener implements EventSubscriberInterface, SiteAccessAware
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     private $defaultSiteAccessName;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $siteAccessList;
 
-    /** @var EventDispatcherInterface */
+    /**
+     * @var EventDispatcherInterface
+     */
     private $eventDispatcher;
 
     /**
@@ -36,7 +43,9 @@ class ConsoleCommandListener implements EventSubscriberInterface, SiteAccessAwar
      */
     private $siteAccess;
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $debug;
 
     /**
@@ -53,13 +62,13 @@ class ConsoleCommandListener implements EventSubscriberInterface, SiteAccessAwar
     public static function getSubscribedEvents()
     {
         return [
-            MVCEvents::CONSOLE_INIT => [
+            ConsoleEvents::COMMAND => [
                 ['onConsoleCommand', -1],
             ],
         ];
     }
 
-    public function onConsoleCommand(ConsoleInitEvent $event)
+    public function onConsoleCommand(ConsoleCommandEvent $event)
     {
         $this->siteAccess->name = $event->getInput()->getParameterOption('--siteaccess', $this->defaultSiteAccessName);
         $this->siteAccess->matchingType = 'cli';
@@ -68,7 +77,7 @@ class ConsoleCommandListener implements EventSubscriberInterface, SiteAccessAwar
             throw new InvalidSiteAccessException($this->siteAccess->name, $this->siteAccessList, $this->siteAccess->matchingType, $this->debug);
         }
 
-        $this->eventDispatcher->dispatch(new ScopeChangeEvent($this->siteAccess), MVCEvents::CONFIG_SCOPE_CHANGE);
+        $this->eventDispatcher->dispatch(MVCEvents::CONFIG_SCOPE_CHANGE, new ScopeChangeEvent($this->siteAccess));
     }
 
     public function setSiteAccess(SiteAccess $siteAccess = null)

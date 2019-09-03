@@ -42,7 +42,7 @@ class CreateStruct extends ValueObject
      *
      * @var string[]
      */
-    public $description = [];
+    public $description = array();
 
     /**
      * String identifier of a type.
@@ -137,14 +137,14 @@ class CreateStruct extends ValueObject
      *
      * @var mixed[]
      */
-    public $groupIds = [];
+    public $groupIds = array();
 
     /**
      * Content fields in this type.
      *
      * @var \eZ\Publish\SPI\Persistence\Content\Type\FieldDefinition[]
      */
-    public $fieldDefinitions = [];
+    public $fieldDefinitions = array();
 
     /**
      * @todo: Document.

@@ -8,9 +8,13 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\Matcher\Tests;
 
+use eZ\Publish\Core\MVC\Symfony\Matcher\Block\Type;
+
 abstract class ContentBasedMatcherFactoryTest extends AbstractMatcherFactoryTest
 {
     /**
+     * @expectedException \InvalidArgumentException
+     *
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\AbstractMatcherFactory::__construct
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\AbstractMatcherFactory::match
      * @covers \eZ\Publish\Core\MVC\Symfony\Matcher\AbstractMatcherFactory::getMatcher
@@ -18,20 +22,18 @@ abstract class ContentBasedMatcherFactoryTest extends AbstractMatcherFactoryTest
      */
     public function testMatchNonContentBasedMatcher()
     {
-        $this->expectException(\InvalidArgumentException::class);
-
         $matcherFactory = new $this->matcherFactoryClass(
             $this->getRepositoryMock(),
-            [
-                'full' => [
-                    'test' => [
+            array(
+                'full' => array(
+                    'test' => array(
                         'template' => 'foo.html.twig',
-                        'match' => [
-                            \stdClass::class => true,
-                        ],
-                    ],
-                ],
-            ]
+                        'match' => array(
+                            Type::class => true,
+                        ),
+                    ),
+                ),
+            )
         );
         $matcherFactory->match($this->getMatchableValueObject(), 'full');
     }

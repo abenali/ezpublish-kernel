@@ -91,7 +91,7 @@ class DoctrineDatabase extends Gateway
         $offset,
         $limit,
         array $sort = null,
-        array $languageFilter = [],
+        array $languageFilter = array(),
         $doCount = true
     ) {
         $count = $doCount ? $this->getResultCount($criterion, $languageFilter) : null;
@@ -101,15 +101,15 @@ class DoctrineDatabase extends Gateway
         }
 
         if ($limit === 0 || ($count !== null && $count <= $offset)) {
-            return ['count' => $count, 'rows' => []];
+            return array('count' => $count, 'rows' => array());
         }
 
         $contentInfoList = $this->getContentInfoList($criterion, $sort, $offset, $limit, $languageFilter);
 
-        return [
+        return array(
             'count' => $count,
             'rows' => $contentInfoList,
-        ];
+        );
     }
 
     /**

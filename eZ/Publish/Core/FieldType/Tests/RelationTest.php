@@ -8,54 +8,15 @@
  */
 namespace eZ\Publish\Core\FieldType\Tests;
 
-use eZ\Publish\API\Repository\Values\ContentType\FieldDefinition;
 use eZ\Publish\Core\FieldType\Relation\Type as RelationType;
 use eZ\Publish\Core\FieldType\Relation\Value;
 use eZ\Publish\API\Repository\Values\Content\Relation;
 use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\SPI\FieldType\Value as SPIValue;
-use eZ\Publish\SPI\Persistence\Content\Handler as SPIContentHandler;
-use eZ\Publish\SPI\Persistence\Content\VersionInfo;
 
 class RelationTest extends FieldTypeTest
 {
-    private const DESTINATION_CONTENT_ID = 14;
-
-    private $contentHandler;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $versionInfo = new VersionInfo([
-            'versionNo' => 24,
-            'names' => [
-                'en_GB' => 'name_en_GB',
-                'de_DE' => 'Name_de_DE',
-            ],
-        ]);
-        $currentVersionNo = 28;
-        $destinationContentInfo = $this->createMock(ContentInfo::class);
-        $destinationContentInfo
-            ->method('__get')
-            ->willReturnMap([
-                ['currentVersionNo', $currentVersionNo],
-                ['mainLanguageCode', 'en_GB'],
-            ]);
-
-        $this->contentHandler = $this->createMock(SPIContentHandler::class);
-        $this->contentHandler
-            ->method('loadContentInfo')
-            ->with(self::DESTINATION_CONTENT_ID)
-            ->willReturn($destinationContentInfo);
-
-        $this->contentHandler
-            ->method('loadVersionInfo')
-            ->with(self::DESTINATION_CONTENT_ID, $currentVersionNo)
-            ->willReturn($versionInfo);
-    }
-
     /**
      * Returns the field type under test.
      *
@@ -69,7 +30,7 @@ class RelationTest extends FieldTypeTest
      */
     protected function createFieldTypeUnderTest()
     {
-        $fieldType = new RelationType($this->contentHandler);
+        $fieldType = new RelationType();
         $fieldType->setTransformationProcessor($this->getTransformationProcessorMock());
 
         return $fieldType;
@@ -82,7 +43,7 @@ class RelationTest extends FieldTypeTest
      */
     protected function getValidatorConfigurationSchemaExpectation()
     {
-        return [];
+        return array();
     }
 
     /**
@@ -143,12 +104,12 @@ class RelationTest extends FieldTypeTest
      */
     public function provideInvalidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 true,
                 InvalidArgumentException::class,
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -182,20 +143,20 @@ class RelationTest extends FieldTypeTest
      */
     public function provideValidInputForAcceptValue()
     {
-        return [
-            [
+        return array(
+            array(
                 new Value(),
                 new Value(),
-            ],
-            [
+            ),
+            array(
                 23,
                 new Value(23),
-            ],
-            [
-                new ContentInfo(['id' => 23]),
+            ),
+            array(
+                new ContentInfo(array('id' => 23)),
                 new Value(23),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -235,16 +196,16 @@ class RelationTest extends FieldTypeTest
      */
     public function provideInputForToHash()
     {
-        return [
-            [
+        return array(
+            array(
                 new Value(23),
-                ['destinationContentId' => 23],
-            ],
-            [
+                array('destinationContentId' => 23),
+            ),
+            array(
                 new Value(),
-                ['destinationContentId' => null],
-            ],
-        ];
+                array('destinationContentId' => null),
+            ),
+        );
     }
 
     /**
@@ -284,16 +245,16 @@ class RelationTest extends FieldTypeTest
      */
     public function provideInputForFromHash()
     {
-        return [
-            [
-                ['destinationContentId' => 23],
+        return array(
+            array(
+                array('destinationContentId' => 23),
                 new Value(23),
-            ],
-            [
-                ['destinationContentId' => null],
+            ),
+            array(
+                array('destinationContentId' => null),
                 new Value(),
-            ],
-        ];
+            ),
+        );
     }
 
     /**
@@ -320,20 +281,20 @@ class RelationTest extends FieldTypeTest
      */
     public function provideValidFieldSettings()
     {
-        return [
-            [
-                [
+        return array(
+            array(
+                array(
                     'selectionMethod' => RelationType::SELECTION_BROWSE,
                     'selectionRoot' => 42,
-                ],
-            ],
-            [
-                [
+                ),
+            ),
+            array(
+                array(
                     'selectionMethod' => RelationType::SELECTION_DROPDOWN,
                     'selectionRoot' => 'some-key',
-                ],
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     /**
@@ -361,30 +322,30 @@ class RelationTest extends FieldTypeTest
      */
     public function provideInValidFieldSettings()
     {
-        return [
-            [
+        return array(
+            array(
                 // Unknown key
-                [
+                array(
                     'unknownKey' => 23,
                     'selectionMethod' => RelationType::SELECTION_BROWSE,
                     'selectionRoot' => 42,
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 // Invalid selectionMethod
-                [
+                array(
                     'selectionMethod' => 2342,
                     'selectionRoot' => 42,
-                ],
-            ],
-            [
+                ),
+            ),
+            array(
                 // Invalid selectionRoot
-                [
+                array(
                     'selectionMethod' => RelationType::SELECTION_DROPDOWN,
-                    'selectionRoot' => [],
-                ],
-            ],
-        ];
+                    'selectionRoot' => array(),
+                ),
+            ),
+        );
     }
 
     /**
@@ -394,9 +355,9 @@ class RelationTest extends FieldTypeTest
     {
         $ft = $this->createFieldTypeUnderTest();
         $this->assertEquals(
-            [
-                Relation::FIELD => [70],
-            ],
+            array(
+                Relation::FIELD => array(70),
+            ),
             $ft->getRelations($ft->acceptValue(70))
         );
     }
@@ -408,30 +369,17 @@ class RelationTest extends FieldTypeTest
 
     /**
      * @dataProvider provideDataForGetName
+     * @expectedException \RuntimeException
      */
-    public function testGetName(SPIValue $value, array $fieldSettings = [], string $languageCode = 'en_GB', string $expected)
+    public function testGetName(SPIValue $value, $expected)
     {
-        /** @var \eZ\Publish\API\Repository\Values\ContentType\FieldDefinition|\PHPUnit\Framework\MockObject\MockObject $fieldDefinitionMock */
-        $fieldDefinitionMock = $this->createMock(FieldDefinition::class);
-        $fieldDefinitionMock->method('getFieldSettings')->willReturn($fieldSettings);
-
-        $name = $this->getFieldTypeUnderTest()->getName($value, $fieldDefinitionMock, $languageCode);
-
-        self::assertSame($expected, $name);
+        $this->getFieldTypeUnderTest()->getName($value);
     }
 
-    public function provideDataForGetName(): array
+    public function provideDataForGetName()
     {
-        return [
-            'empty_destination_content_id' => [
-                $this->getEmptyValueExpectation(), [], 'en_GB', '',
-            ],
-            'destination_content_id' => [
-                new Value(self::DESTINATION_CONTENT_ID), [], 'en_GB', 'name_en_GB',
-            ],
-            'destination_content_id_de_DE' => [
-                new Value(self::DESTINATION_CONTENT_ID), [], 'de_DE', 'Name_de_DE',
-            ],
-        ];
+        return array(
+            array($this->getEmptyValueExpectation(), ''),
+        );
     }
 }

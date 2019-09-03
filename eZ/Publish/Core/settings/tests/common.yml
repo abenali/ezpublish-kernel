@@ -1,9 +1,36 @@
+parameters:
+    ezplatform.ezrichtext.custom_tags:
+        video:
+            template: 'MyBundle:FieldType/RichText/tag:video.html.twig'
+            icon: '/bundles/mybundle/fieldtype/richtext/video.svg#video'
+            attributes:
+                title:
+                    type: 'string'
+                    required: true
+                    default_value: 'abc'
+                width:
+                    type: 'number'
+                    required: true
+                    default_value: 360
+                autoplay:
+                    type: 'boolean'
+        equation:
+            template: 'MyBundle:FieldType/RichText/tag:equation.html.twig'
+            icon: '/bundles/mybundle/fieldtype/richtext/equation.svg#equation'
+            attributes:
+                name:
+                    type: 'string'
+                    required: true
+                    default_value: 'Equation'
+                processor:
+                    type: 'choice'
+                    required: true
+                    default_value: 'latex'
+                    choices: ['latex', 'tex']
+
 services:
     logger:
         class: Psr\Log\NullLogger
-
-    Symfony\Component\EventDispatcher\EventDispatcher: ~
-    Symfony\Contracts\EventDispatcher\EventDispatcherInterface: '@Symfony\Component\EventDispatcher\EventDispatcher'
 
     # By default use in-memory cache for tests to avoid disk IO but still make sure we tests cache clearing works
     ezpublish.cache_pool.driver:
@@ -16,19 +43,3 @@ services:
         arguments:
             - '@ezpublish.api.storage_engine.transformation_processor'
             - []
-
-    # Configure serializer required  Generic Field Type
-    ezpublish.field_type.ezgeneric.value_serializer.symfony.normalizer:
-        class: Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer
-
-    ezpublish.field_type.ezgeneric.value_serializer.symfony.encoder:
-        class: Symfony\Component\Serializer\Encoder\JsonEncoder
-
-    ezpublish.field_type.ezgeneric.value_serializer.symfony.serializer:
-        class: Symfony\Component\Serializer\Serializer
-        arguments:
-            - [ '@ezpublish.field_type.ezgeneric.value_serializer.symfony.normalizer' ]
-            - [ '@ezpublish.field_type.ezgeneric.value_serializer.symfony.encoder' ]
-
-    serializer:
-        alias: ezpublish.field_type.ezgeneric.value_serializer.symfony.serializer

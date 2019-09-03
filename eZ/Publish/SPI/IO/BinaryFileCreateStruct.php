@@ -45,7 +45,9 @@ class BinaryFileCreateStruct
      */
     public $id;
 
-    /** @var resource */
+    /**
+     * @var resource
+     */
     private $inputStream;
 
     /**

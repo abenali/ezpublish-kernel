@@ -11,9 +11,6 @@ namespace eZ\Bundle\EzPublishCoreBundle\Composer;
 use Sensio\Bundle\DistributionBundle\Composer\ScriptHandler as DistributionBundleScriptHandler;
 use Composer\Script\Event;
 
-/**
- * @todo Do not rely on DistributionBundle since it's obsolete in Symfony4.
- */
 class ScriptHandler extends DistributionBundleScriptHandler
 {
     /**
@@ -134,18 +131,16 @@ class ScriptHandler extends DistributionBundleScriptHandler
 
 <fg=cyan>Welcome to ${installName}!</fg=cyan>
 
-<options=bold>Quick installation to test in local dev environment:</>
+<options=bold>Quick dev/test install:</>
 <comment>    $  export SYMFONY_ENV="dev"</comment>
 ${installCommandText}
 <comment>    $  php ${consoleDir}/console server:run</comment>
 
 Note:
-- The instructions assume you execute commands with the CLI user that extracted/installed the software.
-- The "server:run" command will:
-  - Use PHP's single process, local, HTTP/1 only built-in web server, mainly suitable for testing.
-  - Give you the URL to the front end of the installation. TIP: Add "/admin" to reach back end.
+- Instructions above assume the CLI user you execute these commands with is the same one that extracted/installed the software.
+- The last command will give you the url to the frontend of the installation, add "/admin" to reach backend.
 
-See main installation instructions with Nginx/Apache for production, remote, or better performing dev setup in:
+For full install instructions, both for production and better performing dev setup, see:
 ${installUrl}
 
 EOT

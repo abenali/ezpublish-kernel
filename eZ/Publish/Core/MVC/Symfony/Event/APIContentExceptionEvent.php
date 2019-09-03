@@ -8,7 +8,7 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\Event;
 
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 use eZ\Publish\Core\MVC\Symfony\View\View;
 use Exception;
 
@@ -18,13 +18,19 @@ use Exception;
  */
 class APIContentExceptionEvent extends Event
 {
-    /** @var \Exception */
+    /**
+     * @var \Exception
+     */
     private $apiException;
 
-    /** @var \eZ\Publish\Core\MVC\Symfony\View\View */
+    /**
+     * @var \eZ\Publish\Core\MVC\Symfony\View\View
+     */
     private $contentView;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $contentMeta;
 
     public function __construct(Exception $apiException, array $contentMeta)

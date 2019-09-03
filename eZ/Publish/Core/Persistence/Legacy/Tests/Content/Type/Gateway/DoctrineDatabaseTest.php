@@ -30,11 +30,26 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
      */
     protected $gateway;
 
-    protected function setUp(): void
+    public function setUp()
     {
         parent::setUp();
 
         $this->insertDatabaseFixture(__DIR__ . '/_fixtures/languages.php');
+    }
+
+    /**
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Type\Gateway\DoctrineDatabase::__construct
+     */
+    public function testCtor()
+    {
+        $handlerMock = $this->getDatabaseHandler();
+        $gateway = $this->getGateway();
+
+        $this->assertAttributeSame(
+            $handlerMock,
+            'dbHandler',
+            $gateway
+        );
     }
 
     /**
@@ -49,16 +64,16 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $id = $gateway->insertGroup($group);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'id' => '1',
                     'created' => '1032009743',
                     'creator_id' => '14',
                     'modified' => '1033922120',
                     'modifier_id' => '14',
                     'name' => 'Media',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select(
@@ -82,14 +97,14 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
     {
         $group = new Group();
 
-        $group->name = [
+        $group->name = array(
             'always-available' => 'eng-GB',
             'eng-GB' => 'Media',
-        ];
-        $group->description = [
+        );
+        $group->description = array(
             'always-available' => 'eng-GB',
             'eng-GB' => '',
-        ];
+        );
         $group->identifier = 'Media';
         $group->created = 1032009743;
         $group->modified = 1033922120;
@@ -115,9 +130,9 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $res = $gateway->updateGroup($struct);
 
         $this->assertQueryResult(
-            [
-                ['3'],
-            ],
+            array(
+                array('3'),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select('COUNT(*)')
@@ -137,32 +152,32 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclassgroup')
             ->orderBy('id');
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'id' => 1,
                     'created' => 1031216928,
                     'creator_id' => 14,
                     'modified' => 1033922106,
                     'modifier_id' => 14,
                     'name' => 'Content',
-                ],
-                [
+                ),
+                array(
                     'id' => 2,
                     'created' => 1031216941,
                     'creator_id' => 14,
                     'modified' => 1311454096,
                     'modifier_id' => 23,
                     'name' => 'UpdatedGroup',
-                ],
-                [
+                ),
+                array(
                     'id' => 3,
                     'created' => 1032009743,
                     'creator_id' => 14,
                     'modified' => 1033922120,
                     'modifier_id' => 14,
                     'name' => 'Media',
-                ],
-            ],
+                ),
+            ),
             $q
         );
     }
@@ -177,14 +192,14 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $struct = new GroupUpdateStruct();
 
         $struct->id = 2;
-        $struct->name = [
+        $struct->name = array(
             'always-available' => 'eng-GB',
             'eng-GB' => 'UpdatedGroupName',
-        ];
-        $struct->description = [
+        );
+        $struct->description = array(
             'always-available' => 'eng-GB',
             'eng-GB' => '',
-        ];
+        );
         $struct->identifier = 'UpdatedGroup';
         $struct->modified = 1311454096;
         $struct->modifierId = 23;
@@ -248,10 +263,10 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->deleteGroup(2);
 
         $this->assertQueryResult(
-            [
-                ['1'],
-                ['3'],
-            ],
+            array(
+                array('1'),
+                array('3'),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select('id')
@@ -273,16 +288,16 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $data = $gateway->loadGroupData([2]);
 
         $this->assertEquals(
-            [
-                [
+            array(
+                array(
                     'created' => '1031216941',
                     'creator_id' => '14',
                     'id' => '2',
                     'modified' => '1033922113',
                     'modifier_id' => '14',
                     'name' => 'Users',
-                ],
-            ],
+                ),
+            ),
             $data
         );
     }
@@ -301,16 +316,16 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $data = $gateway->loadGroupDataByIdentifier('Users');
 
         $this->assertEquals(
-            [
-                [
+            array(
+                array(
                     'created' => '1031216941',
                     'creator_id' => '14',
                     'id' => '2',
                     'modified' => '1033922113',
                     'modifier_id' => '14',
                     'name' => 'Users',
-                ],
-            ],
+                ),
+            ),
             $data
         );
     }
@@ -328,20 +343,20 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway = $this->getGateway();
         $data = $gateway->loadAllGroupsData();
 
-        $this->assertCount(
+        $this->assertEquals(
             3,
-            $data
+            count($data)
         );
 
         $this->assertEquals(
-            [
+            array(
                 'created' => '1031216941',
                 'creator_id' => '14',
                 'id' => '2',
                 'modified' => '1033922113',
                 'modifier_id' => '14',
                 'name' => 'Users',
-            ],
+            ),
             $data[1]
         );
     }
@@ -358,9 +373,9 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway = $this->getGateway();
         $rows = $gateway->loadTypesDataForGroup(1, 0);
 
-        $this->assertCount(
-            4,
-            $rows
+        $this->assertEquals(
+            6,
+            count($rows)
         );
     }
 
@@ -378,13 +393,13 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway = $this->getGateway();
         $rows = $gateway->loadTypeData(1, 0);
 
-        $this->assertCount(
-            3,
-            $rows
+        $this->assertEquals(
+            5,
+            count($rows)
         );
-        $this->assertCount(
-            49,
-            $rows[0]
+        $this->assertEquals(
+            44,
+            count($rows[0])
         );
 
         /*
@@ -411,13 +426,13 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway = $this->getGateway();
         $rows = $gateway->loadTypeDataByIdentifier('folder', 0);
 
-        $this->assertCount(
-            3,
-            $rows
+        $this->assertEquals(
+            5,
+            count($rows)
         );
-        $this->assertCount(
-            49,
-            $rows[0]
+        $this->assertEquals(
+            44,
+            count($rows[0])
         );
     }
 
@@ -435,13 +450,13 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway = $this->getGateway();
         $rows = $gateway->loadTypeDataByRemoteId('a3d405b81be900468eb153d774f4f0d2', 0);
 
-        $this->assertCount(
-            3,
-            $rows
+        $this->assertEquals(
+            5,
+            count($rows)
         );
-        $this->assertCount(
-            49,
-            $rows[0]
+        $this->assertEquals(
+            44,
+            count($rows[0])
         );
     }
 
@@ -452,25 +467,25 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
      */
     public static function getTypeCreationExpectations()
     {
-        return [
-            ['always_available', 0],
-            ['contentobject_name', '<short_name|name>'],
-            ['created', '1024392098'],
-            ['creator_id', '14'],
-            ['identifier', 'folder'],
-            ['initial_language_id', '2'],
-            ['is_container', '1'],
-            ['language_mask', 7],
-            ['modified', '1082454875'],
-            ['modifier_id', '14'],
-            ['remote_id', 'a3d405b81be900468eb153d774f4f0d2'],
-            ['serialized_description_list', 'a:2:{i:0;s:0:"";s:16:"always-available";b:0;}'],
-            ['serialized_name_list', 'a:3:{s:16:"always-available";s:6:"eng-US";s:6:"eng-US";s:6:"Folder";s:6:"eng-GB";s:11:"Folder (GB)";}'],
-            ['sort_field', 7],
-            ['sort_order', 1],
-            ['url_alias_name', ''],
-            ['version', '0'],
-        ];
+        return array(
+            array('always_available', 0),
+            array('contentobject_name', '<short_name|name>'),
+            array('created', '1024392098'),
+            array('creator_id', '14'),
+            array('identifier', 'folder'),
+            array('initial_language_id', '2'),
+            array('is_container', '1'),
+            array('language_mask', 7),
+            array('modified', '1082454875'),
+            array('modifier_id', '14'),
+            array('remote_id', 'a3d405b81be900468eb153d774f4f0d2'),
+            array('serialized_description_list', 'a:2:{i:0;s:0:"";s:16:"always-available";b:0;}'),
+            array('serialized_name_list', 'a:3:{s:16:"always-available";s:6:"eng-US";s:6:"eng-US";s:6:"Folder";s:6:"eng-GB";s:11:"Folder (GB)";}'),
+            array('sort_field', 7),
+            array('sort_order', 1),
+            array('url_alias_name', ''),
+            array('version', '0'),
+        );
     }
 
     /**
@@ -487,7 +502,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->insertType($type);
 
         $this->assertQueryResult(
-            [[$expectation]],
+            array(array($expectation)),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select($column)
@@ -503,13 +518,13 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
      */
     public static function getTypeCreationContentClassNameExpectations()
     {
-        return [
-            ['contentclass_id', [1, 1]],
-            ['contentclass_version', [0, 0]],
-            ['language_id', [3, 4]],
-            ['language_locale', ['eng-US', 'eng-GB']],
-            ['name', ['Folder', 'Folder (GB)']],
-        ];
+        return array(
+            array('contentclass_id', array(1, 1)),
+            array('contentclass_version', array(0, 0)),
+            array('language_id', array(3, 4)),
+            array('language_locale', array('eng-US', 'eng-GB')),
+            array('name', array('Folder', 'Folder (GB)')),
+        );
     }
 
     /**
@@ -527,7 +542,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $this->assertQueryResult(
             array_map(
                 function ($value) {
-                    return [$value];
+                    return array($value);
                 },
                 $expectation
             ),
@@ -549,15 +564,15 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $type = new Type();
 
         $type->status = 0;
-        $type->name = [
+        $type->name = array(
             'always-available' => 'eng-US',
             'eng-US' => 'Folder',
             'eng-GB' => 'Folder (GB)',
-        ];
-        $type->description = [
+        );
+        $type->description = array(
             0 => '',
             'always-available' => false,
-        ];
+        );
         $type->identifier = 'folder';
         $type->created = 1024392098;
         $type->modified = 1082454875;
@@ -592,15 +607,15 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->insertFieldDefinition(23, 1, $field, $storageField);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'contentclass_id' => '23',
                     'serialized_name_list' => 'a:2:{s:16:"always-available";s:6:"eng-US";s:6:"eng-US";s:11:"Description";}',
                     'serialized_description_list' => 'a:2:{s:16:"always-available";s:6:"eng-GB";s:6:"eng-GB";s:16:"Some description";}',
                     'identifier' => 'description',
                     'category' => 'meta',
                     'placement' => '4',
-                    'data_type_string' => 'ezstring',
+                    'data_type_string' => 'ezrichtext',
                     'can_translate' => '1',
                     'is_required' => '1',
                     'is_information_collector' => '1',
@@ -621,8 +636,8 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
                     'data_text4' => 'd',
                     'data_text5' => 'e',
                     'serialized_data_text' => 'a:2:{i:0;s:3:"foo";i:1;s:3:"bar";}',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select(
@@ -667,26 +682,26 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
     {
         $field = new FieldDefinition();
 
-        $field->name = [
+        $field->name = array(
             'always-available' => 'eng-US',
             'eng-US' => 'Description',
-        ];
-        $field->description = [
+        );
+        $field->description = array(
             'always-available' => 'eng-GB',
             'eng-GB' => 'Some description',
-        ];
+        );
         $field->identifier = 'description';
         $field->fieldGroup = 'meta';
         $field->position = 4;
-        $field->fieldType = 'ezstring';
+        $field->fieldType = 'ezrichtext';
         $field->isTranslatable = true;
         $field->isRequired = true;
         $field->isInfoCollector = true;
         // $field->fieldTypeConstraints ???
-        $field->defaultValue = [
+        $field->defaultValue = array(
             0 => '',
             'always-available' => false,
-        ];
+        );
 
         return $field;
     }
@@ -716,9 +731,9 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $fieldDef->dataText4 = 'd';
         $fieldDef->dataText5 = 'e';
 
-        $fieldDef->serializedDataText = [
+        $fieldDef->serializedDataText = array(
             'foo', 'bar',
-        ];
+        );
 
         return $fieldDef;
     }
@@ -737,7 +752,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->deleteFieldDefinition(1, 0, 119);
 
         $this->assertQueryResult(
-            [[5]],
+            array(array(6)),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select('COUNT(*)')
@@ -762,13 +777,13 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->updateFieldDefinition(2, 0, $fieldDefinitionFixture, $storageFieldDefinitionFixture);
 
         $this->assertQueryResult(
-            [
+            array(
                 // "random" sample
-                [
+                array(
                     'category' => 'meta',
                     'contentclass_id' => '2',
                     'version' => '0',
-                    'data_type_string' => 'ezstring',
+                    'data_type_string' => 'ezrichtext',
                     'identifier' => 'description',
                     'is_information_collector' => '1',
                     'placement' => '4',
@@ -788,8 +803,8 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
                     'data_text4' => 'd',
                     'data_text5' => 'e',
                     'serialized_data_text' => 'a:2:{i:0;s:3:"foo";i:1;s:3:"bar";}',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select(
@@ -837,14 +852,14 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->insertGroupAssignment(3, 42, 1);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'contentclass_id' => '42',
                     'contentclass_version' => '1',
                     'group_id' => '3',
                     'group_name' => 'Media',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select(
@@ -870,7 +885,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->deleteGroupAssignment(1, 1, 0);
 
         $this->assertQueryResult(
-            [['1']],
+            array(array('1')),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select(
@@ -898,11 +913,11 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->updateType(1, 0, $type);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     $fieldName => $expectedValue,
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select(
@@ -931,22 +946,22 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->updateType(1, 0, $type);
 
         $this->assertQueryResult(
-            [
-                [
+            array(
+                array(
                     'contentclass_id' => 1,
                     'contentclass_version' => 0,
                     'language_id' => 3,
                     'language_locale' => 'eng-US',
                     'name' => 'New Folder',
-                ],
-                [
+                ),
+                array(
                     'contentclass_id' => 1,
                     'contentclass_version' => 0,
                     'language_id' => 4,
                     'language_locale' => 'eng-GB',
                     'name' => 'New Folder for you',
-                ],
-            ],
+                ),
+            ),
             $this->getDatabaseHandler()
                 ->createSelectQuery()
                 ->select('*')
@@ -964,21 +979,21 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
      */
     public static function getTypeUpdateExpectations()
     {
-        return [
-            ['serialized_name_list', 'a:3:{s:16:"always-available";s:6:"eng-US";s:6:"eng-US";s:10:"New Folder";s:6:"eng-GB";s:18:"New Folder for you";}'],
-            ['serialized_description_list', 'a:2:{i:0;s:0:"";s:16:"always-available";b:0;}'],
-            ['identifier', 'new_folder'],
-            ['modified', '1311621548'],
-            ['modifier_id', '42'],
-            ['remote_id', 'foobar'],
-            ['url_alias_name', 'some scheke'],
-            ['contentobject_name', '<short_name>'],
-            ['is_container', '0'],
-            ['initial_language_id', '23'],
-            ['sort_field', '3'],
-            ['sort_order', '0'],
-            ['always_available', '1'],
-        ];
+        return array(
+            array('serialized_name_list', 'a:3:{s:16:"always-available";s:6:"eng-US";s:6:"eng-US";s:10:"New Folder";s:6:"eng-GB";s:18:"New Folder for you";}'),
+            array('serialized_description_list', 'a:2:{i:0;s:0:"";s:16:"always-available";b:0;}'),
+            array('identifier', 'new_folder'),
+            array('modified', '1311621548'),
+            array('modifier_id', '42'),
+            array('remote_id', 'foobar'),
+            array('url_alias_name', 'some scheke'),
+            array('contentobject_name', '<short_name>'),
+            array('is_container', '0'),
+            array('initial_language_id', '23'),
+            array('sort_field', '3'),
+            array('sort_order', '0'),
+            array('always_available', '1'),
+        );
     }
 
     /**
@@ -1078,7 +1093,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             );
         // 1 left with version 1
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $countAffectedAttr
         );
 
@@ -1088,7 +1103,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclass_attribute');
 
         $this->assertQueryResult(
-            [[2]],
+            array(array(2)),
             $countNotAffectedAttr
         );
     }
@@ -1112,7 +1127,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclass_attribute');
 
         $this->assertQueryResult(
-            [[5]],
+            array(array(7)),
             $countNotAffectedAttr
         );
     }
@@ -1136,7 +1151,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclass_classgroup');
 
         $this->assertQueryResult(
-            [[2]],
+            array(array(2)),
             $countAffectedAttr
         );
     }
@@ -1160,7 +1175,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclass_classgroup');
 
         $this->assertQueryResult(
-            [[3]],
+            array(array(3)),
             $countAffectedAttr
         );
     }
@@ -1184,7 +1199,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclass');
 
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $countAffectedAttr
         );
     }
@@ -1208,7 +1223,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
             ->from('ezcontentclass');
 
         $this->assertQueryResult(
-            [[2]],
+            array(array(2)),
             $countAffectedAttr
         );
     }
@@ -1226,7 +1241,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         $gateway->publishTypeAndFields(1, 1, 0);
 
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('COUNT( * )')
                 ->from('ezcontentclass')
@@ -1234,7 +1249,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         );
 
         $this->assertQueryResult(
-            [[2]],
+            array(array(2)),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('COUNT( * )')
                 ->from('ezcontentclass_classgroup')
@@ -1242,7 +1257,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         );
 
         $this->assertQueryResult(
-            [[3]],
+            array(array(5)),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('COUNT( * )')
                 ->from('ezcontentclass_attribute')
@@ -1250,7 +1265,7 @@ class DoctrineDatabaseTest extends LanguageAwareTestCase
         );
 
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $this->getDatabaseHandler()->createSelectQuery()
                 ->select('COUNT( * )')
                 ->from('ezcontentclass_name')

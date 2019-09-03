@@ -21,7 +21,9 @@ use PDO;
  */
 abstract class AbstractDoctrineQuery
 {
-    /** @var \Doctrine\DBAL\Connection */
+    /**
+     * @var \Doctrine\DBAL\Connection
+     */
     protected $connection;
 
     /**
@@ -38,14 +40,14 @@ abstract class AbstractDoctrineQuery
      *
      * @var array(string=>&mixed)
      */
-    private $boundParameters = [];
+    private $boundParameters = array();
 
     /**
      * Stores the type of a value which will we used when the value is bound.
      *
      * @var array(string=>int)
      */
-    private $boundParametersType = [];
+    private $boundParametersType = array();
 
     /**
      * Stores the list of values that will be bound with doBind().
@@ -54,16 +56,18 @@ abstract class AbstractDoctrineQuery
      *
      * @var array(string=>mixed)
      */
-    private $boundValues = [];
+    private $boundValues = array();
 
     /**
      * Stores the type of a value which will we used when the value is bound.
      *
      * @var array(string=>int)
      */
-    private $boundValuesType = [];
+    private $boundValuesType = array();
 
-    /** @var \eZ\Publish\Core\Persistence\Database\Expression */
+    /**
+     * @var \eZ\Publish\Core\Persistence\Database\Expression
+     */
     public $expr;
 
     public function __construct(Connection $connection)

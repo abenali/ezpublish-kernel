@@ -8,7 +8,6 @@
  */
 namespace eZ\Publish\Core\Persistence\Legacy\Tests\Content;
 
-use function count;
 use eZ\Publish\Core\Persistence\Legacy\Content\Mapper;
 use eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\ConverterRegistry as Registry;
 use eZ\Publish\Core\Persistence\Legacy\Content\FieldValue\Converter;
@@ -38,6 +37,22 @@ class MapperTest extends LanguageAwareTestCase
     protected $valueConverterRegistryMock;
 
     /**
+     * @covers \eZ\Publish\Core\Persistence\Legacy\Content\Mapper::__construct
+     */
+    public function testCtor()
+    {
+        $regMock = $this->getValueConverterRegistryMock();
+
+        $mapper = $this->getMapper();
+
+        $this->assertAttributeSame(
+            $regMock,
+            'converterRegistry',
+            $mapper
+        );
+    }
+
+    /**
      * Returns a eZ\Publish\SPI\Persistence\Content\CreateStruct fixture.
      *
      * @return \eZ\Publish\SPI\Persistence\Content\CreateStruct
@@ -51,18 +66,18 @@ class MapperTest extends LanguageAwareTestCase
         $struct->sectionId = 42;
         $struct->ownerId = 13;
         $struct->initialLanguageId = 2;
-        $struct->locations = [
+        $struct->locations = array(
             new LocationCreateStruct(
-                ['parentId' => 2]
+                array('parentId' => 2)
             ),
             new LocationCreateStruct(
-                ['parentId' => 3]
+                array('parentId' => 3)
             ),
             new LocationCreateStruct(
-                ['parentId' => 4]
+                array('parentId' => 4)
             ),
-        ];
-        $struct->fields = [new Field()];
+        );
+        $struct->fields = array(new Field());
 
         return $struct;
     }
@@ -84,14 +99,14 @@ class MapperTest extends LanguageAwareTestCase
         );
 
         $this->assertPropertiesCorrect(
-            [
+            array(
                 'id' => null,
                 'versionNo' => 1,
                 'creatorId' => 14,
                 'status' => 0,
                 'initialLanguageCode' => 'eng-GB',
                 'languageCodes' => ['eng-GB'],
-            ],
+            ),
             $versionInfo
         );
         $this->assertGreaterThanOrEqual($time, $versionInfo->creationDate);
@@ -107,15 +122,15 @@ class MapperTest extends LanguageAwareTestCase
     {
         $content = new Content();
 
-        $content->fields = [
-            new Field(['languageCode' => 'eng-GB']),
-        ];
+        $content->fields = array(
+            new Field(array('languageCode' => 'eng-GB')),
+        );
         $content->versionInfo = new VersionInfo(
-            [
+            array(
                 'versionNo' => 1,
                 'initialLanguageCode' => 'eng-GB',
                 'languageCodes' => ['eng-GB'],
-            ]
+            )
         );
 
         $content->versionInfo->contentInfo = new ContentInfo();
@@ -145,7 +160,7 @@ class MapperTest extends LanguageAwareTestCase
                 )
             )->will($this->returnValue(new StorageFieldValue()));
 
-        $reg = new Registry(['some-type' => $convMock]);
+        $reg = new Registry(array('some-type' => $convMock));
 
         $field = new Field();
         $field->type = 'some-type';
@@ -168,11 +183,8 @@ class MapperTest extends LanguageAwareTestCase
      */
     public function testExtractContentFromRows()
     {
-        $rowsFixture = $this->getContentExtractFixture();
-        $nameRowsFixture = $this->getNamesExtractFixture();
-
         $convMock = $this->createMock(Converter::class);
-        $convMock->expects($this->exactly(count($rowsFixture)))
+        $convMock->expects($this->exactly(13))
             ->method('toFieldValue')
             ->with(
                 $this->isInstanceOf(
@@ -185,24 +197,28 @@ class MapperTest extends LanguageAwareTestCase
             );
 
         $reg = new Registry(
-            [
+            array(
                 'ezauthor' => $convMock,
                 'ezstring' => $convMock,
+                'ezrichtext' => $convMock,
                 'ezboolean' => $convMock,
                 'ezimage' => $convMock,
                 'ezdatetime' => $convMock,
                 'ezkeyword' => $convMock,
                 'ezsrrating' => $convMock,
-            ]
+            )
         );
+
+        $rowsFixture = $this->getContentExtractFixture();
+        $nameRowsFixture = $this->getNamesExtractFixture();
 
         $mapper = new Mapper($reg, $this->getLanguageHandler());
         $result = $mapper->extractContentFromRows($rowsFixture, $nameRowsFixture);
 
         $this->assertEquals(
-            [
+            array(
                 $this->getContentExtractReference(),
-            ],
+            ),
             $result
         );
     }
@@ -218,10 +234,11 @@ class MapperTest extends LanguageAwareTestCase
             ->will($this->returnValue(new FieldValue()));
 
         $reg = new Registry(
-            [
+            array(
                 'ezstring' => $convMock,
+                'ezrichtext' => $convMock,
                 'ezdatetime' => $convMock,
-            ]
+            )
         );
 
         $rowsFixture = $this->getMultipleVersionsExtractFixture();
@@ -230,9 +247,9 @@ class MapperTest extends LanguageAwareTestCase
         $mapper = new Mapper($reg, $this->getLanguageHandler());
         $result = $mapper->extractContentFromRows($rowsFixture, $nameRowsFixture);
 
-        $this->assertCount(
+        $this->assertEquals(
             2,
-            $result
+            count($result)
         );
 
         $this->assertEquals(
@@ -268,11 +285,11 @@ class MapperTest extends LanguageAwareTestCase
 
         $this->assertInstanceOf(CreateStruct::class, $struct);
 
-        return [
+        return array(
             'original' => $content,
             'result' => $struct,
             'time' => $time,
-        ];
+        );
 
         // parentLocations
         // fields
@@ -290,7 +307,7 @@ class MapperTest extends LanguageAwareTestCase
         $this->assertStructsEqual(
             $content->versionInfo->contentInfo,
             $struct,
-            ['sectionId', 'ownerId']
+            array('sectionId', 'ownerId')
         );
         self::assertNotEquals($content->versionInfo->contentInfo->remoteId, $struct->remoteId);
         self::assertSame($content->versionInfo->contentInfo->contentTypeId, $struct->typeId);
@@ -306,7 +323,7 @@ class MapperTest extends LanguageAwareTestCase
     public function testCreateCreateStructFromContentParentLocationsEmpty($data)
     {
         $this->assertEquals(
-            [],
+            array(),
             $data['result']->locations
         );
     }
@@ -396,7 +413,7 @@ class MapperTest extends LanguageAwareTestCase
     public function extractContentInfoFromRowProvider()
     {
         $fixtures = $this->getContentExtractFixture();
-        $fixturesNoPrefix = [];
+        $fixturesNoPrefix = array();
         foreach ($fixtures[0] as $key => $value) {
             $keyNoPrefix = $key === 'ezcontentobject_tree_main_node_id'
                 ? $key
@@ -404,10 +421,10 @@ class MapperTest extends LanguageAwareTestCase
             $fixturesNoPrefix[$keyNoPrefix] = $value;
         }
 
-        return [
-            [$fixtures[0], 'ezcontentobject_'],
-            [$fixturesNoPrefix, ''],
-        ];
+        return array(
+            array($fixtures[0], 'ezcontentobject_'),
+            array($fixturesNoPrefix, ''),
+        );
     }
 
     /**
@@ -435,21 +452,21 @@ class MapperTest extends LanguageAwareTestCase
     {
         $fixturesAll = $this->getContentExtractFixture();
         $fixtures = $fixturesAll[0];
-        $fixtures['ezcontentobject_version_names'] = [
-            ['content_translation' => 'eng-US', 'name' => 'Something'],
-        ];
-        $fixtures['ezcontentobject_version_languages'] = [2];
+        $fixtures['ezcontentobject_version_names'] = array(
+            array('content_translation' => 'eng-US', 'name' => 'Something'),
+        );
+        $fixtures['ezcontentobject_version_languages'] = array(2);
         $fixtures['ezcontentobject_version_initial_language_code'] = 'eng-US';
-        $fixturesNoPrefix = [];
+        $fixturesNoPrefix = array();
         foreach ($fixtures as $key => $value) {
             $keyNoPrefix = str_replace('ezcontentobject_version_', '', $key);
             $fixturesNoPrefix[$keyNoPrefix] = $value;
         }
 
-        return [
-            [$fixtures, 'ezcontentobject_version_'],
-            [$fixturesNoPrefix, ''],
-        ];
+        return array(
+            array($fixtures, 'ezcontentobject_version_'),
+            array($fixturesNoPrefix, ''),
+        );
     }
 
     /**
@@ -556,7 +573,8 @@ class MapperTest extends LanguageAwareTestCase
     {
         if (!isset($this->valueConverterRegistryMock)) {
             $this->valueConverterRegistryMock = $this->getMockBuilder(Registry::class)
-                ->setMethods([])
+                ->setMethods(array())
+                ->setConstructorArgs(array(array()))
                 ->getMock();
         }
 
@@ -588,22 +606,22 @@ class MapperTest extends LanguageAwareTestCase
      */
     protected function getLanguageHandler()
     {
-        $languages = [
-            'eng-US' => new Language(
-                [
+        $languages = array(
+            new Language(
+                array(
                     'id' => 2,
                     'languageCode' => 'eng-US',
                     'name' => 'US english',
-                ]
+                )
             ),
-            'eng-GB' => new Language(
-                [
+            new Language(
+                array(
                     'id' => 4,
                     'languageCode' => 'eng-GB',
                     'name' => 'British english',
-                ]
+                )
             ),
-        ];
+        );
 
         if (!isset($this->languageHandler)) {
             $this->languageHandler = $this->createMock(Language\Handler::class);
@@ -633,9 +651,6 @@ class MapperTest extends LanguageAwareTestCase
                         }
                     )
                 );
-            $this->languageHandler->expects($this->any())
-                ->method('loadAll')
-                ->willReturn($languages);
         }
 
         return $this->languageHandler;

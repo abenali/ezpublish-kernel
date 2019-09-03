@@ -28,7 +28,7 @@ class UserHandlerTest extends TestCase
             new User\Gateway\DoctrineDatabase($dbHandler),
             new User\Role\Gateway\DoctrineDatabase($dbHandler),
             new User\Mapper(),
-            new LimitationConverter([new ObjectStateLimitationHandler($dbHandler)])
+            new LimitationConverter(array(new ObjectStateLimitationHandler($dbHandler)))
         );
     }
 
@@ -62,32 +62,34 @@ class UserHandlerTest extends TestCase
 
         $handler->create($this->getValidUser());
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser'),
             'Expected one user to be created.'
         );
 
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser_setting'),
             'Expected one user setting to be created.'
         );
     }
 
+    /**
+     * @expectedException \Doctrine\DBAL\DBALException
+     */
     public function testCreateDuplicateUser()
     {
-        $this->expectException(\Doctrine\DBAL\DBALException::class);
-
         $handler = $this->getUserHandler();
 
         $handler->create($user = $this->getValidUser());
         $handler->create($user);
     }
 
+    /**
+     * @expectedException \Doctrine\DBAL\DBALException
+     */
     public function testInsertIncompleteUser()
     {
-        $this->expectException(\Doctrine\DBAL\DBALException::class);
-
         $handler = $this->getUserHandler();
 
         $user = new Persistence\User();
@@ -107,10 +109,11 @@ class UserHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     */
     public function testLoadUnknownUser()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $handler = $this->getUserHandler();
 
         $handler->load(1337);
@@ -128,10 +131,11 @@ class UserHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     */
     public function testLoadUserByEmailNotFound()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $handler = $this->getUserHandler();
         $handler->create($user = $this->getValidUser());
 
@@ -150,10 +154,11 @@ class UserHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     */
     public function testLoadUserByTokenNotFound()
     {
-        $this->expectException(\eZ\Publish\API\Repository\Exceptions\NotFoundException::class);
-
         $handler = $this->getUserHandler();
         $handler->create($user = $this->getValidUser());
         $handler->updateUserToken($this->getValidUserToken());
@@ -222,26 +227,26 @@ class UserHandlerTest extends TestCase
 
         $handler->create($user = $this->getValidUser());
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser'),
             'Expected one user to be created.'
         );
 
         $this->assertQueryResult(
-            [[1]],
+            array(array(1)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser_setting'),
             'Expected one user setting to be created.'
         );
 
         $handler->delete($user->id);
         $this->assertQueryResult(
-            [[0]],
+            array(array(0)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser'),
             'Expected one user to be removed.'
         );
 
         $this->assertQueryResult(
-            [[0]],
+            array(array(0)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser_setting'),
             'Expected one user setting to be removed.'
         );
@@ -253,7 +258,7 @@ class UserHandlerTest extends TestCase
 
         $handler->delete(1337);
         $this->assertQueryResult(
-            [[0]],
+            array(array(0)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser'),
             'Expected no existing user.'
         );
@@ -269,7 +274,7 @@ class UserHandlerTest extends TestCase
         $handler->update($user);
 
         $this->assertQueryResult(
-            [[42, 'kore@example.org', 'New_lögin', 1234567890, '2']],
+            array(array(42, 'kore@example.org', 'New_lögin', 1234567890, '2')),
             $this->handler->createSelectQuery()->select('*')->from('ezuser'),
             'Expected user data to be updated.'
         );
@@ -285,7 +290,7 @@ class UserHandlerTest extends TestCase
         $handler->update($user);
 
         $this->assertQueryResult(
-            [[1, 42, 42]],
+            array(array(1, 42, 42)),
             $this->handler->createSelectQuery()->select('*')->from('ezuser_setting'),
             'Expected user data to be updated.'
         );
@@ -296,7 +301,7 @@ class UserHandlerTest extends TestCase
         $handler = $this->getUserHandler();
         $handler->update($this->getValidUser());
         $this->assertQueryResult(
-            [[0]],
+            array(array(0)),
             $this->handler->createSelectQuery()->select('COUNT( * )')->from('ezuser'),
             'Expected no existing user.'
         );
@@ -312,7 +317,7 @@ class UserHandlerTest extends TestCase
         $handler->createRole($createStruct);
 
         $this->assertQueryResult(
-            [[1, 'Test', -1]],
+            array(array(1, 'Test', -1)),
             $this->handler->createSelectQuery()->select('id', 'name', 'version')->from('ezrole'),
             'Expected a new role draft.'
         );
@@ -388,18 +393,18 @@ class UserHandlerTest extends TestCase
 
         $loaded = $handler->loadRole($roleDraft->id);
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\Policy(
-                    [
+                    array(
                         'id' => 1,
                         'roleId' => 1,
                         'module' => 'foo',
                         'function' => 'bar',
                         'limitations' => '*',
                         'originalId' => null,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $loaded->policies
         );
     }
@@ -426,18 +431,18 @@ class UserHandlerTest extends TestCase
 
         $loaded = $handler->loadRole($roleDraft->id);
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\Policy(
-                    [
+                    array(
                         'id' => 1,
                         'roleId' => 1,
                         'module' => 'foo',
                         'function' => 'bar',
                         'limitations' => '*',
                         'originalId' => null,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $loaded->policies
         );
     }
@@ -454,31 +459,31 @@ class UserHandlerTest extends TestCase
         $policy = new Persistence\User\Policy();
         $policy->module = 'foo';
         $policy->function = 'bar';
-        $policy->limitations = [
-            'Subtree' => ['/1', '/1/2'],
-            'Foo' => ['Bar'],
-        ];
+        $policy->limitations = array(
+            'Subtree' => array('/1', '/1/2'),
+            'Foo' => array('Bar'),
+        );
 
         $handler->addPolicyByRoleDraft($roleDraft->id, $policy);
         $handler->publishRoleDraft($roleDraft->id);
 
         $loaded = $handler->loadRole($roleDraft->id);
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\Policy(
-                    [
+                    array(
                         'id' => 1,
                         'roleId' => 1,
                         'module' => 'foo',
                         'function' => 'bar',
-                        'limitations' => [
-                            'Subtree' => ['/1', '/1/2'],
-                            'Foo' => ['Bar'],
-                        ],
+                        'limitations' => array(
+                            'Subtree' => array('/1', '/1/2'),
+                            'Foo' => array('Bar'),
+                        ),
                         'originalId' => null,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $loaded->policies
         );
     }
@@ -488,7 +493,7 @@ class UserHandlerTest extends TestCase
         $handler = $this->getUserHandler();
 
         $this->assertEquals(
-            [],
+            array(),
             $handler->loadRoles()
         );
 
@@ -500,7 +505,7 @@ class UserHandlerTest extends TestCase
         $role = $handler->loadRole($roleDraft->id);
 
         $this->assertEquals(
-            [$role],
+            array($role),
             $handler->loadRoles()
         );
     }
@@ -523,7 +528,7 @@ class UserHandlerTest extends TestCase
         $handler->updateRole($update);
 
         $this->assertQueryResult(
-            [[1, 'Changed']],
+            array(array(1, 'Changed')),
             $this->handler->createSelectQuery()->select('id', 'name')->from('ezrole'),
             'Expected a changed role.'
         );
@@ -531,26 +536,26 @@ class UserHandlerTest extends TestCase
 
     public function testDeleteRole()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         // 3 is the ID of Editor role
         $handler->deleteRole(3);
 
         $this->assertQueryResult(
-            [],
+            array(),
             $this->handler->createSelectQuery()->select('id')->from('ezrole')->where('id = 3'),
             'Expected an empty set.'
         );
 
         $this->assertQueryResult(
-            [],
+            array(),
             $this->handler->createSelectQuery()->select('role_id')->from('ezpolicy')->where('role_id = 3'),
             'Expected an empty set.'
         );
 
         $this->assertQueryResult(
-            [],
+            array(),
             $this->handler->createSelectQuery()->select('role_id')->from('ezuser_role')->where('role_id = 3'),
             'Expected an empty set.'
         );
@@ -558,7 +563,7 @@ class UserHandlerTest extends TestCase
 
     public function testDeleteRoleDraft()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         // 3 is the ID of Editor role
@@ -602,7 +607,7 @@ class UserHandlerTest extends TestCase
         $handler->addPolicy($role->id, $policy);
 
         $this->assertQueryResult(
-            [[1, 'foo', 'bar', 1]],
+            array(array(1, 'foo', 'bar', 1)),
             $this->handler->createSelectQuery()->select('id', 'module_name', 'function_name', 'role_id')->from('ezpolicy'),
             'Expected a new policy.'
         );
@@ -642,18 +647,18 @@ class UserHandlerTest extends TestCase
         $policy = new Persistence\User\Policy();
         $policy->module = 'foo';
         $policy->function = 'bar';
-        $policy->limitations = [
-            'Subtree' => ['/1', '/1/2'],
-            'Foo' => ['Bar'],
-        ];
+        $policy->limitations = array(
+            'Subtree' => array('/1', '/1/2'),
+            'Foo' => array('Bar'),
+        );
 
         $handler->addPolicy($role->id, $policy);
 
         $this->assertQueryResult(
-            [
-                [1, 'Subtree', 1],
-                [2, 'Foo', 1],
-            ],
+            array(
+                array(1, 'Subtree', 1),
+                array(2, 'Foo', 1),
+            ),
             $this->handler->createSelectQuery()->select('id', 'identifier', 'policy_id')->from('ezpolicy_limitation'),
             'Expected a new policy.'
         );
@@ -673,19 +678,19 @@ class UserHandlerTest extends TestCase
         $policy = new Persistence\User\Policy();
         $policy->module = 'foo';
         $policy->function = 'bar';
-        $policy->limitations = [
-            'Subtree' => ['/1', '/1/2'],
-            'Foo' => ['Bar'],
-        ];
+        $policy->limitations = array(
+            'Subtree' => array('/1', '/1/2'),
+            'Foo' => array('Bar'),
+        );
 
         $handler->addPolicy($role->id, $policy);
 
         $this->assertQueryResult(
-            [
-                [1, '/1', 1],
-                [2, '/1/2', 1],
-                [3, 'Bar', 2],
-            ],
+            array(
+                array(1, '/1', 1),
+                array(2, '/1/2', 1),
+                array(3, 'Bar', 2),
+            ),
             $this->handler->createSelectQuery()->select('id', 'value', 'limitation_id')->from('ezpolicy_limitation_value'),
             'Expected a new policy.'
         );
@@ -698,21 +703,21 @@ class UserHandlerTest extends TestCase
         $policy1 = new Persistence\User\Policy();
         $policy1->module = 'foo';
         $policy1->function = 'bar';
-        $policy1->limitations = [
-            'Subtree' => ['/1', '/1/2'],
-            'Foo' => ['Bar'],
-        ];
+        $policy1->limitations = array(
+            'Subtree' => array('/1', '/1/2'),
+            'Foo' => array('Bar'),
+        );
 
         $policy2 = new Persistence\User\Policy();
         $policy2->module = 'foo';
         $policy2->function = 'blubb';
-        $policy2->limitations = [
-            'Foo' => ['Blubb'],
-        ];
+        $policy2->limitations = array(
+            'Foo' => array('Blubb'),
+        );
 
         $createStruct = new Persistence\User\RoleCreateStruct();
         $createStruct->identifier = 'Test';
-        $createStruct->policies = [$policy1, $policy2];
+        $createStruct->policies = array($policy1, $policy2);
 
         return $handler->createRole($createStruct);
     }
@@ -722,10 +727,10 @@ class UserHandlerTest extends TestCase
         $this->createRole();
 
         $this->assertQueryResult(
-            [
-                [1, 'foo', 'bar', 1],
-                [2, 'foo', 'blubb', 1],
-            ],
+            array(
+                array(1, 'foo', 'bar', 1),
+                array(2, 'foo', 'blubb', 1),
+            ),
             $this->handler->createSelectQuery()->select('id', 'module_name', 'function_name', 'role_id')->from('ezpolicy'),
             'Expected a new policy.'
         );
@@ -740,9 +745,9 @@ class UserHandlerTest extends TestCase
         $handler->deletePolicy($roleDraft->policies[0]->id, $roleDraft->policies[0]->roleId);
 
         $this->assertQueryResult(
-            [
-                [2, 'foo', 'blubb', 1],
-            ],
+            array(
+                array(2, 'foo', 'blubb', 1),
+            ),
             $this->handler->createSelectQuery()->select('id', 'module_name', 'function_name', 'role_id')->from('ezpolicy')->where('original_id = 0'),
             'Expected a new policy.'
         );
@@ -756,7 +761,7 @@ class UserHandlerTest extends TestCase
         $handler->deletePolicy($roleDraft->policies[0]->id, $roleDraft->policies[0]->roleId);
 
         $this->assertQueryResult(
-            [[3, 'Foo', 2]],
+            array(array(3, 'Foo', 2)),
             $this->handler->createSelectQuery()->select('*')->from('ezpolicy_limitation')
         );
     }
@@ -769,7 +774,7 @@ class UserHandlerTest extends TestCase
         $handler->deletePolicy($roleDraft->policies[0]->id, $roleDraft->policies[0]->roleId);
 
         $this->assertQueryResult(
-            [[4, 3, 'Blubb']],
+            array(array(4, 3, 'Blubb')),
             $this->handler->createSelectQuery()->select('*')->from('ezpolicy_limitation_value')
         );
     }
@@ -781,25 +786,25 @@ class UserHandlerTest extends TestCase
         $roleDraft = $this->createRole();
 
         $policy = $roleDraft->policies[0];
-        $policy->limitations = [
-            'new' => ['something'],
-        ];
+        $policy->limitations = array(
+            'new' => array('something'),
+        );
 
         $handler->updatePolicy($policy);
 
         $this->assertQueryResult(
-            [
-                [3, 'Foo', 2],
-                [4, 'new', 1],
-            ],
+            array(
+                array(3, 'Foo', 2),
+                array(4, 'new', 1),
+            ),
             $this->handler->createSelectQuery()->select('*')->from('ezpolicy_limitation')
         );
 
         $this->assertQueryResult(
-            [
-                [4, 3, 'Blubb'],
-                [5, 4, 'something'],
-            ],
+            array(
+                array(4, 3, 'Blubb'),
+                array(5, 4, 'something'),
+            ),
             $this->handler->createSelectQuery()->select('*')->from('ezpolicy_limitation_value')
         );
     }
@@ -813,12 +818,12 @@ class UserHandlerTest extends TestCase
         $role = $handler->loadRole($roleDraft->id);
         $handler->create($user = $this->getValidUser());
 
-        $handler->assignRole($user->id, $role->id, []);
+        $handler->assignRole($user->id, $role->id, array());
 
         $this->assertQueryResult(
-            [
-                [1, 42, 1, null, null],
-            ],
+            array(
+                array(1, 42, 1, null, null),
+            ),
             $this->handler->createSelectQuery()->select('id', 'contentobject_id', 'role_id', 'limit_identifier', 'limit_value')->from('ezuser_role'),
             'Expected a new user policy association.'
         );
@@ -836,15 +841,15 @@ class UserHandlerTest extends TestCase
         $handler->assignRole(
             $user->id,
             $role->id,
-            [
-                'Subtree' => ['/1'],
-            ]
+            array(
+                'Subtree' => array('/1'),
+            )
         );
 
         $this->assertQueryResult(
-            [
-                [1, 42, 1, 'Subtree', '/1'],
-            ],
+            array(
+                array(1, 42, 1, 'Subtree', '/1'),
+            ),
             $this->handler->createSelectQuery()->select('id', 'contentobject_id', 'role_id', 'limit_identifier', 'limit_value')->from('ezuser_role'),
             'Expected a new user policy association.'
         );
@@ -862,18 +867,18 @@ class UserHandlerTest extends TestCase
         $handler->assignRole(
             $user->id,
             $role->id,
-            [
-                'Subtree' => ['/1', '/1/2'],
-                'Foo' => ['Bar'],
-            ]
+            array(
+                'Subtree' => array('/1', '/1/2'),
+                'Foo' => array('Bar'),
+            )
         );
 
         $this->assertQueryResult(
-            [
-                [1, 42, 1, 'Subtree', '/1'],
-                [2, 42, 1, 'Subtree', '/1/2'],
-                [3, 42, 1, 'Foo', 'Bar'],
-            ],
+            array(
+                array(1, 42, 1, 'Subtree', '/1'),
+                array(2, 42, 1, 'Subtree', '/1/2'),
+                array(3, 42, 1, 'Foo', 'Bar'),
+            ),
             $this->handler->createSelectQuery()->select('id', 'contentobject_id', 'role_id', 'limit_identifier', 'limit_value')->from('ezuser_role'),
             'Expected a new user policy association.'
         );
@@ -891,16 +896,16 @@ class UserHandlerTest extends TestCase
         $handler->assignRole(
             $user->id,
             $role->id,
-            [
-                'Subtree' => ['/1', '/1/2'],
-                'Foo' => ['Bar'],
-            ]
+            array(
+                'Subtree' => array('/1', '/1/2'),
+                'Foo' => array('Bar'),
+            )
         );
 
         $handler->unassignRole($user->id, $role->id);
 
         $this->assertQueryResult(
-            [],
+            array(),
             $this->handler->createSelectQuery()->select('id', 'contentobject_id', 'role_id', 'limit_identifier', 'limit_value')->from('ezuser_role'),
             'Expected no user policy associations.'
         );
@@ -908,7 +913,7 @@ class UserHandlerTest extends TestCase
 
     public function testLoadPoliciesForUser()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         $policies = $handler->loadPoliciesByUserId(10); // Anonymous user
@@ -928,176 +933,176 @@ class UserHandlerTest extends TestCase
                 true
             )
         );
-        $this->assertCount(8, $policies);
+        $this->assertEquals(8, count($policies));
     }
 
     public function testLoadRoleAssignmentsByGroupId()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 28,
                         'roleId' => 1,
                         'contentId' => 11,
-                    ]
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 34,
                         'roleId' => 5,
                         'contentId' => 11,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $handler->loadRoleAssignmentsByGroupId(11)// 11: Members
         );
 
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 31,
                         'roleId' => 1,
                         'contentId' => 42,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $handler->loadRoleAssignmentsByGroupId(42)// 42: Anonymous Users
         );
 
         $this->assertEquals(
-            [],
+            array(),
             $handler->loadRoleAssignmentsByGroupId(10)// 10: Anonymous User
         );
     }
 
     public function testLoadRoleAssignmentsByGroupIdInherited()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 31,
                         'roleId' => 1,
                         'contentId' => 42,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $handler->loadRoleAssignmentsByGroupId(10, true)// 10: Anonymous User
         );
     }
 
     public function testLoadComplexRoleAssignments()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 32,
                         'roleId' => 3,
                         'contentId' => 13,
                         'limitationIdentifier' => 'Subtree',
-                        'values' => ['/1/2/'],
-                    ]
+                        'values' => array('/1/2/'),
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 33,
                         'roleId' => 3,
                         'contentId' => 13,
                         'limitationIdentifier' => 'Subtree',
-                        'values' => ['/1/43/'],
-                    ]
+                        'values' => array('/1/43/'),
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 38,
                         'roleId' => 5,
                         'contentId' => 13,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $handler->loadRoleAssignmentsByGroupId(13)
         );
 
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 32,
                         'roleId' => 3,
                         'contentId' => 13,
                         'limitationIdentifier' => 'Subtree',
-                        'values' => ['/1/2/'],
-                    ]
+                        'values' => array('/1/2/'),
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 33,
                         'roleId' => 3,
                         'contentId' => 13,
                         'limitationIdentifier' => 'Subtree',
-                        'values' => ['/1/43/'],
-                    ]
+                        'values' => array('/1/43/'),
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 38,
                         'roleId' => 5,
                         'contentId' => 13,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $handler->loadRoleAssignmentsByGroupId(13, true)
         );
     }
 
     public function testLoadRoleAssignmentsByRoleId()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         $this->assertEquals(
-            [
+            array(
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 28,
                         'roleId' => 1,
                         'contentId' => 11,
-                    ]
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 31,
                         'roleId' => 1,
                         'contentId' => 42,
-                    ]
+                    )
                 ),
                 new Persistence\User\RoleAssignment(
-                    [
+                    array(
                         'id' => 37,
                         'roleId' => 1,
                         'contentId' => 59,
-                    ]
+                    )
                 ),
-            ],
+            ),
             $handler->loadRoleAssignmentsByRoleId(1)
         );
     }
 
     public function testLoadRoleDraftByRoleId()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
 
         // 3 is the ID of Editor role
@@ -1110,7 +1115,7 @@ class UserHandlerTest extends TestCase
 
     public function testRoleDraftOnlyHavePolicyDraft()
     {
-        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/test_data.php');
+        $this->insertDatabaseFixture(__DIR__ . '/../../../../Repository/Tests/Service/Integration/Legacy/_fixtures/clean_ezdemo_47_dump.php');
         $handler = $this->getUserHandler();
         $originalRoleId = 3;
         $originalRole = $handler->loadRole($originalRoleId);

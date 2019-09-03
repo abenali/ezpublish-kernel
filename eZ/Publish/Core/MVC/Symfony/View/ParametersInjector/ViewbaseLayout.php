@@ -4,7 +4,6 @@
  */
 namespace eZ\Publish\Core\MVC\Symfony\View\ParametersInjector;
 
-use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\View\Event\FilterViewParametersEvent;
 use eZ\Publish\Core\MVC\Symfony\View\ViewEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -14,16 +13,24 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class ViewbaseLayout implements EventSubscriberInterface
 {
-    /** @var string */
+    /**
+     * @var string
+     */
+    private $pageLayout;
+
+    /**
+     * @var string
+     */
     private $viewbaseLayout;
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
-    private $configResolver;
-
-    public function __construct($viewbaseLayout, ConfigResolverInterface $configResolver)
+    public function __construct($viewbaseLayout)
     {
         $this->viewbaseLayout = $viewbaseLayout;
-        $this->configResolver = $configResolver;
+    }
+
+    public function setPageLayout($pageLayout)
+    {
+        $this->pageLayout = $pageLayout;
     }
 
     public static function getSubscribedEvents()
@@ -31,18 +38,9 @@ class ViewbaseLayout implements EventSubscriberInterface
         return [ViewEvents::FILTER_VIEW_PARAMETERS => 'injectViewbaseLayout'];
     }
 
-    private function getPageLayout(): string
-    {
-        return $this->configResolver->getParameter('page_layout');
-    }
-
     public function injectViewbaseLayout(FilterViewParametersEvent $event)
     {
-        $pageLayout = $this->getPageLayout();
-
-        $event->getParameterBag()->set('view_base_layout', $this->viewbaseLayout);
-        // @deprecated since 8.0. Use `page_layout` instead
-        $event->getParameterBag()->set('pagelayout', $pageLayout);
-        $event->getParameterBag()->set('page_layout', $pageLayout);
+        $event->getParameterBag()->set('viewbaseLayout', $this->viewbaseLayout);
+        $event->getParameterBag()->set('pagelayout', $this->pageLayout);
     }
 }
